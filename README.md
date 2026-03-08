@@ -1,4 +1,4 @@
-![Admin Beautify](https://i.see.you/2026/03/08/Vdo1/de2b4ab0e11757cd146b0d458fcdd55b.jpg)
+![Admin Beautify](https://i.see.you/2026/03/08/2Rdm/3fd25739fdb297f5d4e6b55984017591.jpg)
 
 <h1 align="center">Admin Beautify</h1>
 
