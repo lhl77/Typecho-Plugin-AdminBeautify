@@ -139,6 +139,9 @@ your-site/
 - 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues)
 - 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
 
+## ❤️ 请作者喝杯咖啡
+![](https://i.see.you/2026/03/05/yc0T/4ca32aa36972b03bd14c1e480972db55.jpg)
+
 ---
 
 <p align="center">
