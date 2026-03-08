@@ -1,4 +1,4 @@
-![Admin Beautify](https://i.see.you/2026/03/07/7pTq/cef7b01e1bd106510e2e9355aa971efe.jpg)
+![Admin Beautify](https://i.see.you/2026/03/08/Vdo1/de2b4ab0e11757cd146b0d458fcdd55b.jpg)
 
 <h1 align="center">Admin Beautify</h1>
 
@@ -41,7 +41,8 @@
   - 独立的暗色模式控制
   - 自定义 CSS / JS 注入
 - ⚡ **AJAX 导航** — 无刷新页面切换，后台操作更流畅
-- 📱 **响应式设计** — 移动端自动适配折叠菜单
+- 📱 **PWA 响应式 APP** — 安装到您的电脑/手机，流畅管理博客 (v2.1.0 加入)
+- 🧩 **兼容脚本设计** — 自动修复其他插件的排版和功能 (v2.1.0 加入)
 
 ## 📸 截图预览
 
@@ -52,13 +53,13 @@
 ![](https://i.see.you/2026/03/07/Yj5s/11c5ab37b81fa0bcaf65467a641780f1.jpg)
 
 ### 暗色模式
-![](https://i.see.you/2026/03/07/Yi4x/6a8e76f618717503e00451e89017773d.jpg)
+![](https://i.see.you/2026/03/08/pU8v/fb7c26b672cce88776f2fc8c7b35f25b.jpg)
 
 ### 顶部导航栏（原版）
 ![](https://i.see.you/2026/03/07/syL5/52cef9f1d32078f4fd830af98586a0a2.jpg)
 
 ### 文章编辑页面
-![](https://i.see.you/2026/03/07/E0cf/87cf104817c6436599247acadb3b0c0b.jpg)
+![](https://i.see.you/2026/03/08/pQ9d/5af43bda6f057dfde0d06185e4b6ca53.jpg)
 
 ### 文章管理
 ![](https://i.see.you/2026/03/07/iB0n/1ba8fd34ec09ae6835cedf90a82439f5.jpg)
@@ -138,9 +139,6 @@ your-site/
 - 📖 [作者博客](https://blog.lhl.one/artical/977.html)
 - 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues)
 - 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
-
-## ❤️ 请作者喝杯咖啡
-![](https://i.see.you/2026/03/05/yc0T/4ca32aa36972b03bd14c1e480972db55.jpg)
 
 ---
 
