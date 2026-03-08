@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.0.0
+ * @version 2.0.1
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -62,13 +62,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         // ====== 读取当前主题色 ======
         $abConfigColors = array(
-            'purple' => array('#6750A4', '#7F67BE'),
-            'blue'   => array('#1B6EF3', '#5B91F6'),
-            'teal'   => array('#006A6A', '#2D9494'),
-            'green'  => array('#386A20', '#5A8F42'),
-            'orange' => array('#8B5000', '#B67A2E'),
-            'pink'   => array('#984062', '#B66080'),
-            'red'    => array('#BE0B22', '#D44055'),
+            // 调整后的主色/辅色：更贴近 Material Design 3 的语义色，同时略微降低饱和度，降低视觉疲劳
+            'purple' => array('#7D5260', '#9E7B8A'),
+            'blue'   => array('#556270', '#7A8A9E'),
+            'teal'   => array('#4A6363', '#6A8A8A'),
+            'green'  => array('#55624C', '#7A8A6E'),
+            'orange' => array('#725A42', '#9E8062'),
+            'pink'   => array('#74565F', '#9E7A85'),
+            'red'    => array('#775654', '#A27A78'),
         );
         try {
             $abOpt = Typecho_Widget::widget('Widget_Options')->plugin('AdminBeautify');
@@ -79,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.0.0';
+        $abVer = '2.0.1';
 
         // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
@@ -233,18 +234,18 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $loginPrimaryColor = new Typecho_Widget_Helper_Form_Element_Text(
             'login_primaryColor',
             null,
-            '#6750a4',
+            '#7d5260',
             _t('登录页主色（自定义）'),
-            _t('选择"自定义"方案后生效。如：#6750a4')
+            _t('选择"自定义"方案后生效。如：#625fa0')
         );
         $form->addInput($loginPrimaryColor);
 
         $loginPrimaryColor2 = new Typecho_Widget_Helper_Form_Element_Text(
             'login_primaryColor2',
             null,
-            '#7f67be',
+            '#9e7b8a',
             _t('登录页辅色（自定义）'),
-            _t('选择"自定义"方案后生效。如：#7f67be')
+            _t('选择"自定义"方案后生效。如：#7a6ec0')
         );
         $form->addInput($loginPrimaryColor2);
 
@@ -398,14 +399,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
 // ====== 配置面板颜色跟随主题色 & 检查更新 ======
 (function(){
-    var abColorMap = {
-        purple: ["#6750A4","#7F67BE"],
-        blue:   ["#1B6EF3","#5B91F6"],
-        teal:   ["#006A6A","#2D9494"],
-        green:  ["#386A20","#5A8F42"],
-        orange: ["#8B5000","#B67A2E"],
-        pink:   ["#984062","#B66080"],
-        red:    ["#BE0B22","#D44055"]
+        var abColorMap = {
+        purple: ["#7D5260","#9E7B8A"],
+        blue:   ["#556270","#7A8A9E"],
+        teal:   ["#4A6363","#6A8A8A"],
+        green:  ["#55624C","#7A8A6E"],
+        orange: ["#725A42","#9E8062"],
+        pink:   ["#74565F","#9E7A85"],
+        red:    ["#775654","#A27A78"]
     };
     function applyConfigColors(scheme){
         var c = abColorMap[scheme] || abColorMap.purple;
@@ -865,23 +866,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $preset = isset($pluginOptions->login_colorPreset) ? (string) $pluginOptions->login_colorPreset : 'purple';
 
         $colorPresets = array(
-            'purple'   => array('#6750a4', '#7f67be'),
-            'blue'     => array('#1e40af', '#3b82f6'),
-            'pink'     => array('#db2777', '#ec4899'),
-            'green'    => array('#059669', '#10b981'),
-            'orange'   => array('#ea580c', '#f97316'),
-            'red'      => array('#dc2626', '#ef4444'),
-            'teal'     => array('#0d9488', '#14b8a6'),
-            'indigo'   => array('#4f46e5', '#6366f1'),
-            'sunset'   => array('#f59e0b', '#ef4444'),
-            'ocean'    => array('#0ea5e9', '#06b6d4'),
-            'forest'   => array('#059669', '#84cc16'),
-            'lavender' => array('#a855f7', '#c084fc'),
+            'purple'   => array('#7d5260', '#9e7b8a'),
+            'blue'     => array('#556270', '#7a8a9e'),
+            'pink'     => array('#74565f', '#9e7a85'),
+            'green'    => array('#55624c', '#7a8a6e'),
+            'orange'   => array('#725a42', '#9e8062'),
+            'red'      => array('#775654', '#a27a78'),
+            'teal'     => array('#4a6363', '#6a8a8a'),
+            'indigo'   => array('#5a4fd9', '#7b6ef2'),
+            'sunset'   => array('#d38d1a', '#e06b3a'),
+            'ocean'    => array('#0da0d8', '#39c1dd'),
+            'forest'   => array('#2f7a3b', '#7fbf3a'),
+            'lavender' => array('#8f6ee8', '#b89cfb'),
         );
 
         if ($preset === 'custom') {
-            $primary = isset($pluginOptions->login_primaryColor) && trim((string) $pluginOptions->login_primaryColor) !== '' ? trim((string) $pluginOptions->login_primaryColor) : '#6750a4';
-            $primary2 = isset($pluginOptions->login_primaryColor2) && trim((string) $pluginOptions->login_primaryColor2) !== '' ? trim((string) $pluginOptions->login_primaryColor2) : '#7f67be';
+            $primary = isset($pluginOptions->login_primaryColor) && trim((string) $pluginOptions->login_primaryColor) !== '' ? trim((string) $pluginOptions->login_primaryColor) : '#7d5260';
+            $primary2 = isset($pluginOptions->login_primaryColor2) && trim((string) $pluginOptions->login_primaryColor2) !== '' ? trim((string) $pluginOptions->login_primaryColor2) : '#9e7b8a';
         } else {
             $colors = isset($colorPresets[$preset]) ? $colorPresets[$preset] : $colorPresets['purple'];
             $primary = $colors[0];
@@ -1375,15 +1376,15 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
         try {
             $opt = Typecho_Widget::widget('Widget_Options')->plugin('AdminBeautify');
             $preset = isset($opt->login_colorPreset) ? (string) $opt->login_colorPreset : 'purple';
-            $pc1 = isset($opt->login_primaryColor) ? (string) $opt->login_primaryColor : '#6750a4';
-            $pc2 = isset($opt->login_primaryColor2) ? (string) $opt->login_primaryColor2 : '#7f67be';
+            $pc1 = isset($opt->login_primaryColor) ? (string) $opt->login_primaryColor : '#7d5260';
+            $pc2 = isset($opt->login_primaryColor2) ? (string) $opt->login_primaryColor2 : '#9e7b8a';
             $bgUrl = isset($opt->login_bgImage) ? (string) $opt->login_bgImage : '';
             $blurTypeVal = isset($opt->login_blurType) ? (string) $opt->login_blurType : 'filter';
             $blurSizeVal = isset($opt->login_blurSize) ? (int) $opt->login_blurSize : 12;
         } catch (Exception $e) {
             $preset = 'purple';
-            $pc1 = '#6750a4';
-            $pc2 = '#7f67be';
+            $pc1 = '#7d5260';
+            $pc2 = '#9e7b8a';
             $bgUrl = '';
             $blurTypeVal = 'filter';
             $blurSizeVal = 12;
@@ -1462,20 +1463,20 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
 
         echo '<script>
 (function(){
-  var colorPresets = {
-    purple: ["#6750a4", "#7f67be"],
-    blue: ["#1e40af", "#3b82f6"],
-    pink: ["#db2777", "#ec4899"],
-    green: ["#059669", "#10b981"],
-    orange: ["#ea580c", "#f97316"],
-    red: ["#dc2626", "#ef4444"],
-    teal: ["#0d9488", "#14b8a6"],
-    indigo: ["#4f46e5", "#6366f1"],
-    sunset: ["#f59e0b", "#ef4444"],
-    ocean: ["#0ea5e9", "#06b6d4"],
-    forest: ["#059669", "#84cc16"],
-    lavender: ["#a855f7", "#c084fc"]
-  };
+    var colorPresets = {
+        purple: ["#7d5260", "#9e7b8a"],
+        blue: ["#556270", "#7a8a9e"],
+        pink: ["#74565f", "#9e7a85"],
+        green: ["#55624c", "#7a8a6e"],
+        orange: ["#725a42", "#9e8062"],
+        red: ["#775654", "#a27a78"],
+        teal: ["#4a6363", "#6a8a8a"],
+        indigo: ["#5a4fd9", "#7b6ef2"],
+        sunset: ["#d38d1a", "#e06b3a"],
+        ocean: ["#0da0d8", "#39c1dd"],
+        forest: ["#2f7a3b", "#7fbf3a"],
+        lavender: ["#8f6ee8", "#b89cfb"]
+    };
 
   function val(name){
     var el = document.querySelector(\'[name="\' + name + \'"]\');
@@ -1610,9 +1611,9 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
     {
         $schemes = array(
             'purple' => array(
-                '--md-primary'           => '#6750A4',
+                '--md-primary'           => '#7D5260',
                 '--md-on-primary'        => '#FFFFFF',
-                '--md-primary-container' => '#EADDFF',
+                '--md-primary-container' => '#FFD8E4',
                 '--md-on-primary-container' => '#21005D',
                 '--md-secondary'         => '#625B71',
                 '--md-on-secondary'      => '#FFFFFF',
@@ -1656,9 +1657,9 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#F2B8B5',
             ),
             'blue' => array(
-                '--md-primary'           => '#1B6EF3',
+                '--md-primary'           => '#556270',
                 '--md-on-primary'        => '#FFFFFF',
-                '--md-primary-container' => '#D8E2FF',
+                '--md-primary-container' => '#D9E2FF',
                 '--md-on-primary-container' => '#001A41',
                 '--md-secondary'         => '#565E71',
                 '--md-on-secondary'      => '#FFFFFF',
@@ -1701,9 +1702,9 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#FFB4AB',
             ),
             'teal' => array(
-                '--md-primary'           => '#006A6A',
+                '--md-primary'           => '#4A6363',
                 '--md-on-primary'        => '#FFFFFF',
-                '--md-primary-container' => '#6FF7F6',
+                '--md-primary-container' => '#CCE8E7',
                 '--md-on-primary-container' => '#002020',
                 '--md-secondary'         => '#4A6363',
                 '--md-on-secondary'      => '#FFFFFF',
@@ -1746,9 +1747,9 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#FFB4AB',
             ),
             'green' => array(
-                '--md-primary'           => '#386A20',
+                '--md-primary'           => '#55624C',
                 '--md-on-primary'        => '#FFFFFF',
-                '--md-primary-container' => '#B7F397',
+                '--md-primary-container' => '#D9E7CB',
                 '--md-on-primary-container' => '#042100',
                 '--md-secondary'         => '#55624C',
                 '--md-on-secondary'      => '#FFFFFF',
@@ -1791,7 +1792,7 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#FFB4AB',
             ),
             'orange' => array(
-                '--md-primary'           => '#8B5000',
+                '--md-primary'           => '#725A42',
                 '--md-on-primary'        => '#FFFFFF',
                 '--md-primary-container' => '#FFDCBE',
                 '--md-on-primary-container' => '#2C1600',
@@ -1836,7 +1837,7 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#FFB4AB',
             ),
             'pink' => array(
-                '--md-primary'           => '#984062',
+                '--md-primary'           => '#74565F',
                 '--md-on-primary'        => '#FFFFFF',
                 '--md-primary-container' => '#FFD9E3',
                 '--md-on-primary-container' => '#3E001E',
@@ -1881,7 +1882,7 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#FFB4AB',
             ),
             'red' => array(
-                '--md-primary'           => '#BE0B22',
+                '--md-primary'           => '#775654',
                 '--md-on-primary'        => '#FFFFFF',
                 '--md-primary-container' => '#FFDAD7',
                 '--md-on-primary-container' => '#410005',
