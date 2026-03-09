@@ -1,22 +1,17 @@
 <?php
 /**
- * Admin Beautify - 后台管理界面美化插件，包含登录界面美化 (原LoginBeautify)，Material Design 3风格
+ * AB-Admin (Admin Beautify) - 后台管理界面美化插件，包含登录界面美化 (原LoginBeautify)，Material Design 3风格
  *
- * @package AdminBeautify
+ * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.0
+ * @version 2.1.1
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
-
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
-
 class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 {
-    /**
-     * 判断当前是否为登录页（未登录状态）
-     */
     private static function isLoginPage()
     {
         try {
@@ -25,18 +20,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             return true;
         }
     }
-
-    /**
-     * JSON 编码字符串，用于 JS 输出
-     */
     private static function jsString($s)
     {
         return json_encode((string) $s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
-
-    /**
-     * 激活插件
-     */
     public static function activate()
     {
         Typecho_Plugin::factory('admin/header.php')->header = array(__CLASS__, 'renderHeader');
@@ -45,25 +32,15 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         Utils\Helper::addAction('admin-beautify', 'AdminBeautify_Action');
         return _t('AdminBeautify 已启用（含登录页美化）');
     }
-
-    /**
-     * 禁用插件
-     */
     public static function deactivate()
     {
         Utils\Helper::removeAction('admin-beautify');
         return _t('AdminBeautify 已禁用');
     }
-
-    /**
-     * 插件配置面板
-     */
     public static function config(Typecho_Widget_Helper_Form $form)
     {
-        // ====== 读取当前主题色 ======
-        $abConfigColors = array(
-            // 调整后的主色/辅色：更贴近 Material Design 3 的语义色，同时略微降低饱和度，降低视觉疲劳
-            'purple' => array('#7D5260', '#9E7B8A'),
+                $abConfigColors = array(
+                        'purple' => array('#7D5260', '#9E7B8A'),
             'blue'   => array('#556270', '#7A8A9E'),
             'teal'   => array('#4A6363', '#6A8A8A'),
             'green'  => array('#55624C', '#7A8A6E'),
@@ -80,10 +57,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.0';
-
-        // ====== 插件信息头部 ======
-        echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
+        $abVer = '2.1.1';
+                echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
             <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
                 <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
                 <div style="flex:1">
@@ -106,11 +81,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 </button>
             </div>
         </div>';
-
-        // ================================================================
-        // ====== MD3 折叠卡片 — 暗色模式适配 ======
-        // ================================================================
-        echo '<style>
+                                echo '<style>
 [data-theme="dark"] #ab-card-admin,
 [data-theme="dark"] #ab-card-login {
     background: var(--md-surface-container-low, #1d1b20) !important;
@@ -176,21 +147,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     color: #fde68a !important;
 }
 [data-theme="dark"] #ab-card-pwa,
-[data-theme="dark"] #ab-card-compat {
+[data-theme="dark"] #ab-card-compat,
+[data-theme="dark"] #ab-card-perf {
     background: var(--md-surface-container-low, #1d1b20) !important;
     border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
     box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 2px 12px rgba(0,0,0,.2) !important;
 }
 [data-theme="dark"] #ab-card-pwa-hdr:hover,
-[data-theme="dark"] #ab-card-compat-hdr:hover {
+[data-theme="dark"] #ab-card-compat-hdr:hover,
+[data-theme="dark"] #ab-card-perf-hdr:hover {
     background: rgba(255,255,255,.04) !important;
 }
 </style>';
-
-        // ================================================================
-        // ====== 管理后台设置（MD3 折叠卡片） ======
-        // ================================================================
-        echo '<div id="ab-card-admin" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+                                echo '<div id="ab-card-admin" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-admin-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-admin-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
                 <div id="ab-card-admin-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">⚙️</div>
@@ -202,9 +171,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             </div>
             <div id="ab-card-admin-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)"></div>
         </div>';
-
-        // 主题色选择
-        $primaryColor = new Typecho_Widget_Helper_Form_Element_Select(
+                $primaryColor = new Typecho_Widget_Helper_Form_Element_Select(
             'primaryColor',
             array(
                 'purple'  => '🟣 紫 (默认)',
@@ -220,9 +187,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择管理后台的主题色方案')
         );
         $form->addInput($primaryColor);
-
-        // 暗色模式
-        $darkMode = new Typecho_Widget_Helper_Form_Element_Select(
+                $darkMode = new Typecho_Widget_Helper_Form_Element_Select(
             'darkMode',
             array(
                 'auto'  => '跟随系统',
@@ -234,9 +199,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择后台的明暗模式')
         );
         $form->addInput($darkMode);
-
-        // 圆角大小
-        $borderRadius = new Typecho_Widget_Helper_Form_Element_Select(
+                $borderRadius = new Typecho_Widget_Helper_Form_Element_Select(
             'borderRadius',
             array(
                 'small'  => '小圆角',
@@ -248,9 +211,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('控制界面元素的圆角大小')
         );
         $form->addInput($borderRadius);
-
-        // 开启动画
-        $enableAnimation = new Typecho_Widget_Helper_Form_Element_Select(
+                $enableAnimation = new Typecho_Widget_Helper_Form_Element_Select(
             'enableAnimation',
             array(
                 '1' => '开启',
@@ -261,9 +222,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('是否开启界面元素的过渡动画效果')
         );
         $form->addInput($enableAnimation);
-
-        // 导航栏位置
-        $navPosition = new Typecho_Widget_Helper_Form_Element_Select(
+                $navPosition = new Typecho_Widget_Helper_Form_Element_Select(
             'navPosition',
             array(
                 'left' => '侧边栏 (默认)',
@@ -274,9 +233,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择导航栏在页面顶部还是左侧显示（仅桌面端生效，移动端始终为顶部折叠菜单）')
         );
         $form->addInput($navPosition);
-
-        // 插件页展示方式
-        $pluginCardView = new Typecho_Widget_Helper_Form_Element_Select(
+                $pluginCardView = new Typecho_Widget_Helper_Form_Element_Select(
             'pluginCardView',
             array(
                 '1' => '卡片网格 (默认)',
@@ -287,11 +244,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择插件管理页面的展示方式：卡片网格更直观，原始表格与 Typecho 默认保持一致')
         );
         $form->addInput($pluginCardView);
-
-        // ================================================================
-        // ====== 登录页设置（MD3 折叠卡片） ======
-        // ================================================================
-        echo '<div id="ab-card-login" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+                                echo '<div id="ab-card-login" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-login-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-login-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
                 <div id="ab-card-login-icon" style="width:40px;height:40px;background:' . $abC2 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">🔐</div>
@@ -310,9 +263,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 </div>
             </div>
         </div>';
-
-        // 登录页 - 颜色预设方案
-        $loginColorPreset = new Typecho_Widget_Helper_Form_Element_Select(
+                $loginColorPreset = new Typecho_Widget_Helper_Form_Element_Select(
             'login_colorPreset',
             array(
                 'custom'   => _t('自定义'),
@@ -334,9 +285,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择预设配色或使用自定义颜色')
         );
         $form->addInput($loginColorPreset);
-
-        // 登录页 - 主题主色
-        $loginPrimaryColor = new Typecho_Widget_Helper_Form_Element_Text(
+                $loginPrimaryColor = new Typecho_Widget_Helper_Form_Element_Text(
             'login_primaryColor',
             null,
             '#7d5260',
@@ -344,7 +293,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择"自定义"方案后生效。如：#625fa0')
         );
         $form->addInput($loginPrimaryColor);
-
         $loginPrimaryColor2 = new Typecho_Widget_Helper_Form_Element_Text(
             'login_primaryColor2',
             null,
@@ -353,36 +301,28 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择"自定义"方案后生效。如：#7a6ec0')
         );
         $form->addInput($loginPrimaryColor2);
-
-        // 登录页 - 站点名称显示
-        $loginShowSiteName = new Typecho_Widget_Helper_Form_Element_Radio(
+                $loginShowSiteName = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_showSiteName',
             array('1' => _t('显示'), '0' => _t('隐藏')),
             '1',
             _t('登录页显示站点名称')
         );
         $form->addInput($loginShowSiteName);
-
-        // 登录页 - 主题模式
-        $loginThemeMode = new Typecho_Widget_Helper_Form_Element_Radio(
+                $loginThemeMode = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_themeMode',
             array('auto' => _t('跟随系统'), 'light' => _t('亮色'), 'dark' => _t('暗色')),
             'auto',
             _t('登录页默认主题')
         );
         $form->addInput($loginThemeMode);
-
-        // 登录页 - 主题切换按钮
-        $loginShowThemeToggle = new Typecho_Widget_Helper_Form_Element_Radio(
+                $loginShowThemeToggle = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_showThemeToggle',
             array('1' => _t('显示'), '0' => _t('隐藏')),
             '1',
             _t('登录页显示主题切换按钮')
         );
         $form->addInput($loginShowThemeToggle);
-
-        // 登录页 - 背景图片
-        $loginBgImage = new Typecho_Widget_Helper_Form_Element_Text(
+                $loginBgImage = new Typecho_Widget_Helper_Form_Element_Text(
             'login_bgImage',
             null,
             '',
@@ -390,9 +330,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('留空则使用纯色背景。')
         );
         $form->addInput($loginBgImage);
-
-        // 登录页 - 虚化方式
-        $loginBlurType = new Typecho_Widget_Helper_Form_Element_Radio(
+                $loginBlurType = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_blurType',
             array(
                 'none'   => _t('不虚化'),
@@ -402,9 +340,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('登录页虚化方式')
         );
         $form->addInput($loginBlurType);
-
-        // 登录页 - 虚化大小
-        $loginBlurSize = new Typecho_Widget_Helper_Form_Element_Text(
+                $loginBlurSize = new Typecho_Widget_Helper_Form_Element_Text(
             'login_blurSize',
             null,
             '12',
@@ -412,9 +348,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('建议 0-50。')
         );
         $form->addInput($loginBlurSize);
-
-        // 登录页 - 自定义 CSS
-        $loginCustomCss = new Typecho_Widget_Helper_Form_Element_Textarea(
+                $loginCustomCss = new Typecho_Widget_Helper_Form_Element_Textarea(
             'login_customCss',
             null,
             '',
@@ -422,9 +356,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('将注入到登录页。无需 style 标签。如果不生效请加 !important')
         );
         $form->addInput($loginCustomCss);
-
-        // 登录页 - 自定义 JS
-        $loginCustomJs = new Typecho_Widget_Helper_Form_Element_Textarea(
+                $loginCustomJs = new Typecho_Widget_Helper_Form_Element_Textarea(
             'login_customJs',
             null,
             '',
@@ -432,14 +364,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('将注入到登录页。无需 script 标签。')
         );
         $form->addInput($loginCustomJs);
-
-        // ====== 登录页设置预览 ======
-        self::renderLoginPreview();
-
-        // ================================================================
-        // ====== PWA 应用设置（MD3 折叠卡片） ======
-        // ================================================================
-        echo '<div id="ab-card-pwa" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+                self::renderLoginPreview();
+                                echo '<div id="ab-card-pwa" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-pwa-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-pwa-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
                 <div id="ab-card-pwa-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">📱</div>
@@ -451,9 +377,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             </div>
             <div id="ab-card-pwa-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)"></div>
         </div>';
-
-        // PWA 应用名称
-        $pwaAppName = new Typecho_Widget_Helper_Form_Element_Text(
+                $pwaAppName = new Typecho_Widget_Helper_Form_Element_Text(
             'pwa_appName',
             null,
             '',
@@ -461,9 +385,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('安装为 PWA 后显示的应用名称。留空则默认为「博客名称 + 管理后台」')
         );
         $form->addInput($pwaAppName);
-
-        // PWA 应用图标
-        $pwaAppIcon = new Typecho_Widget_Helper_Form_Element_Text(
+                $pwaAppIcon = new Typecho_Widget_Helper_Form_Element_Text(
             'pwa_appIcon',
             null,
             'https://i.see.you/2026/03/08/Uei3/26ee132f48bd9453e9c4d1d3fa1d312d.jpg',
@@ -471,17 +393,54 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('安装为 PWA 后显示的应用图标，建议使用 512×512 的正方形图片。')
         );
         $form->addInput($pwaAppIcon);
-
-        // ================================================================
-        // ====== 兼容脚本管理（MD3 折叠卡片） ======
-        // ================================================================
-        echo '<div id="ab-card-compat" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+                                echo '<div id="ab-card-perf" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+            <div id="ab-card-perf-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
+                <div id="ab-card-perf-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
+                <div id="ab-card-perf-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">⚡</div>
+                <div style="flex:1;min-width:0">
+                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">性能优化</div>
+                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">字体与图标静态资源来源，支持 Google CDN、国内镜像、自定义或本机</div>
+                </div>
+                <svg id="ab-card-perf-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div id="ab-card-perf-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
+            </div>
+        </div>';
+                $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
+            'staticResource',
+            array(
+                'google' => _t('🌐 Google CDN（fonts.googleapis.com）'),
+                'loli'   => _t('🇨🇳 loli.net 镜像（fonts.loli.net，国内推荐）'),
+                'custom' => _t('🔧 自定义 URL')
+            ),
+            'loli',
+            _t('字体 & 图标资源来源'),
+            _t('选择 Noto Sans SC 字体与 Material Icons 图标的加载方式')
+        );
+        $form->addInput($staticResource);
+                $customFontUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'customFontUrl',
+            null,
+            '',
+            _t('自定义字体 CSS URL'),
+            _t('选「自定义 URL」后生效。填入 Noto Sans SC 的 CSS 链接，如本机路径或其他 CDN。')
+        );
+        $form->addInput($customFontUrl);
+                $customIconUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'customIconUrl',
+            null,
+            '',
+            _t('自定义图标 CSS URL'),
+            _t('选「自定义 URL」后生效。填入 Material Icons Round 的 CSS 链接。')
+        );
+        $form->addInput($customIconUrl);
+                                echo '<div id="ab-card-compat" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-compat-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-compat-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
                 <div id="ab-card-compat-icon" style="width:40px;height:40px;background:' . $abC2 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">🧩</div>
                 <div style="flex:1;min-width:0">
                     <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">兼容脚本管理</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">自动修复其他插件页面排版，管理本地与外部兼容脚本</div>
+                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">手动启用兼容脚本，修复其他插件/旧版 Typecho 的页面排版</div>
                 </div>
                 <svg id="ab-card-compat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC2 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -490,40 +449,33 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                     <div style="display:flex;align-items:flex-start;gap:10px">
                         <span style="font-size:15px;flex-shrink:0;margin-top:1px">📦</span>
                         <div class="ab-card-tip-green-text" style="flex:1;font-size:13px;color:#166534;line-height:1.7">
-                            AdminBeautify 会自动加载 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">assets/compat/</code> 目录下的兼容脚本来修复其他插件的页面排版。<br>
-                            开发者可参考 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">assets/compat/README.md</code> 编写兼容脚本（需包含 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@name</code> / <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@plugins</code> / <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@description</code> 元数据）。
+                            兼容脚本默认不加载，请根据需要手动开启。脚本位于 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">assets/compat/</code> 目录。<br>
+                            开发者可参考 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">assets/compat/README.md</code> 编写兼容脚本（需包含 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@name</code> / <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@plugins</code> / <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@description</code> 元数据）。<br/>
+                            文档：<a href="https://blog.lhl.one/artical/977.html" target="_blank">https://blog.lhl.one/artical/977.html</a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>';
-
-        // --- 扫描本地兼容脚本并展示列表 ---
-        $compatDir = dirname(__FILE__) . '/assets/compat/';
+                $compatDir = dirname(__FILE__) . '/assets/compat/';
         $compatScripts = self::scanCompatScripts($compatDir);
-        // 读取当前已禁用脚本列表
-        $disabledRaw = '';
+                        $enabledRaw = '';
         try {
             $abOptCompat = Typecho_Widget::widget('Widget_Options')->plugin('AdminBeautify');
-            $disabledRaw = isset($abOptCompat->compat_disabledScripts) ? (string) $abOptCompat->compat_disabledScripts : '';
+            $enabledRaw = isset($abOptCompat->compat_disabledScripts) ? (string) $abOptCompat->compat_disabledScripts : '';
         } catch (Exception $e) {
-            $disabledRaw = '';
+            $enabledRaw = '';
         }
-        $disabledList = ($disabledRaw !== '') ? (array) json_decode($disabledRaw, true) : array();
-        if (!is_array($disabledList)) $disabledList = array();
-
-        self::renderCompatScriptsList($compatScripts, $disabledList, $abC1);
-
-        // 隐藏的表单字段：存储禁用脚本 JSON
-        $compatDisabledScripts = new Typecho_Widget_Helper_Form_Element_Hidden(
+        $enabledList = ($enabledRaw !== '') ? (array) json_decode($enabledRaw, true) : array();
+        if (!is_array($enabledList)) $enabledList = array();
+        self::renderCompatScriptsList($compatScripts, $enabledList, $abC1);
+                $compatEnabledScripts = new Typecho_Widget_Helper_Form_Element_Hidden(
             'compat_disabledScripts',
             null,
-            $disabledRaw
+            $enabledRaw
         );
-        $form->addInput($compatDisabledScripts);
-
-        // 兼容性 - 外部 JS 文件链接
-        $compatExternalJs = new Typecho_Widget_Helper_Form_Element_Textarea(
+        $form->addInput($compatEnabledScripts);
+                $compatExternalJs = new Typecho_Widget_Helper_Form_Element_Textarea(
             'compat_externalJs',
             null,
             '',
@@ -531,9 +483,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('每行一个 JS 文件 URL，将在后台所有页面加载。示例：https://cdn.example.com/compat/my-plugin-fix.js')
         );
         $form->addInput($compatExternalJs);
-
-        // ====== MD3 折叠卡片 + 颜色跟随 + 检查更新 ======
-        echo '<script>
+                echo '<script>
 // ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
 (function(){
     // 查找字段对应的外层 <ul class="typecho-option"> 元素
@@ -550,14 +500,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
         return null;
     }
-
     function buildCards(){
         // ---- 管理后台卡片 ----
         var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
-
         if(adminCard&&adminBody&&firstAdminUl){
             var form=firstAdminUl.parentNode;
             form.insertBefore(adminCard,firstAdminUl);
@@ -567,7 +515,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
             adminBody.style.paddingBottom="16px";
         }
-
         // ---- 登录页卡片 ----
         var loginFields=["login_colorPreset","login_primaryColor","login_primaryColor2",
             "login_showSiteName","login_themeMode","login_showThemeToggle",
@@ -575,7 +522,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         var firstLoginUl=findFieldUl("login_colorPreset");
         var loginCard=document.getElementById("ab-card-login");
         var loginBody=document.getElementById("ab-card-login-body");
-
         if(loginCard&&loginBody&&firstLoginUl){
             var form2=firstLoginUl.parentNode;
             form2.insertBefore(loginCard,firstLoginUl);
@@ -587,26 +533,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             if(preview) loginBody.appendChild(preview);
             loginBody.style.paddingBottom="16px";
         }
-
-        // ---- PWA 应用卡片（插在登录页卡片之后） ----
-        var pwaFields=["pwa_appName","pwa_appIcon"];
-        var pwaCard=document.getElementById("ab-card-pwa");
-        var pwaBody=document.getElementById("ab-card-pwa-body");
-        if(pwaCard&&pwaBody&&loginCard){
-            var form3=loginCard.parentNode;
-            if(loginCard.nextSibling) form3.insertBefore(pwaCard,loginCard.nextSibling);
-            else form3.appendChild(pwaCard);
-            for(var p=0;p<pwaFields.length;p++){
-                var pu=findFieldUl(pwaFields[p]);
-                if(pu) pwaBody.appendChild(pu);
-            }
-            pwaBody.style.paddingBottom="16px";
-        }
-
-        // ---- 兼容脚本卡片 ----
+        // ---- 兼容脚本卡片（插在登录页卡片之后）----
         var compatCard=document.getElementById("ab-card-compat");
         var compatBody=document.getElementById("ab-card-compat-body");
         if(compatCard&&compatBody){
+            // 重新定位到登录页卡片之后
+            if(loginCard){
+                var formC=loginCard.parentNode;
+                if(loginCard.nextSibling) formC.insertBefore(compatCard,loginCard.nextSibling);
+                else formC.appendChild(compatCard);
+            }
             // 兼容脚本列表
             var csList=document.getElementById("ab-compat-scripts-list");
             if(csList) compatBody.appendChild(csList);
@@ -618,15 +554,55 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // 隐藏 hidden 字段
         var hiddenUl=findFieldUl("compat_disabledScripts");
         if(hiddenUl) hiddenUl.style.display="none";
-
+        // ---- PWA 应用卡片（插在兼容脚本卡片之后）----
+        var pwaFields=["pwa_appName","pwa_appIcon"];
+        var pwaCard=document.getElementById("ab-card-pwa");
+        var pwaBody=document.getElementById("ab-card-pwa-body");
+        if(pwaCard&&pwaBody&&compatCard){
+            var form3=compatCard.parentNode;
+            if(compatCard.nextSibling) form3.insertBefore(pwaCard,compatCard.nextSibling);
+            else form3.appendChild(pwaCard);
+            for(var p=0;p<pwaFields.length;p++){
+                var pu=findFieldUl(pwaFields[p]);
+                if(pu) pwaBody.appendChild(pu);
+            }
+            pwaBody.style.paddingBottom="16px";
+        }
+        // ---- 性能优化卡片（插在 PWA 卡片之后） ----
+        var perfFields=["staticResource","customFontUrl","customIconUrl"];
+        var perfCard=document.getElementById("ab-card-perf");
+        var perfBody=document.getElementById("ab-card-perf-body");
+        if(perfCard&&perfBody&&pwaCard){
+            var form4=pwaCard.parentNode;
+            if(pwaCard.nextSibling) form4.insertBefore(perfCard,pwaCard.nextSibling);
+            else form4.appendChild(perfCard);
+            for(var q=0;q<perfFields.length;q++){
+                var qu=findFieldUl(perfFields[q]);
+                if(qu) perfBody.appendChild(qu);
+            }
+            perfBody.style.paddingBottom="16px";
+        }
+        // 自定义 URL 字段的显示/隐藏
+        (function(){
+            var sel=document.querySelector("[name=\"staticResource\"]");
+            if(!sel) return;
+            function toggleCustom(){
+                var isCustom=sel.value==="custom";
+                var fontUl=findFieldUl("customFontUrl");
+                var iconUl=findFieldUl("customIconUrl");
+                if(fontUl) fontUl.style.display=isCustom?"":"none";
+                if(iconUl) iconUl.style.display=isCustom?"":"none";
+            }
+            sel.addEventListener("change",toggleCustom);
+            toggleCustom();
+        })();
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","login","pwa","compat"].forEach(function(id){
+        ["admin","login","pwa","perf","compat"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
         });
     }
-
     window.abToggleCard=function(id){
         var body=document.getElementById("ab-card-"+id+"-body");
         var chev=document.getElementById("ab-card-"+id+"-chev");
@@ -655,7 +631,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             try{ localStorage.setItem("ab-card-"+id,"0"); }catch(e){}
         }
     };
-
     // 默认折叠；仅当 localStorage 明确为 "1" 时才展开
     function restoreCard(id){
         var saved=null;
@@ -678,14 +653,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
         }
     }
-
     if(document.readyState==="loading"){
         document.addEventListener("DOMContentLoaded",buildCards);
     } else {
         buildCards();
     }
 })();
-
 // ---- 卡片颜色跟随主题色 & 检查更新 ----
 (function(){
     var abColorMap={
@@ -730,20 +703,30 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if(i2) i2.style.background=c[1]+"1a";
         var v2=document.getElementById("ab-card-login-chev");
         if(v2) v2.setAttribute("stroke",c[1]);
+        // 性能优化卡片
+        var s5=document.getElementById("ab-card-perf-strip");
+        if(s5) s5.style.background=c[0];
+        var i5=document.getElementById("ab-card-perf-icon");
+        if(i5) i5.style.background=c[0]+"1a";
+        var v5=document.getElementById("ab-card-perf-chev");
+        if(v5) v5.setAttribute("stroke",c[0]);
+        // 关于插件卡片
+        var s6=document.getElementById("ab-card-about-strip");
+        if(s6) s6.style.background=c[0];
+        var v6=document.getElementById("ab-card-about-chev");
+        if(v6) v6.setAttribute("stroke",c[0]);
     }
     function initColorFollow(){
         var sel=document.querySelector("[name=\"primaryColor\"]");
         if(!sel) return;
         sel.addEventListener("change",function(){ applyConfigColors(this.value); });
     }
-
     // 检查更新（调用全局 abCheckUpdate，定义于 renderFooter 注入的脚本）
     function initUpdateCheck(){
         var btn=document.getElementById("ab-btn-update");
         if(!btn) return;
         btn.addEventListener("click",function(){ window.abCheckUpdate&&window.abCheckUpdate(true); });
     }
-
     // 注入动画
     if(!document.getElementById("ab-config-anim")){
         var st=document.createElement("style");
@@ -751,7 +734,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         st.textContent="@keyframes ab-spin{to{transform:rotate(360deg)}} @keyframes ab-fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}";
         document.head.appendChild(st);
     }
-
     if(document.readyState==="loading"){
         document.addEventListener("DOMContentLoaded",function(){ initColorFollow(); initUpdateCheck(); });
     } else {
@@ -759,58 +741,313 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     }
 })();
 </script>';
+                                echo '<style>
+[data-theme="dark"] #ab-card-about {
+    background: var(--md-surface-container-low, #1d1b20) !important;
+    border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
+}
+[data-theme="dark"] #ab-card-about-hdr:hover { background: rgba(255,255,255,.05) !important; }
+[data-theme="dark"] .ab-about-section-title { color: var(--md-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-about-author-name { color: var(--md-on-surface, #e6e1e5) !important; }
+[data-theme="dark"] .ab-about-author-bio { color: var(--md-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-about-link-btn { background: rgba(255,255,255,.08) !important; color: var(--md-on-surface, #e6e1e5) !important; border-color: rgba(255,255,255,.12) !important; }
+[data-theme="dark"] .ab-about-link-btn:hover { background: rgba(255,255,255,.14) !important; }
+[data-theme="dark"] .ab-about-plugin-card { background: var(--md-surface-container, #211f26) !important; border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important; }
+[data-theme="dark"] .ab-about-plugin-name { color: var(--md-on-surface, #e6e1e5) !important; }
+[data-theme="dark"] .ab-about-plugin-desc { color: var(--md-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-about-changelog-item { border-color: rgba(255,255,255,.08) !important; }
+[data-theme="dark"] .ab-about-tag-version { background: rgba(255,255,255,.1) !important; color: var(--md-on-surface, #e6e1e5) !important; }
+[data-theme="dark"] .ab-about-changelog-body { color: var(--md-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-about-support-tip { background: rgba(255,255,255,.04) !important; border-color: rgba(255,255,255,.1) !important; }
+[data-theme="dark"] .ab-about-support-title { color: var(--md-on-surface, #e6e1e5) !important; }
+[data-theme="dark"] .ab-about-support-desc { color: var(--md-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-about-support-qr-label { color: var(--md-on-surface-variant, #cac4d0) !important; }
+</style>';
+        echo '<div id="ab-card-about" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+            <div id="ab-card-about-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
+                <div id="ab-card-about-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
+                <div style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💡</div>
+                <div style="flex:1;min-width:0">
+                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">关于插件</div>
+                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">作者信息 · 更新日志 · 支持作者</div>
+                </div>
+                <svg id="ab-card-about-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div id="ab-card-about-body" style="overflow:hidden;max-height:9999px;padding:0 22px 24px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
+                <!-- ── 作者信息 ── -->
+                <div style="margin:16px 0 0;padding:18px;background:linear-gradient(135deg,' . $abC1 . '18,' . $abC2 . '10);border-radius:16px;border:1px solid ' . $abC1 . '22">
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+                        <img src="https://i.see.you/2026/03/08/Uei3/26ee132f48bd9453e9c4d1d3fa1d312d.jpg" alt="lhl77" style="width:52px;height:52px;border-radius:50%;border:2px solid ' . $abC1 . '44;flex-shrink:0">
+                        <div>
+                            <div class="ab-about-author-name" style="font-size:17px;font-weight:700;color:#1c1b1f;letter-spacing:-.01em">LHL (lhl77)</div>
+                            <div class="ab-about-author-bio" style="font-size:12px;color:#79747e;margin-top:3px">插件作者</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                        <a href="https://github.com/lhl77" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
+                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+                            GitHub
+                        </a>
+                        <a href="https://blog.lhl.one" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                            个人博客
+                        </a>
+                    </div>
+                </div>
+                <!-- ── 作者的其他插件 ── -->
+                <div style="margin-top:20px">
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🧩 作者的其他插件</div>
+                    <div id="ab-about-more-plugins" style="margin-top:8px"><!-- GitHub API 动态加载 --></div>
+                </div>
+                <!-- ── 作者的其他项目 ── -->
+                <div style="margin-top:20px">
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚀 作者推荐(友情链接)</div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
+                        <a href="https://img.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
+                            <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🖼️ LHL\'s Images 聚合图床</div>
+                            <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">个人博客可申请免费使用•Telegram Bot上传•中国优化储存•S.EE•R2•OSS•Edge One</div>
+                        </a>
+                        <a href="https://img.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
+                            <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🛒 LHL\'s Shop 小店</div>
+                            <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">售卖作者的一些付费服务、虚拟主机、源码等</div>
+                        </a>
+                    </div>
+                </div>
+                <!-- ── 支持作者 ── -->
+                <div style="margin-top:20px">
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">❤️ 支持作者</div>
+                    <div class="ab-about-support-tip" style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:#fdf6ff;border:1px solid ' . $abC1 . '22;border-radius:16px">
+                        <div style="flex:1;min-width:0">
+                            <div class="ab-about-support-title" style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:6px">如果插件对你有帮助，欢迎请作者喝杯咖啡 ☕</div>
+                            <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">备注支持时请在备注中填写：您的名字 + GitHub 或 个人博客，作者会定期把您的名字加入鸣谢列表。</span></div>
+                            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" class="ab-star-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:' . $abC1 . ';color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                    给个 Star
+                                </a>
+                                <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(90deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
+                                    <svg t="1773056468210" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1629" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="13"><path d="M533.504 268.288q33.792-41.984 71.68-75.776 32.768-27.648 74.24-50.176t86.528-19.456q63.488 5.12 105.984 30.208t67.584 63.488 34.304 87.04 6.144 99.84-17.92 97.792-36.864 87.04-48.64 74.752-53.248 61.952q-40.96 41.984-85.504 78.336t-84.992 62.464-73.728 41.472-51.712 15.36q-20.48 1.024-52.224-14.336t-69.632-41.472-79.872-61.952-82.944-75.776q-26.624-25.6-57.344-59.392t-57.856-74.24-46.592-87.552-21.504-100.352 11.264-99.84 39.936-83.456 65.536-61.952 88.064-35.328q24.576-5.12 49.152-1.536t48.128 12.288 45.056 22.016 40.96 27.648q45.056 33.792 86.016 80.896z" p-id="1630" fill="#ffffff"/></svg>
+                                     捐助（微信/支付宝）
+                                </a>
+                            </div>
+                        </div>
+                        <div style="flex-shrink:0;text-align:center">
+                            <img src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:110px;height:110px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08)">
+                            <div class="ab-about-support-qr-label" style="font-size:10px;color:#79747e;margin-top:6px">赞赏码</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- ── 鸣谢（支持者） ── -->
+                <div style="margin-top:18px">
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
+                    <div id="ab-about-thanks" style="border-radius:12px;padding:12px;background:var(--md-surface-container-low);border:1px solid var(--md-outline-variant);">
+                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">感谢以下支持者（将按周期更新）：</div>
+                        <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
+                            <!-- 列表将由作者维护或由后台脚本追加 -->
+                            <li><a href="https://mzrme.com/" target="_blank" style="color:inherit">MZRME</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <!-- ── 更新日志 ── -->
+                <div style="margin-top:20px">
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📋 更新日志</div>
+                    <div id="ab-about-changelog" style="border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.07)">
+                        <div style="padding:20px;text-align:center;color:#79747e;font-size:13px">
+                            <div style="animation:ab-spin 1s linear infinite;display:inline-block;width:20px;height:20px;border:2px solid rgba(0,0,0,.1);border-top-color:#79747e;border-radius:50%;margin-bottom:8px"></div>
+                            <div>正在从 GitHub 加载更新日志...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>';
+        echo '<script>
+(function(){
+    // ── 初始化关于卡片折叠 ──
+    var aboutHdr=document.getElementById("ab-card-about-hdr");
+    if(aboutHdr) aboutHdr.addEventListener("click",function(){ window.abToggleCard&&window.abToggleCard("about"); });
+    function restoreAboutCard(){
+        var saved=null;
+        try{ saved=localStorage.getItem("ab-card-about"); }catch(e){}
+        var body=document.getElementById("ab-card-about-body");
+        var chev=document.getElementById("ab-card-about-chev");
+        var card=document.getElementById("ab-card-about");
+        if(!body) return;
+        if(saved==="1"){
+            body.setAttribute("data-collapsed","0");
+        } else {
+            body.style.transition="none";
+            body.style.paddingBottom="0";
+            body.style.maxHeight="0";
+            body.setAttribute("data-collapsed","1");
+            if(chev) chev.style.transform="rotate(-90deg)";
+            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
+            setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
+        }
     }
-
-    /**
-     * 个人用户配置面板
-     */
+    // ── 更新颜色 ──
+    function updateAboutColors(c1){
+        var s=document.getElementById("ab-card-about-strip");
+        if(s) s.style.background=c1;
+        var v=document.getElementById("ab-card-about-chev");
+        if(v) v.setAttribute("stroke",c1);
+    }
+    // ── 从 GitHub API 加载更新日志 ──
+    function loadChangelog(){
+        var el=document.getElementById("ab-about-changelog");
+        if(!el) return;
+        var xhr=new XMLHttpRequest();
+        xhr.open("GET","https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases?per_page=5",true);
+        xhr.withCredentials=false;
+        xhr.timeout=8000;
+        xhr.onload=function(){
+            try{
+                var releases=JSON.parse(xhr.responseText);
+                if(!Array.isArray(releases)||releases.length===0){
+                    el.innerHTML="<div style=\"padding:16px;text-align:center;font-size:13px;color:#79747e\">暂无更新日志</div>";
+                    return;
+                }
+                var html="";
+                releases.forEach(function(r,i){
+                    var date=r.published_at?r.published_at.substring(0,10):"";
+                    var body=(r.body||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>").replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/`(.*?)`/g,"<code style=\"background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:11px\">$1</code>").replace(/^- /gm,"• ").replace(/<br>• /g,"<br>&nbsp;&nbsp;• ");
+                    var isLatest=(i===0);
+                    var itemId="ab-cl-item-"+i;
+                    html+="<div class=\"ab-about-changelog-item\" style=\""+(i>0?"border-top:1px solid rgba(0,0,0,.06)":"")+"\">";
+                    html+="<div class=\"ab-cl-hdr\" data-idx=\""+i+"\" style=\"display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:"+(isLatest?"default":"pointer")+"\">";
+                    html+="<span class=\"ab-about-tag-version\" style=\"display:inline-block;padding:2px 10px;background:rgba(0,0,0,.06);border-radius:10px;font-size:12px;font-weight:600;color:#333\">"+r.tag_name+"</span>";
+                    if(r.prerelease) html+="<span style=\"display:inline-block;padding:2px 8px;background:#fef3c7;border-radius:10px;font-size:11px;color:#92400e\">预发布</span>";
+                    if(date) html+="<span style=\"font-size:11px;color:#79747e;margin-left:auto\">"+date+"</span>";
+                    if(!isLatest) html+="<svg class=\"ab-cl-chev\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#79747e\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"flex-shrink:0;transition:transform .25s;transform:rotate(-90deg)\"><polyline points=\"6 9 12 15 18 9\"/></svg>";
+                    html+="</div>";
+                    html+="<div id=\""+itemId+"\" class=\"ab-about-changelog-body\" style=\"padding:0 16px 12px;font-size:12px;color:#49454f;line-height:1.8;"+(isLatest?"":"display:none")+"\">"+body+"</div>";
+                    html+="</div>";
+                });
+                el.innerHTML=html;
+                el.addEventListener("click",function(e){
+                    var hdr=e.target.closest?e.target.closest(".ab-cl-hdr"):null;
+                    if(!hdr)return;
+                    var idx=parseInt(hdr.getAttribute("data-idx"),10);
+                    if(idx===0)return;
+                    var bd=document.getElementById("ab-cl-item-"+idx);
+                    if(!bd)return;
+                    var open=bd.style.display!=="none";
+                    bd.style.display=open?"none":"block";
+                    var chev=hdr.querySelector(".ab-cl-chev");
+                    if(chev)chev.style.transform=open?"rotate(-90deg)":"rotate(0)";
+                });
+                el.innerHTML=html;
+            }catch(e){
+                el.innerHTML="<div style=\"padding:16px;text-align:center;font-size:13px;color:#79747e\">加载失败，请访问 <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases\" target=\"_blank\" style=\"color:inherit\">GitHub Releases</a> 查看</div>";
+            }
+        };
+        xhr.onerror=xhr.ontimeout=function(){
+            el.innerHTML="<div style=\"padding:16px;text-align:center;font-size:13px;color:#79747e\">加载超时，请访问 <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases\" target=\"_blank\" style=\"color:inherit\">GitHub Releases</a> 查看</div>";
+        };
+        xhr.send();
+    }
+    // ── 从 GitHub API 加载作者其他 Repo ──
+    function loadGithubRepos(){
+        var xhr=new XMLHttpRequest();
+        xhr.open("GET","https://api.github.com/users/lhl77/repos?sort=updated&per_page=20",true);
+        xhr.withCredentials=false;
+        xhr.timeout=8000;
+        xhr.onload=function(){
+            try{
+                var repos=JSON.parse(xhr.responseText);
+                if(!Array.isArray(repos)) return;
+                // 过滤出 Typecho 插件 repo（名称包含 Typecho 或含 typecho topic）
+                var plugins=repos.filter(function(r){ return /typecho/i.test(r.name)&&r.name!=="Typecho-Plugin-AdminBeautify"; });
+                var otherRepos=repos.filter(function(r){ return !/typecho/i.test(r.name)&&!r.fork&&r.description; }).slice(0,4);
+                // 渲染其他插件
+                var pEl=document.getElementById("ab-about-more-plugins");
+                if(pEl&&plugins.length>0){
+                    var ph="<div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px\">";
+                    plugins.slice(0,4).forEach(function(r){
+                        ph+="<a href=\""+r.html_url+"\" target=\"_blank\" rel=\"noopener\" class=\"ab-about-plugin-card\" style=\"display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s\" onmouseover=\"this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'\" onmouseout=\"this.style.boxShadow=\'none\'\">";
+                        ph+="<div class=\"ab-about-plugin-name\" style=\"font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px\">"+r.name.replace(/^Typecho-Plugin-/,"")+"</div>";
+                        ph+="<div class=\"ab-about-plugin-desc\" style=\"font-size:11px;color:#79747e;line-height:1.5\">"+(r.description||"")+"</div>";
+                        ph+="</a>";
+                    });
+                    ph+="</div>";
+                    pEl.innerHTML=ph;
+                }
+            }catch(e){}
+        };
+        xhr.onerror=function(){};
+        xhr.send();
+    }
+    function initAbout(){
+        restoreAboutCard();
+        // 颜色跟随主题色
+        var sel=document.querySelector("[name=\"primaryColor\"]");
+        if(sel){
+            sel.addEventListener("change",function(){
+                var abColorMap={purple:"#7D5260",blue:"#556270",teal:"#4A6363",green:"#55624C",orange:"#725A42",pink:"#74565F",red:"#775654"};
+                updateAboutColors(abColorMap[this.value]||abColorMap.purple);
+            });
+        }
+        // 插入卡片到 perf 卡片之后（顺序：admin→login→compat→pwa→perf→about）
+        var perfCard=document.getElementById("ab-card-perf");
+        var aboutCard=document.getElementById("ab-card-about");
+        if(perfCard&&aboutCard){
+            if(perfCard.nextSibling) perfCard.parentNode.insertBefore(aboutCard,perfCard.nextSibling);
+            else perfCard.parentNode.appendChild(aboutCard);
+        } else if(aboutCard){
+            // fallback：找到任何一个已定位的卡片，追加在末尾
+            var anyCard=document.getElementById("ab-card-compat")||document.getElementById("ab-card-login")||document.getElementById("ab-card-admin");
+            if(anyCard&&anyCard.parentNode){
+                anyCard.parentNode.appendChild(aboutCard);
+            }
+        }
+        // 延迟加载异步内容（卡片展开后才有意义）
+        setTimeout(function(){ loadChangelog(); loadGithubRepos(); }, 800);
+    }
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",initAbout);
+    } else {
+        initAbout();
+    }
+})();
+</script>';
+    }
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
     {
     }
-
-    /**
-     * 输出头部 CSS（自动区分登录页和管理页）
-     */
     public static function renderHeader($header)
     {
-        // 登录页 → 注入 LoginBeautify 样式
-        if (self::isLoginPage()) {
+                if (self::isLoginPage()) {
             ob_start();
             self::outputLoginHeaderCss();
             $inject = ob_get_clean();
             return $header . $inject;
         }
-
-        // 管理页 → 注入 AdminBeautify 样式
-        return self::renderAdminHeader($header);
+                return self::renderAdminHeader($header);
     }
-
-    /**
-     * 输出管理页头部 CSS
-     */
     private static function renderAdminHeader($header)
     {
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
-
         $primaryColor = $pluginOptions->primaryColor ?: 'purple';
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $borderRadius = $pluginOptions->borderRadius ?: 'medium';
-        // 使用 isset + 空字符串判断，确保 '0' 被正确识别为"关闭"
-        $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
+                $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $navPosition = $pluginOptions->navPosition ?: 'left';
-
-        $cssUrl = Typecho_Common::url('AdminBeautify/assets/style.css', $options->pluginUrl);
-
-        // ⚠️ 必须在所有 CSS 之前执行：设置 data-theme / data-nav / data-animation，防止暗色模式闪烁（FOUC）
-        $earlyScript = '<script>';
+        $colors = self::getColorScheme($primaryColor);
+    $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
+    $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
+    $cssUrl = Typecho_Common::url('AdminBeautify/assets/AdminBeautify', $options->pluginUrl);
+                        $earlyScript = '<script>';
         if ($darkMode === 'dark') {
             $earlyScript .= 'document.documentElement.setAttribute("data-theme","dark");';
+            $earlyScript .= 'document.documentElement.style.background="' . $darkBg . '";';
+            $earlyScript .= 'document.documentElement.style.setProperty("color-scheme","dark");';
         } elseif ($darkMode === 'light') {
             $earlyScript .= 'document.documentElement.removeAttribute("data-theme");';
+            $earlyScript .= 'document.documentElement.style.background="' . $lightBg . '";';
+            $earlyScript .= 'document.documentElement.style.setProperty("color-scheme","light");';
         } elseif ($darkMode === 'auto') {
-            $earlyScript .= '(function(){var m=window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)");if(m&&m.matches){document.documentElement.setAttribute("data-theme","dark");}})();';
+                        $earlyScript .= '(function(){var m=window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)");if(m&&m.matches){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="' . $darkBg . '";document.documentElement.style.setProperty("color-scheme","dark");}else{document.documentElement.removeAttribute("data-theme");document.documentElement.style.background="' . $lightBg . '";document.documentElement.style.setProperty("color-scheme","light");}})();';
         }
         if ($navPosition === 'left') {
             $earlyScript .= 'document.documentElement.setAttribute("data-nav","left");if(localStorage.getItem("adminBeautifySidebarCollapsed")==="1"){document.documentElement.setAttribute("data-nav-collapsed","");}';
@@ -818,88 +1055,96 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if ($enableAnimation === '0') {
             $earlyScript .= 'document.documentElement.setAttribute("data-no-animation","");';
         }
+                $earlyScript .= 'document.documentElement.setAttribute("data-ab-loading","");';
         $earlyScript .= '</script>';
-
-        // early script 必须放在最前面，CSS link 之前
-        $inject = "\n" . $earlyScript;
-        $inject .= "\n" . '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap">';
-        $inject .= "\n" . '<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Round">';
-        $inject .= "\n" . '<link rel="stylesheet" href="' . $cssUrl . '?v=' . '2.0.0' . '">';
-        $inject .= "\n" . '<style>:root{';
-
-        // 主题色 CSS 变量
-        $colors = self::getColorScheme($primaryColor);
-        foreach ($colors as $key => $value) {
-            $inject .= $key . ':' . $value . ';';
+                $colors = self::getColorScheme($primaryColor);
+        $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
+        $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
+                $colorSchemeValue = ($darkMode === 'dark') ? 'dark' : (($darkMode === 'light') ? 'light' : 'light dark');
+                        $injectHead = "\n" . '<meta name="color-scheme" content="' . $colorSchemeValue . '">';
+                $injectHead .= "\n" . $earlyScript;
+                $injectHead .= "\n" . '<style>';
+                $injectHead .= '[data-ab-loading],[data-ab-loading] *{transition:none!important;}';
+                $injectHead .= '[data-ab-loading] .typecho-head-nav{visibility:hidden!important;}';
+                        $injectHead .= 'html,body{background:' . $lightBg . '!important;}';
+        $injectHead .= 'html[data-theme="dark"],html[data-theme="dark"] body{background:' . $darkBg . '!important;}';
+        $injectHead .= ':root{';
+                $injectHead .= 'color-scheme:' . $colorSchemeValue . ';';
+                foreach ($colors as $key => $value) {
+            $injectHead .= $key . ':' . $value . ';';
         }
-
-        // 圆角
-        $radiusMap = array(
+                $radiusMap = array(
             'small'  => array('--md-radius-xs' => '4px', '--md-radius-sm' => '6px', '--md-radius-md' => '8px', '--md-radius-lg' => '12px', '--md-radius-xl' => '16px', '--md-radius-full' => '9999px'),
             'medium' => array('--md-radius-xs' => '6px', '--md-radius-sm' => '8px', '--md-radius-md' => '12px', '--md-radius-lg' => '16px', '--md-radius-xl' => '28px', '--md-radius-full' => '9999px'),
             'large'  => array('--md-radius-xs' => '8px', '--md-radius-sm' => '12px', '--md-radius-md' => '16px', '--md-radius-lg' => '24px', '--md-radius-xl' => '32px', '--md-radius-full' => '9999px'),
         );
         if (isset($radiusMap[$borderRadius])) {
             foreach ($radiusMap[$borderRadius] as $key => $value) {
-                $inject .= $key . ':' . $value . ';';
+                $injectHead .= $key . ':' . $value . ';';
             }
         }
-
-        // 动画
-        if ($enableAnimation === '0') {
-            $inject .= '--md-transition-duration:0s;';
+                if ($enableAnimation === '0') {
+            $injectHead .= '--md-transition-duration:0s;';
         } else {
-            $inject .= '--md-transition-duration:0.2s;';
+            $injectHead .= '--md-transition-duration:0.2s;';
         }
-
-        $inject .= '}</style>';
-
-        // PWA：manifest + iOS meta 标签
-        $colors = self::getColorScheme($primaryColor);
-        $themeColorMap = array(
+        $injectHead .= '}</style>';
+                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.1' . '.css">';
+                $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
+        $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
+        $customIconUrl  = isset($pluginOptions->customIconUrl)  ? trim((string) $pluginOptions->customIconUrl)  : '';
+        if ($staticResource === 'google') {
+            $resFontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
+            $resIconUrl = 'https://fonts.googleapis.com/icon?family=Material+Icons+Round';
+        } elseif ($staticResource === 'loli') {
+                        $resFontUrl = 'https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
+            $resIconUrl = 'https://fonts.loli.net/icon?family=Material+Icons+Round';
+        } elseif ($staticResource === 'custom') {
+            $resFontUrl = $customFontUrl;
+            $resIconUrl = $customIconUrl;
+        } else {
+                        $resFontUrl = '';
+            $resIconUrl = '';
+        }
+        if ($resFontUrl !== '') {
+            $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resFontUrl) . '">';
+        }
+        if ($resIconUrl !== '') {
+            $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resIconUrl) . '">';
+        }
+                $injectTail .= '<script>document.addEventListener("DOMContentLoaded",function(){document.documentElement.removeAttribute("data-ab-loading");},false);</script>';
+                $themeColorMap = array(
             'purple' => '#7D5260', 'blue' => '#556270', 'teal' => '#4A6363',
             'green'  => '#55624C', 'orange' => '#725A42', 'pink' => '#74565F', 'red' => '#775654',
         );
         $themeHex = isset($themeColorMap[$primaryColor]) ? $themeColorMap[$primaryColor] : '#7D5260';
         $manifestUrl = Typecho_Common::url('/action/admin-beautify?do=manifest', $options->index);
-
-        // 读取 PWA 自定义设置
-        $pwaAppName = isset($pluginOptions->pwa_appName) ? trim((string) $pluginOptions->pwa_appName) : '';
+                $pwaAppName = isset($pluginOptions->pwa_appName) ? trim((string) $pluginOptions->pwa_appName) : '';
         $pwaAppIcon = isset($pluginOptions->pwa_appIcon) ? trim((string) $pluginOptions->pwa_appIcon) : '';
         $pwaTitle = ($pwaAppName !== '') ? $pwaAppName : ((string) $options->title . ' 管理后台');
-
-        $inject .= "\n" . '<link rel="manifest" href="' . htmlspecialchars($manifestUrl) . '">';
-        $inject .= "\n" . '<meta name="theme-color" content="' . $themeHex . '">';
-        $inject .= "\n" . '<meta name="apple-mobile-web-app-capable" content="yes">';
-        $inject .= "\n" . '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">';
-        $inject .= "\n" . '<meta name="apple-mobile-web-app-title" content="' . htmlspecialchars($pwaTitle) . '">';
-        $inject .= "\n" . '<meta name="mobile-web-app-capable" content="yes">';
-        // PWA 图标 apple-touch-icon
-        if ($pwaAppIcon !== '') {
-            $inject .= "\n" . '<link rel="apple-touch-icon" sizes="180x180" href="' . htmlspecialchars($pwaAppIcon) . '">';
+        $injectTail .= "\n" . '<link rel="manifest" href="' . htmlspecialchars($manifestUrl) . '">';
+        $injectTail .= "\n" . '<meta name="theme-color" content="' . $themeHex . '">';
+        $injectTail .= "\n" . '<meta name="apple-mobile-web-app-capable" content="yes">';
+        $injectTail .= "\n" . '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">';
+        $injectTail .= "\n" . '<meta name="apple-mobile-web-app-title" content="' . htmlspecialchars($pwaTitle) . '">';
+        $injectTail .= "\n" . '<meta name="mobile-web-app-capable" content="yes">';
+                if ($pwaAppIcon !== '') {
+            $injectTail .= "\n" . '<link rel="apple-touch-icon" sizes="180x180" href="' . htmlspecialchars($pwaAppIcon) . '">';
         }
-
-        return $header . $inject;
+                        return $injectHead . $header . $injectTail;
     }
-
-    /**
-     * 输出管理页尾部 JS（仅在已登录时执行）
-     */
     public static function renderFooter()
     {
         if (self::isLoginPage()) {
             return;
         }
-
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $pluginCardView = isset($pluginOptions->pluginCardView) ? (string)$pluginOptions->pluginCardView : '1';
-
-        // Inject user avatar URL for sidebar header
-        $user = Typecho_Widget::widget('Widget_User');
+                $user = Typecho_Widget::widget('Widget_User');
         $avatarUrl = '';
         if ($user->hasLogin() && $user->mail) {
             $hash = md5(strtolower(trim($user->mail)));
@@ -921,39 +1166,83 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'darkMode'        => $darkMode,
             'enableAnimation' => $enableAnimation,
             'pluginCardView'  => $pluginCardView,
+            'siteName'        => $options->title,
         )) . ';</script>';
-
-        $jsUrl = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min.js', $options->pluginUrl);
-        echo '<script src="' . $jsUrl . '"></script>';
-
+        $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.1.js"></script>';
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
-
-        // 注册 Service Worker（PWA 支持）
-        $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
-        echo '<script>(function(){if(!("serviceWorker"in navigator))return;'
-            . 'navigator.serviceWorker.register(' . json_encode($swUrl) . ',{scope:' . json_encode(rtrim((string)$options->adminUrl, '/') . '/') . '})'
-            . '.then(function(reg){'
-            .   'reg.addEventListener("updatefound",function(){'
-            .     'var newSW=reg.installing;'
-            .     'newSW.addEventListener("statechange",function(){'
-            .       'if(newSW.state==="installed"&&navigator.serviceWorker.controller){'
-            .         '/* 新版本已就绪，可选择提示用户刷新 */'
-            .       '}'
-            .     '});'
+                $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
+        echo '<script>(function(){'
+                        . 'function abSwToast(){'
+            .   'if(document.getElementById("ab-sw-toast"))return;'
+            .   'var t=document.createElement("div");'
+            .   't.id="ab-sw-toast";'
+            .   't.setAttribute("role","alert");'
+            .   'var isDark=document.documentElement.getAttribute("data-theme")==="dark";'
+            .   'var bg=isDark?"#2d2b31":"#1c1b1f";'
+            .   'var fg=isDark?"#e6e1e5":"#f3eff4";'
+            .   'var btnBg=isDark?"rgba(208,188,255,.18)":"rgba(208,188,255,.22)";'
+            .   't.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);'
+            .     'background:"+bg+";color:"+fg+";padding:14px 20px;border-radius:16px;'
+            .     'box-shadow:0 4px 20px rgba(0,0,0,.35);display:flex;align-items:center;gap:14px;'
+            .     'font-size:14px;font-family:inherit;z-index:9999;white-space:nowrap;'
+            .     'transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;opacity:0;";'
+            .   'var txt=document.createElement("span");'
+            .   'txt.textContent="✨ 插件已更新，刷新后生效";'
+            .   'var btn=document.createElement("button");'
+            .   'btn.textContent="立即刷新";'
+            .   'btn.style.cssText="border:none;background:"+btnBg+";color:"+fg+";padding:7px 16px;'
+            .     'border-radius:999px;cursor:pointer;font-size:13px;font-weight:500;flex-shrink:0;'
+            .     'transition:background .15s;";'
+            .   'btn.onmouseover=function(){this.style.background=isDark?"rgba(208,188,255,.32)":"rgba(208,188,255,.36)";};'
+            .   'btn.onmouseout=function(){this.style.background=btnBg;};'
+            .   'btn.onclick=function(){window.location.reload();};'
+            .   'var close=document.createElement("button");'
+            .   'close.textContent="✕";'
+            .   'close.title="关闭";'
+            .   'close.style.cssText="border:none;background:transparent;color:"+fg+";'
+            .     'cursor:pointer;font-size:16px;padding:2px 4px;opacity:.6;flex-shrink:0;";'
+            .   'close.onclick=function(){'
+            .     't.style.opacity="0";t.style.transform="translateX(-50%) translateY(80px)";'
+            .     'setTimeout(function(){t.parentNode&&t.parentNode.removeChild(t);},400);'
+            .   '};'
+            .   't.appendChild(txt);t.appendChild(btn);t.appendChild(close);'
+            .   'document.body.appendChild(t);'
+            .   'requestAnimationFrame(function(){requestAnimationFrame(function(){'
+            .     't.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";'
+            .   '});});'
+            . '}'
+                        . 'if("serviceWorker"in navigator){'
+            .   'navigator.serviceWorker.addEventListener("message",function(e){'
+            .     'if(e.data&&e.data.type==="SW_UPDATED"){ abSwToast(); }'
             .   '});'
-            . '})'
-            . '.catch(function(){});'
+                        .   'var refreshing=false;'
+            .   'navigator.serviceWorker.addEventListener("controllerchange",function(){'
+            .     'if(refreshing)return;'              .     '/* controller 已切换，toast 由 SW_UPDATED 消息触发，此处不再重复 */'
+            .   '});'
+            .   'navigator.serviceWorker.register(' . json_encode($swUrl) . ',{scope:' . json_encode(rtrim((string)$options->adminUrl, '/') . '/') . '})'
+            .   '.then(function(reg){'
+            .     'reg.addEventListener("updatefound",function(){'
+            .       'var newSW=reg.installing;'
+            .       'newSW.addEventListener("statechange",function(){'
+            .         'if(newSW.state==="installed"&&navigator.serviceWorker.controller){'
+            .           '/* 新 SW 已安装，等待激活后由 SW_UPDATED 消息触发 toast */'
+            .           '/* 若 SW 没有自动 skipWaiting，则主动通知它跳过等待 */'
+            .           'newSW.postMessage({type:"SKIP_WAITING"});'
+            .         '}'
+            .       '});'
+            .     '});'
+            .   '})'
+            .   '.catch(function(){});'
+            . '}'
             . '}());</script>';
-
-        // PWA 独立模式下：延长认证 cookie 有效期，防止关闭应用后需重新登录
-        $pingUrl = Typecho_Common::url('/action/admin-beautify?do=ping', $options->index);
+                $pingUrl = Typecho_Common::url('/action/admin-beautify?do=ping', $options->index);
         echo '<script>(function(){'
             . 'var isStandalone=window.matchMedia&&window.matchMedia("(display-mode:standalone)").matches||window.navigator.standalone===true;'
             . 'if(!isStandalone)return;'
-            // 读取现有 __typecho_uid 和 __typecho_authCode cookie，重新设置 30 天过期
-            . 'function renewCookies(){'
+                        . 'function renewCookies(){'
             .   'var cookies=document.cookie.split(";");'
             .   'for(var i=0;i<cookies.length;i++){'
             .     'var c=cookies[i].trim();'
@@ -966,19 +1255,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             .     '}'
             .   '}'
             . '}'
-            // 立即续期一次
-            . 'renewCookies();'
-            // 每 10 分钟续期一次（保活）
-            . 'setInterval(renewCookies,10*60*1000);'
-            // 每 15 分钟 ping 后端保活 session
-            . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
+                        . 'renewCookies();'
+                        . 'setInterval(renewCookies,10*60*1000);'
+                        . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
-
-        // ====== 插件更新检查模块（全局可用） ======
-        echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.0";';
+                echo '<script>(function(){';
+        echo 'var __AB_VER__="2.1.1";';
         echo <<<'UPDATEJS'
-// ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");
     var origHTML=btn?btn.innerHTML:"";
@@ -1004,8 +1287,7 @@ window.abCheckUpdate=function(manual){
                 if(manual) abShowUpdateToast("ok","✅ 已是最新版本 v"+d.current);
                 return;
             }
-            // 检查是否已忽略该版本
-            try{ if(localStorage.getItem("ab-update-dismissed-v"+d.latest)) return; }catch(e){}
+                        try{ if(localStorage.getItem("ab-update-dismissed-v"+d.latest)) return; }catch(e){}
             abShowUpdateAvailable(d);
         }catch(e){
             if(manual) abShowUpdateToast("error","❌ 响应解析失败");
@@ -1017,32 +1299,23 @@ window.abCheckUpdate=function(manual){
     };
     xhr.send();
 };
-
-// ---- abShowUpdateAvailable: 配置页用 banner 内嵌，其他页面用固定顶栏 ----
 window.abShowUpdateAvailable=function(d){
     var old=document.getElementById("ab-update-notify"); if(old) old.remove();
     var banner=document.getElementById("ab-header-banner");
     var notify=document.createElement("div");
     notify.id="ab-update-notify";
-
     var dismissBtn='<button type="button" onclick="(function(el){el.remove();try{localStorage.setItem(\'ab-update-dismissed-v\'+el.dataset.ver,\'1\')}catch(e){}})(document.getElementById(\'ab-update-notify\'))" data-ver="'+d.latest+'" style="background:none;border:none;cursor:pointer;font-size:16px;opacity:.7;padding:0 0 0 8px;color:inherit;line-height:1" title="忽略此版本">✕</button>';
-
-    // 统一按钮基础样式：圆角描边，透明背景，继承颜色
-    // box-sizing + line-height + vertical-align 三项确保 button/a/span 高度完全一致
-    var btnBase='display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap;text-decoration:none;border:1px solid currentColor;box-sizing:border-box;vertical-align:middle;';
+            var btnBase='display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap;text-decoration:none;border:1px solid currentColor;box-sizing:border-box;vertical-align:middle;';
     var actionBtns='';
     if(d.can_direct){
         actionBtns+='<button id="ab-btn-do-update" type="button" onclick="abDoUpdate()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">⬆️ 立即更新</button>';
     } else {
-        // 不支持直接更新：显示禁用态按钮 + 原因提示
-        actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">⬆️ 立即更新</span>'
+                actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">⬆️ 立即更新</span>'
                    +'<span style="font-size:11px;opacity:.65;align-self:center;">需手动更新</span>';
     }
     actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;">🔗 查看详情</a>';
-
     if(banner){
-        // 配置页：嵌入 banner 内
-        notify.style.cssText="margin:12px 0 0;padding:12px 16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:14px;font-size:13px;color:#fff;animation:ab-fadeIn .3s ease;backdrop-filter:blur(4px)";
+                notify.style.cssText="margin:12px 0 0;padding:12px 16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:14px;font-size:13px;color:#fff;animation:ab-fadeIn .3s ease;backdrop-filter:blur(4px)";
         var bodyText='';
         if(d.body){ bodyText=d.body.replace(/[#*`]/g,"").replace(/\r?\n/g," ").trim(); if(bodyText.length>120) bodyText=bodyText.substring(0,120)+"..."; }
         notify.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
@@ -1052,8 +1325,7 @@ window.abShowUpdateAvailable=function(d){
             +dismissBtn+'</div>';
         banner.appendChild(notify);
     } else {
-        // 其他页面：固定顶部通知栏
-        notify.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;background:linear-gradient(90deg,#5c6bc0,#7e57c2);color:#fff;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25);animation:ab-slideDown .3s ease;font-weight:500";
+                notify.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;background:linear-gradient(90deg,#5c6bc0,#7e57c2);color:#fff;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25);animation:ab-slideDown .3s ease;font-weight:500";
         notify.innerHTML='<span style="flex:1">🎉 AdminBeautify 发现新版本 <strong>v'+d.latest+'</strong> <span style="opacity:.8;font-size:12px;font-weight:400">（当前 v'+d.current+'）</span></span>'
             +'<div style="display:flex;gap:8px;align-items:center">'+actionBtns+dismissBtn+'</div>';
         document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+40)+'px';
@@ -1064,8 +1336,6 @@ window.abShowUpdateAvailable=function(d){
         notify.setAttribute("data-new-version",d.latest);
     }
 };
-
-// ---- abDoUpdate: 执行直接更新 ----
 window.abDoUpdate=function(){
     var notify=document.getElementById("ab-update-notify");
     if(!notify) return;
@@ -1101,8 +1371,6 @@ window.abDoUpdate=function(){
     };
     xhr.send("download_url="+encodeURIComponent(dlUrl)+"&new_version="+encodeURIComponent(newVer)+"&_="+encodeURIComponent(ajax.token||""));
 };
-
-// ---- abShowUpdateToast: 轻量级提示（主要用于配置页手动检查反馈）----
 window.abShowUpdateToast=function(type,msg){
     var old=document.getElementById("ab-update-notify"); if(old) old.remove();
     var colors={ok:"#059669",update:"#d97706",error:"#dc2626",info:"#6366f1"};
@@ -1120,77 +1388,106 @@ window.abShowUpdateToast=function(type,msg){
     }
     setTimeout(function(){ if(toast.parentNode) toast.remove(); },6000);
 };
-
-// ---- 注入动画样式（如未注入）----
 if(!document.getElementById("ab-update-anim")){
     var st=document.createElement("style");
     st.id="ab-update-anim";
     st.textContent="@keyframes ab-spin{to{transform:rotate(360deg)}}@keyframes ab-slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}";
     document.head.appendChild(st);
 }
-
-// ---- 自动检查（每小时一次，页面加载后 4 秒执行）----
 setTimeout(function(){
     try{
         var cached=JSON.parse(localStorage.getItem("ab-update-check")||"null");
         var ONE_HOUR=3600000;
         if(!cached||(Date.now()-cached.ts)>ONE_HOUR){
-            // 缓存已过期或不存在，发起网络请求
-            window.abCheckUpdate(false);
+                        window.abCheckUpdate(false);
         } else if(cached.data&&cached.data.has_update){
-            // 缓存中有更新信息，检查是否已忽略
-            var dismissed=localStorage.getItem("ab-update-dismissed-v"+cached.data.latest);
+                        var dismissed=localStorage.getItem("ab-update-dismissed-v"+cached.data.latest);
             if(!dismissed) window.abShowUpdateAvailable(cached.data);
         }
     }catch(e){}
 },4000);
 UPDATEJS;
         echo '})();</script>';
-
-        // ====== 加载兼容性脚本 ======
-        self::loadCompatScripts($options, $pluginOptions);
+                echo '<script>(function(){'
+            . '"use strict";'
+            . 'function abIsMobile(){return window.innerWidth<=575;}'
+                        . 'document.addEventListener("click",function(e){'
+            .   'if(!abIsMobile())return;'
+            .   'var mb=document.querySelector(".typecho-head-nav .menu-bar[open]");'
+            .   'if(!mb)return;'
+            .   'var dr=document.querySelector(".typecho-head-nav nav > menu");'
+            .   'if(mb.contains(e.target))return;'
+            .   'if(dr&&dr.contains(e.target))return;'
+            .   'mb.removeAttribute("open");'
+            . '},true);'
+                        . 'function abInitMobileNav(){'
+            .   'if(!abIsMobile())return;'
+                        .   'var drawerMenu=document.querySelector(".typecho-head-nav nav > menu");'
+            .   'if(drawerMenu&&!document.getElementById("ab-mobile-branding")){'
+            .     'var user=window.__AB_USER__||{};'
+            .     'var cfg=window.__AB_CONFIG__||{};'
+            .     'var siteName=cfg.siteName||"";'
+            .     'var avatarUrl=user.avatar||"";'
+            .     'var bd=document.createElement("div");'
+            .     'bd.id="ab-mobile-branding";'
+            .     'var bhtml="";'
+            .     'if(avatarUrl)bhtml+="<img src=\""+avatarUrl+"\" alt=\"\" style=\"width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0\">";'
+            .     'if(siteName)bhtml+="<span style=\"font-size:15px;font-weight:600;color:var(--md-on-surface);white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">"+siteName+"</span>";'
+            .     'bd.innerHTML=bhtml;'
+            .     'drawerMenu.insertBefore(bd,drawerMenu.firstChild);'
+            .   '}'
+                        .   'var items=document.querySelectorAll(".typecho-head-nav nav > menu > li");'
+            .   '[].forEach.call(items,function(li){'
+            .     'var sub=li.querySelector("menu");'
+            .     'if(!sub)return;'
+            .     '/* 标记父级菜单项：避免被 AJAX 导航捕获拦截 */'
+            .     'li.classList.add("ab-has-children");'
+            .     'if(li.classList.contains("focus"))li.classList.add("ab-expanded");'
+            .   '});'
+            . '}'
+            . 'if(document.readyState==="loading"){'
+            .   'document.addEventListener("DOMContentLoaded",abInitMobileNav);'
+            . '}else{abInitMobileNav();}'
+                        . 'var abResizeTimer;'
+            . 'window.addEventListener("resize",function(){'
+            .   'clearTimeout(abResizeTimer);'
+            .   'abResizeTimer=setTimeout(function(){'
+            .     'var bd=document.getElementById("ab-mobile-branding");'
+            .     'if(!abIsMobile()&&bd){'
+            .       'bd.parentNode&&bd.parentNode.removeChild(bd);'
+            .     '} else if(abIsMobile()&&!document.getElementById("ab-mobile-branding")){'
+            .       'abInitMobileNav();'
+            .     '}'
+            .   '},100);'
+            . '});'
+            . '}());</script>';
+                $typechoVer = isset($options->version) ? (string) $options->version : '';
+        if ($typechoVer && version_compare($typechoVer, '1.3.0', '<')) {
+            $noteMsg = '检测到 Typecho 版本：v' . htmlspecialchars($typechoVer) . '，建议升级到 v1.3.0 以获得最佳兼容性。';
+            if (version_compare($typechoVer, '1.2.1', '==')) {
+                $noteMsg .= ' 如果暂时无法升级，请在 AdminBeautify 插件设置中手动启用 Typecho 1.2.1 兼容脚本。';
+            }
+                        echo '<script>(function(){try{var b=document.createElement("div");b.id="ab-typecho-version-note";b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99998;padding:10px 14px;background:#fef3c7;color:#92400e;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.06);";b.innerHTML=' . json_encode($noteMsg) . ';document.body.insertBefore(b,document.body.firstChild);document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+48)+"px";setTimeout(function(){b.style.transform="translateY(0)";},10);}catch(e){} })();</script>';
+        }
+                self::loadCompatScripts($options, $pluginOptions);
     }
-
-    /**
-     * 加载兼容性脚本（本地 + 外部）
-     *
-     * 本地脚本：自动扫描 assets/compat/ 目录下的 .js 文件，根据单独开关决定是否加载
-     * 外部脚本：从插件设置中读取用户配置的 URL 列表
-     *
-     * 开发者可在 assets/compat/ 目录下放置 JS 文件来兼容其他插件的页面排版。
-     * 每个 JS 文件应自行判断当前页面是否需要执行。
-     * 详细规范见 assets/compat/README.md
-     */
     private static function loadCompatScripts($options, $pluginOptions)
     {
         $compatBaseUrl = Typecho_Common::url('AdminBeautify/assets/compat/', $options->pluginUrl);
         $compatDir = dirname(__FILE__) . '/assets/compat/';
-
-        // 读取禁用脚本列表
-        $disabledRaw = isset($pluginOptions->compat_disabledScripts) ? (string) $pluginOptions->compat_disabledScripts : '';
-        $disabledList = ($disabledRaw !== '') ? (array) json_decode($disabledRaw, true) : array();
-        if (!is_array($disabledList)) $disabledList = array();
-
-        // 1. 加载本地兼容脚本（逐个检查是否被禁用）
-        if (is_dir($compatDir)) {
-            $files = scandir($compatDir);
-            if ($files) {
-                foreach ($files as $file) {
-                    if (substr($file, -3) === '.js' && is_file($compatDir . $file)) {
-                        // 检查是否被用户禁用
-                        if (in_array($file, $disabledList)) {
-                            continue;
-                        }
-                        $fileUrl = $compatBaseUrl . $file;
-                        $fileMtime = filemtime($compatDir . $file);
-                        echo '<script src="' . htmlspecialchars($fileUrl) . '?v=' . $fileMtime . '"></script>' . "\n";
-                    }
+                        $enabledRaw = isset($pluginOptions->compat_disabledScripts) ? (string) $pluginOptions->compat_disabledScripts : '';
+        $enabledList = ($enabledRaw !== '') ? (array) json_decode($enabledRaw, true) : array();
+        if (!is_array($enabledList)) $enabledList = array();
+                if (is_dir($compatDir) && !empty($enabledList)) {
+            foreach ($enabledList as $file) {
+                if (substr($file, -3) === '.js' && is_file($compatDir . $file)) {
+                    $fileUrl = $compatBaseUrl . $file;
+                    $fileMtime = filemtime($compatDir . $file);
+                    echo '<script src="' . htmlspecialchars($fileUrl) . '?v=' . $fileMtime . '"></script>' . "\n";
                 }
             }
         }
-
-        // 2. 加载外部兼容脚本
-        $externalJs = isset($pluginOptions->compat_externalJs) ? trim((string) $pluginOptions->compat_externalJs) : '';
+                $externalJs = isset($pluginOptions->compat_externalJs) ? trim((string) $pluginOptions->compat_externalJs) : '';
         if ($externalJs !== '') {
             $lines = preg_split('/[\r\n]+/', $externalJs);
             foreach ($lines as $line) {
@@ -1201,13 +1498,6 @@ UPDATEJS;
             }
         }
     }
-
-    /**
-     * 扫描 compat 目录中的 JS 文件并解析元数据
-     *
-     * @param string $compatDir 目录绝对路径
-     * @return array 每个元素: ['file'=>文件名, 'name'=>名称, 'description'=>简介, 'plugins'=>适用插件, 'version'=>版本, 'author'=>作者]
-     */
     private static function scanCompatScripts($compatDir)
     {
         $result = array();
@@ -1222,19 +1512,6 @@ UPDATEJS;
         }
         return $result;
     }
-
-    /**
-     * 从 JS 文件头部注释中解析 @name, @description, @plugins, @version, @author 元数据
-     *
-     * 格式示例:
-     *   /**
-     *    * @name 插件名兼容
-     *    * @description 修复xx问题
-     *    * @plugins PluginA, PluginB
-     *    * @version 1.0.0
-     *    * @author 作者名
-     *    *\/
-     */
     private static function parseCompatMeta($filePath)
     {
         $defaults = array(
@@ -1244,36 +1521,24 @@ UPDATEJS;
             'version'     => '',
             'author'      => '',
         );
-        // 只读取文件前 2KB，避免大文件读取
-        $content = @file_get_contents($filePath, false, null, 0, 2048);
+                $content = @file_get_contents($filePath, false, null, 0, 2048);
         if ($content === false) return $defaults;
-
-        // 匹配第一个 /** ... */ 块
-        if (!preg_match('/\/\*\*(.*?)\*\//s', $content, $blockMatch)) {
+                if (!preg_match('/\/\*\*(.*?)\*\//s', $content, $blockMatch)) {
             return $defaults;
         }
         $block = $blockMatch[1];
-
-        // 逐行解析 @key value
-        $tags = array('name', 'description', 'plugins', 'version', 'author');
+                $tags = array('name', 'description', 'plugins', 'version', 'author');
         foreach ($tags as $tag) {
             if (preg_match('/@' . $tag . '\s+(.+)/i', $block, $m)) {
                 $defaults[$tag] = trim($m[1]);
             }
         }
-
-        // 如果 name 为空，用文件名（去掉 .js）作为 fallback
-        if ($defaults['name'] === '') {
+                if ($defaults['name'] === '') {
             $defaults['name'] = basename($filePath, '.js');
         }
-
         return $defaults;
     }
-
-    /**
-     * 在配置面板中渲染兼容脚本列表（含启用/禁用开关）
-     */
-    private static function renderCompatScriptsList($scripts, $disabledList, $accentColor)
+    private static function renderCompatScriptsList($scripts, $enabledList, $accentColor)
     {
         if (empty($scripts)) {
             echo '<div id="ab-compat-scripts-list" class="ab-compat-empty" style="margin:12px 0 20px;padding:16px;background:#fefce8;border:1px solid #fde68a;border-radius:10px;font-size:13px;color:#854d0e">
@@ -1281,7 +1546,6 @@ UPDATEJS;
             </div>';
             return;
         }
-
         echo '<div id="ab-compat-scripts-list" style="margin:12px 0 20px">';
         echo '<div class="ab-compat-list-title" style="font-size:14px;font-weight:600;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="font-size:16px">📋</span>
@@ -1296,7 +1560,6 @@ UPDATEJS;
             . '</button>
         </div>
         <div id="ab-compat-sync-result" style="display:none;margin-bottom:12px"></div>';
-
         foreach ($scripts as $s) {
             $file = htmlspecialchars($s['file']);
             $name = htmlspecialchars($s['name']);
@@ -1304,38 +1567,33 @@ UPDATEJS;
             $plugins = htmlspecialchars($s['plugins']);
             $version = htmlspecialchars($s['version']);
             $author = htmlspecialchars($s['author']);
-            $isDisabled = in_array($s['file'], $disabledList);
+            $isEnabled = in_array($s['file'], $enabledList);
             $toggleId = 'ab-compat-toggle-' . md5($s['file']);
-
             echo '<div class="ab-compat-script-item" data-file="' . $file . '" style="'
                 . 'display:flex;align-items:flex-start;gap:14px;padding:14px 18px;margin-bottom:8px;'
-                . 'background:' . ($isDisabled ? '#f9fafb' : '#fff') . ';'
-                . 'border:1px solid ' . ($isDisabled ? '#e5e7eb' : $accentColor . '44') . ';'
+                . 'background:' . ($isEnabled ? '#fff' : '#f9fafb') . ';'
+                . 'border:1px solid ' . ($isEnabled ? $accentColor . '44' : '#e5e7eb') . ';'
                 . 'border-radius:12px;transition:all .2s;'
-                . ($isDisabled ? 'opacity:.6;' : '')
+                . ($isEnabled ? '' : 'opacity:.6;')
                 . '">';
-
-            // 开关
-            echo '<div style="flex-shrink:0;padding-top:2px">'
+                        echo '<div style="flex-shrink:0;padding-top:2px">'
                 . '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">'
                 . '<input type="checkbox" class="ab-compat-checkbox" data-file="' . $file . '" '
-                . ($isDisabled ? '' : 'checked') . ' '
+                . ($isEnabled ? 'checked' : '') . ' '
                 . 'style="opacity:0;width:0;height:0;position:absolute">'
                 . '<span style="'
                 . 'position:absolute;top:0;left:0;right:0;bottom:0;'
-                . 'background:' . ($isDisabled ? '#d1d5db' : $accentColor) . ';'
+                . 'background:' . ($isEnabled ? $accentColor : '#d1d5db') . ';'
                 . 'border-radius:12px;transition:background .2s;'
                 . '"></span>'
                 . '<span style="'
-                . 'position:absolute;top:2px;left:' . ($isDisabled ? '2px' : '22px') . ';'
+                . 'position:absolute;top:2px;left:' . ($isEnabled ? '22px' : '2px') . ';'
                 . 'width:20px;height:20px;background:#fff;border-radius:50%;'
                 . 'transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);'
                 . '"></span>'
                 . '</label>'
                 . '</div>';
-
-            // 信息区域
-            echo '<div style="flex:1;min-width:0">';
+                        echo '<div style="flex:1;min-width:0">';
             echo '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">';
             echo '<span class="ab-compat-name" style="font-size:14px;font-weight:600;color:#111827">' . $name . '</span>';
             if ($version) {
@@ -1345,11 +1603,9 @@ UPDATEJS;
                 echo '<span class="ab-compat-meta" style="font-size:11px;color:#6b7280">by ' . $author . '</span>';
             }
             echo '</div>';
-
             if ($desc) {
                 echo '<div class="ab-compat-desc" style="font-size:13px;color:#4b5563;line-height:1.5;margin-bottom:4px">' . $desc . '</div>';
             }
-
             if ($plugins) {
                 $pluginArr = array_map('trim', explode(',', $plugins));
                 echo '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
@@ -1359,28 +1615,22 @@ UPDATEJS;
                 }
                 echo '</div>';
             }
-
             echo '<div class="ab-compat-meta" style="font-size:11px;color:#9ca3af;margin-top:4px">📄 ' . $file . '</div>';
-            echo '</div>'; // end info
-
-            echo '</div>'; // end item
-        }
-
-        echo '</div>'; // end list
-
-        // JS: 开关联动隐藏字段
-        echo '<script>
+            echo '</div>'; 
+            echo '</div>';         }
+        echo '</div>'; 
+                echo '<script>
 (function(){
-    function updateDisabledList(){
+    function updateEnabledList(){
         var items = document.querySelectorAll(".ab-compat-checkbox");
-        var disabled = [];
+        var enabled = [];
         for(var i=0;i<items.length;i++){
-            if(!items[i].checked){
-                disabled.push(items[i].getAttribute("data-file"));
+            if(items[i].checked){
+                enabled.push(items[i].getAttribute("data-file"));
             }
         }
         var hidden = document.querySelector("[name=compat_disabledScripts]");
-        if(hidden) hidden.value = JSON.stringify(disabled);
+        if(hidden) hidden.value = JSON.stringify(enabled);
     }
     function initToggles(){
         var checkboxes = document.querySelectorAll(".ab-compat-checkbox");
@@ -1398,7 +1648,7 @@ UPDATEJS;
                     if(track) track.style.background="#d1d5db";
                     if(thumb) thumb.style.left="2px";
                 }
-                updateDisabledList();
+                updateEnabledList();
             });
         }
     }
@@ -1408,7 +1658,6 @@ UPDATEJS;
         initToggles();
     }
 })();
-
 // ---- 从 GitHub 同步兼容脚本 ----
 window.abSyncCompat = function(){
     var btn = document.getElementById("ab-compat-sync-btn");
@@ -1416,17 +1665,14 @@ window.abSyncCompat = function(){
     var label = document.getElementById("ab-compat-sync-label");
     var resultBox = document.getElementById("ab-compat-sync-result");
     if(!btn) return;
-
     btn.disabled = true;
     btn.style.opacity = ".6";
     if(icon) icon.textContent = "⏳";
     if(label) label.textContent = "同步中...";
     if(resultBox){ resultBox.style.display="none"; resultBox.innerHTML=""; }
-
     var ajax = window.__AB_AJAX__ || {};
     var url = (ajax.url || "") + "?do=sync-compat";
     var token = ajax.token || "";
-
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -1446,8 +1692,8 @@ window.abSyncCompat = function(){
                     + "background:#f0fdf4;border:1px solid #bbf7d0;color:#166534\">"
                     + "<div style=\"font-weight:600;margin-bottom:6px\">✅ " + res.message + "</div>"
                     + "<div style=\"display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px\">"
-                    + "<span>🆕 新增 <strong>" + (summary.added||0) + "</strong></span>"
-                    + "<span>⬆️ 更新 <strong>" + (summary.updated||0) + "</strong></span>"
+                    + "<span>❗ 新增 <strong>" + (summary.added||0) + "</strong></span>"
+                    + "<span>☁️ 更新 <strong>" + (summary.updated||0) + "</strong></span>"
                     + "<span>✔️ 跳过 <strong>" + (summary.skipped||0) + "</strong></span>"
                     + (summary.errors > 0 ? "<span style=\"color:#dc2626\">❌ 失败 <strong>" + summary.errors + "</strong></span>" : "")
                     + "</div>";
@@ -1455,7 +1701,7 @@ window.abSyncCompat = function(){
                 for(var i=0;i<results.length;i++){
                     var r = results[i];
                     if(r.status === "added" || r.status === "updated" || r.status === "error"){
-                        var icon2 = r.status==="added"?"🆕":r.status==="updated"?"⬆️":"❌";
+                        var icon2 = r.status==="added"?"❗":r.status==="updated"?"☁️":"❌";
                         changed.push("<span style=\"margin-right:12px\">" + icon2 + " " + r.file
                             + (r.msg ? " <span style=\"color:#6b7280;font-size:12px\">(" + r.msg + ")</span>" : "")
                             + "</span>");
@@ -1488,86 +1734,62 @@ window.abSyncCompat = function(){
 };
 </script>';
     }
-
-    /**
-     * 输出登录页尾部 JS（仅在未登录时执行）
-     */
     public static function renderLoginFooter()
     {
         if (!self::isLoginPage()) {
             return;
         }
-
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
-
         $showSiteName = ((string) $pluginOptions->login_showSiteName !== '0');
         $showThemeToggle = ((string) $pluginOptions->login_showThemeToggle !== '0');
         $customJs = (string) $pluginOptions->login_customJs;
-
         $siteTitle = (string) $options->title;
         $jsSiteTitle = self::jsString($siteTitle);
         $jsShowSiteName = $showSiteName ? 'true' : 'false';
         $jsShowToggle = $showThemeToggle ? 'true' : 'false';
-
         echo "\n<script id=\"loginbeautify-main\">
 (function(){
     function qs(sel, root){ return (root||document).querySelector(sel); }
     function qsa(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
-
     var form = qs('form[action*=\"login\"]') || qs('form') || qs('.typecho-login form') || qs('.typecho-login');
     if (!form) return;
-
     var wrap = document.createElement('div');
     wrap.className = 'lb-wrap';
-
     var bg = document.createElement('div');
     bg.className = 'lb-bg';
     wrap.appendChild(bg);
-
     var overlay = document.createElement('div');
     overlay.className = 'lb-bg-overlay';
     wrap.appendChild(overlay);
-
     var card = document.createElement('div');
     card.className = 'lb-card';
-
     var head = document.createElement('div');
     head.className = 'lb-head';
-
     var titleWrap = document.createElement('div');
     titleWrap.className = 'lb-title';
-
     var showSiteName = {$jsShowSiteName};
-
     if (showSiteName) {
       var name = document.createElement('div');
       name.className = 'name';
       name.textContent = {$jsSiteTitle};
       titleWrap.appendChild(name);
     }
-
     var isRegister = location.href.indexOf('register.php') !== -1;
-
     var sub = document.createElement('div');
     sub.className = 'sub';
     sub.textContent = isRegister ? '注册' : '登录';
     titleWrap.appendChild(sub);
-
     head.appendChild(titleWrap);
     card.appendChild(head);
-
     form.classList.add('lb-form');
-
     var inputs = qsa('input[type=\"text\"], input[type=\"password\"], input[type=\"email\"]', form);
     inputs.forEach(function(input, idx){
       var field = document.createElement('div');
       field.className = 'lb-field';
-
       var label = document.createElement('label');
       var n = (input.getAttribute('name') || '').toLowerCase();
       var t = (input.getAttribute('type') || '').toLowerCase();
-
       if (isRegister) {
         if (idx === 0) {
           label.textContent = '用户名';
@@ -1597,13 +1819,11 @@ window.abSyncCompat = function(){
           }
         }
       }
-
       var parent = input.parentNode;
       parent.insertBefore(field, input);
       field.appendChild(label);
       field.appendChild(input);
     });
-
     var remember = qs('input[type=\"checkbox\"]', form);
     if (remember) {
       var rememberWrap = remember.closest('p') || remember.parentNode;
@@ -1617,7 +1837,6 @@ window.abSyncCompat = function(){
         remember.checked = true;
       }
     }
-
     var submit = qs('input[type=\"submit\"], button[type=\"submit\"]', form);
     if (submit) {
       var submitWrap = document.createElement('div');
@@ -1626,30 +1845,24 @@ window.abSyncCompat = function(){
       p.insertBefore(submitWrap, submit);
       submitWrap.appendChild(submit);
     }
-
     card.appendChild(form);
     wrap.appendChild(card);
-
     document.body.insertBefore(wrap, document.body.firstChild);
-
     var typechoLogin = qs('.typecho-login');
     if (typechoLogin && !typechoLogin.contains(wrap)) {
       typechoLogin.classList.add('lb-hide');
     }
-
     // Theme footer
     var lbFooter = document.createElement('div');
     lbFooter.className = 'lb-footer-theme';
     lbFooter.innerHTML = 'Theme <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify\" target=\"_blank\" rel=\"noopener noreferrer\">AdminBeautify</a> by <a href=\"https://blog.lhl.one\" target=\"_blank\" rel=\"noopener noreferrer\">LHL</a>';
     card.appendChild(lbFooter);
-
     var showToggle = {$jsShowToggle};
     if (showToggle) {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'lb-theme-toggle';
       btn.setAttribute('aria-label', '切换主题');
-
       var sunIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       sunIcon.setAttribute('viewBox', '0 0 24 24');
       sunIcon.setAttribute('fill', 'none');
@@ -1659,7 +1872,6 @@ window.abSyncCompat = function(){
       sunIcon.setAttribute('stroke-linejoin', 'round');
       sunIcon.setAttribute('class', 'lb-icon-sun');
       sunIcon.innerHTML = '<circle cx=\"12\" cy=\"12\" r=\"5\"/><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"/><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"/><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"/><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"/><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"/><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"/><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"/>';
-
       var moonIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       moonIcon.setAttribute('viewBox', '0 0 24 24');
       moonIcon.setAttribute('fill', 'none');
@@ -1669,10 +1881,8 @@ window.abSyncCompat = function(){
       moonIcon.setAttribute('stroke-linejoin', 'round');
       moonIcon.setAttribute('class', 'lb-icon-moon');
       moonIcon.innerHTML = '<path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/>';
-
       btn.appendChild(sunIcon);
       btn.appendChild(moonIcon);
-
       btn.addEventListener('click', function(){
         var cur = document.documentElement.getAttribute('data-lb-theme') === 'dark' ? 'dark' : 'light';
         var next = cur === 'dark' ? 'light' : 'dark';
@@ -1683,43 +1893,27 @@ window.abSyncCompat = function(){
     }
 })();
 </script>\n";
-
         if (trim($customJs) !== '') {
             echo "\n<script id=\"loginbeautify-custom-js\">\n";
             echo $customJs . "\n";
             echo "</script>\n";
         }
     }
-
-    // ================================================================
-    // 登录页 CSS 输出
-    // ================================================================
-
-    /**
-     * 输出登录页头部 CSS
-     */
     private static function outputLoginHeaderCss()
     {
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
-
         $themeMode = isset($pluginOptions->login_themeMode) ? (string) $pluginOptions->login_themeMode : 'auto';
         if (!in_array($themeMode, array('auto', 'light', 'dark'), true)) {
             $themeMode = 'auto';
         }
-
         $bgImage = trim((string) $pluginOptions->login_bgImage);
         $blurType = in_array($pluginOptions->login_blurType, array('none', 'filter', 'backdrop'), true) ? $pluginOptions->login_blurType : 'filter';
-
         $blurSize = (int) $pluginOptions->login_blurSize;
         if ($blurSize < 0) $blurSize = 0;
         if ($blurSize > 80) $blurSize = 80;
-
         $customCss = (string) $pluginOptions->login_customCss;
-
-        // 颜色预设处理
-        $preset = isset($pluginOptions->login_colorPreset) ? (string) $pluginOptions->login_colorPreset : 'purple';
-
+                $preset = isset($pluginOptions->login_colorPreset) ? (string) $pluginOptions->login_colorPreset : 'purple';
         $colorPresets = array(
             'purple'   => array('#7d5260', '#9e7b8a'),
             'blue'     => array('#556270', '#7a8a9e'),
@@ -1734,7 +1928,6 @@ window.abSyncCompat = function(){
             'forest'   => array('#2f7a3b', '#7fbf3a'),
             'lavender' => array('#8f6ee8', '#b89cfb'),
         );
-
         if ($preset === 'custom') {
             $primary = isset($pluginOptions->login_primaryColor) && trim((string) $pluginOptions->login_primaryColor) !== '' ? trim((string) $pluginOptions->login_primaryColor) : '#7d5260';
             $primary2 = isset($pluginOptions->login_primaryColor2) && trim((string) $pluginOptions->login_primaryColor2) !== '' ? trim((string) $pluginOptions->login_primaryColor2) : '#9e7b8a';
@@ -1743,9 +1936,7 @@ window.abSyncCompat = function(){
             $primary = $colors[0];
             $primary2 = $colors[1];
         }
-
         $bgCss = $bgImage !== '' ? "url(" . htmlspecialchars($bgImage, ENT_QUOTES, 'UTF-8') . ")" : "none";
-
         echo "\n" . '<style id="loginbeautify-style">' . "\n";
         ?>
 :root{
@@ -1763,13 +1954,11 @@ window.abSyncCompat = function(){
 --lb-bg-image: <?php echo $bgCss; ?>;
 --lb-blur: <?php echo (int) $blurSize; ?>px;
 }
-
 .typecho-login-wrap{
 opacity: 0 !important;
 position: absolute !important;
 pointer-events: none !important;
 }
-
 html[data-lb-theme="dark"]{
 --lb-surface:#111827;
 --lb-surface-alpha:rgba(20,20,20,.75);
@@ -1780,11 +1969,9 @@ html[data-lb-theme="dark"]{
 --lb-input-bg: rgba(0,0,0,.2);
 --lb-input-border: rgba(255,255,255,.1);
 }
-
 html{
 transition: background-color .3s ease, color .3s ease;
 }
-
 body{
 margin:0;
 background: var(--lb-surface);
@@ -1792,7 +1979,6 @@ color: var(--lb-on-surface);
 font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
 transition: background-color .3s ease, color .3s ease;
 }
-
 .lb-wrap{
 min-height:100vh;
 display:flex;
@@ -1801,7 +1987,6 @@ justify-content:center;
 position:relative;
 overflow:hidden;
 }
-
 .lb-bg{
 position:absolute;
 inset:0;
@@ -1812,7 +1997,6 @@ background-repeat:no-repeat;
 z-index:-2;
 transform: scale(1.03);
 }
-
 .lb-bg-overlay{
 position:absolute;
 inset:0;
@@ -1820,11 +2004,9 @@ background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
 z-index:-1;
 transition: background .3s ease;
 }
-
 html[data-lb-theme="light"] .lb-bg-overlay{
 background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0));
 }
-
 .lb-card{
 width:min(400px, 94%);
 background: var(--lb-surface-alpha);
@@ -1837,20 +2019,17 @@ transition: background-color .3s ease, border-color .3s ease, box-shadow .3s eas
 backdrop-filter: blur(20px);
 -webkit-backdrop-filter: blur(20px);
 }
-
 <?php if ($blurType === 'backdrop') { ?>
 .lb-card{
 backdrop-filter: blur(var(--lb-blur));
 -webkit-backdrop-filter: blur(var(--lb-blur));
 }
 <?php } ?>
-
 <?php if ($blurType === 'filter') { ?>
 .lb-bg{
 filter: blur(var(--lb-blur));
 }
 <?php } ?>
-
 .lb-head{
 display:flex;
 flex-direction:column;
@@ -1858,20 +2037,17 @@ align-items:center;
 text-align:center;
 margin-bottom: 20px;
 }
-
 .lb-title{
 display:flex;
 flex-direction:column;
 gap:8px;
 width:100%;
 }
-
 .lb-title .name{
 font-size: 16px;
 font-weight: 500;
 color: var(--lb-on-surface-muted);
 }
-
 .lb-title .sub{
 font-size: 24px;
 font-weight: 800;
@@ -1879,11 +2055,9 @@ letter-spacing: -0.025em;
 color: var(--lb-on-surface);
 margin-bottom: 8px;
 }
-
 .lb-form .lb-field{
 margin-top: 16px;
 }
-
 .lb-form label{
 display:block;
 font-size: 12px;
@@ -1891,7 +2065,6 @@ font-weight: 500;
 color: var(--lb-on-surface-muted);
 margin: 0 0 6px 1px;
 }
-
 .lb-form input[type="text"],
 .lb-form input[type="password"],
 .lb-form input[type="email"]{
@@ -1906,19 +2079,16 @@ font-size: 14px;
 outline: none;
 transition: all .2s ease;
 }
-
 html[data-lb-theme="dark"] .lb-form input[type="text"],
 html[data-lb-theme="dark"] .lb-form input[type="password"]{
 background: rgba(255,255,255,.06);
 }
-
 .lb-form input[type="text"]:focus,
 .lb-form input[type="password"]:focus{
 border-color: var(--lb-primary);
 background: var(--lb-surface);
 box-shadow: 0 0 0 3px color-mix(in srgb, var(--lb-primary) 15%, transparent);
 }
-
 @supports not (color: color-mix(in srgb, red, blue)) {
 .lb-form input[type="text"]:focus,
 .lb-form input[type="password"]:focus{
@@ -1929,7 +2099,6 @@ html[data-lb-theme="dark"] .lb-form input[type="password"]:focus{
 box-shadow: 0 0 0 4px rgba(103,80,164,.25);
 }
 }
-
 .lb-actions{
 display:flex;
 align-items:center;
@@ -1937,7 +2106,6 @@ justify-content:space-between;
 gap:12px;
 margin: 12px 0 6px;
 }
-
 .lb-remember{
 font-size: 13px;
 color: var(--lb-on-surface2);
@@ -1945,9 +2113,7 @@ display:flex;
 align-items:center;
 gap:8px;
 }
-
 .lb-remember input{ accent-color: var(--lb-primary); }
-
 .lb-submit input[type="submit"],
 .lb-submit button{
 width:100%;
@@ -1964,19 +2130,16 @@ letter-spacing:0.5px;
 box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
 transition: all .2s ease;
 }
-
 .lb-submit input[type="submit"]:hover{
 filter: brightness(1.08);
 transform: translateY(-1px);
 box-shadow: 0 10px 15px -3px rgba(0,0,0,.15);
 }
-
 @supports not (color: color-mix(in srgb, red, blue)) {
 .lb-submit input[type="submit"]:hover{
 box-shadow: 0 10px 24px rgba(103,80,164,.30);
 }
 }
-
 .message.popup{
 position: fixed !important;
 top: 20px !important;
@@ -1996,22 +2159,18 @@ backdrop-filter: blur(10px) !important;
 animation: lb-slide-down 0.3s ease-out !important;
 z-index: 9999 !important;
 }
-
 .notice{
 background:none!important;
 }
-
 @keyframes lb-slide-down {
 from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
 to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
-
 .message.popup ul{
 margin: 0 !important;
 padding: 0 !important;
 list-style: none !important;
 }
-
 .message.popup ul li{
 padding: 14px 18px !important;
 margin: 5px !important;
@@ -2022,46 +2181,38 @@ display: flex !important;
 align-items: center !important;
 gap: 10px !important;
 }
-
 .message.popup ul li:before{
 content: '⚠' !important;
 font-size: 18px !important;
 display: inline-block !important;
 }
-
 .message.popup.notice ul li{
 background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
 color: #fff !important;
 border-radius: 14px !important;
 }
-
 .message.popup.notice ul li:before{
 content: '⚠' !important;
 font-weight: bold !important;
 }
-
 .message.popup.success ul li{
 background: linear-gradient(135deg, #10b981, #059669) !important;
 color: #fff !important;
 border-radius: 14px !important;
 }
-
 .message.popup.success ul li:before{
 content: '✓' !important;
 font-weight: bold !important;
 }
-
 .message.popup.error ul li{
 background: linear-gradient(135deg, #dc2626, #ef4444) !important;
 color: #fff !important;
 border-radius: 14px !important;
 }
-
 .message.popup.error ul li:before{
 content: '✕' !important;
 font-weight: bold !important;
 }
-
 @media (max-width: 480px) {
 .message.popup{
 top: 16px !important;
@@ -2073,7 +2224,6 @@ padding: 12px 16px !important;
 font-size: 13px !important;
 }
 }
-
 .lb-theme-toggle{
 position: fixed;
 right: 20px;
@@ -2095,50 +2245,41 @@ justify-content:center;
 padding:0;
 z-index:1000;
 }
-
 .lb-theme-toggle:hover{
 transform: translateY(-2px) scale(1.05);
 box-shadow: 0 8px 20px rgba(0,0,0,.18);
 border-color: var(--lb-primary);
 }
-
 .lb-theme-toggle:active {
 transform: translateY(0) scale(0.98);
 box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
-
 .lb-theme-toggle svg{
 width: 20px;
 height: 20px;
 transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .lb-theme-toggle .lb-icon-sun,
 .lb-theme-toggle .lb-icon-moon{
 position: absolute;
 transition: opacity .3s ease, transform .3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 html[data-lb-theme="light"] .lb-theme-toggle .lb-icon-sun{
 opacity: 0;
 transform: rotate(-90deg) scale(0.8);
 }
-
 html[data-lb-theme="light"] .lb-theme-toggle .lb-icon-moon{
 opacity: 1;
 transform: rotate(0) scale(1);
 }
-
 html[data-lb-theme="dark"] .lb-theme-toggle .lb-icon-sun{
 opacity: 1;
 transform: rotate(0) scale(1);
 }
-
 html[data-lb-theme="dark"] .lb-theme-toggle .lb-icon-moon{
 opacity: 0;
 transform: rotate(90deg) scale(0.8);
 }
-
 @media (max-width: 480px) {
 .lb-theme-toggle{
 right: 16px;
@@ -2151,11 +2292,9 @@ width: 18px;
 height: 18px;
 }
 }
-
 .lb-remember{
   display:none !important;
 }
-
 .lb-footer-theme{
 text-align: center;
 margin-top: 28px;
@@ -2166,11 +2305,9 @@ color: var(--lb-on-surface-muted);
 opacity: 0.55;
 transition: opacity .3s ease;
 }
-
 .lb-footer-theme:hover{
 opacity: 0.95;
 }
-
 .lb-footer-theme a{
 color: inherit;
 font-weight: 600;
@@ -2179,22 +2316,17 @@ padding-bottom: 2px;
 border-bottom: 1px solid transparent;
 transition: all .2s ease;
 }
-
 .lb-footer-theme a:hover{
 color: var(--lb-primary);
 border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
 }
-
 .lb-hide { display:none !important; }
-
 <?php
         if (trim($customCss) !== '') {
             echo "\n/* --- custom login css --- */\n";
             echo $customCss . "\n";
         }
-
         echo "</style>\n";
-
         $jsThemeMode = self::jsString($themeMode);
         echo "\n<script id=\"loginbeautify-theme-init\">
 (function(){
@@ -2202,7 +2334,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
       var mode = {$jsThemeMode};
       var saved = localStorage.getItem('lb-theme');
       var dark = false;
-
       if (saved === 'light' || saved === 'dark') {
         dark = saved === 'dark';
       } else if (mode === 'dark') {
@@ -2212,20 +2343,11 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
       } else {
         dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       }
-
       document.documentElement.setAttribute('data-lb-theme', dark ? 'dark' : 'light');
     }catch(e){}
 })();
 </script>\n";
     }
-
-    // ================================================================
-    // 登录页预览（config 页面用）
-    // ================================================================
-
-    /**
-     * 渲染登录页设置预览
-     */
     private static function renderLoginPreview()
     {
         try {
@@ -2244,7 +2366,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
             $blurTypeVal = 'filter';
             $blurSizeVal = 12;
         }
-
         echo '<style>
 #lb-preview{margin-top:16px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.08)}
 #lb-preview .lbpv-head{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;background:#fff}
@@ -2280,7 +2401,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
 #lb-preview .lbpv-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 10px 15px -3px rgba(0,0,0,.15)}
 #lb-preview .lbpv-btn:active{transform:translateY(0);filter:brightness(0.95)}
 </style>';
-
         echo '<div id="lb-preview" data-theme="light">
   <div class="lbpv-head">
     <div class="lbpv-left">
@@ -2315,7 +2435,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
     </div>
   </div>
 </div>';
-
         echo '<script>
 (function(){
     var colorPresets = {
@@ -2332,7 +2451,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
         forest: ["#2f7a3b", "#7fbf3a"],
         lavender: ["#8f6ee8", "#b89cfb"]
     };
-
   function val(name){
     var el = document.querySelector(\'[name="\' + name + \'"]\');
     if (!el) return "";
@@ -2342,19 +2460,16 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
     }
     return (el.value || "").trim();
   }
-
   var btn = document.getElementById("lbpv-btn");
   var title = document.getElementById("lbpv-title");
   var bg = document.getElementById("lbpv-bg");
   var preview = document.getElementById("lb-preview");
   var themeButtons = preview.querySelectorAll(".lbpv-theme-btns button");
   var refreshBtn = document.getElementById("lbpv-refresh");
-
   function normalizeColor(s, fallback){
     s = (s || "").trim();
     return s ? s : fallback;
   }
-
   function getCurrentColors(){
     var preset = val("login_colorPreset") || "purple";
     var c1, c2;
@@ -2368,7 +2483,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
     }
     return {c1: c1, c2: c2};
   }
-
   function updateAllButtonColors(){
     var colors = getCurrentColors();
     var gradient = "linear-gradient(135deg," + colors.c1 + "," + colors.c2 + ")";
@@ -2385,7 +2499,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
       }
     });
   }
-
   function render(){
     var showName = val("login_showSiteName") || "1";
     var bgUrl = val("login_bgImage") || "";
@@ -2393,13 +2506,10 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
     var blurSize = parseInt(val("login_blurSize") || "12");
     if (isNaN(blurSize) || blurSize < 0) blurSize = 0;
     if (blurSize > 80) blurSize = 80;
-
     updateAllButtonColors();
     title.style.display = (showName === "1") ? "block" : "none";
-
     var overlay = preview.querySelector(".lbpv-bg-overlay");
     var body = preview.querySelector(".lbpv-body");
-
     if (bgUrl) {
       bg.style.backgroundImage = "url(\'" + bgUrl + "\')";
       bg.style.display = "block";
@@ -2422,12 +2532,10 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
         body.style.background = "#f9fafb";
       }
     }
-
     bg.style.filter = "";
     var card = preview.querySelector(".lbpv-card");
     card.style.backdropFilter = "blur(20px)";
     card.style.webkitBackdropFilter = "blur(20px)";
-
     if (bgUrl && blurType === "filter") {
       bg.style.filter = "blur(" + blurSize + "px)";
     } else if (bgUrl && blurType === "backdrop") {
@@ -2436,14 +2544,12 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
       card.style.webkitBackdropFilter = "blur(" + size + "px)";
     }
   }
-
   refreshBtn.addEventListener("click", function(){
     this.classList.add("spinning");
     var self = this;
     setTimeout(function(){ self.classList.remove("spinning"); }, 600);
     render();
   });
-
   themeButtons.forEach(function(themeBtn){
     themeBtn.addEventListener("click", function(){
       var theme = this.getAttribute("data-theme");
@@ -2453,15 +2559,10 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
       render();
     });
   });
-
   setTimeout(function(){ render(); }, 500);
 })();
 </script>';
     }
-
-    /**
-     * 获取颜色方案
-     */
     private static function getColorScheme($scheme)
     {
         $schemes = array(
@@ -2491,8 +2592,7 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-on-error'          => '#FFFFFF',
                 '--md-error-container'   => '#F9DEDC',
                 '--md-on-error-container' => '#410E0B',
-                // Dark variants
-                '--md-dark-primary'           => '#D0BCFF',
+                                '--md-dark-primary'           => '#D0BCFF',
                 '--md-dark-on-primary'        => '#381E72',
                 '--md-dark-primary-container' => '#4F378B',
                 '--md-dark-on-primary-container' => '#EADDFF',
@@ -2782,7 +2882,6 @@ border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
                 '--md-dark-error'             => '#FFB4AB',
             ),
         );
-
         return isset($schemes[$scheme]) ? $schemes[$scheme] : $schemes['purple'];
     }
 }

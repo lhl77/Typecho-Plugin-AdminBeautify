@@ -15,14 +15,6 @@
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/network/members"><img src="https://img.shields.io/github/forks/lhl77/Typecho-Plugin-AdminBeautify?style=flat-square&logo=github" alt="GitHub Forks"></a>
 </p>
 
-<p align="center">
-  <a href="#-功能特色">功能特色</a> •
-  <a href="#-截图预览">截图预览</a> •
-  <a href="#-安装">安装</a> •
-  <a href="#-配置说明">配置说明</a> •
-  <a href="#-常见问题">常见问题</a>
-</p>
-
 ---
 
 ## ✨ 功能特色
