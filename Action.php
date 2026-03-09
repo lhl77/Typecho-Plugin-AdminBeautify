@@ -1,30 +1,9 @@
 <?php
-/**
- * AdminBeautify AJAX Action Handler
- *
- * @package AdminBeautify
- * @author LHL
- * @version 2.1.0
- * @link https://blog.lhl.one
- */
-
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 {
-    /**
-     * @var Typecho_Db
-     */
     private $db;
-
-    /**
-     * @var object
-     */
     private $options;
-
-    /**
-     * @var object
-     */
     private $pluginOptions;
-
     public function __construct($request, $response, $params = NULL)
     {
         parent::__construct($request, $response, $params);
@@ -32,14 +11,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->options = Typecho_Widget::widget('Widget_Options');
         $this->pluginOptions = $this->options->plugin('AdminBeautify');
     }
-
     public function execute()
     {
     }
-
-    /**
-     * 检查管理员权限
-     */
     private function checkAuth()
     {
         $user = Typecho_Widget::widget('Widget_User');
@@ -47,10 +21,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError('未登录', 401);
         }
     }
-
-    /**
-     * 检查管理员权限（仅管理员）
-     */
     private function checkAdmin()
     {
         $user = Typecho_Widget::widget('Widget_User');
@@ -58,10 +28,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError('权限不足', 403);
         }
     }
-
-    /**
-     * 输出 JSON 成功响应
-     */
     private function jsonSuccess($data = null, $message = 'ok')
     {
         $this->response->throwJson(array(
@@ -70,10 +36,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'data'    => $data,
         ));
     }
-
-    /**
-     * 输出 JSON 错误响应
-     */
     private function jsonError($message = 'error', $code = 400)
     {
         $this->response->throwJson(array(
@@ -82,24 +44,12 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'data'    => null,
         ));
     }
-
-    // ================================================================
-    // AJAX 业务方法
-    // ================================================================
-
-    /**
-     * 输出 PWA Web App Manifest (JSON)
-     * 访问方式：/action/admin-beautify?do=manifest
-     */
     public function manifest()
     {
-        // Manifest 无需登录即可访问（浏览器会在安装前请求）
-        $siteTitle = (string) $this->options->title;
+                $siteTitle = (string) $this->options->title;
         $adminUrl  = rtrim((string) $this->options->adminUrl, '/') . '/';
         $pluginUrl = rtrim((string) $this->options->pluginUrl, '/');
-
-        // 读取主题色
-        $primaryColor = $this->pluginOptions->primaryColor ?: 'purple';
+                $primaryColor = $this->pluginOptions->primaryColor ?: 'purple';
         $colorMap = array(
             'purple' => array('theme' => '#7D5260', 'bg' => '#FFFBFE'),
             'blue'   => array('theme' => '#556270', 'bg' => '#FAFCFF'),
@@ -112,19 +62,13 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $colors = isset($colorMap[$primaryColor]) ? $colorMap[$primaryColor] : $colorMap['purple'];
         $themeColor = $colors['theme'];
         $bgColor    = $colors['bg'];
-
-        // 读取 PWA 自定义设置
-        $pwaAppName = isset($this->pluginOptions->pwa_appName) ? trim((string) $this->pluginOptions->pwa_appName) : '';
+                $pwaAppName = isset($this->pluginOptions->pwa_appName) ? trim((string) $this->pluginOptions->pwa_appName) : '';
         $pwaAppIcon = isset($this->pluginOptions->pwa_appIcon) ? trim((string) $this->pluginOptions->pwa_appIcon) : '';
-
         $appName = ($pwaAppName !== '') ? $pwaAppName : ($siteTitle . ' 管理后台');
         $shortName = ($pwaAppName !== '') ? $pwaAppName : ($siteTitle ?: 'Admin');
-
-        // 图标
-        $icons = array();
+                $icons = array();
         if ($pwaAppIcon !== '') {
-            // 使用用户自定义图标
-            $icons[] = array(
+                        $icons[] = array(
                 'src'     => $pwaAppIcon,
                 'sizes'   => '192x192',
                 'type'    => 'image/png',
@@ -143,8 +87,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'purpose' => 'maskable',
             );
         } else {
-            // 使用默认 SVG 图标
-            $svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">'
+                        $svgIcon = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">'
                 . '<rect width="192" height="192" rx="48" fill="' . htmlspecialchars($themeColor) . '"/>'
                 . '<text x="96" y="130" font-size="100" text-anchor="middle" fill="#fff" font-family="sans-serif">T</text>'
                 . '</svg>';
@@ -156,7 +99,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'purpose' => 'any maskable',
             );
         }
-
         $manifest = array(
             'name'             => $appName,
             'short_name'       => $shortName,
@@ -172,72 +114,50 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'screenshots'      => array(),
             'categories'       => array('productivity', 'utilities'),
         );
-
         $this->response->setContentType('application/manifest+json');
-        // 允许浏览器缓存 1 小时
-        $this->response->setHeader('Cache-Control', 'public, max-age=3600');
+                $this->response->setHeader('Cache-Control', 'public, max-age=3600');
         echo json_encode($manifest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         exit;
     }
-
-    /**
-     * 代理输出 Service Worker 脚本
-     * 访问方式：/action/admin-beautify?do=sw
-     *
-     * SW 文件必须与后台同源（同 path scope），因此通过 action 动态注入配置后输出。
-     */
     public function sw()
     {
         $options   = $this->options;
         $pluginUrl = rtrim((string) $options->pluginUrl, '/');
         $cssUrl    = $pluginUrl . '/AdminBeautify/assets/style.css?v=2.0.2';
         $jsUrl     = $pluginUrl . '/AdminBeautify/assets/script.js?v=2.0.2';
-
         $swFile = dirname(__FILE__) . '/assets/sw.js';
         if (!file_exists($swFile)) {
             http_response_code(404);
             exit;
         }
-
         $swContent = file_get_contents($swFile);
-
-        // 动态注入预缓存 URL 列表（替换占位数组）
-        $precacheUrls = json_encode(array($cssUrl, $jsUrl), JSON_UNESCAPED_SLASHES);
+                $precacheUrls = json_encode(array($cssUrl, $jsUrl), JSON_UNESCAPED_SLASHES);
         $swContent = str_replace('var PRECACHE_URLS = [];', 'var PRECACHE_URLS = ' . $precacheUrls . ';', $swContent);
-
         $this->response->setContentType('application/javascript');
         $this->response->setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         $this->response->setHeader('Service-Worker-Allowed', rtrim((string) $options->adminUrl, '/') . '/');
         echo $swContent;
         exit;
     }
-
-    /**
-     * 获取插件信息 & 仪表盘统计（示例）
-     */
     public function info()
     {
         $this->checkAuth();
-
         $postsCount = $this->db->fetchObject(
             $this->db->select(array('COUNT(*)' => 'num'))
                 ->from('table.contents')
                 ->where('type = ?', 'post')
                 ->where('status = ?', 'publish')
         )->num;
-
         $commentsCount = $this->db->fetchObject(
             $this->db->select(array('COUNT(*)' => 'num'))
                 ->from('table.comments')
                 ->where('status = ?', 'approved')
         )->num;
-
         $categoriesCount = $this->db->fetchObject(
             $this->db->select(array('COUNT(*)' => 'num'))
                 ->from('table.metas')
                 ->where('type = ?', 'category')
         )->num;
-
         $this->jsonSuccess(array(
             'version'    => '1.4.5',
             'posts'      => (int) $postsCount,
@@ -245,75 +165,48 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'categories' => (int) $categoriesCount,
         ));
     }
-
-    /**
-     * 保存插件设置（AJAX 方式）
-     */
     public function saveSettings()
     {
         $this->checkAdmin();
-
-        // 获取请求中的设置参数
-        $settings = $this->request->from(
+                $settings = $this->request->from(
             'primaryColor', 'darkMode', 'borderRadius',
             'enableAnimation', 'navPosition'
         );
-
-        // 过滤空值
-        $settings = array_filter($settings, function ($v) {
+                $settings = array_filter($settings, function ($v) {
             return $v !== null && $v !== '';
         });
-
         if (empty($settings)) {
             $this->jsonError('没有需要保存的设置');
         }
-
         try {
-            // 使用 Typecho 方式更新插件配置
-            $pluginName = 'AdminBeautify';
+                        $pluginName = 'AdminBeautify';
             $currentSettings = $this->options->plugin($pluginName);
-
             $merged = array();
-            // 取出当前所有设置
-            foreach ($currentSettings as $key => $value) {
+                        foreach ($currentSettings as $key => $value) {
                 $merged[$key] = $value;
             }
-            // 覆盖变化的部分
-            foreach ($settings as $key => $value) {
+                        foreach ($settings as $key => $value) {
                 $merged[$key] = $value;
             }
-
-            // 写入数据库
-            $this->db->query(
+                        $this->db->query(
                 $this->db->update('table.options')
                     ->rows(array('value' => serialize($merged)))
                     ->where('name = ?', 'plugin:' . $pluginName)
             );
-
             $this->jsonSuccess($merged, '设置已保存');
         } catch (Exception $e) {
             $this->jsonError('保存失败: ' . $e->getMessage(), 500);
         }
     }
-
-    /**
-     * 获取当前插件配置（AJAX 获取设置）
-     */
     public function getSettings()
     {
         $this->checkAdmin();
-
         $settings = array();
         foreach ($this->pluginOptions as $key => $value) {
             $settings[$key] = $value;
         }
-
         $this->jsonSuccess($settings);
     }
-
-    /**
-     * 通用 ping / 心跳检测
-     */
     public function ping()
     {
         $this->jsonSuccess(array(
@@ -321,37 +214,19 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'plugin' => 'AdminBeautify',
         ), 'pong');
     }
-
-    /**
-     * 检查插件更新
-     * 访问方式：/action/admin-beautify?do=check-update
-     *
-     * 返回：
-     *   - has_update: bool
-     *   - current: 当前版本
-     *   - latest: 最新版本
-     *   - can_direct: 是否可直接更新（2.1.x → 2.1.y）
-     *   - html_url: GitHub Releases 页面
-     *   - download_url: ZIP 下载地址（直接更新时使用）
-     *   - body: Release 说明
-     */
     public function checkUpdate()
     {
         $this->checkAdmin();
-
         require_once dirname(__FILE__) . '/Updater.php';
         $updater = new AdminBeautify_Updater();
-
         $release = $updater->fetchLatestRelease();
         if ($release === false) {
             $this->jsonError('无法连接 GitHub，请检查服务器网络', 502);
         }
-
         $current   = AdminBeautify_Updater::CURRENT_VERSION;
         $latest    = $release['version'];
         $hasUpdate = AdminBeautify_Updater::compareVersion($latest, $current) > 0;
         $canDirect = $hasUpdate && AdminBeautify_Updater::canDirectUpdate($current, $latest);
-
         $this->jsonSuccess(array(
             'has_update'   => $hasUpdate,
             'current'      => $current,
@@ -362,45 +237,27 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'body'         => $release['body'],
         ), $hasUpdate ? '发现新版本 v' . $latest : '已是最新版本 v' . $current);
     }
-
-    /**
-     * 执行直接更新（仅允许 2.1.x → 2.1.y 的补丁更新）
-     * 访问方式：/action/admin-beautify?do=do-update
-     *
-     * POST 参数：
-     *   download_url: ZIP 包地址
-     *   new_version:  目标版本号（用于安全校验）
-     */
     public function doUpdate()
     {
         $this->checkAdmin();
-
         require_once dirname(__FILE__) . '/Updater.php';
-
         $downloadUrl = trim($this->request->get('download_url', ''));
         $newVersion  = trim($this->request->get('new_version', ''));
-
         if ($downloadUrl === '') {
             $this->jsonError('缺少 download_url 参数');
         }
         if ($newVersion === '') {
             $this->jsonError('缺少 new_version 参数');
         }
-
-        // 安全校验：必须满足直接更新条件
-        $current = AdminBeautify_Updater::CURRENT_VERSION;
+                $current = AdminBeautify_Updater::CURRENT_VERSION;
         if (!AdminBeautify_Updater::canDirectUpdate($current, $newVersion)) {
             $this->jsonError('版本跨度过大（当前 v' . $current . ' → v' . $newVersion . '），请前往 GitHub 手动更新', 400);
         }
-
-        // 校验 URL 必须来自 GitHub
-        if (strpos($downloadUrl, 'github.com') === false && strpos($downloadUrl, 'codeload.github.com') === false) {
+                if (strpos($downloadUrl, 'github.com') === false && strpos($downloadUrl, 'codeload.github.com') === false) {
             $this->jsonError('下载地址不合法', 400);
         }
-
         $updater = new AdminBeautify_Updater();
         $result  = $updater->doUpdate($downloadUrl, $newVersion);
-
         if ($result['ok']) {
             $this->jsonSuccess(array(
                 'details'     => $result['details'],
@@ -410,22 +267,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError($result['msg'] . "\n详情：" . implode("\n", $result['details']), 500);
         }
     }
-
-    /**
-     * 从 GitHub 同步兼容脚本
-     * 访问方式：/action/admin-beautify?do=sync-compat
-     *
-     * 逻辑：
-     * 1. 通过 GitHub Contents API 获取 assets/compat/ 目录文件列表
-     * 2. 仅处理 .js 文件，跳过 README.md 等
-     * 3. 下载文件内容，解析 @version 元数据
-     * 4. 与本地文件版本比较：本地不存在 → 新增；远程版本更高 → 更新；否则跳过
-     * 5. 返回每个文件的处理结果
-     */
     public function syncCompat()
     {
         $this->checkAdmin();
-
         $compatDir = dirname(__FILE__) . '/assets/compat/';
         if (!is_dir($compatDir)) {
             $this->jsonError('本地 assets/compat/ 目录不存在', 500);
@@ -433,58 +277,41 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         if (!is_writable($compatDir)) {
             $this->jsonError('本地 assets/compat/ 目录不可写，请检查文件权限', 500);
         }
-
-        // GitHub Contents API — 列出目录
-        $apiUrl = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/contents/assets/compat';
+                $apiUrl = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/contents/assets/compat';
         $listJson = $this->httpGet($apiUrl);
         if ($listJson === false) {
             $this->jsonError('无法连接 GitHub API，请检查服务器网络', 502);
         }
-
         $files = @json_decode($listJson, true);
         if (!is_array($files)) {
             $this->jsonError('GitHub API 返回数据解析失败', 502);
         }
-
         $results = array();
-
         foreach ($files as $item) {
-            // 只处理 .js 文件
-            if (!isset($item['name']) || !isset($item['type'])) continue;
+                        if (!isset($item['name']) || !isset($item['type'])) continue;
             if ($item['type'] !== 'file') continue;
             if (substr($item['name'], -3) !== '.js') continue;
-
             $filename    = $item['name'];
             $downloadUrl = isset($item['download_url']) ? $item['download_url'] : '';
             if ($downloadUrl === '') continue;
-
-            // 下载远程文件内容
-            $remoteContent = $this->httpGet($downloadUrl);
+                        $remoteContent = $this->httpGet($downloadUrl);
             if ($remoteContent === false) {
                 $results[] = array('file' => $filename, 'status' => 'error', 'msg' => '下载失败');
                 continue;
             }
-
-            // 解析远程版本
-            $remoteVersion = $this->parseVersionFromContent($remoteContent);
-
+                        $remoteVersion = $this->parseVersionFromContent($remoteContent);
             $localPath = $compatDir . $filename;
-
             if (!file_exists($localPath)) {
-                // 本地不存在 → 新增
-                if (file_put_contents($localPath, $remoteContent) !== false) {
+                                if (file_put_contents($localPath, $remoteContent) !== false) {
                     $results[] = array('file' => $filename, 'status' => 'added', 'version' => $remoteVersion, 'msg' => '新增');
                 } else {
                     $results[] = array('file' => $filename, 'status' => 'error', 'msg' => '写入失败');
                 }
             } else {
-                // 本地存在 → 比较版本
-                $localContent = @file_get_contents($localPath, false, null, 0, 2048);
+                                $localContent = @file_get_contents($localPath, false, null, 0, 2048);
                 $localVersion = $localContent !== false ? $this->parseVersionFromContent($localContent) : '0';
-
                 if ($this->compareVersion($remoteVersion, $localVersion) > 0) {
-                    // 远程版本更高 → 更新
-                    if (file_put_contents($localPath, $remoteContent) !== false) {
+                                        if (file_put_contents($localPath, $remoteContent) !== false) {
                         $results[] = array(
                             'file'           => $filename,
                             'status'         => 'updated',
@@ -496,8 +323,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                         $results[] = array('file' => $filename, 'status' => 'error', 'msg' => '写入失败');
                     }
                 } else {
-                    // 版本相同或本地更新 → 跳过
-                    $results[] = array(
+                                        $results[] = array(
                         'file'    => $filename,
                         'status'  => 'skip',
                         'version' => $localVersion,
@@ -506,12 +332,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 }
             }
         }
-
         $added   = count(array_filter($results, function($r){ return $r['status'] === 'added'; }));
         $updated = count(array_filter($results, function($r){ return $r['status'] === 'updated'; }));
         $skipped = count(array_filter($results, function($r){ return $r['status'] === 'skip'; }));
         $errors  = count(array_filter($results, function($r){ return $r['status'] === 'error'; }));
-
         $this->jsonSuccess(array(
             'results' => $results,
             'summary' => array(
@@ -523,10 +347,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             ),
         ), '同步完成：新增 ' . $added . ' 个，更新 ' . $updated . ' 个，跳过 ' . $skipped . ' 个' . ($errors > 0 ? '，失败 ' . $errors . ' 个' : ''));
     }
-
-    /**
-     * 简单 HTTP GET（支持 file_get_contents 和 cURL 回退）
-     */
     private function httpGet($url)
     {
         $opts = array(
@@ -544,9 +364,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $context = stream_context_create($opts);
         $result = @file_get_contents($url, false, $context);
         if ($result !== false) return $result;
-
-        // 回退到 cURL
-        if (!function_exists('curl_init')) return false;
+                if (!function_exists('curl_init')) return false;
         $ch = curl_init($url);
         curl_setopt_array($ch, array(
             CURLOPT_RETURNTRANSFER => true,
@@ -562,10 +380,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         curl_close($ch);
         return ($result !== false && $httpCode === 200) ? $result : false;
     }
-
-    /**
-     * 从脚本文件内容中解析 @version 元数据
-     */
     private function parseVersionFromContent($content)
     {
         if (preg_match('/@version\s+([^\s\*\/]+)/i', $content, $m)) {
@@ -573,11 +387,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         return '0';
     }
-
-    /**
-     * 版本号比较（支持语义版本）
-     * 返回 1 表示 $a > $b，-1 表示 $a < $b，0 表示相等
-     */
     private function compareVersion($a, $b)
     {
         $pa = array_map('intval', explode('.', ltrim((string)$a, 'vV')));
@@ -591,22 +400,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         return 0;
     }
-
-    // ================================================================
-    // Action 路由入口
-    // ================================================================
-
-    /**
-     * 绑定动作 — 根据 ?do=xxx 分发到对应方法
-     *
-     * @access public
-     * @return void
-     */
     public function action()
     {
         $do = $this->request->get('do', '');
-
-        /* manifest 和 sw 响应不走 JSON，提前分发 */
         if ($do === 'manifest') {
             $this->manifest();
             return;
@@ -615,39 +411,29 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->sw();
             return;
         }
-
-        // 设置 JSON 响应头
-        $this->response->setContentType('application/json');
-
+                $this->response->setContentType('application/json');
         switch ($do) {
             case 'ping':
                 $this->ping();
                 break;
-
             case 'info':
                 $this->info();
                 break;
-
             case 'get-settings':
                 $this->getSettings();
                 break;
-
             case 'save-settings':
                 $this->saveSettings();
                 break;
-
             case 'sync-compat':
                 $this->syncCompat();
                 break;
-
             case 'check-update':
                 $this->checkUpdate();
                 break;
-
             case 'do-update':
                 $this->doUpdate();
                 break;
-
             default:
                 $this->jsonError('未知的操作: ' . $do, 404);
                 break;
