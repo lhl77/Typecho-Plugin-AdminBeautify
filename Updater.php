@@ -7,7 +7,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.0
+ * @version 2.1.1
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -27,7 +27,7 @@ class AdminBeautify_Updater
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
 
     /** 当前版本 */
-    const CURRENT_VERSION = '2.1.0';
+    const CURRENT_VERSION = '2.1.1';
 
     /** 插件根目录 */
     private $pluginDir;
