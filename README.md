@@ -1,4 +1,4 @@
-![Admin Beautify](https://i.see.you/2026/03/08/2Rdm/3fd25739fdb297f5d4e6b55984017591.jpg)
+![Admin Beautify](https://i.see.you/2026/03/09/7Vlk/fa7f0943bd2dab09e242e1d10fa888fc.png)
 
 <h1 align="center">Admin Beautify</h1>
 
@@ -39,13 +39,10 @@
 ## 📸 截图预览
 
 ### 插件管理
-![](https://i.see.you/2026/03/07/iV0a/1831ea5eca3e0a41fa8347d03ffc6d67.jpg)
+![](https://i.see.you/2026/03/09/6Suf/cba899aed9f6ca84d4391851999fe5da.jpg)
 
 ### 个人设置
-![](https://i.see.you/2026/03/07/Yj5s/11c5ab37b81fa0bcaf65467a641780f1.jpg)
-
-### 暗色模式
-![](https://i.see.you/2026/03/08/pU8v/fb7c26b672cce88776f2fc8c7b35f25b.jpg)
+![](https://i.see.you/2026/03/09/6obF/adb91d7fa933171c290b5c2b8d2800b3.jpg)
 
 ### 顶部导航栏（原版）
 ![](https://i.see.you/2026/03/07/syL5/52cef9f1d32078f4fd830af98586a0a2.jpg)
@@ -54,8 +51,10 @@
 ![](https://i.see.you/2026/03/08/pQ9d/5af43bda6f057dfde0d06185e4b6ca53.jpg)
 
 ### 文章管理
-![](https://i.see.you/2026/03/07/iB0n/1ba8fd34ec09ae6835cedf90a82439f5.jpg)
+![](https://i.see.you/2026/03/09/8Ymx/f2b263450caf708dc80a04c62bf15f1a.jpg)
 
+### 移动端导航栏
+![](https://i.see.you/2026/03/09/nGd0/f6e304f2c9d58b622ccd59f334c12c27.png)
 
 ## 📦 安装
 
