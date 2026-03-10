@@ -1,0 +1,13 @@
+/**
+ * @name        TeStore 兼容
+ * @description 修复 TeStore 插件仓库页面在 AdminBeautify 下的样式冲突：内联 .error 标签异常块化、操作列按钮溢出、底部 .notice 链接样式错乱、暗色模式 SVG 图标不可见、AJAX 导航导致页面重复渲染等。
+ *
+ * 触发页面：
+ *   - 插件设置页  options-plugin.php?config=TeStore
+ *   - 仓库市场    te-store/market（自定义路由）
+ *
+ * @plugins     TeStore
+ * @version     1.0.0
+ * @author      LHL
+ */
+(function(){'use strict';var STYLE_ID='ab-compat-testore';var CSS='.typecho-list-table td .error {  display: inline !important;  padding: 2px 8px !important;  border-radius: var(--md-radius-full, 9999px) !important;  font-size: 12px !important;  font-weight: 500 !important;  white-space: nowrap !important;}.typecho-list-table td form .btn-xs {  padding: 0 12px !important;  min-width: 0 !important;}a.tflink.notice {  background: transparent !important;  color: var(--md-primary) !important;  padding: 6px 12px !important;  border-radius: var(--md-radius-full, 9999px) !important;  font-weight: 500 !important;  transition: background var(--md-transition-duration, .2s) !important;}a.tflink.notice:hover {  background: color-mix(in srgb, var(--md-primary) 8%, transparent) !important;}.list-notice {  color: var(--md-on-surface-variant) !important;  padding: 40px 16px !important;  font-size: 14px !important;}.list-notice .loading {  color: var(--md-on-surface-variant) !important;}[data-theme="dark"] .typecho-list-table td img {  filter: brightness(1.6) !important;}[data-theme="dark"] .tflink img {  filter: brightness(1.6) !important;}.search input.text-s {  height: 36px !important;  padding: 0 12px !important;  box-sizing: border-box !important;}';function applyFix(url){var u=url||'';var isTarget=u.indexOf('TeStore')!==-1||u.indexOf('te-store')!==-1;if(!isTarget){var old=document.getElementById(STYLE_ID);if(old)old.parentNode.removeChild(old);return}if(!document.getElementById(STYLE_ID)){var style=document.createElement('style');style.id=STYLE_ID;style.textContent=CSS;document.head.appendChild(style)}}function interceptAjaxNav(){document.addEventListener('click',function(e){var link=e.target.closest?e.target.closest('a'):null;if(!link||!link.href)return;if(link.target==='_blank')return;if(link.href.indexOf('te-store/')===-1)return;if(link.closest&&link.closest('form'))return;e.preventDefault();e.stopPropagation();window.location.href=link.href},true)}interceptAjaxNav();if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',function(){applyFix(window.location.href)})}else{applyFix(window.location.href)}document.addEventListener('ab:pageload',function(e){var url=(e&&e.detail&&e.detail.url)?e.detail.url:window.location.href;applyFix(url)})})();
