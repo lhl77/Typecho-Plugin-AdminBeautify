@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.2
+ * @version 2.1.3
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -57,7 +57,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.2';
+        $abVer = '2.1.3';
                 echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
             <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
                 <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
@@ -822,12 +822,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                             <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">备注支持时请在备注中填写：您的名字 + GitHub 或 个人博客，作者会定期把您的名字加入鸣谢列表。</span></div>
                             <div style="display:flex;gap:8px;flex-wrap:wrap">
                                 <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" class="ab-star-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:' . $abC1 . ';color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
-                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                                    给个 Star
+                                    <span class="material-icons-round">star</span> 给个 Star
                                 </a>
                                 <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(90deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
-                                    <svg t="1773056468210" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="1629" xmlns:xlink="http://www.w3.org/1999/xlink" width="13" height="13"><path d="M533.504 268.288q33.792-41.984 71.68-75.776 32.768-27.648 74.24-50.176t86.528-19.456q63.488 5.12 105.984 30.208t67.584 63.488 34.304 87.04 6.144 99.84-17.92 97.792-36.864 87.04-48.64 74.752-53.248 61.952q-40.96 41.984-85.504 78.336t-84.992 62.464-73.728 41.472-51.712 15.36q-20.48 1.024-52.224-14.336t-69.632-41.472-79.872-61.952-82.944-75.776q-26.624-25.6-57.344-59.392t-57.856-74.24-46.592-87.552-21.504-100.352 11.264-99.84 39.936-83.456 65.536-61.952 88.064-35.328q24.576-5.12 49.152-1.536t48.128 12.288 45.056 22.016 40.96 27.648q45.056 33.792 86.016 80.896z" p-id="1630" fill="#ffffff"/></svg>
-                                     捐助（微信/支付宝）
+                                    <span class="material-icons-round">volunteer_activism</span> 捐助
                                 </a>
                             </div>
                         </div>
@@ -1089,7 +1087,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $injectHead .= '--md-transition-duration:0.2s;';
         }
         $injectHead .= '}</style>';
-                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.2' . '.css">';
+                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.3' . '.css">';
                 $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
         $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
         $customIconUrl  = isset($pluginOptions->customIconUrl)  ? trim((string) $pluginOptions->customIconUrl)  : '';
@@ -1169,7 +1167,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'        => $options->title,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.2.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.3.js"></script>';
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
@@ -1260,7 +1258,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
                 echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.2";';
+        echo 'var __AB_VER__="2.1.3";';
         echo <<<'UPDATEJS'
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");
@@ -1308,12 +1306,12 @@ window.abShowUpdateAvailable=function(d){
             var btnBase='display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap;text-decoration:none;border:1px solid currentColor;box-sizing:border-box;vertical-align:middle;';
     var actionBtns='';
     if(d.can_direct){
-        actionBtns+='<button id="ab-btn-do-update" type="button" onclick="abDoUpdate()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">⬆️ 立即更新</button>';
+        actionBtns+='<button id="ab-btn-do-update" type="button" onclick="abDoUpdate()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">立即更新</button>';
     } else {
-                actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">⬆️ 立即更新</span>'
+                actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">立即更新</span>'
                    +'<span style="font-size:11px;opacity:.65;align-self:center;">需手动更新</span>';
     }
-    actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;">🔗 查看详情</a>';
+    actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;">查看详情</a>';
     if(banner){
                 notify.style.cssText="margin:12px 0 0;padding:12px 16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:14px;font-size:13px;color:#fff;animation:ab-fadeIn .3s ease;backdrop-filter:blur(4px)";
         var bodyText='';
