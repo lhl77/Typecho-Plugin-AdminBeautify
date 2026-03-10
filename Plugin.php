@@ -4,9 +4,10 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.3
+ * @version 2.1.4
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
+ 
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
@@ -57,7 +58,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.3';
+        $abVer = '2.1.4';
                 echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
             <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
                 <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
@@ -398,8 +399,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 <div id="ab-card-perf-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
                 <div id="ab-card-perf-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">⚡</div>
                 <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">性能优化</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">字体与图标静态资源来源，支持 Google CDN、国内镜像、自定义或本机</div>
+                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">速度优化</div>
+                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">字体与图标静态资源来源，支持 Google CDN、国内镜像或自定义</div>
                 </div>
                 <svg id="ab-card-perf-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
@@ -409,9 +410,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
             'staticResource',
             array(
-                'google' => _t('🌐 Google CDN（fonts.googleapis.com）'),
-                'loli'   => _t('🇨🇳 loli.net 镜像（fonts.loli.net，国内推荐）'),
-                'custom' => _t('🔧 自定义 URL')
+                'google'    => _t('🌐 Google CDN（fonts.googleapis.com）'),
+                'loli'      => _t('🇨🇳 loli.net 镜像（fonts.loli.net，国内推荐）'),
+                'jsdelivr'  => _t('📦 jsDelivr CDN（cdn.jsdelivr.net，国内加速）'),
+                'local'     => _t('💾 本地文件（需自行托管字体+图标，零外部依赖）'),
+                'custom'    => _t('🔧 自定义 URL')
             ),
             'loli',
             _t('字体 & 图标资源来源'),
@@ -431,9 +434,25 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             null,
             '',
             _t('自定义图标 CSS URL'),
-            _t('选「自定义 URL」后生效。填入 Material Icons Round 的 CSS 链接。')
+            _t('选「自定义 URL」后生效。填入 Material Icons Round 的 CSS 链接。注：一定是Material Icons Round，内含 .material-icons-round 类样式。')
         );
         $form->addInput($customIconUrl);
+                $localFontUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'localFontUrl',
+            null,
+            '',
+            _t('本地字体 CSS 路径（可选）'),
+            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/NotoSansSC.css）。需将 NotoSansSC.css 及对应字体文件放入该目录，否则显示会不正常。')
+        );
+        $form->addInput($localFontUrl);
+                $localIconUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'localIconUrl',
+            null,
+            '',
+            _t('本地图标 CSS 路径（可选）'),
+            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/MaterialIconsRound.css）。需将 MaterialIconsRound.css 及 woff2 字体放入该目录，否则显示会不正常。')
+        );
+        $form->addInput($localIconUrl);
                                 echo '<div id="ab-card-compat" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-compat-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-compat-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -569,7 +588,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             pwaBody.style.paddingBottom="16px";
         }
         // ---- 性能优化卡片（插在 PWA 卡片之后） ----
-        var perfFields=["staticResource","customFontUrl","customIconUrl"];
+        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl"];
         var perfCard=document.getElementById("ab-card-perf");
         var perfBody=document.getElementById("ab-card-perf-body");
         if(perfCard&&perfBody&&pwaCard){
@@ -582,16 +601,22 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
             perfBody.style.paddingBottom="16px";
         }
-        // 自定义 URL 字段的显示/隐藏
+        // 自定义/本地 URL 字段的显示/隐藏
         (function(){
             var sel=document.querySelector("[name=\"staticResource\"]");
             if(!sel) return;
             function toggleCustom(){
-                var isCustom=sel.value==="custom";
+                var v=sel.value;
+                var isCustom=(v==="custom");
+                var isLocal=(v==="local");
                 var fontUl=findFieldUl("customFontUrl");
                 var iconUl=findFieldUl("customIconUrl");
-                if(fontUl) fontUl.style.display=isCustom?"":"none";
-                if(iconUl) iconUl.style.display=isCustom?"":"none";
+                var localFontUl=findFieldUl("localFontUrl");
+                var localIconUl=findFieldUl("localIconUrl");
+                if(fontUl)      fontUl.style.display=isCustom?"":"none";
+                if(iconUl)      iconUl.style.display=isCustom?"":"none";
+                if(localFontUl) localFontUl.style.display=isLocal?"":"none";
+                if(localIconUl) localIconUl.style.display=isLocal?"":"none";
             }
             sel.addEventListener("change",toggleCustom);
             toggleCustom();
@@ -839,11 +864,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 <div style="margin-top:18px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
                     <div id="ab-about-thanks" style="border-radius:12px;padding:12px;background:var(--md-surface-container-low);border:1px solid var(--md-outline-variant);">
-                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">感谢以下支持者（将按周期更新）：</div>
+                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">感谢朋友们：</div>
                         <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
                             <!-- 列表将由作者维护或由后台脚本追加 -->
                             <li><a href="https://mzrme.com/" target="_blank" style="color:inherit">MZRME</a></li>
+                        </ul><br/>
+                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">你们的支持是我开发的最大动力（将按周期更新）：</div>
+                        <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
+                            <!-- 列表将由作者维护或由后台脚本追加 -->
+                            <li>感谢 <a href="https://github.com/Yilimmilk" target="_blank" style="color:inherit">Yilimmilk</a> 的 20元 打赏</li>
                         </ul>
+                        <br/><div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">（将按周期随版本更新，如有调整后续更新）</div>
                     </div>
                 </div>
                 <!-- ── 更新日志 ── -->
@@ -1087,16 +1118,26 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $injectHead .= '--md-transition-duration:0.2s;';
         }
         $injectHead .= '}</style>';
-                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.3' . '.css">';
+                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.4' . '.css">';
                 $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
         $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
         $customIconUrl  = isset($pluginOptions->customIconUrl)  ? trim((string) $pluginOptions->customIconUrl)  : '';
+        $localFontUrl   = isset($pluginOptions->localFontUrl)   ? trim((string) $pluginOptions->localFontUrl)   : '';
+        $localIconUrl   = isset($pluginOptions->localIconUrl)   ? trim((string) $pluginOptions->localIconUrl)   : '';
         if ($staticResource === 'google') {
             $resFontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
             $resIconUrl = 'https://fonts.googleapis.com/icon?family=Material+Icons+Round';
         } elseif ($staticResource === 'loli') {
                         $resFontUrl = 'https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
             $resIconUrl = 'https://fonts.loli.net/icon?family=Material+Icons+Round';
+        } elseif ($staticResource === 'jsdelivr') {
+                        $resFontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/index.css';
+            $resIconUrl = 'https://cdn.jsdelivr.net/npm/material-icons@1/iconfont/round.css';
+        } elseif ($staticResource === 'local') {
+                        $localPluginFontDefault = Typecho_Common::url('AdminBeautify/assets/fonts/NotoSansSC.css', $options->pluginUrl);
+            $localPluginIconDefault = Typecho_Common::url('AdminBeautify/assets/fonts/MaterialIconsRound.css', $options->pluginUrl);
+            $resFontUrl = ($localFontUrl !== '') ? $localFontUrl : $localPluginFontDefault;
+            $resIconUrl = ($localIconUrl !== '') ? $localIconUrl : $localPluginIconDefault;
         } elseif ($staticResource === 'custom') {
             $resFontUrl = $customFontUrl;
             $resIconUrl = $customIconUrl;
@@ -1167,7 +1208,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'        => $options->title,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.3.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.4.js"></script>';
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
@@ -1258,7 +1299,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
                 echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.3";';
+        echo 'var __AB_VER__="2.1.4";';
         echo <<<'UPDATEJS'
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");
@@ -1951,6 +1992,11 @@ window.abSyncCompat = function(){
 --lb-input-border: #e5e7eb;
 --lb-bg-image: <?php echo $bgCss; ?>;
 --lb-blur: <?php echo (int) $blurSize; ?>px;
+}
+@media (max-width: 575px) {
+  body {
+    padding-top: 0 !important;
+  }
 }
 .typecho-login-wrap{
 opacity: 0 !important;
