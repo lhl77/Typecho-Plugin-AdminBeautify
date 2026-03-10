@@ -832,7 +832,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                             <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🖼️ LHL\'s Images 聚合图床</div>
                             <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">个人博客可申请免费使用•Telegram Bot上传•中国优化储存•S.EE•R2•OSS•Edge One</div>
                         </a>
-                        <a href="https://img.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
+                        <a href="https://shop.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
                             <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🛒 LHL\'s Shop 小店</div>
                             <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">售卖作者的一些付费服务、虚拟主机、源码等</div>
                         </a>
