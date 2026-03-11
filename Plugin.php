@@ -4,10 +4,9 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.4
+ * @version 2.1.5
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
- 
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
@@ -58,7 +57,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.4';
+        $abVer = '2.1.5';
                 echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
             <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
                 <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
@@ -149,14 +148,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 }
 [data-theme="dark"] #ab-card-pwa,
 [data-theme="dark"] #ab-card-compat,
-[data-theme="dark"] #ab-card-perf {
+[data-theme="dark"] #ab-card-perf,
+[data-theme="dark"] #ab-card-editor {
     background: var(--md-surface-container-low, #1d1b20) !important;
     border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
     box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 2px 12px rgba(0,0,0,.2) !important;
 }
 [data-theme="dark"] #ab-card-pwa-hdr:hover,
 [data-theme="dark"] #ab-card-compat-hdr:hover,
-[data-theme="dark"] #ab-card-perf-hdr:hover {
+[data-theme="dark"] #ab-card-perf-hdr:hover,
+[data-theme="dark"] #ab-card-editor-hdr:hover {
     background: rgba(255,255,255,.04) !important;
 }
 </style>';
@@ -245,6 +246,48 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择插件管理页面的展示方式：卡片网格更直观，原始表格与 Typecho 默认保持一致')
         );
         $form->addInput($pluginCardView);
+                                echo '<div id="ab-card-editor" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
+            <div id="ab-card-editor-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
+                <div id="ab-card-editor-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
+                <div id="ab-card-editor-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">✏️</div>
+                <div style="flex:1;min-width:0">
+                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">编辑器设置</div>
+                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">Vditor Markdown 编辑器，所见即所得 / 实时预览 / 分屏编辑</div>
+                </div>
+                <svg id="ab-card-editor-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div id="ab-card-editor-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
+                <div class="ab-card-tip" style="margin:4px 6px 8px;padding:12px 15px;background:#f0f9ff;border:1px solid #bfdbfe;border-radius:12px">
+                    <div style="display:flex;align-items:flex-start;gap:10px">
+                        <span style="font-size:15px;flex-shrink:0;margin-top:1px">✏️</span>
+                        <div class="ab-card-tip-text" style="flex:1;font-size:13px;color:#1e40af;line-height:1.7">开启 Vditor 后，文章 / 页面编辑界面将使用 Vditor 替代原版 PageDown 编辑器。原工具栏将被 Vditor 内置工具栏接管，原"撰写/预览"切换将变为 <strong>所见即所得 / 实时预览 / 分屏编辑</strong> 三种模式切换按钮。</div>
+                    </div>
+                </div>
+            </div>
+        </div>';
+                $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
+            'editor_vditor',
+            array(
+                '0' => '关闭（使用原版 PageDown 编辑器）',
+                '1' => '开启（使用 Vditor）',
+            ),
+            '0',
+            _t('Vditor 编辑器'),
+            _t('开启后，文章/页面编辑页将使用 Vditor Markdown 编辑器，支持所见即所得、实时预览、分屏编辑三种模式')
+        );
+        $form->addInput($editorVditor);
+                $editorVditorMode = new Typecho_Widget_Helper_Form_Element_Select(
+            'editor_vditorMode',
+            array(
+                'wysiwyg' => '所见即所得',
+                'ir'      => '实时预览（默认）',
+                'sv'      => '分屏编辑（宽屏推荐）',
+            ),
+            'ir',
+            _t('Vditor 默认模式'),
+            _t('首次打开编辑器时使用的模式，用户可通过编辑器上方的模式切换按钮随时切换')
+        );
+        $form->addInput($editorVditorMode);
                                 echo '<div id="ab-card-login" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-login-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-login-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -412,7 +455,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             array(
                 'google'    => _t('🌐 Google CDN（fonts.googleapis.com）'),
                 'loli'      => _t('🇨🇳 loli.net 镜像（fonts.loli.net，国内推荐）'),
-                'jsdelivr'  => _t('📦 jsDelivr CDN（cdn.jsdelivr.net，国内加速）'),
                 'local'     => _t('💾 本地文件（需自行托管字体+图标，零外部依赖）'),
                 'custom'    => _t('🔧 自定义 URL')
             ),
@@ -502,6 +544,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('每行一个 JS 文件 URL，将在后台所有页面加载。示例：https://cdn.example.com/compat/my-plugin-fix.js')
         );
         $form->addInput($compatExternalJs);
+                $telemetryOptOut = new Typecho_Widget_Helper_Form_Element_Radio(
+            'telemetryOptOut',
+            array(
+                '0' => _t('允许'),
+                '1' => _t('关闭统计'),
+            ),
+            '0',
+            _t('匿名使用统计'),
+            _t('启用后，插件会通过浏览器向开发者统计服务发送，仅包含：插件版本号、站点表示。选择"关闭统计"后立即停止上报。')
+        );
+        $form->addInput($telemetryOptOut);
                 echo '<script>
 // ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
 (function(){
@@ -533,6 +586,25 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 if(ul) adminBody.appendChild(ul);
             }
             adminBody.style.paddingBottom="16px";
+        }
+        // ---- 编辑器设置卡片（插在管理后台卡片之后）----
+        var editorFields=["editor_vditor","editor_vditorMode"];
+        var editorCard=document.getElementById("ab-card-editor");
+        var editorBody=document.getElementById("ab-card-editor-body");
+        if(editorCard&&editorBody){
+            var firstEditorUl=findFieldUl("editor_vditor");
+            if(firstEditorUl){
+                var formE=firstEditorUl.parentNode;
+                formE.insertBefore(editorCard,firstEditorUl);
+            } else if(adminCard){
+                if(adminCard.nextSibling) adminCard.parentNode.insertBefore(editorCard,adminCard.nextSibling);
+                else adminCard.parentNode.appendChild(editorCard);
+            }
+            for(var e=0;e<editorFields.length;e++){
+                var eu=findFieldUl(editorFields[e]);
+                if(eu) editorBody.appendChild(eu);
+            }
+            editorBody.style.paddingBottom="16px";
         }
         // ---- 登录页卡片 ----
         var loginFields=["login_colorPreset","login_primaryColor","login_primaryColor2",
@@ -622,7 +694,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             toggleCustom();
         })();
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","login","pwa","perf","compat"].forEach(function(id){
+        ["admin","editor","login","pwa","perf","compat"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
@@ -707,6 +779,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if(i1) i1.style.background=c[0]+"1a";
         var v1=document.getElementById("ab-card-admin-chev");
         if(v1) v1.setAttribute("stroke",c[0]);
+        // 编辑器设置卡片
+        var se=document.getElementById("ab-card-editor-strip");
+        if(se) se.style.background=c[0];
+        var ie=document.getElementById("ab-card-editor-icon");
+        if(ie) ie.style.background=c[0]+"1a";
+        var ve=document.getElementById("ab-card-editor-chev");
+        if(ve) ve.setAttribute("stroke",c[0]);
         // PWA 卡片
         var s3=document.getElementById("ab-card-pwa-strip");
         if(s3) s3.style.background=c[0];
@@ -887,6 +966,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         </div>
                     </div>
                 </div>
+                <!-- ── 数据与隐私 ── -->
+                <div style="margin-top:20px">
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🔒 数据与隐私</div>
+                    <div id="ab-telemetry-field-container"></div>
+                </div>
             </div>
         </div>';
         echo '<script>
@@ -1030,6 +1114,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         // 延迟加载异步内容（卡片展开后才有意义）
         setTimeout(function(){ loadChangelog(); loadGithubRepos(); }, 800);
+        // 将「匿名使用统计」表单字段注入「数据与隐私」区块
+        var telContainer=document.getElementById("ab-telemetry-field-container");
+        if(telContainer){
+            function findFieldUlAbout(name){
+                var el=document.querySelector("ul[id^=\'typecho-option-item-"+name+"-\']");
+                if(el) return el;
+                var form=document.querySelector("form.protected")||document.querySelector("form");
+                if(!form) return null;
+                var inp=form.querySelector("[name=\""+name+"\"]");
+                if(!inp) return null;
+                var c=inp.parentNode;
+                while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
+                return null;
+            }
+            var telUl=findFieldUlAbout("telemetryOptOut");
+            if(telUl) telContainer.appendChild(telUl);
+        }
     }
     if(document.readyState==="loading"){
         document.addEventListener("DOMContentLoaded",initAbout);
@@ -1118,7 +1219,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $injectHead .= '--md-transition-duration:0.2s;';
         }
         $injectHead .= '}</style>';
-                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.4' . '.css">';
+                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.5' . '.css">';
+                $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
+        $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
+        if ($editorVditor === '1' && $isWritePage) {
+            $injectTail .= "\n" . '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vditor/dist/index.css">';
+        }
                 $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
         $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
         $customIconUrl  = isset($pluginOptions->customIconUrl)  ? trim((string) $pluginOptions->customIconUrl)  : '';
@@ -1170,7 +1277,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 if ($pwaAppIcon !== '') {
             $injectTail .= "\n" . '<link rel="apple-touch-icon" sizes="180x180" href="' . htmlspecialchars($pwaAppIcon) . '">';
         }
-                        return $injectHead . $header . $injectTail;
+                                $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
+        if ($telemetryOptOut !== '1') {
+            $injectTail .= "\n" . '<script defer src="https://umami.lhl.one/script.js" data-website-id="dfabc99f-991e-4f7c-9358-03177fbee0ec"></script>';
+        }
+        return $injectHead . $header . $injectTail;
     }
     public static function renderFooter()
     {
@@ -1183,6 +1294,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $pluginCardView = isset($pluginOptions->pluginCardView) ? (string)$pluginOptions->pluginCardView : '1';
+        $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
+        $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
                 $user = Typecho_Widget::widget('Widget_User');
         $avatarUrl = '';
         if ($user->hasLogin() && $user->mail) {
@@ -1202,17 +1315,31 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'token' => $token,
         )) . ';';
         echo 'window.__AB_CONFIG__=' . json_encode(array(
-            'darkMode'        => $darkMode,
-            'enableAnimation' => $enableAnimation,
-            'pluginCardView'  => $pluginCardView,
-            'siteName'        => $options->title,
+            'darkMode'         => $darkMode,
+            'enableAnimation'  => $enableAnimation,
+            'pluginCardView'   => $pluginCardView,
+            'siteName'         => $options->title,
+            'editorVditor'     => $editorVditor,
+            'editorVditorMode' => $editorVditorMode,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.4.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.5.js"></script>';
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
-                $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
+                $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
+        if ($telemetryOptOut !== '1') {
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.5"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+        }
+                $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
+        if ($editorVditor === '1' && $isWritePageFooter) {
+                        $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.0.css', $options->pluginUrl);
+            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.0.js', $options->pluginUrl);
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorCssUrl) . '">';
+            echo '<script src="' . htmlspecialchars($vditorJsUrl) . '"></script>';
+        }
+        $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
         echo '<script>(function(){'
                         . 'function abSwToast(){'
             .   'if(document.getElementById("ab-sw-toast"))return;'
@@ -1299,7 +1426,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
                 echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.4";';
+        echo 'var __AB_VER__="2.1.5";';
         echo <<<'UPDATEJS'
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");

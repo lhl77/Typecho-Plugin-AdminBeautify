@@ -7,7 +7,7 @@ class AdminBeautify_Updater
     const GITHUB_REPO = 'lhl77/Typecho-Plugin-AdminBeautify';
     const GITHUB_API_RELEASES = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest';
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.4';
+    const CURRENT_VERSION = '2.1.5';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
