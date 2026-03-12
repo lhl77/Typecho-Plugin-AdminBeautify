@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.5
+ * @version 2.1.6
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -57,7 +57,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.5';
+        $abVer = '2.1.6';
                 echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
             <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
                 <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
@@ -555,6 +555,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('启用后，插件会通过浏览器向开发者统计服务发送，仅包含：插件版本号、站点表示。选择"关闭统计"后立即停止上报。')
         );
         $form->addInput($telemetryOptOut);
+                $notifyOptOut = new Typecho_Widget_Helper_Form_Element_Radio(
+            'notifyOptOut',
+            array(
+                '0' => _t('显示通知（默认）'),
+                '1' => _t('关闭通知'),
+            ),
+            '0',
+            _t('插件通知'),
+            _t('关闭后，将不再显示插件更新横幅通知和公告弹窗。')
+        );
+        $form->addInput($notifyOptOut);
                 echo '<script>
 // ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
 (function(){
@@ -896,6 +907,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                             个人博客
                         </a>
+                        <a href="https://t.me/+S_rnDEUlSPPRzvW_" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.667l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.978.892z"/></svg>
+                            Telegram 群
+                        </a>
+                        <a href="https://qm.qq.com/q/OOzG20idi2" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 2.717.99 5.198 2.618 7.107C4.232 20.525 3 22 3 22s1.81-.474 3.49-1.388A9.947 9.947 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1.5 14.5h-3v-5h3v5zm0-7h-3V7.5h3V9.5z"/></svg>
+                            QQ 群
+                        </a>
                     </div>
                 </div>
                 <!-- ── 作者的其他插件 ── -->
@@ -1069,7 +1088,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 var repos=JSON.parse(xhr.responseText);
                 if(!Array.isArray(repos)) return;
                 // 过滤出 Typecho 插件 repo（名称包含 Typecho 或含 typecho topic）
-                var plugins=repos.filter(function(r){ return /typecho/i.test(r.name)&&r.name!=="Typecho-Plugin-AdminBeautify"; });
+                var plugins=repos.filter(function(r){ return /typecho/i.test(r.name)&&r.name!=="Typecho-Plugin-AdminBeautify"&&r.name!=="Typecho-Raw-Nontification"; });
                 var otherRepos=repos.filter(function(r){ return !/typecho/i.test(r.name)&&!r.fork&&r.description; }).slice(0,4);
                 // 渲染其他插件
                 var pEl=document.getElementById("ab-about-more-plugins");
@@ -1130,6 +1149,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
             var telUl=findFieldUlAbout("telemetryOptOut");
             if(telUl) telContainer.appendChild(telUl);
+            var notifyUl=findFieldUlAbout("notifyOptOut");
+            if(notifyUl) telContainer.appendChild(notifyUl);
         }
     }
     if(document.readyState==="loading"){
@@ -1139,6 +1160,132 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     }
 })();
 </script>';
+                echo '<script>(function(){
+function abInitModal(){
+    var CFG=window.__AB_CONFIG__||{};
+    if((CFG.notifyOptOut||"0")==="1") return;
+    var dark=document.documentElement.getAttribute("data-theme")==="dark"
+        ||(CFG.darkMode==="1")
+        ||(CFG.darkMode==="auto"&&window.matchMedia("(prefers-color-scheme:dark)").matches);
+    var noticeUrl="https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md";
+    fetch(noticeUrl,{cache:"no-cache"})
+        .then(function(r){return r.ok?r.text():null;})
+        .then(function(md){
+            if(!md) return;
+            // 解析 YAML frontmatter
+            var fm={id:"",title:""};
+            var m=md.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+            if(m){
+                var raw=m[1];
+                var idM=raw.match(/id:\s*(.+)/);
+                var ttM=raw.match(/title:\s*(.+)/);
+                if(idM) fm.id=idM[1].trim();
+                if(ttM) fm.title=ttM[1].trim();
+            }
+            if(!fm.id) return;
+            var lsKey="ab-notice-"+fm.id;
+            var dismissed="";
+            try{dismissed=localStorage.getItem(lsKey)||"";}catch(e){}
+            if(dismissed==="1") return;
+            // 提取正文
+            var body=md.replace(/^---[\s\S]*?---\r?\n/,"").trim();
+            showModal(fm,body,lsKey);
+        })
+        .catch(function(){});
+    function simpleMarkdown(text){
+        return text
+            .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+            .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+            .replace(/\*(.+?)\*/g,"<em>$1</em>")
+            .replace(/`(.+?)`/g,"<code>$1</code>")
+            .replace(/^#{1,3}\s+(.+)$/gm,"<strong>$1</strong>")
+            .replace(/^[-*]\s+(.+)$/gm,"• $1")
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"<a href=\"$2\" target=\"_blank\" rel=\"noopener\" style=\"color:inherit\">$1</a>")
+            .replace(/\n/g,"<br>");
+    }
+    function showModal(fm,body,lsKey){
+        var bg=dark?"#2b2930":"#fffbfe";
+        var fg=dark?"#e6e1e5":"#1c1b1f";
+        var fgSub=dark?"#cac4d0":"#49454f";
+        var border=dark?"rgba(255,255,255,.10)":"rgba(0,0,0,.08)";
+        var primaryFg=dark?"#d0bcff":"#6750a4";
+        var btnOutBg=dark?"rgba(208,188,255,.10)":"rgba(103,80,164,.06)";
+        var overlay=document.createElement("div");
+        overlay.id="ab-modal-notify";
+        overlay.style.cssText="position:fixed;inset:0;z-index:99999;"
+            +"display:flex;align-items:center;justify-content:center;"
+            +"background:rgba(0,0,0,.45);backdrop-filter:blur(4px);"
+            +"opacity:0;transition:opacity .3s;";
+        var modal=document.createElement("div");
+        modal.setAttribute("role","dialog");
+        modal.setAttribute("aria-modal","true");
+        modal.setAttribute("aria-labelledby","ab-modal-title");
+        modal.style.cssText="background:"+bg+";color:"+fg+";"
+            +"border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.22);"
+            +"width:480px;max-width:calc(100vw - 32px);max-height:80vh;"
+            +"display:flex;flex-direction:column;font-family:inherit;font-size:14px;"
+            +"transform:translateY(24px) scale(.96);transition:transform .3s cubic-bezier(.4,0,.2,1);";
+        // 标题栏
+        var hdr=document.createElement("div");
+        hdr.style.cssText="display:flex;align-items:center;gap:12px;padding:20px 20px 14px;"
+            +"border-bottom:1px solid "+border+";flex-shrink:0;";
+        var ic=document.createElement("span");ic.textContent="📢";ic.style.fontSize="20px";
+        var ttl=document.createElement("h3");
+        ttl.id="ab-modal-title";
+        ttl.style.cssText="margin:0;flex:1;font-size:16px;font-weight:600;line-height:1.3;";
+        ttl.textContent=fm.title||"插件公告";
+        var cls=document.createElement("button");
+        cls.setAttribute("aria-label","关闭");
+        cls.style.cssText="border:none;background:transparent;cursor:pointer;color:"+fgSub+";"
+            +"font-size:20px;line-height:1;padding:2px 4px;border-radius:8px;flex-shrink:0;";
+        cls.textContent="×";
+        cls.onclick=function(){ closeModal(false); };
+        hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(cls);
+        // 正文
+        var bd=document.createElement("div");
+        bd.style.cssText="padding:16px 20px;overflow-y:auto;flex:1;line-height:1.7;color:"+fgSub+";";
+        bd.innerHTML=simpleMarkdown(body);
+        // 底部按钮
+        var ft=document.createElement("div");
+        ft.style.cssText="display:flex;justify-content:flex-end;gap:10px;padding:12px 20px 18px;"
+            +"border-top:1px solid "+border+";flex-shrink:0;";
+        var btnNever=document.createElement("button");
+        btnNever.style.cssText="border:1px solid "+border+";background:"+btnOutBg+";"
+            +"color:"+primaryFg+";padding:8px 18px;border-radius:999px;cursor:pointer;"
+            +"font-size:13px;font-weight:500;font-family:inherit;";
+        btnNever.textContent="不再显示";
+        btnNever.onclick=function(){ closeModal(true); };
+        var btnOk=document.createElement("button");
+        btnOk.style.cssText="border:none;background:"+primaryFg+";color:"+(dark?"#1c1b1f":"#fff")+";"
+            +"padding:8px 22px;border-radius:999px;cursor:pointer;"
+            +"font-size:13px;font-weight:500;font-family:inherit;";
+        btnOk.textContent="知道了";
+        btnOk.onclick=function(){ closeModal(false); };
+        ft.appendChild(btnNever);ft.appendChild(btnOk);
+        modal.appendChild(hdr);modal.appendChild(bd);modal.appendChild(ft);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        // 点击遮罩关闭
+        overlay.addEventListener("click",function(e){ if(e.target===overlay) closeModal(false); });
+        // 动画
+        requestAnimationFrame(function(){
+            overlay.style.opacity="1";
+            modal.style.transform="translateY(0) scale(1)";
+        });
+        function closeModal(never){
+            if(never){try{localStorage.setItem(lsKey,"1");}catch(e){}}
+            overlay.style.opacity="0";
+            modal.style.transform="translateY(12px) scale(.97)";
+            setTimeout(function(){overlay.parentNode&&overlay.parentNode.removeChild(overlay);},300);
+        }
+    }
+}
+if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",abInitModal);
+} else {
+    abInitModal();
+}
+})();</script>';
     }
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
     {
@@ -1219,7 +1366,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $injectHead .= '--md-transition-duration:0.2s;';
         }
         $injectHead .= '}</style>';
-                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.5' . '.css">';
+                        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.6' . '.css">';
                 $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1314,6 +1461,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'url'   => $ajaxUrl,
             'token' => $token,
         )) . ';';
+        $notifyOptOut = isset($pluginOptions->notifyOptOut) ? (string)$pluginOptions->notifyOptOut : '0';
         echo 'window.__AB_CONFIG__=' . json_encode(array(
             'darkMode'         => $darkMode,
             'enableAnimation'  => $enableAnimation,
@@ -1321,17 +1469,123 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'         => $options->title,
             'editorVditor'     => $editorVditor,
             'editorVditorMode' => $editorVditorMode,
+            'pluginVersion'    => '2.1.6',
+            'notifyOptOut'     => $notifyOptOut,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.5.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.6.js"></script>';
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
                 $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.5"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.6"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
-                $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+                if ($notifyOptOut !== '1') {
+            echo '<script>(function(){
+var CFG=window.__AB_CONFIG__||{};
+var ver=CFG.pluginVersion||"";
+if(!ver) return;
+var lsKey="ab-seen-version";
+var seen="";
+try{seen=localStorage.getItem(lsKey)||"";}catch(e){}
+if(seen===ver) return;
+var dark=document.documentElement.getAttribute("data-theme")==="dark"
+    ||(CFG.darkMode==="1")
+    ||(CFG.darkMode==="auto"&&window.matchMedia("(prefers-color-scheme:dark)").matches);
+function mkBanner(release){
+    var tag=release.tag_name||ver;
+    var body=release.body||"";
+    var url=release.html_url||("https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases");
+    var lines=body.split("\n").filter(function(l){return l.trim()!=="";});
+    var preview=lines.slice(0,4).join("\n");
+    var hasMore=lines.length>4;
+    var bg=dark?"#2b2930":"#fff";
+    var fg=dark?"#e6e1e5":"#1c1b1f";
+    var fgSub=dark?"#cac4d0":"#49454f";
+    var border=dark?"rgba(255,255,255,.10)":"rgba(0,0,0,.08)";
+    var pillBg=dark?"rgba(208,188,255,.15)":"rgba(103,80,164,.08)";
+    var pillFg=dark?"#d0bcff":"#6750a4";
+    var wrap=document.createElement("div");
+    wrap.id="ab-banner-notify";
+    wrap.setAttribute("role","region");
+    wrap.setAttribute("aria-label","插件更新通知");
+    wrap.style.cssText="position:fixed;top:20px;right:20px;z-index:99998;"
+        +"width:340px;max-width:calc(100vw - 32px);"
+        +"background:"+bg+";color:"+fg+";"
+        +"border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.18);"
+        +"border:1px solid "+border+";"
+        +"font-family:inherit;font-size:14px;"
+        +"transform:translateX(380px);transition:transform .4s cubic-bezier(.4,0,.2,1);"
+        +"overflow:hidden;";
+    var hdr=document.createElement("div");
+    hdr.style.cssText="display:flex;align-items:center;gap:10px;padding:14px 16px 10px;"
+        +"border-bottom:1px solid "+border+";";
+    var ic=document.createElement("span");
+    ic.textContent="🎉";
+    ic.style.fontSize="18px";
+    var ttl=document.createElement("div");
+    ttl.style.cssText="flex:1;font-weight:600;font-size:14px;";
+    ttl.textContent="AdminBeautify 已更新";
+    var pill=document.createElement("span");
+    pill.style.cssText="background:"+pillBg+";color:"+pillFg+";padding:2px 10px;"
+        +"border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;";
+    pill.textContent=tag;
+    var cls=document.createElement("button");
+    cls.setAttribute("aria-label","关闭");
+    cls.style.cssText="border:none;background:transparent;cursor:pointer;color:"+fgSub+";"
+        +"padding:2px;line-height:1;font-size:18px;margin-left:4px;border-radius:6px;";
+    cls.textContent="×";
+    cls.onclick=function(){
+        wrap.style.transform="translateX(380px)";
+        setTimeout(function(){wrap.parentNode&&wrap.parentNode.removeChild(wrap);},400);
+        try{localStorage.setItem(lsKey,ver);}catch(e){}
+    };
+    hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(pill);hdr.appendChild(cls);
+    var bd=document.createElement("div");
+    bd.style.cssText="padding:12px 16px;";
+    var pre=document.createElement("pre");
+    pre.id="ab-banner-preview";
+    pre.style.cssText="margin:0;white-space:pre-wrap;word-break:break-word;font-family:inherit;"
+        +"font-size:13px;line-height:1.6;color:"+fg+";max-height:120px;overflow:hidden;";
+    pre.textContent=preview;
+    bd.appendChild(pre);
+    if(hasMore){
+        var full=document.createElement("pre");
+        full.id="ab-banner-full";
+        full.style.cssText=pre.style.cssText+"display:none;max-height:none;";
+        full.textContent=lines.join("\n");
+        bd.appendChild(full);
+        var tog=document.createElement("button");
+        tog.style.cssText="border:none;background:transparent;cursor:pointer;color:"+pillFg+";"
+            +"font-size:12px;font-weight:500;padding:4px 0;margin-top:4px;";
+        tog.textContent="展开更多 ▾";
+        tog.onclick=function(){
+            var expanded=full.style.display!=="none";
+            full.style.display=expanded?"none":"block";
+            pre.style.display=expanded?"block":"none";
+            tog.textContent=expanded?"展开更多 ▾":"收起 ▴";
+        };
+        bd.appendChild(tog);
+    }
+    var ft=document.createElement("div");
+    ft.style.cssText="padding:8px 16px 14px;display:flex;justify-content:flex-end;";
+    var lnk=document.createElement("a");
+    lnk.href=url;lnk.target="_blank";lnk.rel="noopener";
+    lnk.style.cssText="color:"+pillFg+";font-size:13px;font-weight:500;text-decoration:none;";
+    lnk.textContent="查看完整更新日志 →";
+    ft.appendChild(lnk);
+    wrap.appendChild(hdr);wrap.appendChild(bd);wrap.appendChild(ft);
+    document.body.appendChild(wrap);
+    setTimeout(function(){wrap.style.transform="translateX(0)";},50);
+}
+fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest",{cache:"no-cache"})
+    .then(function(r){return r.ok?r.json():null;})
+    .then(function(d){if(d&&d.tag_name) mkBanner(d);})
+    .catch(function(){});
+})();</script>';
+        }
+        $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePageFooter) {
                         $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.0.css', $options->pluginUrl);
@@ -1426,7 +1680,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
                 echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.5";';
+        echo 'var __AB_VER__="2.1.6";';
         echo <<<'UPDATEJS'
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");
@@ -2475,6 +2729,7 @@ letter-spacing: 0.02em;
 color: var(--lb-on-surface-muted);
 opacity: 0.55;
 transition: opacity .3s ease;
+line-height: 1.9;
 }
 .lb-footer-theme:hover{
 opacity: 0.95;
@@ -2490,6 +2745,13 @@ transition: all .2s ease;
 .lb-footer-theme a:hover{
 color: var(--lb-primary);
 border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
+}
+.lb-footer-links{
+display: block;
+font-size: 11px;
+font-weight: 400;
+opacity: 0.75;
+margin-top: 2px;
 }
 .lb-hide { display:none !important; }
 <?php
