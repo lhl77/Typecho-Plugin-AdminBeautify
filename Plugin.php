@@ -7,6 +7,7 @@
  * @version 2.1.6
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
+ 
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
@@ -1164,9 +1165,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 function abInitModal(){
     var CFG=window.__AB_CONFIG__||{};
     if((CFG.notifyOptOut||"0")==="1") return;
-    var dark=document.documentElement.getAttribute("data-theme")==="dark"
-        ||(CFG.darkMode==="1")
-        ||(CFG.darkMode==="auto"&&window.matchMedia("(prefers-color-scheme:dark)").matches);
     var noticeUrl="https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md";
     fetch(noticeUrl,{cache:"no-cache"})
         .then(function(r){return r.ok?r.text():null;})
@@ -1200,65 +1198,46 @@ function abInitModal(){
             .replace(/`(.+?)`/g,"<code>$1</code>")
             .replace(/^#{1,3}\s+(.+)$/gm,"<strong>$1</strong>")
             .replace(/^[-*]\s+(.+)$/gm,"• $1")
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"<a href=\"$2\" target=\"_blank\" rel=\"noopener\" style=\"color:inherit\">$1</a>")
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"<a href=\"$2\" target=\"_blank\" rel=\"noopener\">$1</a>")
             .replace(/\n/g,"<br>");
     }
     function showModal(fm,body,lsKey){
-        var bg=dark?"#2b2930":"#fffbfe";
-        var fg=dark?"#e6e1e5":"#1c1b1f";
-        var fgSub=dark?"#cac4d0":"#49454f";
-        var border=dark?"rgba(255,255,255,.10)":"rgba(0,0,0,.08)";
-        var primaryFg=dark?"#d0bcff":"#6750a4";
-        var btnOutBg=dark?"rgba(208,188,255,.10)":"rgba(103,80,164,.06)";
         var overlay=document.createElement("div");
         overlay.id="ab-modal-notify";
-        overlay.style.cssText="position:fixed;inset:0;z-index:99999;"
-            +"display:flex;align-items:center;justify-content:center;"
-            +"background:rgba(0,0,0,.45);backdrop-filter:blur(4px);"
-            +"opacity:0;transition:opacity .3s;";
+        overlay.style.opacity="0";
         var modal=document.createElement("div");
+        modal.className="ab-modal-dialog";
         modal.setAttribute("role","dialog");
         modal.setAttribute("aria-modal","true");
         modal.setAttribute("aria-labelledby","ab-modal-title");
-        modal.style.cssText="background:"+bg+";color:"+fg+";"
-            +"border-radius:20px;box-shadow:0 8px 40px rgba(0,0,0,.22);"
-            +"width:480px;max-width:calc(100vw - 32px);max-height:80vh;"
-            +"display:flex;flex-direction:column;font-family:inherit;font-size:14px;"
-            +"transform:translateY(24px) scale(.96);transition:transform .3s cubic-bezier(.4,0,.2,1);";
+        modal.style.transform="translateY(24px) scale(.96)";
         // 标题栏
         var hdr=document.createElement("div");
-        hdr.style.cssText="display:flex;align-items:center;gap:12px;padding:20px 20px 14px;"
-            +"border-bottom:1px solid "+border+";flex-shrink:0;";
+        hdr.className="ab-modal-hdr";
         var ic=document.createElement("span");ic.textContent="📢";ic.style.fontSize="20px";
         var ttl=document.createElement("h3");
         ttl.id="ab-modal-title";
-        ttl.style.cssText="margin:0;flex:1;font-size:16px;font-weight:600;line-height:1.3;";
+        ttl.className="ab-modal-title";
         ttl.textContent=fm.title||"插件公告";
         var cls=document.createElement("button");
+        cls.className="ab-modal-close";
         cls.setAttribute("aria-label","关闭");
-        cls.style.cssText="border:none;background:transparent;cursor:pointer;color:"+fgSub+";"
-            +"font-size:20px;line-height:1;padding:2px 4px;border-radius:8px;flex-shrink:0;";
         cls.textContent="×";
         cls.onclick=function(){ closeModal(false); };
         hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(cls);
         // 正文
         var bd=document.createElement("div");
-        bd.style.cssText="padding:16px 20px;overflow-y:auto;flex:1;line-height:1.7;color:"+fgSub+";";
+        bd.className="ab-modal-bd";
         bd.innerHTML=simpleMarkdown(body);
         // 底部按钮
         var ft=document.createElement("div");
-        ft.style.cssText="display:flex;justify-content:flex-end;gap:10px;padding:12px 20px 18px;"
-            +"border-top:1px solid "+border+";flex-shrink:0;";
+        ft.className="ab-modal-ft";
         var btnNever=document.createElement("button");
-        btnNever.style.cssText="border:1px solid "+border+";background:"+btnOutBg+";"
-            +"color:"+primaryFg+";padding:8px 18px;border-radius:999px;cursor:pointer;"
-            +"font-size:13px;font-weight:500;font-family:inherit;";
+        btnNever.className="ab-modal-btn-outline";
         btnNever.textContent="不再显示";
         btnNever.onclick=function(){ closeModal(true); };
         var btnOk=document.createElement("button");
-        btnOk.style.cssText="border:none;background:"+primaryFg+";color:"+(dark?"#1c1b1f":"#fff")+";"
-            +"padding:8px 22px;border-radius:999px;cursor:pointer;"
-            +"font-size:13px;font-weight:500;font-family:inherit;";
+        btnOk.className="ab-modal-btn-filled";
         btnOk.textContent="知道了";
         btnOk.onclick=function(){ closeModal(false); };
         ft.appendChild(btnNever);ft.appendChild(btnOk);
@@ -1267,7 +1246,7 @@ function abInitModal(){
         document.body.appendChild(overlay);
         // 点击遮罩关闭
         overlay.addEventListener("click",function(e){ if(e.target===overlay) closeModal(false); });
-        // 动画
+        // 入场动画
         requestAnimationFrame(function(){
             overlay.style.opacity="1";
             modal.style.transform="translateY(0) scale(1)";
@@ -1490,9 +1469,6 @@ var lsKey="ab-seen-version";
 var seen="";
 try{seen=localStorage.getItem(lsKey)||"";}catch(e){}
 if(seen===ver) return;
-var dark=document.documentElement.getAttribute("data-theme")==="dark"
-    ||(CFG.darkMode==="1")
-    ||(CFG.darkMode==="auto"&&window.matchMedia("(prefers-color-scheme:dark)").matches);
 function mkBanner(release){
     var tag=release.tag_name||ver;
     var body=release.body||"";
@@ -1500,41 +1476,25 @@ function mkBanner(release){
     var lines=body.split("\n").filter(function(l){return l.trim()!=="";});
     var preview=lines.slice(0,4).join("\n");
     var hasMore=lines.length>4;
-    var bg=dark?"#2b2930":"#fff";
-    var fg=dark?"#e6e1e5":"#1c1b1f";
-    var fgSub=dark?"#cac4d0":"#49454f";
-    var border=dark?"rgba(255,255,255,.10)":"rgba(0,0,0,.08)";
-    var pillBg=dark?"rgba(208,188,255,.15)":"rgba(103,80,164,.08)";
-    var pillFg=dark?"#d0bcff":"#6750a4";
     var wrap=document.createElement("div");
     wrap.id="ab-banner-notify";
     wrap.setAttribute("role","region");
     wrap.setAttribute("aria-label","插件更新通知");
-    wrap.style.cssText="position:fixed;top:20px;right:20px;z-index:99998;"
-        +"width:340px;max-width:calc(100vw - 32px);"
-        +"background:"+bg+";color:"+fg+";"
-        +"border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.18);"
-        +"border:1px solid "+border+";"
-        +"font-family:inherit;font-size:14px;"
-        +"transform:translateX(380px);transition:transform .4s cubic-bezier(.4,0,.2,1);"
-        +"overflow:hidden;";
+    wrap.style.transform="translateX(380px)";
     var hdr=document.createElement("div");
-    hdr.style.cssText="display:flex;align-items:center;gap:10px;padding:14px 16px 10px;"
-        +"border-bottom:1px solid "+border+";";
+    hdr.className="ab-notify-hdr";
     var ic=document.createElement("span");
     ic.textContent="🎉";
     ic.style.fontSize="18px";
     var ttl=document.createElement("div");
-    ttl.style.cssText="flex:1;font-weight:600;font-size:14px;";
+    ttl.className="ab-notify-title";
     ttl.textContent="AdminBeautify 已更新";
     var pill=document.createElement("span");
-    pill.style.cssText="background:"+pillBg+";color:"+pillFg+";padding:2px 10px;"
-        +"border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;";
+    pill.className="ab-notify-pill";
     pill.textContent=tag;
     var cls=document.createElement("button");
+    cls.className="ab-notify-close";
     cls.setAttribute("aria-label","关闭");
-    cls.style.cssText="border:none;background:transparent;cursor:pointer;color:"+fgSub+";"
-        +"padding:2px;line-height:1;font-size:18px;margin-left:4px;border-radius:6px;";
     cls.textContent="×";
     cls.onclick=function(){
         wrap.style.transform="translateX(380px)";
@@ -1543,22 +1503,20 @@ function mkBanner(release){
     };
     hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(pill);hdr.appendChild(cls);
     var bd=document.createElement("div");
-    bd.style.cssText="padding:12px 16px;";
+    bd.className="ab-notify-bd";
     var pre=document.createElement("pre");
     pre.id="ab-banner-preview";
-    pre.style.cssText="margin:0;white-space:pre-wrap;word-break:break-word;font-family:inherit;"
-        +"font-size:13px;line-height:1.6;color:"+fg+";max-height:120px;overflow:hidden;";
+    pre.className="ab-notify-pre";
     pre.textContent=preview;
     bd.appendChild(pre);
     if(hasMore){
         var full=document.createElement("pre");
         full.id="ab-banner-full";
-        full.style.cssText=pre.style.cssText+"display:none;max-height:none;";
+        full.className="ab-notify-pre-full";
         full.textContent=lines.join("\n");
         bd.appendChild(full);
         var tog=document.createElement("button");
-        tog.style.cssText="border:none;background:transparent;cursor:pointer;color:"+pillFg+";"
-            +"font-size:12px;font-weight:500;padding:4px 0;margin-top:4px;";
+        tog.className="ab-notify-toggle";
         tog.textContent="展开更多 ▾";
         tog.onclick=function(){
             var expanded=full.style.display!=="none";
@@ -1569,10 +1527,10 @@ function mkBanner(release){
         bd.appendChild(tog);
     }
     var ft=document.createElement("div");
-    ft.style.cssText="padding:8px 16px 14px;display:flex;justify-content:flex-end;";
+    ft.className="ab-notify-ft";
     var lnk=document.createElement("a");
     lnk.href=url;lnk.target="_blank";lnk.rel="noopener";
-    lnk.style.cssText="color:"+pillFg+";font-size:13px;font-weight:500;text-decoration:none;";
+    lnk.className="ab-notify-link";
     lnk.textContent="查看完整更新日志 →";
     ft.appendChild(lnk);
     wrap.appendChild(hdr);wrap.appendChild(bd);wrap.appendChild(ft);
