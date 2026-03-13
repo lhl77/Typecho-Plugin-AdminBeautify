@@ -4,14 +4,19 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.7
+ * @version 2.1.8
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
+
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
+
 class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 {
+    /**
+     * 判断当前是否为登录页（未登录状态）
+     */
     private static function isLoginPage()
     {
         try {
@@ -20,10 +25,18 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             return true;
         }
     }
+
+    /**
+     * JSON 编码字符串，用于 JS 输出
+     */
     private static function jsString($s)
     {
         return json_encode((string) $s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
+
+    /**
+     * 激活插件
+     */
     public static function activate()
     {
         Typecho_Plugin::factory('admin/header.php')->header = array(__CLASS__, 'renderHeader');
@@ -32,14 +45,24 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         Utils\Helper::addAction('admin-beautify', 'AdminBeautify_Action');
         return _t('AdminBeautify 已启用（含登录页美化）');
     }
+
+    /**
+     * 禁用插件
+     */
     public static function deactivate()
     {
         Utils\Helper::removeAction('admin-beautify');
         return _t('AdminBeautify 已禁用');
     }
+
+    /**
+     * 插件配置面板
+     */
     public static function config(Typecho_Widget_Helper_Form $form)
     {
+        // ====== 读取当前主题色 ======
         $abConfigColors = array(
+            // 调整后的主色/辅色：更贴近 Material Design 3 的语义色，同时略微降低饱和度，降低视觉疲劳
             'purple' => array('#7D5260', '#9E7B8A'),
             'blue'   => array('#556270', '#7A8A9E'),
             'teal'   => array('#4A6363', '#6A8A8A'),
@@ -57,7 +80,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.7';
+        $abVer = '2.1.8';
+
+        // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
             <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
                 <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
@@ -81,6 +106,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 </button>
             </div>
         </div>';
+
+        // ================================================================
+        // ====== MD3 折叠卡片 — 暗色模式适配 ======
+        // ================================================================
         echo '<style>
 [data-theme="dark"] #ab-card-admin,
 [data-theme="dark"] #ab-card-login {
@@ -161,6 +190,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     background: rgba(255,255,255,.04) !important;
 }
 </style>';
+
+        // ================================================================
+        // ====== 管理后台设置（MD3 折叠卡片） ======
+        // ================================================================
         echo '<div id="ab-card-admin" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-admin-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-admin-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -173,6 +206,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             </div>
             <div id="ab-card-admin-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)"></div>
         </div>';
+
+        // 主题色选择
         $primaryColor = new Typecho_Widget_Helper_Form_Element_Select(
             'primaryColor',
             array(
@@ -189,6 +224,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择管理后台的主题色方案')
         );
         $form->addInput($primaryColor);
+
+        // 暗色模式
         $darkMode = new Typecho_Widget_Helper_Form_Element_Select(
             'darkMode',
             array(
@@ -201,6 +238,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择后台的明暗模式')
         );
         $form->addInput($darkMode);
+
+        // 圆角大小
         $borderRadius = new Typecho_Widget_Helper_Form_Element_Select(
             'borderRadius',
             array(
@@ -213,6 +252,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('控制界面元素的圆角大小')
         );
         $form->addInput($borderRadius);
+
+        // 开启动画
         $enableAnimation = new Typecho_Widget_Helper_Form_Element_Select(
             'enableAnimation',
             array(
@@ -224,6 +265,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('是否开启界面元素的过渡动画效果')
         );
         $form->addInput($enableAnimation);
+
+        // 导航栏位置
         $navPosition = new Typecho_Widget_Helper_Form_Element_Select(
             'navPosition',
             array(
@@ -235,6 +278,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择导航栏在页面顶部还是左侧显示（仅桌面端生效，移动端始终为顶部折叠菜单）')
         );
         $form->addInput($navPosition);
+
+        // 插件页展示方式
         $pluginCardView = new Typecho_Widget_Helper_Form_Element_Select(
             'pluginCardView',
             array(
@@ -246,6 +291,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择插件管理页面的展示方式：卡片网格更直观，原始表格与 Typecho 默认保持一致')
         );
         $form->addInput($pluginCardView);
+
+        // ================================================================
+        // ====== 编辑器设置（MD3 折叠卡片） ======
+        // ================================================================
         echo '<div id="ab-card-editor" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-editor-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-editor-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -265,6 +314,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 </div>
             </div>
         </div>';
+
+        // 编辑器 - Vditor 开关
         $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
             'editor_vditor',
             array(
@@ -276,6 +327,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('开启后，文章/页面编辑页将使用 Vditor Markdown 编辑器，支持所见即所得、实时预览、分屏编辑三种模式')
         );
         $form->addInput($editorVditor);
+
+        // 编辑器 - Vditor 默认模式
         $editorVditorMode = new Typecho_Widget_Helper_Form_Element_Select(
             'editor_vditorMode',
             array(
@@ -288,6 +341,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('首次打开编辑器时使用的模式，用户可通过编辑器上方的模式切换按钮随时切换')
         );
         $form->addInput($editorVditorMode);
+
+        // ================================================================
+        // ====== 登录页设置（MD3 折叠卡片） ======
+        // ================================================================
         echo '<div id="ab-card-login" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-login-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-login-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -307,6 +364,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 </div>
             </div>
         </div>';
+
+        // 登录页 - 颜色预设方案
         $loginColorPreset = new Typecho_Widget_Helper_Form_Element_Select(
             'login_colorPreset',
             array(
@@ -329,6 +388,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择预设配色或使用自定义颜色')
         );
         $form->addInput($loginColorPreset);
+
+        // 登录页 - 主题主色
         $loginPrimaryColor = new Typecho_Widget_Helper_Form_Element_Text(
             'login_primaryColor',
             null,
@@ -337,6 +398,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择"自定义"方案后生效。如：#625fa0')
         );
         $form->addInput($loginPrimaryColor);
+
         $loginPrimaryColor2 = new Typecho_Widget_Helper_Form_Element_Text(
             'login_primaryColor2',
             null,
@@ -345,6 +407,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择"自定义"方案后生效。如：#7a6ec0')
         );
         $form->addInput($loginPrimaryColor2);
+
+        // 登录页 - 站点名称显示
         $loginShowSiteName = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_showSiteName',
             array('1' => _t('显示'), '0' => _t('隐藏')),
@@ -352,6 +416,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('登录页显示站点名称')
         );
         $form->addInput($loginShowSiteName);
+
+        // 登录页 - 主题模式
         $loginThemeMode = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_themeMode',
             array('auto' => _t('跟随系统'), 'light' => _t('亮色'), 'dark' => _t('暗色')),
@@ -359,6 +425,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('登录页默认主题')
         );
         $form->addInput($loginThemeMode);
+
+        // 登录页 - 主题切换按钮
         $loginShowThemeToggle = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_showThemeToggle',
             array('1' => _t('显示'), '0' => _t('隐藏')),
@@ -366,6 +434,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('登录页显示主题切换按钮')
         );
         $form->addInput($loginShowThemeToggle);
+
+        // 登录页 - 背景图片
         $loginBgImage = new Typecho_Widget_Helper_Form_Element_Text(
             'login_bgImage',
             null,
@@ -374,6 +444,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('留空则使用纯色背景。')
         );
         $form->addInput($loginBgImage);
+
+        // 登录页 - 虚化方式
         $loginBlurType = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_blurType',
             array(
@@ -384,6 +456,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('登录页虚化方式')
         );
         $form->addInput($loginBlurType);
+
+        // 登录页 - 虚化大小
         $loginBlurSize = new Typecho_Widget_Helper_Form_Element_Text(
             'login_blurSize',
             null,
@@ -392,6 +466,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('建议 0-50。')
         );
         $form->addInput($loginBlurSize);
+
+        // 登录页 - 自定义 CSS
         $loginCustomCss = new Typecho_Widget_Helper_Form_Element_Textarea(
             'login_customCss',
             null,
@@ -400,6 +476,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('将注入到登录页。无需 style 标签。如果不生效请加 !important')
         );
         $form->addInput($loginCustomCss);
+
+        // 登录页 - 自定义 JS
         $loginCustomJs = new Typecho_Widget_Helper_Form_Element_Textarea(
             'login_customJs',
             null,
@@ -408,7 +486,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('将注入到登录页。无需 script 标签。')
         );
         $form->addInput($loginCustomJs);
+
+        // ====== 登录页设置预览 ======
         self::renderLoginPreview();
+
+        // ================================================================
+        // ====== PWA 应用设置（MD3 折叠卡片） ======
+        // ================================================================
         echo '<div id="ab-card-pwa" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-pwa-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-pwa-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -421,6 +505,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             </div>
             <div id="ab-card-pwa-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)"></div>
         </div>';
+
+        // PWA 应用名称
         $pwaAppName = new Typecho_Widget_Helper_Form_Element_Text(
             'pwa_appName',
             null,
@@ -429,6 +515,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('安装为 PWA 后显示的应用名称。留空则默认为「博客名称 + 管理后台」')
         );
         $form->addInput($pwaAppName);
+
+        // PWA 应用图标
         $pwaAppIcon = new Typecho_Widget_Helper_Form_Element_Text(
             'pwa_appIcon',
             null,
@@ -437,6 +525,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('安装为 PWA 后显示的应用图标，建议使用 512×512 的正方形图片。')
         );
         $form->addInput($pwaAppIcon);
+
+        // ================================================================
+        // ====== 速度优化设置（MD3 折叠卡片） ======
+        // ================================================================
         echo '<div id="ab-card-perf" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-perf-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-perf-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -450,6 +542,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             <div id="ab-card-perf-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
             </div>
         </div>';
+
+        // 静态资源来源
         $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
             'staticResource',
             array(
@@ -463,6 +557,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择 Noto Sans SC 字体与 Material Icons 图标的加载方式')
         );
         $form->addInput($staticResource);
+
+        // 自定义字体 CSS URL（选"自定义"时生效）
         $customFontUrl = new Typecho_Widget_Helper_Form_Element_Text(
             'customFontUrl',
             null,
@@ -471,6 +567,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选「自定义 URL」后生效。填入 Noto Sans SC 的 CSS 链接，如本机路径或其他 CDN。')
         );
         $form->addInput($customFontUrl);
+
+        // 自定义图标 CSS URL（选"自定义"时生效）
         $customIconUrl = new Typecho_Widget_Helper_Form_Element_Text(
             'customIconUrl',
             null,
@@ -479,6 +577,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选「自定义 URL」后生效。填入 Material Icons Round 的 CSS 链接。注：一定是Material Icons Round，内含 .material-icons-round 类样式。')
         );
         $form->addInput($customIconUrl);
+
+        // 本地字体 CSS URL（选"本地文件"时生效，默认指向插件内 assets/fonts/）
         $localFontUrl = new Typecho_Widget_Helper_Form_Element_Text(
             'localFontUrl',
             null,
@@ -487,6 +587,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/NotoSansSC.css）。需将 NotoSansSC.css 及对应字体文件放入该目录，否则显示会不正常。')
         );
         $form->addInput($localFontUrl);
+
+        // 本地图标 CSS URL（选"本地文件"时生效，默认指向插件内 assets/fonts/）
         $localIconUrl = new Typecho_Widget_Helper_Form_Element_Text(
             'localIconUrl',
             null,
@@ -495,6 +597,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/MaterialIconsRound.css）。需将 MaterialIconsRound.css 及 woff2 字体放入该目录，否则显示会不正常。')
         );
         $form->addInput($localIconUrl);
+
+        // ================================================================
+        // ====== 兼容脚本管理（MD3 折叠卡片） ======
+        // ================================================================
         echo '<div id="ab-card-compat" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-compat-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-compat-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -518,8 +624,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 </div>
             </div>
         </div>';
+
+        // --- 扫描本地兼容脚本并展示列表 ---
         $compatDir = dirname(__FILE__) . '/assets/compat/';
         $compatScripts = self::scanCompatScripts($compatDir);
+        // 读取当前已启用脚本列表（默认全部关闭，需手动启用）
+        // 注：字段名沿用 compat_disabledScripts 以保持数据库 schema 兼容，但语义已改为存储"已启用"列表
         $enabledRaw = '';
         try {
             $abOptCompat = Typecho_Widget::widget('Widget_Options')->plugin('AdminBeautify');
@@ -529,13 +639,18 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $enabledList = ($enabledRaw !== '') ? (array) json_decode($enabledRaw, true) : array();
         if (!is_array($enabledList)) $enabledList = array();
+
         self::renderCompatScriptsList($compatScripts, $enabledList, $abC1);
+
+        // 隐藏的表单字段：存储已启用脚本 JSON（字段名保持原名以兼容已激活的插件配置）
         $compatEnabledScripts = new Typecho_Widget_Helper_Form_Element_Hidden(
             'compat_disabledScripts',
             null,
             $enabledRaw
         );
         $form->addInput($compatEnabledScripts);
+
+        // 兼容性 - 外部 JS 文件链接
         $compatExternalJs = new Typecho_Widget_Helper_Form_Element_Textarea(
             'compat_externalJs',
             null,
@@ -544,6 +659,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('每行一个 JS 文件 URL，将在后台所有页面加载。示例：https://cdn.example.com/compat/my-plugin-fix.js')
         );
         $form->addInput($compatExternalJs);
+
+        // 匿名使用统计开关
         $telemetryOptOut = new Typecho_Widget_Helper_Form_Element_Radio(
             'telemetryOptOut',
             array(
@@ -555,6 +672,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('启用后，插件会通过浏览器向开发者统计服务发送，仅包含：插件版本号、站点表示。选择"关闭统计"后立即停止上报。')
         );
         $form->addInput($telemetryOptOut);
+
+        // 通知开关
         $notifyOptOut = new Typecho_Widget_Helper_Form_Element_Radio(
             'notifyOptOut',
             array(
@@ -566,6 +685,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('关闭后，将不再显示插件更新横幅通知和公告弹窗。')
         );
         $form->addInput($notifyOptOut);
+
+        // ====== MD3 折叠卡片 + 颜色跟随 + 检查更新 ======
         echo '<script>
 // ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
 (function(){
@@ -583,12 +704,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
         return null;
     }
+
     function buildCards(){
         // ---- 管理后台卡片 ----
         var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
+
         if(adminCard&&adminBody&&firstAdminUl){
             var form=firstAdminUl.parentNode;
             form.insertBefore(adminCard,firstAdminUl);
@@ -598,6 +721,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
             adminBody.style.paddingBottom="16px";
         }
+
         // ---- 编辑器设置卡片（插在管理后台卡片之后）----
         var editorFields=["editor_vditor","editor_vditorMode"];
         var editorCard=document.getElementById("ab-card-editor");
@@ -617,6 +741,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
             editorBody.style.paddingBottom="16px";
         }
+
         // ---- 登录页卡片 ----
         var loginFields=["login_colorPreset","login_primaryColor","login_primaryColor2",
             "login_showSiteName","login_themeMode","login_showThemeToggle",
@@ -624,6 +749,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         var firstLoginUl=findFieldUl("login_colorPreset");
         var loginCard=document.getElementById("ab-card-login");
         var loginBody=document.getElementById("ab-card-login-body");
+
         if(loginCard&&loginBody&&firstLoginUl){
             var form2=firstLoginUl.parentNode;
             form2.insertBefore(loginCard,firstLoginUl);
@@ -635,6 +761,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             if(preview) loginBody.appendChild(preview);
             loginBody.style.paddingBottom="16px";
         }
+
         // ---- 兼容脚本卡片（插在登录页卡片之后）----
         var compatCard=document.getElementById("ab-card-compat");
         var compatBody=document.getElementById("ab-card-compat-body");
@@ -656,6 +783,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // 隐藏 hidden 字段
         var hiddenUl=findFieldUl("compat_disabledScripts");
         if(hiddenUl) hiddenUl.style.display="none";
+
         // ---- PWA 应用卡片（插在兼容脚本卡片之后）----
         var pwaFields=["pwa_appName","pwa_appIcon"];
         var pwaCard=document.getElementById("ab-card-pwa");
@@ -732,6 +860,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             })();
             pwaBody.style.paddingBottom="16px";
         }
+
         // ---- 性能优化卡片（插在 PWA 卡片之后） ----
         var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl"];
         var perfCard=document.getElementById("ab-card-perf");
@@ -766,6 +895,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             sel.addEventListener("change",toggleCustom);
             toggleCustom();
         })();
+
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
         ["admin","editor","login","pwa","perf","compat"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
@@ -773,6 +903,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             restoreCard(id);
         });
     }
+
     window.abToggleCard=function(id){
         var body=document.getElementById("ab-card-"+id+"-body");
         var chev=document.getElementById("ab-card-"+id+"-chev");
@@ -801,6 +932,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             try{ localStorage.setItem("ab-card-"+id,"0"); }catch(e){}
         }
     };
+
     // 默认折叠；仅当 localStorage 明确为 "1" 时才展开
     function restoreCard(id){
         var saved=null;
@@ -823,12 +955,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
         }
     }
+
     if(document.readyState==="loading"){
         document.addEventListener("DOMContentLoaded",buildCards);
     } else {
         buildCards();
     }
 })();
+
 // ---- 卡片颜色跟随主题色 & 检查更新 ----
 (function(){
     var abColorMap={
@@ -898,12 +1032,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if(!sel) return;
         sel.addEventListener("change",function(){ applyConfigColors(this.value); });
     }
+
     // 检查更新（调用全局 abCheckUpdate，定义于 renderFooter 注入的脚本）
     function initUpdateCheck(){
         var btn=document.getElementById("ab-btn-update");
         if(!btn) return;
         btn.addEventListener("click",function(){ window.abCheckUpdate&&window.abCheckUpdate(true); });
     }
+
     // 注入动画
     if(!document.getElementById("ab-config-anim")){
         var st=document.createElement("style");
@@ -911,6 +1047,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         st.textContent="@keyframes ab-spin{to{transform:rotate(360deg)}} @keyframes ab-fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}";
         document.head.appendChild(st);
     }
+
     if(document.readyState==="loading"){
         document.addEventListener("DOMContentLoaded",function(){ initColorFollow(); initUpdateCheck(); });
     } else {
@@ -918,6 +1055,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     }
 })();
 </script>';
+
+        // ================================================================
+        // ====== 关于插件（MD3 折叠卡片） ======
+        // ================================================================
         echo '<style>
 [data-theme="dark"] #ab-card-about {
     background: var(--md-surface-container-low, #1d1b20) !important;
@@ -940,6 +1081,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 [data-theme="dark"] .ab-about-support-desc { color: var(--md-on-surface-variant, #cac4d0) !important; }
 [data-theme="dark"] .ab-about-support-qr-label { color: var(--md-on-surface-variant, #cac4d0) !important; }
 </style>';
+
         echo '<div id="ab-card-about" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
             <div id="ab-card-about-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
                 <div id="ab-card-about-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
@@ -951,6 +1093,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 <svg id="ab-card-about-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
             <div id="ab-card-about-body" style="overflow:hidden;max-height:9999px;padding:0 22px 24px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
+
                 <!-- ── 作者信息 ── -->
                 <div style="margin:16px 0 0;padding:18px;background:linear-gradient(135deg,' . $abC1 . '18,' . $abC2 . '10);border-radius:16px;border:1px solid ' . $abC1 . '22">
                     <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
@@ -979,11 +1122,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         </a>
                     </div>
                 </div>
+
                 <!-- ── 作者的其他插件 ── -->
                 <div style="margin-top:20px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🧩 作者的其他插件</div>
                     <div id="ab-about-more-plugins" style="margin-top:8px"><!-- GitHub API 动态加载 --></div>
                 </div>
+
                 <!-- ── 作者的其他项目 ── -->
                 <div style="margin-top:20px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚀 作者推荐(友情链接)</div>
@@ -998,6 +1143,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         </a>
                     </div>
                 </div>
+
                 <!-- ── 支持作者 ── -->
                 <div style="margin-top:20px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">❤️ 支持作者</div>
@@ -1020,6 +1166,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         </div>
                     </div>
                 </div>
+
                 <!-- ── 鸣谢（支持者） ── -->
                 <div style="margin-top:18px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
@@ -1037,6 +1184,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         <br/><div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">（将按周期随版本更新，如有调整后续更新）</div>
                     </div>
                 </div>
+
                 <!-- ── 更新日志 ── -->
                 <div style="margin-top:20px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📋 更新日志</div>
@@ -1047,18 +1195,22 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                         </div>
                     </div>
                 </div>
+
                 <!-- ── 数据与隐私 ── -->
                 <div style="margin-top:20px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🔒 数据与隐私</div>
                     <div id="ab-telemetry-field-container"></div>
                 </div>
+
             </div>
         </div>';
+
         echo '<script>
 (function(){
     // ── 初始化关于卡片折叠 ──
     var aboutHdr=document.getElementById("ab-card-about-hdr");
     if(aboutHdr) aboutHdr.addEventListener("click",function(){ window.abToggleCard&&window.abToggleCard("about"); });
+
     function restoreAboutCard(){
         var saved=null;
         try{ saved=localStorage.getItem("ab-card-about"); }catch(e){}
@@ -1078,6 +1230,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
         }
     }
+
     // ── 更新颜色 ──
     function updateAboutColors(c1){
         var s=document.getElementById("ab-card-about-strip");
@@ -1085,6 +1238,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         var v=document.getElementById("ab-card-about-chev");
         if(v) v.setAttribute("stroke",c1);
     }
+
     // ── 从 GitHub API 加载更新日志 ──
     function loadChangelog(){
         var el=document.getElementById("ab-about-changelog");
@@ -1139,6 +1293,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         };
         xhr.send();
     }
+
     // ── 从 GitHub API 加载作者其他 Repo ──
     function loadGithubRepos(){
         var xhr=new XMLHttpRequest();
@@ -1170,6 +1325,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         xhr.onerror=function(){};
         xhr.send();
     }
+
     function initAbout(){
         restoreAboutCard();
         // 颜色跟随主题色
@@ -1215,6 +1371,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             if(notifyUl) telContainer.appendChild(notifyUl);
         }
     }
+
     if(document.readyState==="loading"){
         document.addEventListener("DOMContentLoaded",initAbout);
     } else {
@@ -1222,6 +1379,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     }
 })();
 </script>';
+
+        // ====== 公告弹窗通知（仅设置页，从 GitHub 拉取 notice.md） ======
         echo '<script>(function(){
 function abInitModal(){
     var CFG=window.__AB_CONFIG__||{};
@@ -1251,6 +1410,7 @@ function abInitModal(){
             showModal(fm,body,lsKey);
         })
         .catch(function(){});
+
     function simpleMarkdown(text){
         return text
             .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
@@ -1262,6 +1422,7 @@ function abInitModal(){
             .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"<a href=\"$2\" target=\"_blank\" rel=\"noopener\">$1</a>")
             .replace(/\n/g,"<br>");
     }
+
     function showModal(fm,body,lsKey){
         var overlay=document.createElement("div");
         overlay.id="ab-modal-notify";
@@ -1330,30 +1491,49 @@ if(document.readyState==="loading"){
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
     {
     }
+
+    /**
+     * 输出头部 CSS（自动区分登录页和管理页）
+     */
     public static function renderHeader($header)
     {
+        // 登录页 → 注入 LoginBeautify 样式
         if (self::isLoginPage()) {
             ob_start();
             self::outputLoginHeaderCss();
             $inject = ob_get_clean();
             return $header . $inject;
         }
+
+        // 管理页 → 注入 AdminBeautify 样式
         return self::renderAdminHeader($header);
     }
+
+    /**
+     * 输出管理页头部 CSS
+     */
     private static function renderAdminHeader($header)
     {
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
+
         $primaryColor = $pluginOptions->primaryColor ?: 'purple';
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $borderRadius = $pluginOptions->borderRadius ?: 'medium';
+        // 使用 isset + 空字符串判断，确保 '0' 被正确识别为"关闭"
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $navPosition = $pluginOptions->navPosition ?: 'left';
+
+    // 提前获取颜色方案（后续多处复用，避免重复调用）
     $colors = self::getColorScheme($primaryColor);
     $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
     $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
+
     $cssUrl = Typecho_Common::url('AdminBeautify/assets/AdminBeautify', $options->pluginUrl);
+
+        // ⚠️ 必须在所有 CSS 之前执行：设置 data-theme / data-nav / data-animation，并立即设置 html 内联背景与 color-scheme，
+        // 以尽量保证首次渲染时初始画布颜色与插件主题一致，减少在非 AJAX 跳转中的闪黑/闪白。
         $earlyScript = '<script>';
         if ($darkMode === 'dark') {
             $earlyScript .= 'document.documentElement.setAttribute("data-theme","dark");';
@@ -1364,6 +1544,7 @@ if(document.readyState==="loading"){
             $earlyScript .= 'document.documentElement.style.background="' . $lightBg . '";';
             $earlyScript .= 'document.documentElement.style.setProperty("color-scheme","light");';
         } elseif ($darkMode === 'auto') {
+            // 根据系统偏好即时设置 data-theme 与 html 内联背景
             $earlyScript .= '(function(){var m=window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)");if(m&&m.matches){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="' . $darkBg . '";document.documentElement.style.setProperty("color-scheme","dark");}else{document.documentElement.removeAttribute("data-theme");document.documentElement.style.background="' . $lightBg . '";document.documentElement.style.setProperty("color-scheme","light");}})();';
         }
         if ($navPosition === 'left') {
@@ -1372,24 +1553,58 @@ if(document.readyState==="loading"){
         if ($enableAnimation === '0') {
             $earlyScript .= 'document.documentElement.setAttribute("data-no-animation","");';
         }
+        // 防止初始渲染时 body/元素过渡动画触发（页面加载完成后再由 JS 移除）
         $earlyScript .= 'document.documentElement.setAttribute("data-ab-loading","");';
         $earlyScript .= '</script>';
+
+        // 提前获取颜色方案（后续多处复用，避免重复调用）
         $colors = self::getColorScheme($primaryColor);
         $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
         $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
+
+        // ⚠️ 关键：将 earlyScript + 内联 CSS 变量提前到 Typecho 自身 CSS 链接之前
+        //   浏览器在遇到 <link rel="stylesheet"> 时会阻塞后续内联 <script> 的执行，
+        //   因此 earlyScript 必须出现在 Typecho CSS 链接之前，才能在首次渲染前设置
+        //   data-ab-loading（导航隐藏）和 data-theme（主题色变量），彻底消除闪黑。
+        //
+        //   ├── injectHead（置于 Typecho CSS 之前）：
+        //   │     0. color-scheme meta（告知浏览器色彩模式）
+        //   │     1. earlyScript（立即执行，无 CSS 阻塞：设置 data-theme / data-ab-loading）
+        //   │     2. 内联 <style>（CSS 变量 + 导航隐藏规则，Typecho CSS 之前已生效）
+        //   └── injectTail（置于 Typecho CSS 之后）：
+        //         3. style.css <link>
+        //         4. 字体等外部资源 + DOMContentLoaded + PWA
+
+        // 0. 色彩模式值
         $colorSchemeValue = ($darkMode === 'dark') ? 'dark' : (($darkMode === 'light') ? 'light' : 'light dark');
+
+        // ─── HEAD 注入：必须在 Typecho CSS 之前 ───────────────────────────────────
+        // color-scheme meta：告知浏览器该页面支持的色彩模式
         $injectHead = "\n" . '<meta name="color-scheme" content="' . $colorSchemeValue . '">';
+
+        // 1. 早期脚本（在 CSS <link> 之前，不会被 CSS 加载阻塞，立即执行）
         $injectHead .= "\n" . $earlyScript;
+
+        // 2. 内联 CSS 变量 + 防闪规则（在 Typecho CSS 之前即可生效）
         $injectHead .= "\n" . '<style>';
+        // 防加载闪烁：页面加载期间禁用所有过渡，DOMContentLoaded 后移除
         $injectHead .= '[data-ab-loading],[data-ab-loading] *{transition:none!important;}';
+        // 隐藏 Typecho 原生深色顶部导航栏（background:#292D33），防止外部 CSS 加载前短暂闪黑
         $injectHead .= '[data-ab-loading] .typecho-head-nav{visibility:hidden!important;}';
+        // 同时设置 html 和 body 背景色，并用 !important 阻断 Typecho 自身 CSS（body{background:#F6F6F3}，无 !important）对 body 的覆盖；
+        // style.css 内的 body{background:var(--md-surface)!important} 因加载顺序更晚，仍可正确覆盖此处规则，不影响最终样式。
         $injectHead .= 'html,body{background:' . $lightBg . '!important;}';
         $injectHead .= 'html[data-theme="dark"],html[data-theme="dark"] body{background:' . $darkBg . '!important;}';
         $injectHead .= ':root{';
+        // color-scheme CSS 属性（配合 meta tag，确保表单控件等 UA 渲染跟随页面主题）
         $injectHead .= 'color-scheme:' . $colorSchemeValue . ';';
+
+        // 主题色 CSS 变量
         foreach ($colors as $key => $value) {
             $injectHead .= $key . ':' . $value . ';';
         }
+
+        // 圆角
         $radiusMap = array(
             'small'  => array('--md-radius-xs' => '4px', '--md-radius-sm' => '6px', '--md-radius-md' => '8px', '--md-radius-lg' => '12px', '--md-radius-xl' => '16px', '--md-radius-full' => '9999px'),
             'medium' => array('--md-radius-xs' => '6px', '--md-radius-sm' => '8px', '--md-radius-md' => '12px', '--md-radius-lg' => '16px', '--md-radius-xl' => '28px', '--md-radius-full' => '9999px'),
@@ -1400,34 +1615,48 @@ if(document.readyState==="loading"){
                 $injectHead .= $key . ':' . $value . ';';
             }
         }
+
+        // 动画
         if ($enableAnimation === '0') {
             $injectHead .= '--md-transition-duration:0s;';
         } else {
             $injectHead .= '--md-transition-duration:0.2s;';
         }
+
         $injectHead .= '}</style>';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.7' . '.css">';
+
+        // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
+        // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.8' . '.css">';
+
+        // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePage) {
             $injectTail .= "\n" . '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vditor/dist/index.css">';
         }
+
+        // 4. 外部字体/图标（根据「静态资源来源」设置加载）
         $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
         $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
         $customIconUrl  = isset($pluginOptions->customIconUrl)  ? trim((string) $pluginOptions->customIconUrl)  : '';
         $localFontUrl   = isset($pluginOptions->localFontUrl)   ? trim((string) $pluginOptions->localFontUrl)   : '';
         $localIconUrl   = isset($pluginOptions->localIconUrl)   ? trim((string) $pluginOptions->localIconUrl)   : '';
+
         if ($staticResource === 'google') {
             $resFontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
             $resIconUrl = 'https://fonts.googleapis.com/icon?family=Material+Icons+Round';
         } elseif ($staticResource === 'loli') {
+            // loli.net 镜像（fonts.googleapis.com → fonts.loli.net）
             $resFontUrl = 'https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
             $resIconUrl = 'https://fonts.loli.net/icon?family=Material+Icons+Round';
         } elseif ($staticResource === 'jsdelivr') {
+            // jsDelivr CDN：@fontsource/noto-sans-sc + material-icons npm 包
             $resFontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/index.css';
             $resIconUrl = 'https://cdn.jsdelivr.net/npm/material-icons@1/iconfont/round.css';
         } elseif ($staticResource === 'local') {
+            // 本地文件（从插件 assets/fonts/ 目录加载，或使用用户自定义路径）
             $localPluginFontDefault = Typecho_Common::url('AdminBeautify/assets/fonts/NotoSansSC.css', $options->pluginUrl);
             $localPluginIconDefault = Typecho_Common::url('AdminBeautify/assets/fonts/MaterialIconsRound.css', $options->pluginUrl);
             $resFontUrl = ($localFontUrl !== '') ? $localFontUrl : $localPluginFontDefault;
@@ -1436,45 +1665,65 @@ if(document.readyState==="loading"){
             $resFontUrl = $customFontUrl;
             $resIconUrl = $customIconUrl;
         } else {
+            // 'none' 或其他：不加载外部字体/图标，回退至系统字体
             $resFontUrl = '';
             $resIconUrl = '';
         }
+
         if ($resFontUrl !== '') {
             $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resFontUrl) . '">';
         }
         if ($resIconUrl !== '') {
             $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resIconUrl) . '">';
         }
+
+        // DOMContentLoaded 后移除 data-ab-loading，恢复过渡效果
         $injectTail .= '<script>document.addEventListener("DOMContentLoaded",function(){document.documentElement.removeAttribute("data-ab-loading");},false);</script>';
+
+        // PWA：manifest + iOS meta 标签（$colors 已在函数开头定义，无需重复调用）
         $themeColorMap = array(
             'purple' => '#7D5260', 'blue' => '#556270', 'teal' => '#4A6363',
             'green'  => '#55624C', 'orange' => '#725A42', 'pink' => '#74565F', 'red' => '#775654',
         );
         $themeHex = isset($themeColorMap[$primaryColor]) ? $themeColorMap[$primaryColor] : '#7D5260';
         $manifestUrl = Typecho_Common::url('/action/admin-beautify?do=manifest', $options->index);
+
+        // 读取 PWA 自定义设置
         $pwaAppName = isset($pluginOptions->pwa_appName) ? trim((string) $pluginOptions->pwa_appName) : '';
         $pwaAppIcon = isset($pluginOptions->pwa_appIcon) ? trim((string) $pluginOptions->pwa_appIcon) : '';
         $pwaTitle = ($pwaAppName !== '') ? $pwaAppName : ((string) $options->title . ' 管理后台');
+
         $injectTail .= "\n" . '<link rel="manifest" href="' . htmlspecialchars($manifestUrl) . '">';
         $injectTail .= "\n" . '<meta name="theme-color" content="' . $themeHex . '">';
         $injectTail .= "\n" . '<meta name="apple-mobile-web-app-capable" content="yes">';
         $injectTail .= "\n" . '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">';
         $injectTail .= "\n" . '<meta name="apple-mobile-web-app-title" content="' . htmlspecialchars($pwaTitle) . '">';
         $injectTail .= "\n" . '<meta name="mobile-web-app-capable" content="yes">';
+        // PWA 图标 apple-touch-icon
         if ($pwaAppIcon !== '') {
             $injectTail .= "\n" . '<link rel="apple-touch-icon" sizes="180x180" href="' . htmlspecialchars($pwaAppIcon) . '">';
         }
+
+        // 最终返回：injectHead（Typecho CSS 之前）+ Typecho 原生 CSS + injectTail（Typecho CSS 之后）
+        // earlyScript 在 CSS <link> 之前，不被阻塞，首次渲染前 data-ab-loading 已设置 → 导航已隐藏
+        // 匿名使用统计：用户未关闭时注入 Umami 脚本到 <head>
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
             $injectTail .= "\n" . '<script defer src="https://umami.lhl.one/script.js" data-website-id="dfabc99f-991e-4f7c-9358-03177fbee0ec"></script>';
         }
+
         return $injectHead . $header . $injectTail;
     }
+
+    /**
+     * 输出管理页尾部 JS（仅在已登录时执行）
+     */
     public static function renderFooter()
     {
         if (self::isLoginPage()) {
             return;
         }
+
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
         $darkMode = $pluginOptions->darkMode ?: 'auto';
@@ -1483,6 +1732,8 @@ if(document.readyState==="loading"){
         $pluginCardView = isset($pluginOptions->pluginCardView) ? (string)$pluginOptions->pluginCardView : '1';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
+
+        // Inject user avatar URL for sidebar header
         $user = Typecho_Widget::widget('Widget_User');
         $avatarUrl = '';
         if ($user->hasLogin() && $user->mail) {
@@ -1509,18 +1760,24 @@ if(document.readyState==="loading"){
             'siteName'         => $options->title,
             'editorVditor'     => $editorVditor,
             'editorVditorMode' => $editorVditorMode,
-            'pluginVersion'    => '2.1.7',
+            'pluginVersion'    => '2.1.8',
             'notifyOptOut'     => $notifyOptOut,
         )) . ';</script>';
+
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.7.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.8.js"></script>';
+
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
+
+        // 匿名统计：通过 umami.track() 发送含域名的自定义事件，可在 Umami 后台 Events 中直接看到来源域名
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.7"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.8"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
+
+        // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
 var CFG=window.__AB_CONFIG__||{};
@@ -1604,9 +1861,12 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
     .catch(function(){});
 })();</script>';
         }
+
+
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePageFooter) {
+            // Vditor 样式与逻辑：从 assets/vditor/ 加载独立文件，避免 PHP 文件膨胀
             $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.0.css', $options->pluginUrl);
             $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.1.js', $options->pluginUrl);
             echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorCssUrl) . '">';
@@ -1614,6 +1874,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
         }
         $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
         echo '<script>(function(){'
+            // ── toast 函数（MD3 风格，兼容亮/暗主题） ──
             . 'function abSwToast(){'
             .   'if(document.getElementById("ab-sw-toast"))return;'
             .   'var t=document.createElement("div");'
@@ -1653,13 +1914,15 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
             .     't.style.opacity="1";t.style.transform="translateX(-50%) translateY(0)";'
             .   '});});'
             . '}'
+            // ── 监听 SW 发来的 SW_UPDATED 消息 ──
             . 'if("serviceWorker"in navigator){'
             .   'navigator.serviceWorker.addEventListener("message",function(e){'
             .     'if(e.data&&e.data.type==="SW_UPDATED"){ abSwToast(); }'
             .   '});'
+            // ── 注册 SW，发现 waiting 状态直接跳过，并在 controllerchange 后 toast ──
             .   'var refreshing=false;'
             .   'navigator.serviceWorker.addEventListener("controllerchange",function(){'
-            .     'if(refreshing)return;'
+            .     'if(refreshing)return;'  // 避免循环刷新
             .     '/* controller 已切换，toast 由 SW_UPDATED 消息触发，此处不再重复 */'
             .   '});'
             .   'navigator.serviceWorker.register(' . json_encode($swUrl) . ',{scope:' . json_encode(rtrim((string)$options->adminUrl, '/') . '/') . '})'
@@ -1678,10 +1941,13 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
             .   '.catch(function(){});'
             . '}'
             . '}());</script>';
+
+        // PWA 独立模式下：延长认证 cookie 有效期，防止关闭应用后需重新登录
         $pingUrl = Typecho_Common::url('/action/admin-beautify?do=ping', $options->index);
         echo '<script>(function(){'
             . 'var isStandalone=window.matchMedia&&window.matchMedia("(display-mode:standalone)").matches||window.navigator.standalone===true;'
             . 'if(!isStandalone)return;'
+            // 读取现有 __typecho_uid 和 __typecho_authCode cookie，重新设置 30 天过期
             . 'function renewCookies(){'
             .   'var cookies=document.cookie.split(";");'
             .   'for(var i=0;i<cookies.length;i++){'
@@ -1695,13 +1961,19 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
             .     '}'
             .   '}'
             . '}'
+            // 立即续期一次
             . 'renewCookies();'
+            // 每 10 分钟续期一次（保活）
             . 'setInterval(renewCookies,10*60*1000);'
+            // 每 15 分钟 ping 后端保活 session
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
+
+        // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.7";';
+        echo 'var __AB_VER__="2.1.8";';
         echo <<<'UPDATEJS'
+// ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");
     var origHTML=btn?btn.innerHTML:"";
@@ -1727,6 +1999,7 @@ window.abCheckUpdate=function(manual){
                 if(manual) abShowUpdateToast("ok","✅ 已是最新版本 v"+d.current);
                 return;
             }
+            // 检查是否已忽略该版本
             try{ if(localStorage.getItem("ab-update-dismissed-v"+d.latest)) return; }catch(e){}
             abShowUpdateAvailable(d);
         }catch(e){
@@ -1739,22 +2012,31 @@ window.abCheckUpdate=function(manual){
     };
     xhr.send();
 };
+
+// ---- abShowUpdateAvailable: 配置页用 banner 内嵌，其他页面用固定顶栏 ----
 window.abShowUpdateAvailable=function(d){
     var old=document.getElementById("ab-update-notify"); if(old) old.remove();
     var banner=document.getElementById("ab-header-banner");
     var notify=document.createElement("div");
     notify.id="ab-update-notify";
+
     var dismissBtn='<button type="button" onclick="(function(el){el.remove();try{localStorage.setItem(\'ab-update-dismissed-v\'+el.dataset.ver,\'1\')}catch(e){}})(document.getElementById(\'ab-update-notify\'))" data-ver="'+d.latest+'" style="background:none;border:none;cursor:pointer;font-size:16px;opacity:.7;padding:0 0 0 8px;color:inherit;line-height:1" title="忽略此版本">✕</button>';
+
+    // 统一按钮基础样式：圆角描边，透明背景，继承颜色
+    // box-sizing + line-height + vertical-align 三项确保 button/a/span 高度完全一致
     var btnBase='display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap;text-decoration:none;border:1px solid currentColor;box-sizing:border-box;vertical-align:middle;';
     var actionBtns='';
     if(d.can_direct){
         actionBtns+='<button id="ab-btn-do-update" type="button" onclick="abDoUpdate()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">立即更新</button>';
     } else {
+        // 不支持直接更新：显示禁用态按钮 + 原因提示
         actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">立即更新</span>'
                    +'<span style="font-size:11px;opacity:.65;align-self:center;">需手动更新</span>';
     }
     actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;">查看详情</a>';
+
     if(banner){
+        // 配置页：嵌入 banner 内
         notify.style.cssText="margin:12px 0 0;padding:12px 16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:14px;font-size:13px;color:#fff;animation:ab-fadeIn .3s ease;backdrop-filter:blur(4px)";
         var bodyText='';
         if(d.body){ bodyText=d.body.replace(/[#*`]/g,"").replace(/\r?\n/g," ").trim(); if(bodyText.length>120) bodyText=bodyText.substring(0,120)+"..."; }
@@ -1777,6 +2059,7 @@ window.abShowUpdateAvailable=function(d){
         notify.setAttribute("data-new-version",d.latest);
     }
 };
+
 // ---- abDoUpdate: 执行直接更新 ----
 window.abDoUpdate=function(){
     var notify=document.getElementById("ab-update-notify");
@@ -1813,6 +2096,7 @@ window.abDoUpdate=function(){
     };
     xhr.send("download_url="+encodeURIComponent(dlUrl)+"&new_version="+encodeURIComponent(newVer)+"&_="+encodeURIComponent(ajax.token||""));
 };
+
 // ---- abShowUpdateToast: 轻量级提示（主要用于配置页手动检查反馈）----
 window.abShowUpdateToast=function(type,msg){
     var old=document.getElementById("ab-update-notify"); if(old) old.remove();
@@ -1831,6 +2115,7 @@ window.abShowUpdateToast=function(type,msg){
     }
     setTimeout(function(){ if(toast.parentNode) toast.remove(); },6000);
 };
+
 // ---- 注入动画样式（如未注入）----
 if(!document.getElementById("ab-update-anim")){
     var st=document.createElement("style");
@@ -1838,6 +2123,7 @@ if(!document.getElementById("ab-update-anim")){
     st.textContent="@keyframes ab-spin{to{transform:rotate(360deg)}}@keyframes ab-slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}";
     document.head.appendChild(st);
 }
+
 // ---- 自动检查（每小时一次，页面加载后 4 秒执行）----
 setTimeout(function(){
     try{
@@ -1855,6 +2141,7 @@ setTimeout(function(){
 },4000);
 UPDATEJS;
         echo '})();</script>';
+
         // ====== 移动端导航：遮罩关闭抽屉 + 子菜单点击展开 ======
         echo '<script>(function(){'
             . '"use strict";'
@@ -1914,6 +2201,7 @@ UPDATEJS;
             .   '},100);'
             . '});'
             . '}());</script>';
+
         // ====== Typecho 版本兼容提示（低于 1.3.0 时提示升级；1.2.1 提示启用兼容脚本） ======
         $typechoVer = isset($options->version) ? (string) $options->version : '';
         if ($typechoVer && version_compare($typechoVer, '1.3.0', '<')) {
@@ -1924,6 +2212,7 @@ UPDATEJS;
             // 插入到页面顶部的 JS 提示条（不依赖服务端渲染位置，可安全注入）
             echo '<script>(function(){try{var b=document.createElement("div");b.id="ab-typecho-version-note";b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99998;padding:10px 14px;background:#fef3c7;color:#92400e;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.06);";b.innerHTML=' . json_encode($noteMsg) . ';document.body.insertBefore(b,document.body.firstChild);document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+48)+"px";setTimeout(function(){b.style.transform="translateY(0)";},10);}catch(e){} })();</script>';
         }
+
         // ====== AB插件仓库 快捷入口（仅 plugins.php 页面注入按钮）======
         $absDir = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'AdminBeautifyStore';
         $absInstalled = is_dir($absDir);
@@ -1937,6 +2226,7 @@ UPDATEJS;
                 $absActivated = false;
             }
         }
+
         if (!$absInstalled) {
             // 未安装：点击按钮触发 AJAX 自动安装
             $absStoreUrl  = '';
@@ -1962,6 +2252,7 @@ UPDATEJS;
             $absWarnUrl   = '';
             $absAction    = 'go';
         }
+
         echo '<script>(function(){'
             . 'var BTN_ID="ab-store-shortcut-btn";'
             . 'var WARN_ID="ab-store-shortcut-warn";'
@@ -2053,9 +2344,11 @@ UPDATEJS;
             .   'abCheckAndInject(url);'
             . '});'
             . '})();</script>';
+
         // ====== 加载兼容性脚本 ======
         self::loadCompatScripts($options, $pluginOptions);
     }
+
     /**
      * 加载兼容性脚本（本地 + 外部）
      *
@@ -2070,11 +2363,13 @@ UPDATEJS;
     {
         $compatBaseUrl = Typecho_Common::url('AdminBeautify/assets/compat/', $options->pluginUrl);
         $compatDir = dirname(__FILE__) . '/assets/compat/';
+
         // 读取已启用脚本列表（默认全部关闭，需手动启用）
         // 注：字段名沿用 compat_disabledScripts 以保持数据库 schema 兼容，语义已改为存储"已启用"列表
         $enabledRaw = isset($pluginOptions->compat_disabledScripts) ? (string) $pluginOptions->compat_disabledScripts : '';
         $enabledList = ($enabledRaw !== '') ? (array) json_decode($enabledRaw, true) : array();
         if (!is_array($enabledList)) $enabledList = array();
+
         // 1. 加载本地兼容脚本（仅加载用户手动启用的脚本）
         if (is_dir($compatDir) && !empty($enabledList)) {
             foreach ($enabledList as $file) {
@@ -2085,6 +2380,7 @@ UPDATEJS;
                 }
             }
         }
+
         // 2. 加载外部兼容脚本
         $externalJs = isset($pluginOptions->compat_externalJs) ? trim((string) $pluginOptions->compat_externalJs) : '';
         if ($externalJs !== '') {
@@ -2097,6 +2393,7 @@ UPDATEJS;
             }
         }
     }
+
     /**
      * 扫描 compat 目录中的 JS 文件并解析元数据
      *
@@ -2117,6 +2414,7 @@ UPDATEJS;
         }
         return $result;
     }
+
     /**
      * 从 JS 文件头部注释中解析 @name, @description, @plugins, @version, @author 元数据
      *
@@ -2141,11 +2439,13 @@ UPDATEJS;
         // 只读取文件前 2KB，避免大文件读取
         $content = @file_get_contents($filePath, false, null, 0, 2048);
         if ($content === false) return $defaults;
+
         // 匹配第一个 /** ... */ 块
         if (!preg_match('/\/\*\*(.*?)\*\//s', $content, $blockMatch)) {
             return $defaults;
         }
         $block = $blockMatch[1];
+
         // 逐行解析 @key value
         $tags = array('name', 'description', 'plugins', 'version', 'author');
         foreach ($tags as $tag) {
@@ -2153,12 +2453,15 @@ UPDATEJS;
                 $defaults[$tag] = trim($m[1]);
             }
         }
+
         // 如果 name 为空，用文件名（去掉 .js）作为 fallback
         if ($defaults['name'] === '') {
             $defaults['name'] = basename($filePath, '.js');
         }
+
         return $defaults;
     }
+
     /**
      * 在配置面板中渲染兼容脚本列表（含启用/禁用开关，默认关闭）
      */
@@ -2170,6 +2473,7 @@ UPDATEJS;
             </div>';
             return;
         }
+
         echo '<div id="ab-compat-scripts-list" style="margin:12px 0 20px">';
         echo '<div class="ab-compat-list-title" style="font-size:14px;font-weight:600;color:#374151;margin-bottom:10px;display:flex;align-items:center;gap:6px;flex-wrap:wrap">
             <span style="font-size:16px">📋</span>
@@ -2184,6 +2488,7 @@ UPDATEJS;
             . '</button>
         </div>
         <div id="ab-compat-sync-result" style="display:none;margin-bottom:12px"></div>';
+
         foreach ($scripts as $s) {
             $file = htmlspecialchars($s['file']);
             $name = htmlspecialchars($s['name']);
@@ -2193,6 +2498,7 @@ UPDATEJS;
             $author = htmlspecialchars($s['author']);
             $isEnabled = in_array($s['file'], $enabledList);
             $toggleId = 'ab-compat-toggle-' . md5($s['file']);
+
             echo '<div class="ab-compat-script-item" data-file="' . $file . '" style="'
                 . 'display:flex;align-items:flex-start;gap:14px;padding:14px 18px;margin-bottom:8px;'
                 . 'background:' . ($isEnabled ? '#fff' : '#f9fafb') . ';'
@@ -2200,6 +2506,7 @@ UPDATEJS;
                 . 'border-radius:12px;transition:all .2s;'
                 . ($isEnabled ? '' : 'opacity:.6;')
                 . '">';
+
             // 开关
             echo '<div style="flex-shrink:0;padding-top:2px">'
                 . '<label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">'
@@ -2218,6 +2525,7 @@ UPDATEJS;
                 . '"></span>'
                 . '</label>'
                 . '</div>';
+
             // 信息区域
             echo '<div style="flex:1;min-width:0">';
             echo '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">';
@@ -2229,9 +2537,11 @@ UPDATEJS;
                 echo '<span class="ab-compat-meta" style="font-size:11px;color:#6b7280">by ' . $author . '</span>';
             }
             echo '</div>';
+
             if ($desc) {
                 echo '<div class="ab-compat-desc" style="font-size:13px;color:#4b5563;line-height:1.5;margin-bottom:4px">' . $desc . '</div>';
             }
+
             if ($plugins) {
                 $pluginArr = array_map('trim', explode(',', $plugins));
                 echo '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
@@ -2241,11 +2551,15 @@ UPDATEJS;
                 }
                 echo '</div>';
             }
+
             echo '<div class="ab-compat-meta" style="font-size:11px;color:#9ca3af;margin-top:4px">📄 ' . $file . '</div>';
             echo '</div>'; // end info
+
             echo '</div>'; // end item
         }
+
         echo '</div>'; // end list
+
         // JS: 开关联动隐藏字段
         echo '<script>
 (function(){
@@ -2286,6 +2600,7 @@ UPDATEJS;
         initToggles();
     }
 })();
+
 // ---- 从 GitHub 同步兼容脚本 ----
 window.abSyncCompat = function(){
     var btn = document.getElementById("ab-compat-sync-btn");
@@ -2293,14 +2608,17 @@ window.abSyncCompat = function(){
     var label = document.getElementById("ab-compat-sync-label");
     var resultBox = document.getElementById("ab-compat-sync-result");
     if(!btn) return;
+
     btn.disabled = true;
     btn.style.opacity = ".6";
     if(icon) icon.textContent = "⏳";
     if(label) label.textContent = "同步中...";
     if(resultBox){ resultBox.style.display="none"; resultBox.innerHTML=""; }
+
     var ajax = window.__AB_AJAX__ || {};
     var url = (ajax.url || "") + "?do=sync-compat";
     var token = ajax.token || "";
+
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -2362,6 +2680,7 @@ window.abSyncCompat = function(){
 };
 </script>';
     }
+
     /**
      * 输出登录页尾部 JS（仅在未登录时执行）
      */
@@ -2370,57 +2689,77 @@ window.abSyncCompat = function(){
         if (!self::isLoginPage()) {
             return;
         }
+
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
+
         $showSiteName = ((string) $pluginOptions->login_showSiteName !== '0');
         $showThemeToggle = ((string) $pluginOptions->login_showThemeToggle !== '0');
         $customJs = (string) $pluginOptions->login_customJs;
+
         $siteTitle = (string) $options->title;
         $jsSiteTitle = self::jsString($siteTitle);
         $jsShowSiteName = $showSiteName ? 'true' : 'false';
         $jsShowToggle = $showThemeToggle ? 'true' : 'false';
+
         echo "\n<script id=\"loginbeautify-main\">
 (function(){
     function qs(sel, root){ return (root||document).querySelector(sel); }
     function qsa(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
+
     var form = qs('form[action*=\"login\"]') || qs('form') || qs('.typecho-login form') || qs('.typecho-login');
     if (!form) return;
+
     var wrap = document.createElement('div');
     wrap.className = 'lb-wrap';
+
     var bg = document.createElement('div');
     bg.className = 'lb-bg';
     wrap.appendChild(bg);
+
     var overlay = document.createElement('div');
     overlay.className = 'lb-bg-overlay';
     wrap.appendChild(overlay);
+
     var card = document.createElement('div');
     card.className = 'lb-card';
+
     var head = document.createElement('div');
     head.className = 'lb-head';
+
     var titleWrap = document.createElement('div');
     titleWrap.className = 'lb-title';
+
     var showSiteName = {$jsShowSiteName};
+
     if (showSiteName) {
       var name = document.createElement('div');
       name.className = 'name';
       name.textContent = {$jsSiteTitle};
       titleWrap.appendChild(name);
     }
+
     var isRegister = location.href.indexOf('register.php') !== -1;
+
     var sub = document.createElement('div');
     sub.className = 'sub';
     sub.textContent = isRegister ? '注册' : '登录';
     titleWrap.appendChild(sub);
+
     head.appendChild(titleWrap);
     card.appendChild(head);
+
     form.classList.add('lb-form');
+
     var inputs = qsa('input[type=\"text\"], input[type=\"password\"], input[type=\"email\"]', form);
     inputs.forEach(function(input, idx){
       var field = document.createElement('div');
       field.className = 'lb-field';
+
       var label = document.createElement('label');
       var n = (input.getAttribute('name') || '').toLowerCase();
       var t = (input.getAttribute('type') || '').toLowerCase();
+
       if (isRegister) {
         if (idx === 0) {
           label.textContent = '用户名';
@@ -2450,11 +2789,13 @@ window.abSyncCompat = function(){
           }
         }
       }
+
       var parent = input.parentNode;
       parent.insertBefore(field, input);
       field.appendChild(label);
       field.appendChild(input);
     });
+
     var remember = qs('input[type=\"checkbox\"]', form);
     if (remember) {
       var rememberWrap = remember.closest('p') || remember.parentNode;
@@ -2468,6 +2809,7 @@ window.abSyncCompat = function(){
         remember.checked = true;
       }
     }
+
     var submit = qs('input[type=\"submit\"], button[type=\"submit\"]', form);
     if (submit) {
       var submitWrap = document.createElement('div');
@@ -2476,24 +2818,30 @@ window.abSyncCompat = function(){
       p.insertBefore(submitWrap, submit);
       submitWrap.appendChild(submit);
     }
+
     card.appendChild(form);
     wrap.appendChild(card);
+
     document.body.insertBefore(wrap, document.body.firstChild);
+
     var typechoLogin = qs('.typecho-login');
     if (typechoLogin && !typechoLogin.contains(wrap)) {
       typechoLogin.classList.add('lb-hide');
     }
+
     // Theme footer
     var lbFooter = document.createElement('div');
     lbFooter.className = 'lb-footer-theme';
     lbFooter.innerHTML = 'Theme <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify\" target=\"_blank\" rel=\"noopener noreferrer\">AdminBeautify</a> by <a href=\"https://blog.lhl.one\" target=\"_blank\" rel=\"noopener noreferrer\">LHL</a>';
     card.appendChild(lbFooter);
+
     var showToggle = {$jsShowToggle};
     if (showToggle) {
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'lb-theme-toggle';
       btn.setAttribute('aria-label', '切换主题');
+
       var sunIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       sunIcon.setAttribute('viewBox', '0 0 24 24');
       sunIcon.setAttribute('fill', 'none');
@@ -2503,6 +2851,7 @@ window.abSyncCompat = function(){
       sunIcon.setAttribute('stroke-linejoin', 'round');
       sunIcon.setAttribute('class', 'lb-icon-sun');
       sunIcon.innerHTML = '<circle cx=\"12\" cy=\"12\" r=\"5\"/><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"/><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"/><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"/><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"/><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"/><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"/><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"/>';
+
       var moonIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       moonIcon.setAttribute('viewBox', '0 0 24 24');
       moonIcon.setAttribute('fill', 'none');
@@ -2512,8 +2861,10 @@ window.abSyncCompat = function(){
       moonIcon.setAttribute('stroke-linejoin', 'round');
       moonIcon.setAttribute('class', 'lb-icon-moon');
       moonIcon.innerHTML = '<path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/>';
+
       btn.appendChild(sunIcon);
       btn.appendChild(moonIcon);
+
       btn.addEventListener('click', function(){
         var cur = document.documentElement.getAttribute('data-lb-theme') === 'dark' ? 'dark' : 'light';
         var next = cur === 'dark' ? 'light' : 'dark';
@@ -2524,15 +2875,18 @@ window.abSyncCompat = function(){
     }
 })();
 </script>\n";
+
         if (trim($customJs) !== '') {
             echo "\n<script id=\"loginbeautify-custom-js\">\n";
             echo $customJs . "\n";
             echo "</script>\n";
         }
     }
+
     // ================================================================
     // 登录页 CSS 输出
     // ================================================================
+
     /**
      * 输出登录页头部 CSS
      */
@@ -2540,18 +2894,24 @@ window.abSyncCompat = function(){
     {
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
+
         $themeMode = isset($pluginOptions->login_themeMode) ? (string) $pluginOptions->login_themeMode : 'auto';
         if (!in_array($themeMode, array('auto', 'light', 'dark'), true)) {
             $themeMode = 'auto';
         }
+
         $bgImage = trim((string) $pluginOptions->login_bgImage);
         $blurType = in_array($pluginOptions->login_blurType, array('none', 'filter', 'backdrop'), true) ? $pluginOptions->login_blurType : 'filter';
+
         $blurSize = (int) $pluginOptions->login_blurSize;
         if ($blurSize < 0) $blurSize = 0;
         if ($blurSize > 80) $blurSize = 80;
+
         $customCss = (string) $pluginOptions->login_customCss;
+
         // 颜色预设处理
         $preset = isset($pluginOptions->login_colorPreset) ? (string) $pluginOptions->login_colorPreset : 'purple';
+
         $colorPresets = array(
             'purple'   => array('#7d5260', '#9e7b8a'),
             'blue'     => array('#556270', '#7a8a9e'),
@@ -2566,6 +2926,7 @@ window.abSyncCompat = function(){
             'forest'   => array('#2f7a3b', '#7fbf3a'),
             'lavender' => array('#8f6ee8', '#b89cfb'),
         );
+
         if ($preset === 'custom') {
             $primary = isset($pluginOptions->login_primaryColor) && trim((string) $pluginOptions->login_primaryColor) !== '' ? trim((string) $pluginOptions->login_primaryColor) : '#7d5260';
             $primary2 = isset($pluginOptions->login_primaryColor2) && trim((string) $pluginOptions->login_primaryColor2) !== '' ? trim((string) $pluginOptions->login_primaryColor2) : '#9e7b8a';
@@ -2574,7 +2935,9 @@ window.abSyncCompat = function(){
             $primary = $colors[0];
             $primary2 = $colors[1];
         }
+
         $bgCss = $bgImage !== '' ? "url(" . htmlspecialchars($bgImage, ENT_QUOTES, 'UTF-8') . ")" : "none";
+
         echo "\n" . '<style id="loginbeautify-style">' . "\n";
         ?>
 :root{
@@ -2592,16 +2955,19 @@ window.abSyncCompat = function(){
 --lb-bg-image: <?php echo $bgCss; ?>;
 --lb-blur: <?php echo (int) $blurSize; ?>px;
 }
+
 @media (max-width: 575px) {
   body {
     padding-top: 0 !important;
   }
 }
+
 .typecho-login-wrap{
 opacity: 0 !important;
 position: absolute !important;
 pointer-events: none !important;
 }
+
 html[data-lb-theme="dark"]{
 --lb-surface:#111827;
 --lb-surface-alpha:rgba(20,20,20,.75);
@@ -2612,9 +2978,11 @@ html[data-lb-theme="dark"]{
 --lb-input-bg: rgba(0,0,0,.2);
 --lb-input-border: rgba(255,255,255,.1);
 }
+
 html{
 transition: background-color .3s ease, color .3s ease;
 }
+
 body{
 margin:0;
 background: var(--lb-surface);
@@ -2622,6 +2990,7 @@ color: var(--lb-on-surface);
 font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
 transition: background-color .3s ease, color .3s ease;
 }
+
 .lb-wrap{
 min-height:100vh;
 display:flex;
@@ -2630,6 +2999,7 @@ justify-content:center;
 position:relative;
 overflow:hidden;
 }
+
 .lb-bg{
 position:absolute;
 inset:0;
@@ -2640,6 +3010,7 @@ background-repeat:no-repeat;
 z-index:-2;
 transform: scale(1.03);
 }
+
 .lb-bg-overlay{
 position:absolute;
 inset:0;
@@ -2647,9 +3018,11 @@ background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
 z-index:-1;
 transition: background .3s ease;
 }
+
 html[data-lb-theme="light"] .lb-bg-overlay{
 background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0));
 }
+
 .lb-card{
 width:min(400px, 94%);
 background: var(--lb-surface-alpha);
@@ -2662,17 +3035,20 @@ transition: background-color .3s ease, border-color .3s ease, box-shadow .3s eas
 backdrop-filter: blur(20px);
 -webkit-backdrop-filter: blur(20px);
 }
+
 <?php if ($blurType === 'backdrop') { ?>
 .lb-card{
 backdrop-filter: blur(var(--lb-blur));
 -webkit-backdrop-filter: blur(var(--lb-blur));
 }
 <?php } ?>
+
 <?php if ($blurType === 'filter') { ?>
 .lb-bg{
 filter: blur(var(--lb-blur));
 }
 <?php } ?>
+
 .lb-head{
 display:flex;
 flex-direction:column;
@@ -2680,17 +3056,20 @@ align-items:center;
 text-align:center;
 margin-bottom: 20px;
 }
+
 .lb-title{
 display:flex;
 flex-direction:column;
 gap:8px;
 width:100%;
 }
+
 .lb-title .name{
 font-size: 16px;
 font-weight: 500;
 color: var(--lb-on-surface-muted);
 }
+
 .lb-title .sub{
 font-size: 24px;
 font-weight: 800;
@@ -2698,9 +3077,11 @@ letter-spacing: -0.025em;
 color: var(--lb-on-surface);
 margin-bottom: 8px;
 }
+
 .lb-form .lb-field{
 margin-top: 16px;
 }
+
 .lb-form label{
 display:block;
 font-size: 12px;
@@ -2708,6 +3089,7 @@ font-weight: 500;
 color: var(--lb-on-surface-muted);
 margin: 0 0 6px 1px;
 }
+
 .lb-form input[type="text"],
 .lb-form input[type="password"],
 .lb-form input[type="email"]{
@@ -2722,16 +3104,19 @@ font-size: 14px;
 outline: none;
 transition: all .2s ease;
 }
+
 html[data-lb-theme="dark"] .lb-form input[type="text"],
 html[data-lb-theme="dark"] .lb-form input[type="password"]{
 background: rgba(255,255,255,.06);
 }
+
 .lb-form input[type="text"]:focus,
 .lb-form input[type="password"]:focus{
 border-color: var(--lb-primary);
 background: var(--lb-surface);
 box-shadow: 0 0 0 3px color-mix(in srgb, var(--lb-primary) 15%, transparent);
 }
+
 @supports not (color: color-mix(in srgb, red, blue)) {
 .lb-form input[type="text"]:focus,
 .lb-form input[type="password"]:focus{
@@ -2742,6 +3127,7 @@ html[data-lb-theme="dark"] .lb-form input[type="password"]:focus{
 box-shadow: 0 0 0 4px rgba(103,80,164,.25);
 }
 }
+
 .lb-actions{
 display:flex;
 align-items:center;
@@ -2749,6 +3135,7 @@ justify-content:space-between;
 gap:12px;
 margin: 12px 0 6px;
 }
+
 .lb-remember{
 font-size: 13px;
 color: var(--lb-on-surface2);
@@ -2756,7 +3143,9 @@ display:flex;
 align-items:center;
 gap:8px;
 }
+
 .lb-remember input{ accent-color: var(--lb-primary); }
+
 .lb-submit input[type="submit"],
 .lb-submit button{
 width:100%;
@@ -2773,16 +3162,19 @@ letter-spacing:0.5px;
 box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
 transition: all .2s ease;
 }
+
 .lb-submit input[type="submit"]:hover{
 filter: brightness(1.08);
 transform: translateY(-1px);
 box-shadow: 0 10px 15px -3px rgba(0,0,0,.15);
 }
+
 @supports not (color: color-mix(in srgb, red, blue)) {
 .lb-submit input[type="submit"]:hover{
 box-shadow: 0 10px 24px rgba(103,80,164,.30);
 }
 }
+
 .message.popup{
 position: fixed !important;
 top: 20px !important;
@@ -2802,18 +3194,22 @@ backdrop-filter: blur(10px) !important;
 animation: lb-slide-down 0.3s ease-out !important;
 z-index: 9999 !important;
 }
+
 .notice{
 background:none!important;
 }
+
 @keyframes lb-slide-down {
 from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
 to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
+
 .message.popup ul{
 margin: 0 !important;
 padding: 0 !important;
 list-style: none !important;
 }
+
 .message.popup ul li{
 padding: 14px 18px !important;
 margin: 5px !important;
@@ -2824,38 +3220,46 @@ display: flex !important;
 align-items: center !important;
 gap: 10px !important;
 }
+
 .message.popup ul li:before{
 content: '⚠' !important;
 font-size: 18px !important;
 display: inline-block !important;
 }
+
 .message.popup.notice ul li{
 background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
 color: #fff !important;
 border-radius: 14px !important;
 }
+
 .message.popup.notice ul li:before{
 content: '⚠' !important;
 font-weight: bold !important;
 }
+
 .message.popup.success ul li{
 background: linear-gradient(135deg, #10b981, #059669) !important;
 color: #fff !important;
 border-radius: 14px !important;
 }
+
 .message.popup.success ul li:before{
 content: '✓' !important;
 font-weight: bold !important;
 }
+
 .message.popup.error ul li{
 background: linear-gradient(135deg, #dc2626, #ef4444) !important;
 color: #fff !important;
 border-radius: 14px !important;
 }
+
 .message.popup.error ul li:before{
 content: '✕' !important;
 font-weight: bold !important;
 }
+
 @media (max-width: 480px) {
 .message.popup{
 top: 16px !important;
@@ -2867,6 +3271,7 @@ padding: 12px 16px !important;
 font-size: 13px !important;
 }
 }
+
 .lb-theme-toggle{
 position: fixed;
 right: 20px;
@@ -2888,41 +3293,50 @@ justify-content:center;
 padding:0;
 z-index:1000;
 }
+
 .lb-theme-toggle:hover{
 transform: translateY(-2px) scale(1.05);
 box-shadow: 0 8px 20px rgba(0,0,0,.18);
 border-color: var(--lb-primary);
 }
+
 .lb-theme-toggle:active {
 transform: translateY(0) scale(0.98);
 box-shadow: 0 2px 8px rgba(0,0,0,.12);
 }
+
 .lb-theme-toggle svg{
 width: 20px;
 height: 20px;
 transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .lb-theme-toggle .lb-icon-sun,
 .lb-theme-toggle .lb-icon-moon{
 position: absolute;
 transition: opacity .3s ease, transform .3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 html[data-lb-theme="light"] .lb-theme-toggle .lb-icon-sun{
 opacity: 0;
 transform: rotate(-90deg) scale(0.8);
 }
+
 html[data-lb-theme="light"] .lb-theme-toggle .lb-icon-moon{
 opacity: 1;
 transform: rotate(0) scale(1);
 }
+
 html[data-lb-theme="dark"] .lb-theme-toggle .lb-icon-sun{
 opacity: 1;
 transform: rotate(0) scale(1);
 }
+
 html[data-lb-theme="dark"] .lb-theme-toggle .lb-icon-moon{
 opacity: 0;
 transform: rotate(90deg) scale(0.8);
 }
+
 @media (max-width: 480px) {
 .lb-theme-toggle{
 right: 16px;
@@ -2935,9 +3349,11 @@ width: 18px;
 height: 18px;
 }
 }
+
 .lb-remember{
   display:none !important;
 }
+
 .lb-footer-theme{
 text-align: center;
 margin-top: 28px;
@@ -2949,9 +3365,11 @@ opacity: 0.55;
 transition: opacity .3s ease;
 line-height: 1.9;
 }
+
 .lb-footer-theme:hover{
 opacity: 0.95;
 }
+
 .lb-footer-theme a{
 color: inherit;
 font-weight: 600;
@@ -2960,10 +3378,12 @@ padding-bottom: 2px;
 border-bottom: 1px solid transparent;
 transition: all .2s ease;
 }
+
 .lb-footer-theme a:hover{
 color: var(--lb-primary);
 border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
 }
+
 .lb-footer-links{
 display: block;
 font-size: 11px;
@@ -2971,13 +3391,17 @@ font-weight: 400;
 opacity: 0.75;
 margin-top: 2px;
 }
+
 .lb-hide { display:none !important; }
+
 <?php
         if (trim($customCss) !== '') {
             echo "\n/* --- custom login css --- */\n";
             echo $customCss . "\n";
         }
+
         echo "</style>\n";
+
         $jsThemeMode = self::jsString($themeMode);
         echo "\n<script id=\"loginbeautify-theme-init\">
 (function(){
@@ -2985,6 +3409,7 @@ margin-top: 2px;
       var mode = {$jsThemeMode};
       var saved = localStorage.getItem('lb-theme');
       var dark = false;
+
       if (saved === 'light' || saved === 'dark') {
         dark = saved === 'dark';
       } else if (mode === 'dark') {
@@ -2994,14 +3419,17 @@ margin-top: 2px;
       } else {
         dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       }
+
       document.documentElement.setAttribute('data-lb-theme', dark ? 'dark' : 'light');
     }catch(e){}
 })();
 </script>\n";
     }
+
     // ================================================================
     // 登录页预览（config 页面用）
     // ================================================================
+
     /**
      * 渲染登录页设置预览
      */
@@ -3023,6 +3451,7 @@ margin-top: 2px;
             $blurTypeVal = 'filter';
             $blurSizeVal = 12;
         }
+
         echo '<style>
 #lb-preview{margin-top:16px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.08)}
 #lb-preview .lbpv-head{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;background:#fff}
@@ -3058,6 +3487,7 @@ margin-top: 2px;
 #lb-preview .lbpv-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 10px 15px -3px rgba(0,0,0,.15)}
 #lb-preview .lbpv-btn:active{transform:translateY(0);filter:brightness(0.95)}
 </style>';
+
         echo '<div id="lb-preview" data-theme="light">
   <div class="lbpv-head">
     <div class="lbpv-left">
@@ -3092,6 +3522,7 @@ margin-top: 2px;
     </div>
   </div>
 </div>';
+
         echo '<script>
 (function(){
     var colorPresets = {
@@ -3108,6 +3539,7 @@ margin-top: 2px;
         forest: ["#2f7a3b", "#7fbf3a"],
         lavender: ["#8f6ee8", "#b89cfb"]
     };
+
   function val(name){
     var el = document.querySelector(\'[name="\' + name + \'"]\');
     if (!el) return "";
@@ -3117,16 +3549,19 @@ margin-top: 2px;
     }
     return (el.value || "").trim();
   }
+
   var btn = document.getElementById("lbpv-btn");
   var title = document.getElementById("lbpv-title");
   var bg = document.getElementById("lbpv-bg");
   var preview = document.getElementById("lb-preview");
   var themeButtons = preview.querySelectorAll(".lbpv-theme-btns button");
   var refreshBtn = document.getElementById("lbpv-refresh");
+
   function normalizeColor(s, fallback){
     s = (s || "").trim();
     return s ? s : fallback;
   }
+
   function getCurrentColors(){
     var preset = val("login_colorPreset") || "purple";
     var c1, c2;
@@ -3140,6 +3575,7 @@ margin-top: 2px;
     }
     return {c1: c1, c2: c2};
   }
+
   function updateAllButtonColors(){
     var colors = getCurrentColors();
     var gradient = "linear-gradient(135deg," + colors.c1 + "," + colors.c2 + ")";
@@ -3156,6 +3592,7 @@ margin-top: 2px;
       }
     });
   }
+
   function render(){
     var showName = val("login_showSiteName") || "1";
     var bgUrl = val("login_bgImage") || "";
@@ -3163,10 +3600,13 @@ margin-top: 2px;
     var blurSize = parseInt(val("login_blurSize") || "12");
     if (isNaN(blurSize) || blurSize < 0) blurSize = 0;
     if (blurSize > 80) blurSize = 80;
+
     updateAllButtonColors();
     title.style.display = (showName === "1") ? "block" : "none";
+
     var overlay = preview.querySelector(".lbpv-bg-overlay");
     var body = preview.querySelector(".lbpv-body");
+
     if (bgUrl) {
       bg.style.backgroundImage = "url(\'" + bgUrl + "\')";
       bg.style.display = "block";
@@ -3189,10 +3629,12 @@ margin-top: 2px;
         body.style.background = "#f9fafb";
       }
     }
+
     bg.style.filter = "";
     var card = preview.querySelector(".lbpv-card");
     card.style.backdropFilter = "blur(20px)";
     card.style.webkitBackdropFilter = "blur(20px)";
+
     if (bgUrl && blurType === "filter") {
       bg.style.filter = "blur(" + blurSize + "px)";
     } else if (bgUrl && blurType === "backdrop") {
@@ -3201,12 +3643,14 @@ margin-top: 2px;
       card.style.webkitBackdropFilter = "blur(" + size + "px)";
     }
   }
+
   refreshBtn.addEventListener("click", function(){
     this.classList.add("spinning");
     var self = this;
     setTimeout(function(){ self.classList.remove("spinning"); }, 600);
     render();
   });
+
   themeButtons.forEach(function(themeBtn){
     themeBtn.addEventListener("click", function(){
       var theme = this.getAttribute("data-theme");
@@ -3216,10 +3660,12 @@ margin-top: 2px;
       render();
     });
   });
+
   setTimeout(function(){ render(); }, 500);
 })();
 </script>';
     }
+
     /**
      * 获取颜色方案
      */
@@ -3543,6 +3989,7 @@ margin-top: 2px;
                 '--md-dark-error'             => '#FFB4AB',
             ),
         );
+
         return isset($schemes[$scheme]) ? $schemes[$scheme] : $schemes['purple'];
     }
 }
