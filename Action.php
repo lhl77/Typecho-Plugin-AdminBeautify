@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.8
+ * @version 2.1.9
  * @link https://blog.lhl.one
  */
 

@@ -1,0 +1,428 @@
+/* ── AdminBeautify: Vditor MD3 样式 ──────────────────────────── */
+
+/* === 编辑器容器 === */
+.vditor {
+    border: 1px solid var(--md-outline-variant, #cac4d0) !important;
+    border-radius: 12px !important;
+    overflow: visible !important; /* 允许 tooltip 超出边界显示 */
+}
+
+/* === MD3 Toolbar：工具栏容器 === */
+.vditor-toolbar {
+    background: var(--md-surface-container-low, #f7f2fa) !important;
+    border-bottom: 1px solid var(--md-outline-variant, #cac4d0) !important;
+    border-radius: 12px 12px 0 0 !important; /* 顶部圆角与容器对齐，弥补 overflow:visible 后的视觉 */
+    padding: 6px 8px !important;
+    gap: 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    box-sizing: border-box !important;
+}
+.vditor-toolbar__item {
+    display: inline-flex !important;
+    align-items: center !important;
+    list-style: none !important;
+}
+/* MD3 图标按钮：36×36，圆角 8dp */
+.vditor-toolbar button,
+.vditor-toolbar__item > button {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    border-radius: 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    transition: background .15s !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+}
+/* Hover —— on-surface-variant 8% 叠加 */
+.vditor-toolbar button:hover,
+.vditor-toolbar__item > button:hover {
+    background: rgba(73, 69, 79, .08) !important;
+}
+/* 激活态 —— secondary-container */
+.vditor-toolbar__item--current > button,
+.vditor-toolbar__item--current > button:hover {
+    background: var(--md-secondary-container, #e8def8) !important;
+}
+/* 隐藏原始 SVG（由 JS 注入 material-icons-round span 替代） */
+.vditor-toolbar button svg { display: none !important; }
+/* JS 注入的 Material Icons Round span */
+.vditor-toolbar button .ab-icon {
+    font-family: 'Material Icons Round', 'Material Icons', sans-serif;
+    font-size: 20px;
+    line-height: 1;
+    font-style: normal;
+    font-weight: normal;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    color: var(--md-on-surface-variant, #49454f);
+}
+.vditor-toolbar__item--current > button .ab-icon {
+    color: var(--md-on-secondary-container, #1d192b) !important;
+}
+/* 分隔符：li.vditor-toolbar__divider */
+.vditor-toolbar__divider {
+    width: 1px !important;
+    min-width: 1px !important;
+    height: 20px !important;
+    background: var(--md-outline-variant, #cac4d0) !important;
+    border: none !important;
+    border-left: none !important;
+    margin: 0 6px !important;
+    padding: 0 !important;
+    align-self: center !important;
+    flex-shrink: 0 !important;
+    list-style: none !important;
+}
+
+/* === MD3 下拉面板 & 提示框 === */
+/* 普通面板（emoji、标题列表、more菜单等）MD3风格 */
+.vditor-hint,
+.vditor-panel:not(.vditor-panel--none) {
+    background: var(--md-surface-container, #ece6f0) !important;
+    border: 1px solid var(--md-outline-variant, #cac4d0) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,.14), 0 1px 4px rgba(0,0,0,.08) !important;
+    overflow: hidden !important;
+    padding: 4px !important;
+}
+/* WYSIWYG 浮动工具栏（vditor-panel--none）：保持原有尺寸布局，只增加 MD3 圆角/色调 */
+.vditor-panel--none {
+    background: var(--md-surface-container, #ece6f0) !important;
+    border: 1px solid var(--md-outline-variant, #cac4d0) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12) !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+    white-space: nowrap !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+}
+.vditor-hint button,
+.vditor-panel:not(.vditor-panel--none) button {
+    border-radius: 8px !important;
+    padding: 6px 12px !important;
+    transition: background .15s !important;
+    width: calc(100% - 8px) !important;
+    margin: 0 !important;
+    display: block !important;
+}
+.vditor-hint button:hover,
+.vditor-panel:not(.vditor-panel--none) button:hover,
+.vditor-panel:not(.vditor-panel--none) button.vditor-panel__action--current {
+    background: var(--md-secondary-container, #e8def8) !important;
+    color: var(--md-on-secondary-container, #1d192b) !important;
+}
+
+/* 隐藏 edit-mode / more 按钮（从 toolbar config 已移除，CSS 双保险） */
+.vditor-toolbar__item:has(> button[data-type="edit-mode"]),
+.vditor-toolbar__item:has(> button[data-type="more"]) {
+    display: none !important;
+}
+
+/* === MD3 Segmented Button：模式切换栏 === */
+#ab-vditor-mode-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+/* 模式按钮组（胶囊 pill 样式） */
+.ab-mode-btn-group {
+    display: inline-flex;
+    background: transparent;
+    border: 1px solid var(--md-outline, #79747e);
+    border-radius: 40px;
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+    align-items: stretch;
+}
+#ab-vditor-mode-bar button.ab-mode-btn {
+    padding: 0 20px;
+    height: 40px;
+    border-radius: 0;
+    border: none;
+    border-left: 1px solid var(--md-outline, #79747e);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    background: transparent;
+    color: var(--md-on-surface, #1c1b1f);
+    transition: background .15s, color .15s;
+    white-space: nowrap;
+    line-height: 1;
+    font-family: inherit;
+    letter-spacing: .1px;
+}
+#ab-vditor-mode-bar button.ab-mode-btn:first-child {
+    border-left: none;
+}
+#ab-vditor-mode-bar button.ab-mode-btn:hover:not(.ab-mode-active) {
+    background: rgba(73, 69, 79, .08);
+}
+#ab-vditor-mode-bar button.ab-mode-btn.ab-mode-active {
+    background: var(--md-secondary-container, #e8def8);
+    color: var(--md-on-secondary-container, #1d192b);
+}
+/* 暗色模式：模式栏 */
+[data-theme="dark"] #ab-vditor-mode-bar {
+    border-color: var(--md-outline, #938f99);
+}
+[data-theme="dark"] .ab-mode-btn-group {
+    border-color: var(--md-outline, #938f99);
+}
+[data-theme="dark"] #ab-vditor-mode-bar button.ab-mode-btn {
+    border-left-color: var(--md-outline, #938f99);
+    color: var(--md-on-surface, #e6e1e5);
+}
+[data-theme="dark"] #ab-vditor-mode-bar button.ab-mode-btn:hover:not(.ab-mode-active) {
+    background: rgba(202, 196, 208, .08);
+}
+[data-theme="dark"] #ab-vditor-mode-bar button.ab-mode-btn.ab-mode-active {
+    background: var(--md-secondary-container, #4a4458);
+    color: var(--md-on-secondary-container, #ccc2dc);
+}
+
+/* === 自定义全屏按钮（MD3 Toolbar Icon Button，与 PageDown 全屏按钮风格一致） === */
+#ab-vditor-fullscreen-btn {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    flex-shrink: 0;
+    border-radius: 8px !important;
+    background: transparent;
+    color: var(--md-on-surface-variant, #49454f);
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, transform .1s;
+    box-shadow: none;
+}
+#ab-vditor-fullscreen-btn:hover {
+    background: rgba(73, 69, 79, .08);
+}
+#ab-vditor-fullscreen-btn:active {
+    background: rgba(73, 69, 79, .12);
+    transform: scale(.93);
+}
+#ab-vditor-fullscreen-btn .ab-icon {
+    font-family: 'Material Icons Round', 'Material Icons', sans-serif;
+    font-size: 20px;
+    line-height: 1;
+    font-style: normal;
+    font-weight: normal;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+}
+[data-theme="dark"] #ab-vditor-fullscreen-btn {
+    color: var(--md-on-surface-variant, #cac4d0);
+}
+[data-theme="dark"] #ab-vditor-fullscreen-btn:hover {
+    background: rgba(202, 196, 208, .08);
+}
+[data-theme="dark"] #ab-vditor-fullscreen-btn:active {
+    background: rgba(202, 196, 208, .12);
+}
+
+/* === 全屏容器（wrap 包裹模式栏 + 编辑器） === */
+#ab-vditor-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+/* 全屏激活态：固定覆盖整个视口，动画由 JS 控制 clip-path */
+#ab-vditor-wrap.ab-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    z-index: 9000 !important;
+    background: var(--md-surface, #fffbfe) !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    overflow: hidden !important;
+}
+[data-theme="dark"] #ab-vditor-wrap.ab-fullscreen {
+    background: var(--md-surface, #141218) !important;
+}
+/* 全屏时隐藏右侧侧边栏（分类/标签/选项等） */
+body.ab-vditor-fullscreen #edit-secondary,
+body.ab-vditor-fullscreen .typecho-option-tabs {
+    display: none !important;
+}
+/* 全屏时模式栏固定在顶部 */
+#ab-vditor-wrap.ab-fullscreen #ab-vditor-mode-bar {
+    padding: 12px 16px 8px 16px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+    background: var(--md-surface, #fffbfe);
+    border-bottom: 1px solid var(--md-outline-variant, #cac4d0);
+}
+[data-theme="dark"] #ab-vditor-wrap.ab-fullscreen #ab-vditor-mode-bar {
+    background: var(--md-surface, #141218);
+    border-bottom-color: var(--md-outline-variant, #49454f);
+}
+/* 全屏时编辑器撑满剩余高度 */
+#ab-vditor-wrap.ab-fullscreen #ab-vditor {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+}
+/* 全屏时 .vditor 覆盖 Vditor 的内联 style="height:Xpx"，撑满父容器 */
+#ab-vditor-wrap.ab-fullscreen #ab-vditor .vditor {
+    height: 100% !important;
+}
+/* 全屏时 .vditor-content 区域同步撑满 */
+#ab-vditor-wrap.ab-fullscreen #ab-vditor .vditor-content {
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    min-height: 0 !important;
+}
+
+/* === 暗色 Vditor 工具栏 === */
+.vditor--dark .vditor-toolbar {
+    background: var(--md-surface-container-low, #1d1b20) !important;
+    border-color: var(--md-outline-variant, #49454f) !important;
+}
+.vditor--dark .vditor-toolbar button:hover,
+.vditor--dark .vditor-toolbar__item > button:hover {
+    background: rgba(202, 196, 208, .08) !important;
+}
+.vditor--dark .vditor-toolbar__item--current > button {
+    background: var(--md-secondary-container, #4a4458) !important;
+}
+.vditor--dark .vditor-toolbar__item--current > button .ab-icon {
+    color: var(--md-on-secondary-container, #ccc2dc) !important;
+}
+.vditor--dark .vditor-toolbar button .ab-icon {
+    color: var(--md-on-surface-variant, #cac4d0) !important;
+}
+.vditor--dark .vditor-toolbar__divider {
+    background: var(--md-outline-variant, #49454f) !important;
+}
+.vditor--dark .vditor-hint,
+.vditor--dark .vditor-panel:not(.vditor-panel--none) {
+    background: var(--md-surface-container, #2d2b31) !important;
+    border-color: var(--md-outline-variant, #49454f) !important;
+}
+.vditor--dark .vditor-panel--none {
+    background: var(--md-surface-container, #2d2b31) !important;
+    border-color: var(--md-outline-variant, #49454f) !important;
+}
+.vditor--dark .vditor-hint button:hover,
+.vditor--dark .vditor-panel:not(.vditor-panel--none) button:hover,
+.vditor--dark .vditor-panel:not(.vditor-panel--none) button.vditor-panel__action--current {
+    background: var(--md-secondary-container, #4a4458) !important;
+    color: var(--md-on-secondary-container, #ccc2dc) !important;
+}
+
+/* === 修复：覆盖 AdminBeautify 全局 input[type=number] 样式对 Vditor 面板输入框的影响 === */
+/* AdminBeautify 全局 CSS 给 input[type=number] 设置了 padding:12px 16px !important 和暗色背景，
+   导致 WYSIWYG 浮动工具栏中行/列数字输入框显示为大黑方块。在此处重置为 Vditor 原生样式。 */
+.vditor .vditor-input {
+    background: var(--panel-background-color) !important;
+    background-color: var(--panel-background-color) !important;
+    border: 0 !important;
+    padding: 3px 5px !important;
+    border-radius: 3px !important;
+    color: var(--textarea-text-color) !important;
+    font-size: 12px !important;
+    line-height: normal !important;
+    height: auto !important;
+    min-height: unset !important;
+    box-shadow: none !important;
+    box-sizing: content-box !important;
+    width: 84px !important;
+    text-align: center !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+/* 让面板（panel--none）内的输入框加细边框，视觉上更清晰 */
+.vditor-panel--none .vditor-input {
+    border: 1px solid var(--md-outline-variant, #cac4d0) !important;
+    border-radius: 4px !important;
+    padding: 2px 4px !important;
+}
+[data-theme="dark"] .vditor-panel--none .vditor-input {
+    border-color: var(--md-outline-variant, #49454f) !important;
+}
+/* panel--none 内的按钮（vditor-icon）保持 Vditor 原生小图标尺寸，不被 AdminBeautify 按钮样式覆盖 */
+.vditor-panel--none button.vditor-icon {
+    width: 23px !important;
+    height: 21px !important;
+    padding: 4px 5px !important;
+    border-radius: 3px !important;
+    background: transparent !important;
+    border: 0 !important;
+    float: left !important;
+    display: inline-block !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    box-sizing: content-box !important;
+}
+.vditor-panel--none button.vditor-icon svg {
+    display: block !important;
+    width: 13px !important;
+    height: 13px !important;
+    float: left !important;
+}
+.vditor-panel--none button.vditor-icon:hover {
+    background: var(--md-secondary-container, #e8def8) !important;
+    border-radius: 4px !important;
+}
+[data-theme="dark"] .vditor-panel--none button.vditor-icon:hover {
+    background: var(--md-secondary-container, #4a4458) !important;
+}
+/* 面板浮动工具栏：Material Icons Round 图标（不限 --none，面板可见时同样生效） */
+.vditor-panel button.vditor-icon .ab-icon {
+    font-family: 'Material Icons Round', 'Material Icons', sans-serif;
+    font-size: 13px;
+    line-height: 1;
+    font-style: normal;
+    font-weight: normal;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
+    display: block;
+    float: left;
+    pointer-events: none;
+    user-select: none;
+    color: var(--toolbar-icon-color);
+    width: 13px;
+    height: 13px;
+}
+/* 有 .ab-icon 时隐藏原生 SVG（覆盖所有面板状态） */
+.vditor-panel button.vditor-icon:has(.ab-icon) svg {
+    display: none !important;
+}

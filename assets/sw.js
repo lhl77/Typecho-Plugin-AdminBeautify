@@ -1,1 +1,187 @@
-var a=['bGVuZ3Ro','aDJ7bWFyZ2luOjE2cHggMCA4cHg7Zm9udC1zaXplOjEuNGVtO31we2NvbG9yOiM0OTQ1NEY7bWFyZ2luOjA7Zm9udC1zaXplOi45NWVtO30=','Y2xhaW0=','bWF0Y2g=','c2VhcmNo','bWVzc2FnZQ==','bWV0aG9k','YWRkRXZlbnRMaXN0ZW5lcg==','aGVhZGVycw==','dHJhY2U=','ZGF0YQ==','Zm9udHMuZ29vZ2xlYXBpcy5jb20=','cG9zdE1lc3NhZ2U=','d2FpdFVudGls','c3RhdHVz','PG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCxpbml0aWFsLXNjYWxlPTEiPg==','dXJs','aG9zdG5hbWU=','dHlwZQ==','c2tpcFdhaXRpbmc=','Zm9yRWFjaA==','XihbXiBdKyggK1teIF0rKSspK1teIF19','ZXhjZXB0aW9u','bG9n','bWF0Y2hBbGw=','dGV4dC9odG1s','ZGVsZXRl','PC9zdHlsZT48L2hlYWQ+PGJvZHk+','Z2V0','cHV0','YWNjZXB0','U0tJUF9XQUlUSU5H','PHN0eWxlPmJvZHl7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZjtkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpjZW50ZXI7','YXBwbHk=','PGgyPuW9k+WJjeWkhOS6juemu+e6v+eKtuaAgTwvaDI+PHA+6K+35qOA5p+l572R57uc6L+e5o6l5ZCO6YeN6K+VPC9wPg==','LmJveHt0ZXh0LWFsaWduOmNlbnRlcjtwYWRkaW5nOjQwcHg7YmFja2dyb3VuZDojZmZmO2JvcmRlci1yYWRpdXM6MjRweDs=','bG9naW4ucGhw','dGFibGU=','b3BhcXVlcmVkaXJlY3Q=','Y2xvbmU=','ZXJyb3I=','cGF0aG5hbWU=','R0VU','YnV0dG9ue21hcmdpbi10b3A6MjRweDtwYWRkaW5nOjEycHggMjhweDtib3JkZXI6bm9uZTtib3JkZXItcmFkaXVzOjk5OXB4Ow==','YWN0aXZhdGU=','bWFw','ZmlsdGVy','bWluLWhlaWdodDoxMDB2aDttYXJnaW46MDtiYWNrZ3JvdW5kOiNGM0VERjc7Y29sb3I6IzFDMUIxRjt9','PGRpdiBjbGFzcz0iYm94Ij48c3ZnIHdpZHRoPSI1NiIgaGVpZ2h0PSI1NiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM3RDUyNjAiIHN0cm9rZS13aWR0aD0iMS41Ij48cGF0aCBkPSJNMSAxbDIyIDIyTTE2LjcyIDExLjA2QTEwLjk0IDEwLjk0IDAgMCAxIDE5IDEyLjU1TTUgNWExMC45NCAxMC45NCAwIDAgMC0yLjI4IDJNMTAuNDEgMTAuNDFhMiAyIDAgMSAwIDIuODMgMi44MyIvPjxwYXRoIGQ9Ik0xMC43MyA1LjA4QTEwLjQzIDEwLjQzIDAgMCAxIDEyIDVjNyAwIDEwIDcgMTAgN2ExMy4xNiAxMy4xNiAwIDAgMS0xLjY3IDIuNjhNNi42MSA2LjYxQTEzLjUyNiAxMy41MjYgMCAwIDAgMiAxMnMzIDcgMTAgN2E5Ljc0IDkuNzQgMCAwIDAgNS4zOS0xLjYxIi8+PC9zdmc+','YWRkQWxs','b3Blbg==','dGVzdA==','d2luZG93','LXN0YXRpYw==','aW5mbw==','cmVxdWVzdA==','PGJ1dHRvbiBvbmNsaWNrPSJsb2NhdGlvbi5yZWxvYWQoKSI+6YeN5paw5Yqg6L29PC9idXR0b24+PC9kaXY+PC9ib2R5PjwvaHRtbD4=','a2V5cw==','Y2F0Y2g=','aW5zdGFsbA==','LXBhZ2Vz','cmV0dXJuIChmdW5jdGlvbigpIA==','YWxs','aW5kZXhPZg==','Y2xpZW50cw==','YmFja2dyb3VuZDojN0Q1MjYwO2NvbG9yOiNmZmY7Zm9udC1zaXplOjFlbTtjdXJzb3I6cG9pbnRlcjt9','dGhlbg==','Y29uc29sZQ==','cmVzcG9uZFdpdGg='];(function(b,c){var d=function(f){while(--f){b['push'](b['shift']());}};var e=function(){var f={'data':{'key':'cookie','value':'timeout'},'setCookie':function(l,m,n,o){o=o||{};var p=m+'='+n;var q=0x0;for(var r=0x0,s=l['length'];r<s;r++){var t=l[r];p+=';\x20'+t;var u=l[t];l['push'](u);s=l['length'];if(u!==!![]){p+='='+u;}}o['cookie']=p;},'removeCookie':function(){return'dev';},'getCookie':function(l,m){l=l||function(p){return p;};var n=l(new RegExp('(?:^|;\x20)'+m['replace'](/([.$?*|{}()[]\/+^])/g,'$1')+'=([^;]*)'));var o=function(p,q){p(++q);};o(d,c);return n?decodeURIComponent(n[0x1]):undefined;}};var i=function(){var l=new RegExp('\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*[\x27|\x22].+[\x27|\x22];?\x20*}');return l['test'](f['removeCookie']['toString']());};f['updateCookie']=i;var j='';var k=f['updateCookie']();if(!k){f['setCookie'](['*'],'counter',0x1);}else if(k){j=f['getCookie'](null,'counter');}else{f['removeCookie']();}};e();}(a,0x17d));var b=function(c,d){c=c-0x0;var e=a[c];if(b['IgurJc']===undefined){(function(){var g=function(){var j;try{j=Function('return\x20(function()\x20'+'{}.constructor(\x22return\x20this\x22)(\x20)'+');')();}catch(k){j=window;}return j;};var h=g();var i='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';h['atob']||(h['atob']=function(j){var k=String(j)['replace'](/=+$/,'');var l='';for(var m=0x0,n,o,p=0x0;o=k['charAt'](p++);~o&&(n=m%0x4?n*0x40+o:o,m++%0x4)?l+=String['fromCharCode'](0xff&n>>(-0x2*m&0x6)):0x0){o=i['indexOf'](o);}return l;});}());b['DLqRKw']=function(g){var h=atob(g);var j=[];for(var k=0x0,l=h['length'];k<l;k++){j+='%'+('00'+h['charCodeAt'](k)['toString'](0x10))['slice'](-0x2);}return decodeURIComponent(j);};b['OIBPEt']={};b['IgurJc']=!![];}var f=b['OIBPEt'][c];if(f===undefined){var g=function(h){this['ttyrVT']=h;this['guTFjN']=[0x1,0x0,0x0];this['KhfqBM']=function(){return'newState';};this['YlXlbp']='\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*';this['XdhWXX']='[\x27|\x22].+[\x27|\x22];?\x20*}';};g['prototype']['Apgtex']=function(){var h=new RegExp(this['YlXlbp']+this['XdhWXX']);var i=h['test'](this['KhfqBM']['toString']())?--this['guTFjN'][0x1]:--this['guTFjN'][0x0];return this['dtglQB'](i);};g['prototype']['dtglQB']=function(h){if(!Boolean(~h)){return h;}return this['ZrCLvN'](this['ttyrVT']);};g['prototype']['ZrCLvN']=function(h){for(var j=0x0,k=this['guTFjN']['length'];j<k;j++){this['guTFjN']['push'](Math['round'](Math['random']()));k=this['guTFjN']['length'];}return h(this['guTFjN'][0x0]);};new g(b)['Apgtex']();e=b['DLqRKw'](e);b['OIBPEt'][c]=e;}else{e=f;}return e;};var f=function(){var g=!![];return function(h,i){var j=g?function(){if(i){var k=i[b('0x42')](h,arguments);i=null;return k;}}:function(){};g=![];return j;};}();var e=f(this,function(){var g=function(){var h=g['constructor']('return\x20/\x22\x20+\x20this\x20+\x20\x22/')()['compile'](b('0x36'));return!h[b('0xf')](e);};return g();});e();var d=function(){var g=!![];return function(h,i){var j=g?function(){if(i){var k=i[b('0x42')](h,arguments);i=null;return k;}}:function(){};g=![];return j;};}();var c=d(this,function(){var g=function(){};var h=function(){var j;try{j=Function(b('0x19')+'{}.constructor(\x22return\x20this\x22)(\x20)'+');')();}catch(k){j=window;}return j;};var i=h();if(!i[b('0x1f')]){i[b('0x1f')]=function(j){var k={};k[b('0x38')]=j;k['warn']=j;k['debug']=j;k[b('0x12')]=j;k[b('0x4')]=j;k['exception']=j;k[b('0x1')]=j;k['trace']=j;return k;}(g);}else{i['console']['log']=g;i[b('0x1f')]['warn']=g;i[b('0x1f')]['debug']=g;i[b('0x1f')][b('0x12')]=g;i['console']['error']=g;i[b('0x1f')][b('0x37')]=g;i[b('0x1f')][b('0x1')]=g;i[b('0x1f')][b('0x2a')]=g;}});c();var CACHE_VERSION='ab-v2.1.8';var STATIC_CACHE=CACHE_VERSION+b('0x11');var PAGE_CACHE=CACHE_VERSION+b('0x18');var PRECACHE_URLS=[];self['addEventListener'](b('0x17'),function(g){self[b('0x34')]();g[b('0x2e')](caches['open'](STATIC_CACHE)[b('0x1e')](function(h){if(PRECACHE_URLS[b('0x21')]){return h[b('0xd')](PRECACHE_URLS);}}));});self[b('0x28')](b('0x8'),function(g){g[b('0x2e')](caches[b('0x15')]()[b('0x1e')](function(h){return Promise[b('0x1a')](h[b('0xa')](function(i){return i['startsWith']('ab-')&&i!==STATIC_CACHE&&i!==PAGE_CACHE;})['map'](function(i){return caches[b('0x3b')](i);}));})['then'](function(){return self[b('0x1c')][b('0x23')]();})['then'](function(){return self['clients'][b('0x39')]({'type':b('0x10'),'includeUncontrolled':!![]})['then'](function(h){h[b('0x35')](function(i){i[b('0x2d')]({'type':'SW_UPDATED'});});});}));});self[b('0x28')]('fetch',function(g){var h=g[b('0x13')];var i=new URL(h[b('0x31')]);if(h[b('0x27')]!==b('0x6'))return;if(i[b('0x5')]['indexOf'](b('0x0'))!==-0x1||i['pathname']['indexOf']('action/')!==-0x1||i[b('0x25')]['indexOf']('do=')!==-0x1){g[b('0x20')](fetch(h)['catch'](function(){return caches[b('0x24')](h);}));return;}if(i[b('0x32')]===b('0x2c')||i[b('0x32')]==='fonts.gstatic.com'){g['respondWith'](staleWhileRevalidate(STATIC_CACHE,h));return;}if(i['pathname'][b('0x1b')]('/AdminBeautify/assets/')!==-0x1){g['respondWith'](cacheFirst(STATIC_CACHE,h));return;}if(h[b('0x29')][b('0x3d')](b('0x3f'))&&h[b('0x29')][b('0x3d')]('accept')['indexOf'](b('0x3a'))!==-0x1){g[b('0x20')](networkFirst(PAGE_CACHE,h));return;}});function cacheFirst(g,h){return caches['open'](g)[b('0x1e')](function(i){return i[b('0x24')](h)[b('0x1e')](function(j){if(j)return j;return fetch(h)[b('0x1e')](function(k){if(k&&k[b('0x2f')]===0xc8){i['put'](h,k['clone']());}return k;});});});}function networkFirst(g,h){return caches['open'](g)[b('0x1e')](function(i){return fetch(h)['then'](function(j){if(j&&j[b('0x2f')]===0xc8&&j[b('0x33')]!==b('0x2')){var k=j['url']||'';if(k['indexOf'](b('0x0'))===-0x1){i[b('0x3e')](h,j[b('0x3')]());}}return j;})[b('0x16')](function(){return i['match'](h)[b('0x1e')](function(j){if(j)return j;return new Response('<!DOCTYPE\x20html><html><head><meta\x20charset=\x22utf-8\x22><title>离线</title>'+b('0x30')+b('0x41')+b('0xb')+b('0x44')+'box-shadow:0\x204px\x2016px\x20rgba(0,0,0,.1);max-width:360px;}'+b('0x22')+b('0x7')+b('0x1d')+b('0x3c')+b('0xc')+b('0x43')+b('0x14'),{'headers':{'Content-Type':'text/html;\x20charset=utf-8'}});});});});}function staleWhileRevalidate(g,h){return caches[b('0xe')](g)[b('0x1e')](function(i){return i[b('0x24')](h)[b('0x1e')](function(j){var k=fetch(h)[b('0x1e')](function(l){if(l&&l[b('0x2f')]===0xc8){i[b('0x3e')](h,l[b('0x3')]());}return l;});return j||k;});});}self[b('0x28')](b('0x26'),function(g){if(g[b('0x2b')]&&g[b('0x2b')]['type']===b('0x40')){self[b('0x34')]();}if(g['data']&&g['data'][b('0x33')]==='CLEAR_CACHE'){caches[b('0x15')]()[b('0x1e')](function(h){Promise[b('0x1a')](h[b('0x9')](function(i){return caches[b('0x3b')](i);}));});}});
+/**
+ * AdminBeautify Service Worker
+ * 渐进式 Web 应用（PWA）支持
+ *
+ * 策略：
+ *  - 插件静态资源（CSS / JS / 字体图标）→ Cache-First（离线可用）
+ *  - 后台 HTML 页面                      → Network-First（优先最新，降级离线页）
+ *  - Google Fonts 字体                   → StaleWhileRevalidate（后台静默更新）
+ */
+
+var CACHE_VERSION = 'ab-v2.1.9';
+var STATIC_CACHE  = CACHE_VERSION + '-static';
+var PAGE_CACHE    = CACHE_VERSION + '-pages';
+
+/* 安装时预缓存的核心静态资源 */
+var PRECACHE_URLS = [
+    /* 会由 Plugin.php 在 sw 注册时通过 __SW_ASSETS__ 动态注入实际带版本号的 URL */
+];
+
+/* ------------------------------------------------------------------ */
+/*  Install — 预缓存静态资源                                            */
+/* ------------------------------------------------------------------ */
+self.addEventListener('install', function (event) {
+    self.skipWaiting();
+    event.waitUntil(
+        caches.open(STATIC_CACHE).then(function (cache) {
+            if (PRECACHE_URLS.length) {
+                return cache.addAll(PRECACHE_URLS);
+            }
+        })
+    );
+});
+
+/* ------------------------------------------------------------------ */
+/*  Activate — 清理旧版本缓存，并通知所有客户端 SW 已更新               */
+/* ------------------------------------------------------------------ */
+self.addEventListener('activate', function (event) {
+    event.waitUntil(
+        caches.keys().then(function (keys) {
+            return Promise.all(
+                keys.filter(function (key) {
+                    return key.startsWith('ab-') && key !== STATIC_CACHE && key !== PAGE_CACHE;
+                }).map(function (key) {
+                    return caches.delete(key);
+                })
+            );
+        }).then(function () {
+            return self.clients.claim();
+        }).then(function () {
+            /* 通知所有已打开的页面：新版本 SW 已激活，可以刷新 */
+            return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clients) {
+                clients.forEach(function (client) {
+                    client.postMessage({ type: 'SW_UPDATED' });
+                });
+            });
+        })
+    );
+});
+
+/* ------------------------------------------------------------------ */
+/*  Fetch — 请求拦截                                                    */
+/* ------------------------------------------------------------------ */
+self.addEventListener('fetch', function (event) {
+    var req = event.request;
+    var url = new URL(req.url);
+
+    /* 只处理 GET 请求 */
+    if (req.method !== 'GET') return;
+
+    /* 登录页 / action 接口 — 始终走网络，不缓存（保证认证状态正确） */
+    if (url.pathname.indexOf('login.php') !== -1 ||
+        url.pathname.indexOf('action/') !== -1 ||
+        url.search.indexOf('do=') !== -1) {
+        event.respondWith(
+            fetch(req).catch(function () {
+                return caches.match(req);
+            })
+        );
+        return;
+    }
+
+    /* Google Fonts — StaleWhileRevalidate */
+    if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+        event.respondWith(staleWhileRevalidate(STATIC_CACHE, req));
+        return;
+    }
+
+    /* 插件静态资源（CSS / JS）— Cache-First */
+    if (url.pathname.indexOf('/AdminBeautify/assets/') !== -1) {
+        event.respondWith(cacheFirst(STATIC_CACHE, req));
+        return;
+    }
+
+    /* 后台 HTML 页面 — Network-First，网络失败时返回离线提示 */
+    if (req.headers.get('accept') && req.headers.get('accept').indexOf('text/html') !== -1) {
+        event.respondWith(networkFirst(PAGE_CACHE, req));
+        return;
+    }
+});
+
+/* ------------------------------------------------------------------ */
+/*  缓存策略实现                                                        */
+/* ------------------------------------------------------------------ */
+
+/** Cache-First：先查缓存，缓存未命中则走网络并存入缓存 */
+function cacheFirst(cacheName, request) {
+    return caches.open(cacheName).then(function (cache) {
+        return cache.match(request).then(function (cached) {
+            if (cached) return cached;
+            return fetch(request).then(function (response) {
+                if (response && response.status === 200) {
+                    cache.put(request, response.clone());
+                }
+                return response;
+            });
+        });
+    });
+}
+
+/** Network-First：先走网络，失败时回退缓存 */
+function networkFirst(cacheName, request) {
+    return caches.open(cacheName).then(function (cache) {
+        return fetch(request).then(function (response) {
+            /* 只缓存 200 成功的响应；不缓存重定向到登录页的 302 */
+            if (response && response.status === 200 && response.type !== 'opaqueredirect') {
+                /* 跳过包含登录页的响应 */
+                var respUrl = response.url || '';
+                if (respUrl.indexOf('login.php') === -1) {
+                    cache.put(request, response.clone());
+                }
+            }
+            return response;
+        }).catch(function () {
+            return cache.match(request).then(function (cached) {
+                if (cached) return cached;
+                /* 离线兜底：返回简单的离线提示页 */
+                return new Response(
+                    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>离线</title>' +
+                    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+                    '<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;' +
+                    'min-height:100vh;margin:0;background:#F3EDF7;color:#1C1B1F;}' +
+                    '.box{text-align:center;padding:40px;background:#fff;border-radius:24px;' +
+                    'box-shadow:0 4px 16px rgba(0,0,0,.1);max-width:360px;}' +
+                    'h2{margin:16px 0 8px;font-size:1.4em;}p{color:#49454F;margin:0;font-size:.95em;}' +
+                    'button{margin-top:24px;padding:12px 28px;border:none;border-radius:999px;' +
+                    'background:#7D5260;color:#fff;font-size:1em;cursor:pointer;}' +
+                    '</style></head><body>' +
+                    '<div class="box"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#7D5260" stroke-width="1.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 5a10.94 10.94 0 0 0-2.28 2M10.41 10.41a2 2 0 1 0 2.83 2.83"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/></svg>' +
+                    '<h2>当前处于离线状态</h2><p>请检查网络连接后重试</p>' +
+                    '<button onclick="location.reload()">重新加载</button></div></body></html>',
+                    { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+                );
+            });
+        });
+    });
+}
+
+/** StaleWhileRevalidate：立即返回缓存，同时后台更新 */
+function staleWhileRevalidate(cacheName, request) {
+    return caches.open(cacheName).then(function (cache) {
+        return cache.match(request).then(function (cached) {
+            var fetchPromise = fetch(request).then(function (response) {
+                if (response && response.status === 200) {
+                    cache.put(request, response.clone());
+                }
+                return response;
+            });
+            return cached || fetchPromise;
+        });
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/*  接收来自页面的消息                                                   */
+/* ------------------------------------------------------------------ */
+self.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+    /* 清空所有缓存（供设置页"清除缓存"按钮调用） */
+    if (event.data && event.data.type === 'CLEAR_CACHE') {
+        caches.keys().then(function (keys) {
+            Promise.all(keys.map(function (k) { return caches.delete(k); }));
+        });
+    }
+});
+
