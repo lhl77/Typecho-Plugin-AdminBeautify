@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.9
+ * @version 2.1.10
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.9';
+        $abVer = '2.1.10';
 
         // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
@@ -291,6 +291,29 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择插件管理页面的展示方式：卡片网格更直观，原始表格与 Typecho 默认保持一致')
         );
         $form->addInput($pluginCardView);
+
+        // 概要页快捷操作 - 原有按钮显示/隐藏
+        $dashboardQuickShow = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardQuickShow',
+            array(
+                '1' => '显示 (默认)',
+                '0' => '隐藏',
+            ),
+            '1',
+            _t('概要页快捷操作'),
+            _t('是否显示概要页中 Typecho 原有的快捷操作按钮（写文章、管理评论等）')
+        );
+        $form->addInput($dashboardQuickShow);
+
+        // 概要页自定义快捷按钮
+        $dashboardCustomButtons = new Typecho_Widget_Helper_Form_Element_Textarea(
+            'dashboardCustomButtons',
+            null,
+            '',
+            _t('概要页自定义快捷按钮'),
+            _t('每行一个按钮，格式：<code>名称:地址:图标</code>，图标名称来自 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a>。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:/:public</code><br><code>管理评论:manage-comments.php:comment</code>')
+        );
+        $form->addInput($dashboardCustomButtons);
 
         // ================================================================
         // ====== 编辑器设置（MD3 折叠卡片） ======
@@ -707,7 +730,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView","dashboardQuickShow","dashboardCustomButtons"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -716,6 +739,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             var form=firstAdminUl.parentNode;
             form.insertBefore(adminCard,firstAdminUl);
             for(var i=0;i<adminFields.length;i++){
+                // 在"概要页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="dashboardQuickShow"){
+                    var abDivider=document.createElement("div");
+                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
+                    abGroupLabel.textContent="概要页";
+                    adminBody.appendChild(abGroupLabel);
+                }
                 var ul=findFieldUl(adminFields[i]);
                 if(ul) adminBody.appendChild(ul);
             }
@@ -1623,11 +1656,24 @@ if(document.readyState==="loading"){
             $injectHead .= '--md-transition-duration:0.2s;';
         }
 
-        $injectHead .= '}</style>';
+        $injectHead .= '}';
+        // ── 全局加载遮罩样式 ──────────────────────────────────────────────────────
+        // body 在 data-ab-loading 期间完全隐藏，防止 JS 增强完成前的原始界面闪现；
+        // #ab-page-loader 由 PHP footer 注入 DOM，通过属性选择器激活显示。
+        // JS init() 末尾调用 removeAttribute('data-ab-loading') 移除遮罩。
+        // PHP head 的 DOMContentLoaded 脚本作为 JS 失败时的保底降级移除。
+        $injectHead .= '[data-ab-loading] body{visibility:hidden!important;}';
+        $injectHead .= '#ab-page-loader{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:var(--md-surface,#FFFBFE);align-items:center;justify-content:center;}';
+        $injectHead .= '[data-theme="dark"] #ab-page-loader{background:var(--md-dark-surface,#1C1B1F)!important;}';
+        $injectHead .= '[data-ab-loading] #ab-page-loader{display:flex!important;visibility:visible!important;}';
+        $injectHead .= '#ab-loader-spinner{width:44px;height:44px;border-radius:50%;border:3.5px solid rgba(0,0,0,0.1);border-top-color:var(--md-primary,#1976D2);animation:ab-spin 0.72s linear infinite;}';
+        $injectHead .= '[data-theme="dark"] #ab-loader-spinner{border-color:rgba(255,255,255,0.1);border-top-color:var(--md-primary,#90CAF9);}';
+        $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
+        $injectHead .= '</style>';
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.9' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.10' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -1724,6 +1770,10 @@ if(document.readyState==="loading"){
             return;
         }
 
+        // 全局加载遮罩 DOM — 必须先于 JS 文件输出，以便 CSS data-ab-loading 规则立即激活显示；
+        // JS init() 末尾移除 data-ab-loading 属性时，CSS 将自动隐藏此元素。
+        echo '<div id="ab-page-loader"><div id="ab-loader-spinner"></div></div>';
+
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
         $darkMode = $pluginOptions->darkMode ?: 'auto';
@@ -1732,6 +1782,8 @@ if(document.readyState==="loading"){
         $pluginCardView = isset($pluginOptions->pluginCardView) ? (string)$pluginOptions->pluginCardView : '1';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
+        $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
+        $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
 
         // Inject user avatar URL for sidebar header
         $user = Typecho_Widget::widget('Widget_User');
@@ -1753,19 +1805,34 @@ if(document.readyState==="loading"){
             'token' => $token,
         )) . ';';
         $notifyOptOut = isset($pluginOptions->notifyOptOut) ? (string)$pluginOptions->notifyOptOut : '0';
+        // 解析自定义快捷按钮：每行 名称:地址:图标，生成 JSON 数组
+        $customBtnsRaw = $dashboardCustomButtons;
+        $customBtnsParsed = array();
+        foreach (array_filter(array_map('trim', explode("\n", $customBtnsRaw))) as $line) {
+            $parts = array_map('trim', explode(':', $line, 3));
+            if (count($parts) >= 2 && $parts[0] !== '' && $parts[1] !== '') {
+                $customBtnsParsed[] = array(
+                    'label' => $parts[0],
+                    'href'  => $parts[1],
+                    'icon'  => isset($parts[2]) && $parts[2] !== '' ? $parts[2] : 'link',
+                );
+            }
+        }
         echo 'window.__AB_CONFIG__=' . json_encode(array(
-            'darkMode'         => $darkMode,
-            'enableAnimation'  => $enableAnimation,
-            'pluginCardView'   => $pluginCardView,
-            'siteName'         => $options->title,
-            'editorVditor'     => $editorVditor,
-            'editorVditorMode' => $editorVditorMode,
-            'pluginVersion'    => '2.1.9',
-            'notifyOptOut'     => $notifyOptOut,
+            'darkMode'               => $darkMode,
+            'enableAnimation'        => $enableAnimation,
+            'pluginCardView'         => $pluginCardView,
+            'siteName'               => $options->title,
+            'editorVditor'           => $editorVditor,
+            'editorVditorMode'       => $editorVditorMode,
+            'pluginVersion'          => '2.1.10',
+            'notifyOptOut'           => $notifyOptOut,
+            'dashboardQuickShow'     => $dashboardQuickShow,
+            'dashboardCustomButtons' => $customBtnsParsed,
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.9.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.10.js"></script>';
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
@@ -1774,7 +1841,7 @@ if(document.readyState==="loading"){
         // 匿名统计：通过 umami.track() 发送含域名的自定义事件，可在 Umami 后台 Events 中直接看到来源域名
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.9"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.10"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1971,7 +2038,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.9";';
+        echo 'var __AB_VER__="2.1.10";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){

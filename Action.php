@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.9
+ * @version 2.1.10
  * @link https://blog.lhl.one
  */
 
@@ -243,6 +243,94 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'posts'      => (int) $postsCount,
             'comments'   => (int) $commentsCount,
             'categories' => (int) $categoriesCount,
+        ));
+    }
+
+    /**
+     * 仪表盘统计趋势数据
+     * 访问方式：/action/admin-beautify?do=stats
+     *
+     * 返回本周 vs 上周的文章/评论新增趋势，以及总数
+     */
+    public function stats()
+    {
+        $this->checkAuth();
+
+        $db  = $this->db;
+        $now = time();
+        $weekAgo      = $now - 7 * 86400;
+        $twoWeeksAgo  = $now - 14 * 86400;
+
+        // --- 总数 ---
+        $postsTotal = (int) $db->fetchObject(
+            $db->select(array('COUNT(cid)' => 'num'))
+               ->from('table.contents')
+               ->where('type = ?', 'post')
+               ->where('status = ?', 'publish')
+        )->num;
+
+        $commentsTotal = (int) $db->fetchObject(
+            $db->select(array('COUNT(coid)' => 'num'))
+               ->from('table.comments')
+               ->where('status = ?', 'approved')
+        )->num;
+
+        $catsTotal = (int) $db->fetchObject(
+            $db->select(array('COUNT(mid)' => 'num'))
+               ->from('table.metas')
+               ->where('type = ?', 'category')
+        )->num;
+
+        // --- 本周新增（最近 7 天） ---
+        $postsThisWeek = (int) $db->fetchObject(
+            $db->select(array('COUNT(cid)' => 'num'))
+               ->from('table.contents')
+               ->where('type = ?', 'post')
+               ->where('status = ?', 'publish')
+               ->where('created >= ?', $weekAgo)
+        )->num;
+
+        $commentsThisWeek = (int) $db->fetchObject(
+            $db->select(array('COUNT(coid)' => 'num'))
+               ->from('table.comments')
+               ->where('status = ?', 'approved')
+               ->where('created >= ?', $weekAgo)
+        )->num;
+
+        // --- 上周新增（7~14 天前） ---
+        $postsLastWeek = (int) $db->fetchObject(
+            $db->select(array('COUNT(cid)' => 'num'))
+               ->from('table.contents')
+               ->where('type = ?', 'post')
+               ->where('status = ?', 'publish')
+               ->where('created >= ?', $twoWeeksAgo)
+               ->where('created < ?', $weekAgo)
+        )->num;
+
+        $commentsLastWeek = (int) $db->fetchObject(
+            $db->select(array('COUNT(coid)' => 'num'))
+               ->from('table.comments')
+               ->where('status = ?', 'approved')
+               ->where('created >= ?', $twoWeeksAgo)
+               ->where('created < ?', $weekAgo)
+        )->num;
+
+        $this->jsonSuccess(array(
+            'posts' => array(
+                'total'    => $postsTotal,
+                'thisWeek' => $postsThisWeek,
+                'lastWeek' => $postsLastWeek,
+            ),
+            'comments' => array(
+                'total'    => $commentsTotal,
+                'thisWeek' => $commentsThisWeek,
+                'lastWeek' => $commentsLastWeek,
+            ),
+            'cats' => array(
+                'total'    => $catsTotal,
+                'thisWeek' => null,
+                'lastWeek' => null,
+            ),
         ));
     }
 
@@ -740,6 +828,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
             case 'info':
                 $this->info();
+                break;
+
+            case 'stats':
+                $this->stats();
                 break;
 
             case 'get-settings':
