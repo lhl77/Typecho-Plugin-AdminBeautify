@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.10
+ * @version 2.1.11
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.10';
+        $abVer = '2.1.11';
 
         // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
@@ -1673,7 +1673,7 @@ if(document.readyState==="loading"){
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.10' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.11' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -1818,6 +1818,37 @@ if(document.readyState==="loading"){
                 );
             }
         }
+
+        // 计算已启用兼容脚本覆盖的插件/外观名称列表（用于 AJAX 兼容性检测，避免重复提示）
+        $enabledCompatPlugins = array();
+        $compatEnabledRaw = isset($pluginOptions->compat_disabledScripts) ? (string)$pluginOptions->compat_disabledScripts : '';
+        $compatEnabledFiles = ($compatEnabledRaw !== '') ? (array)json_decode($compatEnabledRaw, true) : array();
+        if (is_array($compatEnabledFiles) && !empty($compatEnabledFiles)) {
+            $compatDir = dirname(__FILE__) . '/assets/compat/';
+            foreach ($compatEnabledFiles as $compatFile) {
+                if (substr($compatFile, -3) === '.js' && is_file($compatDir . $compatFile)) {
+                    $compatMeta = self::parseCompatMeta($compatDir . $compatFile);
+                    if (!empty($compatMeta['plugins'])) {
+                        foreach (array_map('trim', explode(',', $compatMeta['plugins'])) as $pName) {
+                            if ($pName !== '') $enabledCompatPlugins[] = strtolower($pName);
+                        }
+                    }
+                }
+            }
+        }
+        $enabledCompatPlugins = array_values(array_unique($enabledCompatPlugins));
+
+        // 当前页面的兼容性标识符（插件名 / 外观名，小写）
+        $currentPageCompatKey = '';
+        $requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        if (strpos($requestUri, 'options-plugin.php') !== false && isset($_GET['config'])) {
+            $currentPageCompatKey = strtolower(trim((string)$_GET['config']));
+        } elseif (strpos($requestUri, 'options-theme.php') !== false) {
+            $currentPageCompatKey = strtolower(trim((string)$options->theme));
+        } elseif (strpos($requestUri, 'extending.php') !== false && isset($_GET['panel'])) {
+            $panelParts = explode('/', trim((string)$_GET['panel']));
+            $currentPageCompatKey = strtolower($panelParts[0]);
+        }
         echo 'window.__AB_CONFIG__=' . json_encode(array(
             'darkMode'               => $darkMode,
             'enableAnimation'        => $enableAnimation,
@@ -1825,14 +1856,16 @@ if(document.readyState==="loading"){
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.10',
+            'pluginVersion'          => '2.1.11',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardCustomButtons' => $customBtnsParsed,
+            'enabledCompatPlugins'   => $enabledCompatPlugins,
+            'currentPageCompatKey'   => $currentPageCompatKey,
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.10.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.11.js"></script>';
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
@@ -1841,7 +1874,7 @@ if(document.readyState==="loading"){
         // 匿名统计：通过 umami.track() 发送含域名的自定义事件，可在 Umami 后台 Events 中直接看到来源域名
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.10"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.11"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -2038,7 +2071,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.10";';
+        echo 'var __AB_VER__="2.1.11";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
