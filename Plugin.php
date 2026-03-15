@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.11
+ * @version 2.1.12
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.11';
+        $abVer = '2.1.12';
 
         // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
@@ -304,6 +304,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('是否显示概要页中 Typecho 原有的快捷操作按钮（写文章、管理评论等）')
         );
         $form->addInput($dashboardQuickShow);
+
+        // 概要页快捷操作 - 按钮样式（小/大）
+        $dashboardQuickStyle = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardQuickStyle',
+            array(
+                'small' => '小（胶囊按钮，默认）',
+                'large' => '大（图标卡片）',
+            ),
+            'large',
+            _t('快捷操作按钮样式'),
+            _t('小：横排胶囊按钮（图标 + 文字并排）；大：网格图标卡片（图标在上、文字在下）')
+        );
+        $form->addInput($dashboardQuickStyle);
 
         // 概要页自定义快捷按钮
         $dashboardCustomButtons = new Typecho_Widget_Helper_Form_Element_Textarea(
@@ -730,7 +743,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView","dashboardQuickShow","dashboardCustomButtons"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView","dashboardQuickShow","dashboardQuickStyle","dashboardCustomButtons"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -1673,7 +1686,7 @@ if(document.readyState==="loading"){
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.11' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.12' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -1783,6 +1796,7 @@ if(document.readyState==="loading"){
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
+        $dashboardQuickStyle = isset($pluginOptions->dashboardQuickStyle) ? (string)$pluginOptions->dashboardQuickStyle : 'small';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
 
         // Inject user avatar URL for sidebar header
@@ -1838,6 +1852,38 @@ if(document.readyState==="loading"){
         }
         $enabledCompatPlugins = array_values(array_unique($enabledCompatPlugins));
 
+        // 检测已安装插件但对应兼容脚本未启用的情况（用于前端弹窗提醒）
+        $pendingCompatSuggestions = array();
+        $compatDirScan = dirname(__FILE__) . '/assets/compat/';
+        $pluginsBaseDir = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
+        if (is_dir($compatDirScan)) {
+            $scanFiles = @scandir($compatDirScan);
+            if ($scanFiles) {
+                foreach ($scanFiles as $scanFile) {
+                    if (substr($scanFile, -3) !== '.js' || !is_file($compatDirScan . $scanFile)) continue;
+                    // 已启用的脚本不需要提醒
+                    if (is_array($compatEnabledFiles) && in_array($scanFile, $compatEnabledFiles)) continue;
+                    $scanMeta = self::parseCompatMeta($compatDirScan . $scanFile);
+                    if (empty($scanMeta['plugins'])) continue;
+                    $scanPluginList = array_map('trim', explode(',', $scanMeta['plugins']));
+                    foreach ($scanPluginList as $scanPlugin) {
+                        if ($scanPlugin === '') continue;
+                        // 检查插件目录是否存在（已安装）
+                        if (is_dir($pluginsBaseDir . $scanPlugin)) {
+                            $pendingCompatSuggestions[] = array(
+                                'file'        => $scanFile,
+                                'name'        => ($scanMeta['name'] !== '' ? $scanMeta['name'] : basename($scanFile, '.js')),
+                                'plugin'      => $scanPlugin,
+                                'description' => $scanMeta['description'],
+                            );
+                            break; // 一个脚本只需匹配一个已安装插件即报告
+                        }
+                    }
+                }
+            }
+        }
+        $pluginSettingsUrl = Typecho_Common::url('/admin/options-plugin.php?config=AdminBeautify', $options->index);
+
         // 当前页面的兼容性标识符（插件名 / 外观名，小写）
         $currentPageCompatKey = '';
         $requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1856,16 +1902,19 @@ if(document.readyState==="loading"){
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.11',
+            'pluginVersion'          => '2.1.12',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
+            'dashboardQuickStyle'    => $dashboardQuickStyle,
             'dashboardCustomButtons' => $customBtnsParsed,
-            'enabledCompatPlugins'   => $enabledCompatPlugins,
-            'currentPageCompatKey'   => $currentPageCompatKey,
+            'enabledCompatPlugins'       => $enabledCompatPlugins,
+            'currentPageCompatKey'       => $currentPageCompatKey,
+            'pendingCompatSuggestions'   => $pendingCompatSuggestions,
+            'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.11.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.12.js"></script>';
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
@@ -1874,7 +1923,7 @@ if(document.readyState==="loading"){
         // 匿名统计：通过 umami.track() 发送含域名的自定义事件，可在 Umami 后台 Events 中直接看到来源域名
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.11"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.12"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -2071,7 +2120,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.11";';
+        echo 'var __AB_VER__="2.1.12";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
@@ -2444,6 +2493,52 @@ UPDATEJS;
             .   'abCheckAndInject(url);'
             . '});'
             . '})();</script>';
+
+        // ====== 兼容脚本每日自动同步（静默后台，24小时一次） ======
+        echo '<script>(function(){
+setTimeout(function(){
+    var LS_KEY="ab-compat-auto-sync-ts";
+    var ONE_DAY=86400000;
+    var last=0;
+    try{last=parseInt(localStorage.getItem(LS_KEY)||"0",10)||0;}catch(e){}
+    if(Date.now()-last<ONE_DAY)return;
+    var ajax=window.__AB_AJAX__||{};
+    if(!ajax.url)return;
+    var xhr=new XMLHttpRequest();
+    xhr.open("POST",ajax.url+"?do=sync-compat",true);
+    xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+    xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+    xhr.timeout=60000;
+    xhr.onload=function(){
+        try{
+            var res=JSON.parse(xhr.responseText);
+            if(res.code===0){
+                try{localStorage.setItem(LS_KEY,Date.now().toString());}catch(e){}
+                var s=(res.data||{}).summary||{};
+                var n=(s.added||0)+(s.updated||0);
+                if(n>0)abCompatAutoSyncToast(n);
+            }
+        }catch(e){}
+    };
+    xhr.onerror=xhr.ontimeout=function(){};
+    xhr.send("_="+encodeURIComponent(ajax.token||""));
+},10000);
+function abCompatAutoSyncToast(n){
+    if(document.getElementById("ab-compat-autosync-toast"))return;
+    var t=document.createElement("div");
+    t.id="ab-compat-autosync-toast";
+    t.style.cssText="position:fixed;bottom:24px;right:24px;z-index:9999;background:var(--md-surface,#fff);border:1px solid var(--md-outline-variant,#cac4d0);border-radius:16px;padding:14px 18px;font-size:13px;color:var(--md-on-surface,#1c1b1f);box-shadow:0 4px 20px rgba(0,0,0,.14);display:flex;align-items:center;gap:10px;animation:ab-fade-in .3s ease;max-width:320px";
+    t.innerHTML="<span class=\"material-icons-round\" style=\"font-size:20px;color:var(--md-primary,#6750a4)\">update</span>"
+        +"<span>兼容脚本自动更新了 <strong>"+n+"</strong> 个，请刷新页面生效。</span>";
+    var cls=document.createElement("button");
+    cls.textContent="\u00d7";
+    cls.style.cssText="border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--md-on-surface-variant,#49454f);opacity:.6;flex-shrink:0;padding:0";
+    cls.onclick=function(){t.parentNode&&t.parentNode.removeChild(t);};
+    t.appendChild(cls);
+    document.body.appendChild(t);
+    setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},8000);
+}
+})();</script>';
 
         // ====== 加载兼容性脚本 ======
         self::loadCompatScripts($options, $pluginOptions);
