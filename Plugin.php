@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.12
+ * @version 2.1.13
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.12';
+        $abVer = '2.1.13';
 
         // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
@@ -327,6 +327,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('每行一个按钮，格式：<code>名称:地址:图标</code>，图标名称来自 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a>。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:/:public</code><br><code>管理评论:manage-comments.php:comment</code>')
         );
         $form->addInput($dashboardCustomButtons);
+
+        // 概要页最近内容卡片样式
+        $dashboardRecentStyle = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardRecentStyle',
+            array(
+                'md3'      => 'MD卡片（默认）',
+                'original' => '原版',
+            ),
+            'md3',
+            _t('最近文章/评论卡片样式'),
+            _t('MD卡片：Material Design 3 列表风格，时间居右，文章单行、评论双行；原版：Typecho 原有样式。同时会隐藏"官方最新日志"卡片。')
+        );
+        $form->addInput($dashboardRecentStyle);
 
         // ================================================================
         // ====== 编辑器设置（MD3 折叠卡片） ======
@@ -743,7 +756,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView","dashboardQuickShow","dashboardQuickStyle","dashboardCustomButtons"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView","dashboardQuickShow","dashboardQuickStyle","dashboardCustomButtons","dashboardRecentStyle"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -1357,7 +1370,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 var pEl=document.getElementById("ab-about-more-plugins");
                 if(pEl&&plugins.length>0){
                     var ph="<div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px\">";
-                    plugins.slice(0,4).forEach(function(r){
+                    plugins.slice(0,8).forEach(function(r){
                         ph+="<a href=\""+r.html_url+"\" target=\"_blank\" rel=\"noopener\" class=\"ab-about-plugin-card\" style=\"display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s\" onmouseover=\"this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'\" onmouseout=\"this.style.boxShadow=\'none\'\">";
                         ph+="<div class=\"ab-about-plugin-name\" style=\"font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px\">"+r.name.replace(/^Typecho-Plugin-/,"")+"</div>";
                         ph+="<div class=\"ab-about-plugin-desc\" style=\"font-size:11px;color:#79747e;line-height:1.5\">"+(r.description||"")+"</div>";
@@ -1686,7 +1699,7 @@ if(document.readyState==="loading"){
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.12' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.13' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -1798,6 +1811,7 @@ if(document.readyState==="loading"){
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
         $dashboardQuickStyle = isset($pluginOptions->dashboardQuickStyle) ? (string)$pluginOptions->dashboardQuickStyle : 'small';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
+        $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
 
         // Inject user avatar URL for sidebar header
         $user = Typecho_Widget::widget('Widget_User');
@@ -1902,11 +1916,12 @@ if(document.readyState==="loading"){
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.12',
+            'pluginVersion'          => '2.1.13',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
             'dashboardCustomButtons' => $customBtnsParsed,
+            'dashboardRecentStyle'   => $dashboardRecentStyle,
             'enabledCompatPlugins'       => $enabledCompatPlugins,
             'currentPageCompatKey'       => $currentPageCompatKey,
             'pendingCompatSuggestions'   => $pendingCompatSuggestions,
@@ -1914,7 +1929,7 @@ if(document.readyState==="loading"){
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.12.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.13.js"></script>';
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
@@ -1923,7 +1938,7 @@ if(document.readyState==="loading"){
         // 匿名统计：通过 umami.track() 发送含域名的自定义事件，可在 Umami 后台 Events 中直接看到来源域名
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.12"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.13"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -2120,7 +2135,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.12";';
+        echo 'var __AB_VER__="2.1.13";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
@@ -2897,185 +2912,7 @@ window.abSyncCompat = function(){
         $jsShowSiteName = $showSiteName ? 'true' : 'false';
         $jsShowToggle = $showThemeToggle ? 'true' : 'false';
 
-        echo "\n<script id=\"loginbeautify-main\">
-(function(){
-    function qs(sel, root){ return (root||document).querySelector(sel); }
-    function qsa(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
-
-    var form = qs('form[action*=\"login\"]') || qs('form') || qs('.typecho-login form') || qs('.typecho-login');
-    if (!form) return;
-
-    var wrap = document.createElement('div');
-    wrap.className = 'lb-wrap';
-
-    var bg = document.createElement('div');
-    bg.className = 'lb-bg';
-    wrap.appendChild(bg);
-
-    var overlay = document.createElement('div');
-    overlay.className = 'lb-bg-overlay';
-    wrap.appendChild(overlay);
-
-    var card = document.createElement('div');
-    card.className = 'lb-card';
-
-    var head = document.createElement('div');
-    head.className = 'lb-head';
-
-    var titleWrap = document.createElement('div');
-    titleWrap.className = 'lb-title';
-
-    var showSiteName = {$jsShowSiteName};
-
-    if (showSiteName) {
-      var name = document.createElement('div');
-      name.className = 'name';
-      name.textContent = {$jsSiteTitle};
-      titleWrap.appendChild(name);
-    }
-
-    var isRegister = location.href.indexOf('register.php') !== -1;
-
-    var sub = document.createElement('div');
-    sub.className = 'sub';
-    sub.textContent = isRegister ? '注册' : '登录';
-    titleWrap.appendChild(sub);
-
-    head.appendChild(titleWrap);
-    card.appendChild(head);
-
-    form.classList.add('lb-form');
-
-    var inputs = qsa('input[type=\"text\"], input[type=\"password\"], input[type=\"email\"]', form);
-    inputs.forEach(function(input, idx){
-      var field = document.createElement('div');
-      field.className = 'lb-field';
-
-      var label = document.createElement('label');
-      var n = (input.getAttribute('name') || '').toLowerCase();
-      var t = (input.getAttribute('type') || '').toLowerCase();
-
-      if (isRegister) {
-        if (idx === 0) {
-          label.textContent = '用户名';
-          input.setAttribute('placeholder', '请输入用户名');
-        } else if (idx === 1 || t === 'email' || n === 'mail') {
-          label.textContent = '邮箱';
-          input.setAttribute('placeholder', '请输入邮箱');
-        } else {
-          label.textContent = '输入';
-          if (!input.getAttribute('placeholder')) {
-            input.setAttribute('placeholder', '请输入内容');
-          }
-        }
-      } else {
-        if (n.indexOf('name') !== -1 || n.indexOf('user') !== -1) {
-          label.textContent = '用户名/邮箱';
-          input.setAttribute('placeholder', '用户名/邮箱');
-        } else if (n.indexOf('pass') !== -1) {
-          label.textContent = '密码';
-          if (!input.getAttribute('placeholder')) {
-            input.setAttribute('placeholder', '请输入密码');
-          }
-        } else {
-          label.textContent = '输入';
-          if (!input.getAttribute('placeholder')) {
-            input.setAttribute('placeholder', '请输入内容');
-          }
-        }
-      }
-
-      var parent = input.parentNode;
-      parent.insertBefore(field, input);
-      field.appendChild(label);
-      field.appendChild(input);
-    });
-
-    var remember = qs('input[type=\"checkbox\"]', form);
-    if (remember) {
-      var rememberWrap = remember.closest('p') || remember.parentNode;
-      if (rememberWrap) {
-        rememberWrap.classList.add('lb-remember');
-      }
-      // PWA 独立模式下自动勾选「记住我」，防止关闭应用后 session cookie 丢失需重新登录
-      var isStandalone = window.matchMedia('(display-mode: standalone)').matches
-                      || window.navigator.standalone === true;
-      if (isStandalone && !remember.checked) {
-        remember.checked = true;
-      }
-    }
-
-    var submit = qs('input[type=\"submit\"], button[type=\"submit\"]', form);
-    if (submit) {
-      var submitWrap = document.createElement('div');
-      submitWrap.className = 'lb-submit';
-      var p = submit.parentNode;
-      p.insertBefore(submitWrap, submit);
-      submitWrap.appendChild(submit);
-    }
-
-    card.appendChild(form);
-    wrap.appendChild(card);
-
-    document.body.insertBefore(wrap, document.body.firstChild);
-
-    var typechoLogin = qs('.typecho-login');
-    if (typechoLogin && !typechoLogin.contains(wrap)) {
-      typechoLogin.classList.add('lb-hide');
-    }
-
-    // Theme footer
-    var lbFooter = document.createElement('div');
-    lbFooter.className = 'lb-footer-theme';
-    lbFooter.innerHTML = 'Theme <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify\" target=\"_blank\" rel=\"noopener noreferrer\">AdminBeautify</a> by <a href=\"https://blog.lhl.one\" target=\"_blank\" rel=\"noopener noreferrer\">LHL</a>';
-    card.appendChild(lbFooter);
-
-    var showToggle = {$jsShowToggle};
-    if (showToggle) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'lb-theme-toggle';
-      btn.setAttribute('aria-label', '切换主题');
-
-      var sunIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      sunIcon.setAttribute('viewBox', '0 0 24 24');
-      sunIcon.setAttribute('fill', 'none');
-      sunIcon.setAttribute('stroke', 'currentColor');
-      sunIcon.setAttribute('stroke-width', '2');
-      sunIcon.setAttribute('stroke-linecap', 'round');
-      sunIcon.setAttribute('stroke-linejoin', 'round');
-      sunIcon.setAttribute('class', 'lb-icon-sun');
-      sunIcon.innerHTML = '<circle cx=\"12\" cy=\"12\" r=\"5\"/><line x1=\"12\" y1=\"1\" x2=\"12\" y2=\"3\"/><line x1=\"12\" y1=\"21\" x2=\"12\" y2=\"23\"/><line x1=\"4.22\" y1=\"4.22\" x2=\"5.64\" y2=\"5.64\"/><line x1=\"18.36\" y1=\"18.36\" x2=\"19.78\" y2=\"19.78\"/><line x1=\"1\" y1=\"12\" x2=\"3\" y2=\"12\"/><line x1=\"21\" y1=\"12\" x2=\"23\" y2=\"12\"/><line x1=\"4.22\" y1=\"19.78\" x2=\"5.64\" y2=\"18.36\"/><line x1=\"18.36\" y1=\"5.64\" x2=\"19.78\" y2=\"4.22\"/>';
-
-      var moonIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      moonIcon.setAttribute('viewBox', '0 0 24 24');
-      moonIcon.setAttribute('fill', 'none');
-      moonIcon.setAttribute('stroke', 'currentColor');
-      moonIcon.setAttribute('stroke-width', '2');
-      moonIcon.setAttribute('stroke-linecap', 'round');
-      moonIcon.setAttribute('stroke-linejoin', 'round');
-      moonIcon.setAttribute('class', 'lb-icon-moon');
-      moonIcon.innerHTML = '<path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/>';
-
-      btn.appendChild(sunIcon);
-      btn.appendChild(moonIcon);
-
-      btn.addEventListener('click', function(){
-        var cur = document.documentElement.getAttribute('data-lb-theme') === 'dark' ? 'dark' : 'light';
-        var next = cur === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-lb-theme', next);
-        try{ localStorage.setItem('lb-theme', next); }catch(e){}
-      });
-      document.body.appendChild(btn);
-    }
-})();
-</script>\n";
-
-        if (trim($customJs) !== '') {
-            echo "\n<script id=\"loginbeautify-custom-js\">\n";
-            echo $customJs . "\n";
-            echo "</script>\n";
-        }
+        include dirname(__FILE__) . '/assets/templates/login/script.php';
     }
 
     // ================================================================
@@ -3132,494 +2969,11 @@ window.abSyncCompat = function(){
         }
 
         $bgCss = $bgImage !== '' ? "url(" . htmlspecialchars($bgImage, ENT_QUOTES, 'UTF-8') . ")" : "none";
-
-        echo "\n" . '<style id="loginbeautify-style">' . "\n";
-        ?>
-:root{
---lb-primary:<?php echo htmlspecialchars($primary, ENT_QUOTES, 'UTF-8'); ?>;
---lb-primary2:<?php echo htmlspecialchars($primary2, ENT_QUOTES, 'UTF-8'); ?>;
---lb-surface:#f3f4f5;
---lb-surface-alpha:rgba(255,255,255,.8);
---lb-on-surface:#111827;
---lb-on-surface-muted:#4b5563;
---lb-border:rgba(0,0,0,.08);
---lb-shadow: 0 20px 40px -10px rgba(0,0,0,.15), 0 0 0 1px rgba(255,255,255,.4) inset;
---lb-radius: 20px;
---lb-input-bg: rgba(255,255,255,.8);
---lb-input-border: #e5e7eb;
---lb-bg-image: <?php echo $bgCss; ?>;
---lb-blur: <?php echo (int) $blurSize; ?>px;
-}
-
-@media (max-width: 575px) {
-  body {
-    padding-top: 0 !important;
-  }
-}
-
-.typecho-login-wrap{
-opacity: 0 !important;
-position: absolute !important;
-pointer-events: none !important;
-}
-
-html[data-lb-theme="dark"]{
---lb-surface:#111827;
---lb-surface-alpha:rgba(20,20,20,.75);
---lb-on-surface:#f9fafb;
---lb-on-surface-muted:#9ca3af;
---lb-border:rgba(255,255,255,.08);
---lb-shadow: 0 25px 50px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05) inset;
---lb-input-bg: rgba(0,0,0,.2);
---lb-input-border: rgba(255,255,255,.1);
-}
-
-html{
-transition: background-color .3s ease, color .3s ease;
-}
-
-body{
-margin:0;
-background: var(--lb-surface);
-color: var(--lb-on-surface);
-font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
-transition: background-color .3s ease, color .3s ease;
-}
-
-.lb-wrap{
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-position:relative;
-overflow:hidden;
-}
-
-.lb-bg{
-position:absolute;
-inset:0;
-background-image: var(--lb-bg-image);
-background-size: cover;
-background-position: center;
-background-repeat:no-repeat;
-z-index:-2;
-transform: scale(1.03);
-}
-
-.lb-bg-overlay{
-position:absolute;
-inset:0;
-background: linear-gradient(180deg, rgba(0,0,0,.2), rgba(0,0,0,.4));
-z-index:-1;
-transition: background .3s ease;
-}
-
-html[data-lb-theme="light"] .lb-bg-overlay{
-background: linear-gradient(180deg, rgba(255,255,255,0), rgba(255,255,255,0));
-}
-
-.lb-card{
-width:min(400px, 94%);
-background: var(--lb-surface-alpha);
-color: var(--lb-on-surface);
-border: 1px solid var(--lb-border);
-border-radius: var(--lb-radius);
-box-shadow: var(--lb-shadow);
-padding: 32px 32px 28px;
-transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
-backdrop-filter: blur(20px);
--webkit-backdrop-filter: blur(20px);
-}
-
-<?php if ($blurType === 'backdrop') { ?>
-.lb-card{
-backdrop-filter: blur(var(--lb-blur));
--webkit-backdrop-filter: blur(var(--lb-blur));
-}
-<?php } ?>
-
-<?php if ($blurType === 'filter') { ?>
-.lb-bg{
-filter: blur(var(--lb-blur));
-}
-<?php } ?>
-
-.lb-head{
-display:flex;
-flex-direction:column;
-align-items:center;
-text-align:center;
-margin-bottom: 20px;
-}
-
-.lb-title{
-display:flex;
-flex-direction:column;
-gap:8px;
-width:100%;
-}
-
-.lb-title .name{
-font-size: 16px;
-font-weight: 500;
-color: var(--lb-on-surface-muted);
-}
-
-.lb-title .sub{
-font-size: 24px;
-font-weight: 800;
-letter-spacing: -0.025em;
-color: var(--lb-on-surface);
-margin-bottom: 8px;
-}
-
-.lb-form .lb-field{
-margin-top: 16px;
-}
-
-.lb-form label{
-display:block;
-font-size: 12px;
-font-weight: 500;
-color: var(--lb-on-surface-muted);
-margin: 0 0 6px 1px;
-}
-
-.lb-form input[type="text"],
-.lb-form input[type="password"],
-.lb-form input[type="email"]{
-width:100%;
-box-sizing:border-box;
-padding: 12px 14px;
-border-radius: 10px;
-border: 1px solid var(--lb-input-border);
-background: var(--lb-input-bg);
-color: var(--lb-on-surface);
-font-size: 14px;
-outline: none;
-transition: all .2s ease;
-}
-
-html[data-lb-theme="dark"] .lb-form input[type="text"],
-html[data-lb-theme="dark"] .lb-form input[type="password"]{
-background: rgba(255,255,255,.06);
-}
-
-.lb-form input[type="text"]:focus,
-.lb-form input[type="password"]:focus{
-border-color: var(--lb-primary);
-background: var(--lb-surface);
-box-shadow: 0 0 0 3px color-mix(in srgb, var(--lb-primary) 15%, transparent);
-}
-
-@supports not (color: color-mix(in srgb, red, blue)) {
-.lb-form input[type="text"]:focus,
-.lb-form input[type="password"]:focus{
-box-shadow: 0 0 0 4px rgba(103,80,164,.18);
-}
-html[data-lb-theme="dark"] .lb-form input[type="text"]:focus,
-html[data-lb-theme="dark"] .lb-form input[type="password"]:focus{
-box-shadow: 0 0 0 4px rgba(103,80,164,.25);
-}
-}
-
-.lb-actions{
-display:flex;
-align-items:center;
-justify-content:space-between;
-gap:12px;
-margin: 12px 0 6px;
-}
-
-.lb-remember{
-font-size: 13px;
-color: var(--lb-on-surface2);
-display:flex;
-align-items:center;
-gap:8px;
-}
-
-.lb-remember input{ accent-color: var(--lb-primary); }
-
-.lb-submit input[type="submit"],
-.lb-submit button{
-width:100%;
-margin-top: 20px;
-border:0;
-cursor:pointer;
-padding: 12px 16px;
-border-radius: 12px;
-font-size: 14px;
-background: linear-gradient(135deg, var(--lb-primary), var(--lb-primary2));
-color:#fff;
-font-weight:600;
-letter-spacing:0.5px;
-box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06);
-transition: all .2s ease;
-}
-
-.lb-submit input[type="submit"]:hover{
-filter: brightness(1.08);
-transform: translateY(-1px);
-box-shadow: 0 10px 15px -3px rgba(0,0,0,.15);
-}
-
-@supports not (color: color-mix(in srgb, red, blue)) {
-.lb-submit input[type="submit"]:hover{
-box-shadow: 0 10px 24px rgba(103,80,164,.30);
-}
-}
-
-.message.popup{
-position: fixed !important;
-top: 20px !important;
-left: 50% !important;
-transform: translateX(-50%) !important;
-width: auto !important;
-max-width: calc(100vw - 40px) !important;
-min-width: 280px !important;
-border-radius: 10px !important;
-padding: 0 !important;
-margin: 0 !important;
-background: none !important;
-border: none !important;
-box-shadow: none !important;
-backdrop-filter: blur(10px) !important;
--webkit-backdrop-filter: blur(10px) !important;
-animation: lb-slide-down 0.3s ease-out !important;
-z-index: 9999 !important;
-}
-
-.notice{
-background:none!important;
-}
-
-@keyframes lb-slide-down {
-from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-to { opacity: 1; transform: translateX(-50%) translateY(0); }
-}
-
-.message.popup ul{
-margin: 0 !important;
-padding: 0 !important;
-list-style: none !important;
-}
-
-.message.popup ul li{
-padding: 14px 18px !important;
-margin: 5px !important;
-font-size: 14px !important;
-line-height: 1.5 !important;
-color: var(--lb-on-surface) !important;
-display: flex !important;
-align-items: center !important;
-gap: 10px !important;
-}
-
-.message.popup ul li:before{
-content: '⚠' !important;
-font-size: 18px !important;
-display: inline-block !important;
-}
-
-.message.popup.notice ul li{
-background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
-color: #fff !important;
-border-radius: 14px !important;
-}
-
-.message.popup.notice ul li:before{
-content: '⚠' !important;
-font-weight: bold !important;
-}
-
-.message.popup.success ul li{
-background: linear-gradient(135deg, #10b981, #059669) !important;
-color: #fff !important;
-border-radius: 14px !important;
-}
-
-.message.popup.success ul li:before{
-content: '✓' !important;
-font-weight: bold !important;
-}
-
-.message.popup.error ul li{
-background: linear-gradient(135deg, #dc2626, #ef4444) !important;
-color: #fff !important;
-border-radius: 14px !important;
-}
-
-.message.popup.error ul li:before{
-content: '✕' !important;
-font-weight: bold !important;
-}
-
-@media (max-width: 480px) {
-.message.popup{
-top: 16px !important;
-max-width: calc(100vw - 32px) !important;
-min-width: 260px !important;
-}
-.message.popup ul li{
-padding: 12px 16px !important;
-font-size: 13px !important;
-}
-}
-
-.lb-theme-toggle{
-position: fixed;
-right: 20px;
-top: 20px;
-width: 48px;
-height: 48px;
-border-radius: 50%;
-border: 1px solid var(--lb-outline);
-background: var(--lb-surface-alpha);
-color: var(--lb-on-surface);
-backdrop-filter: blur(10px);
--webkit-backdrop-filter: blur(10px);
-box-shadow: 0 4px 12px rgba(0,0,0,.12);
-cursor:pointer;
-transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
-display:flex;
-align-items:center;
-justify-content:center;
-padding:0;
-z-index:1000;
-}
-
-.lb-theme-toggle:hover{
-transform: translateY(-2px) scale(1.05);
-box-shadow: 0 8px 20px rgba(0,0,0,.18);
-border-color: var(--lb-primary);
-}
-
-.lb-theme-toggle:active {
-transform: translateY(0) scale(0.98);
-box-shadow: 0 2px 8px rgba(0,0,0,.12);
-}
-
-.lb-theme-toggle svg{
-width: 20px;
-height: 20px;
-transition: all .3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.lb-theme-toggle .lb-icon-sun,
-.lb-theme-toggle .lb-icon-moon{
-position: absolute;
-transition: opacity .3s ease, transform .3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-html[data-lb-theme="light"] .lb-theme-toggle .lb-icon-sun{
-opacity: 0;
-transform: rotate(-90deg) scale(0.8);
-}
-
-html[data-lb-theme="light"] .lb-theme-toggle .lb-icon-moon{
-opacity: 1;
-transform: rotate(0) scale(1);
-}
-
-html[data-lb-theme="dark"] .lb-theme-toggle .lb-icon-sun{
-opacity: 1;
-transform: rotate(0) scale(1);
-}
-
-html[data-lb-theme="dark"] .lb-theme-toggle .lb-icon-moon{
-opacity: 0;
-transform: rotate(90deg) scale(0.8);
-}
-
-@media (max-width: 480px) {
-.lb-theme-toggle{
-right: 16px;
-top: 16px;
-width: 44px;
-height: 44px;
-}
-.lb-theme-toggle svg{
-width: 18px;
-height: 18px;
-}
-}
-
-.lb-remember{
-  display:none !important;
-}
-
-.lb-footer-theme{
-text-align: center;
-margin-top: 28px;
-font-size: 11.5px;
-font-weight: 500;
-letter-spacing: 0.02em;
-color: var(--lb-on-surface-muted);
-opacity: 0.55;
-transition: opacity .3s ease;
-line-height: 1.9;
-}
-
-.lb-footer-theme:hover{
-opacity: 0.95;
-}
-
-.lb-footer-theme a{
-color: inherit;
-font-weight: 600;
-text-decoration: none;
-padding-bottom: 2px;
-border-bottom: 1px solid transparent;
-transition: all .2s ease;
-}
-
-.lb-footer-theme a:hover{
-color: var(--lb-primary);
-border-bottom-color: color-mix(in srgb, var(--lb-primary) 40%, transparent);
-}
-
-.lb-footer-links{
-display: block;
-font-size: 11px;
-font-weight: 400;
-opacity: 0.75;
-margin-top: 2px;
-}
-
-.lb-hide { display:none !important; }
-
-<?php
-        if (trim($customCss) !== '') {
-            echo "\n/* --- custom login css --- */\n";
-            echo $customCss . "\n";
-        }
-
-        echo "</style>\n";
-
         $jsThemeMode = self::jsString($themeMode);
-        echo "\n<script id=\"loginbeautify-theme-init\">
-(function(){
-    try{
-      var mode = {$jsThemeMode};
-      var saved = localStorage.getItem('lb-theme');
-      var dark = false;
 
-      if (saved === 'light' || saved === 'dark') {
-        dark = saved === 'dark';
-      } else if (mode === 'dark') {
-        dark = true;
-      } else if (mode === 'light') {
-        dark = false;
-      } else {
-        dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
-
-      document.documentElement.setAttribute('data-lb-theme', dark ? 'dark' : 'light');
-    }catch(e){}
-})();
-</script>\n";
+        include dirname(__FILE__) . '/assets/templates/login/style.php';
     }
+
 
     // ================================================================
     // 登录页预览（config 页面用）
@@ -3647,219 +3001,9 @@ margin-top: 2px;
             $blurSizeVal = 12;
         }
 
-        echo '<style>
-#lb-preview{margin-top:16px;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden;background:#fff;box-shadow:0 4px 12px rgba(0,0,0,.08)}
-#lb-preview .lbpv-head{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;background:#fff}
-#lb-preview .lbpv-head strong{font-size:14px;color:#374151;font-weight:600}
-#lb-preview .lbpv-head .lbpv-left{display:flex;align-items:center;gap:12px}
-#lb-preview .lbpv-head .lbpv-theme-btns{display:flex;gap:6px;background:#f3f4f6;padding:3px;border-radius:8px}
-#lb-preview .lbpv-theme-btns button{padding:4px 12px;border:none;border-radius:6px;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:#6b7280;transition:all .2s}
-#lb-preview .lbpv-theme-btns button:hover{color:#374151}
-#lb-preview .lbpv-theme-btns button.active{background:#fff;color:#000;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-#lb-preview .lbpv-refresh{padding:6px 12px;border:1px solid #e5e7eb;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;color:#6b7280;transition:all .2s;display:flex;align-items:center;gap:6px}
-#lb-preview .lbpv-refresh:hover{background:#f9fafb;color:#374151;border-color:#d1d5db}
-#lb-preview .lbpv-refresh:active{transform:scale(0.96)}
-#lb-preview .lbpv-refresh svg{width:14px;height:14px;transition:transform .3s}
-#lb-preview .lbpv-refresh.spinning svg{animation:lb-spin .6s linear}
-@keyframes lb-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-#lb-preview .lbpv-body{padding:40px 20px;background:#f9fafb;min-height:420px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;transition:background .3s}
-#lb-preview .lbpv-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;transform:scale(1.03);transition:all .3s}
-#lb-preview .lbpv-bg-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.4));z-index:1;transition:background .3s}
-#lb-preview[data-theme="light"] .lbpv-bg-overlay{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.4))}
-#lb-preview .lbpv-card{position:relative;z-index:2;max-width:380px;width:100%;border-radius:20px;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.8);padding:32px 28px;box-shadow:0 20px 40px -10px rgba(0,0,0,.15), 0 0 0 1px rgba(255,255,255,.4) inset;transition:all .3s;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
-#lb-preview[data-theme="dark"] .lbpv-card{background:rgba(20,20,20,.75);border-color:rgba(255,255,255,.08);box-shadow:0 25px 50px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05) inset;}
-#lb-preview[data-theme="dark"] .lbpv-body{background:#111827}
-#lb-preview .lbpv-title{font-size:16px;font-weight:500;text-align:center;margin-bottom:6px;color:#4b5563;transition:color .3s}
-#lb-preview[data-theme="dark"] .lbpv-title{color:#9ca3af}
-#lb-preview .lbpv-sub{font-size:24px;font-weight:800;color:#111827;text-align:center;margin-bottom:28px;transition:color .3s;letter-spacing:-0.025em}
-#lb-preview[data-theme="dark"] .lbpv-sub{color:#f9fafb}
-#lb-preview .lbpv-field{margin-bottom:16px}
-#lb-preview .lbpv-label{display:block;font-size:12px;color:#6b7280;margin-bottom:6px;font-weight:500}
-#lb-preview[data-theme="dark"] .lbpv-label{color:#9ca3af}
-#lb-preview .lbpv-input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid #e5e7eb;background:rgba(255,255,255,.8);font-size:14px;outline:none;transition:all .2s;color:#1f2937}
-#lb-preview[data-theme="dark"] .lbpv-input{background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.1);color:#e5e7eb}
-#lb-preview .lbpv-btn{width:100%;padding:12px;border:0;border-radius:12px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;margin-top:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06)}
-#lb-preview .lbpv-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 10px 15px -3px rgba(0,0,0,.15)}
-#lb-preview .lbpv-btn:active{transform:translateY(0);filter:brightness(0.95)}
-</style>';
-
-        echo '<div id="lb-preview" data-theme="light">
-  <div class="lbpv-head">
-    <div class="lbpv-left">
-      <strong>🔐 登录页预览</strong>
-      <button type="button" class="lbpv-refresh" id="lbpv-refresh" title="刷新预览">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
-        </svg>
-        刷新
-      </button>
-    </div>
-    <div class="lbpv-theme-btns">
-      <button type="button" data-theme="light" class="lbpv-theme-light active">☀️ 亮色</button>
-      <button type="button" data-theme="dark" class="lbpv-theme-dark">🌙 暗色</button>
-    </div>
-  </div>
-  <div class="lbpv-body">
-    <div class="lbpv-bg" id="lbpv-bg"></div>
-    <div class="lbpv-bg-overlay"></div>
-    <div class="lbpv-card">
-      <div class="lbpv-title" id="lbpv-title">我的博客</div>
-      <div class="lbpv-sub">登录</div>
-      <div class="lbpv-field">
-        <label class="lbpv-label">用户名/邮箱</label>
-        <input type="text" class="lbpv-input" value="user" readonly>
-      </div>
-      <div class="lbpv-field">
-        <label class="lbpv-label">密码</label>
-        <input type="password" class="lbpv-input" value="password" readonly>
-      </div>
-      <button class="lbpv-btn" id="lbpv-btn" type="button">登录</button>
-    </div>
-  </div>
-</div>';
-
-        echo '<script>
-(function(){
-    var colorPresets = {
-        purple: ["#7d5260", "#9e7b8a"],
-        blue: ["#556270", "#7a8a9e"],
-        pink: ["#74565f", "#9e7a85"],
-        green: ["#55624c", "#7a8a6e"],
-        orange: ["#725a42", "#9e8062"],
-        red: ["#775654", "#a27a78"],
-        teal: ["#4a6363", "#6a8a8a"],
-        indigo: ["#5a4fd9", "#7b6ef2"],
-        sunset: ["#d38d1a", "#e06b3a"],
-        ocean: ["#0da0d8", "#39c1dd"],
-        forest: ["#2f7a3b", "#7fbf3a"],
-        lavender: ["#8f6ee8", "#b89cfb"]
-    };
-
-  function val(name){
-    var el = document.querySelector(\'[name="\' + name + \'"]\');
-    if (!el) return "";
-    if (el.type === "radio") {
-      var c = document.querySelector(\'[name="\' + name + \'"]:checked\');
-      return c ? c.value : "";
-    }
-    return (el.value || "").trim();
-  }
-
-  var btn = document.getElementById("lbpv-btn");
-  var title = document.getElementById("lbpv-title");
-  var bg = document.getElementById("lbpv-bg");
-  var preview = document.getElementById("lb-preview");
-  var themeButtons = preview.querySelectorAll(".lbpv-theme-btns button");
-  var refreshBtn = document.getElementById("lbpv-refresh");
-
-  function normalizeColor(s, fallback){
-    s = (s || "").trim();
-    return s ? s : fallback;
-  }
-
-  function getCurrentColors(){
-    var preset = val("login_colorPreset") || "purple";
-    var c1, c2;
-    if (preset === "custom") {
-      c1 = normalizeColor(val("login_primaryColor"), ' . json_encode($pc1) . ');
-      c2 = normalizeColor(val("login_primaryColor2"), ' . json_encode($pc2) . ');
-    } else {
-      var colors = colorPresets[preset] || colorPresets.purple;
-      c1 = colors[0];
-      c2 = colors[1];
-    }
-    return {c1: c1, c2: c2};
-  }
-
-  function updateAllButtonColors(){
-    var colors = getCurrentColors();
-    var gradient = "linear-gradient(135deg," + colors.c1 + "," + colors.c2 + ")";
-    btn.style.background = gradient;
-    var inputs = preview.querySelectorAll(".lbpv-input");
-    inputs.forEach(function(inp){ inp.style.caretColor = colors.c1; });
-    themeButtons.forEach(function(b){
-      if (b.classList.contains("active")) {
-        b.style.background = gradient;
-        b.style.color = "#fff";
-      } else {
-        b.style.background = "#fff";
-        b.style.color = "";
-      }
-    });
-  }
-
-  function render(){
-    var showName = val("login_showSiteName") || "1";
-    var bgUrl = val("login_bgImage") || "";
-    var blurType = val("login_blurType") || "filter";
-    var blurSize = parseInt(val("login_blurSize") || "12");
-    if (isNaN(blurSize) || blurSize < 0) blurSize = 0;
-    if (blurSize > 80) blurSize = 80;
-
-    updateAllButtonColors();
-    title.style.display = (showName === "1") ? "block" : "none";
-
-    var overlay = preview.querySelector(".lbpv-bg-overlay");
-    var body = preview.querySelector(".lbpv-body");
-
-    if (bgUrl) {
-      bg.style.backgroundImage = "url(\'" + bgUrl + "\')";
-      bg.style.display = "block";
-      overlay.style.display = "block";
-      var currentTheme = preview.getAttribute("data-theme");
-      if (currentTheme === "dark") {
-        overlay.style.background = "linear-gradient(180deg,rgba(0,0,0,.3),rgba(0,0,0,.5))";
-      } else {
-        overlay.style.background = "transparent";
-      }
-      body.style.background = "transparent";
-    } else {
-      bg.style.backgroundImage = "none";
-      bg.style.display = "none";
-      overlay.style.display = "none";
-      var currentTheme = preview.getAttribute("data-theme");
-      if (currentTheme === "dark") {
-        body.style.background = "#111827";
-      } else {
-        body.style.background = "#f9fafb";
-      }
+        include dirname(__FILE__) . '/assets/templates/login/preview.php';
     }
 
-    bg.style.filter = "";
-    var card = preview.querySelector(".lbpv-card");
-    card.style.backdropFilter = "blur(20px)";
-    card.style.webkitBackdropFilter = "blur(20px)";
-
-    if (bgUrl && blurType === "filter") {
-      bg.style.filter = "blur(" + blurSize + "px)";
-    } else if (bgUrl && blurType === "backdrop") {
-      var size = Math.max(20, blurSize);
-      card.style.backdropFilter = "blur(" + size + "px)";
-      card.style.webkitBackdropFilter = "blur(" + size + "px)";
-    }
-  }
-
-  refreshBtn.addEventListener("click", function(){
-    this.classList.add("spinning");
-    var self = this;
-    setTimeout(function(){ self.classList.remove("spinning"); }, 600);
-    render();
-  });
-
-  themeButtons.forEach(function(themeBtn){
-    themeBtn.addEventListener("click", function(){
-      var theme = this.getAttribute("data-theme");
-      preview.setAttribute("data-theme", theme);
-      themeButtons.forEach(function(b){ b.classList.remove("active"); });
-      this.classList.add("active");
-      render();
-    });
-  });
-
-  setTimeout(function(){ render(); }, 500);
-})();
-</script>';
-    }
 
     /**
      * 获取颜色方案

@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.12
+ * @version 2.1.13
  * @link https://blog.lhl.one
  */
 
@@ -188,10 +188,11 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
      */
     public function sw()
     {
-        $options   = $this->options;
-        $pluginUrl = rtrim((string) $options->pluginUrl, '/');
-        $cssUrl    = $pluginUrl . '/AdminBeautify/assets/style.css?v=2.0.2';
-        $jsUrl     = $pluginUrl . '/AdminBeautify/assets/script.js?v=2.0.2';
+        $options    = $this->options;
+        $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
+        $pluginVer  = '2.1.13';
+        $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
+        $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
         $swFile = dirname(__FILE__) . '/assets/sw.js';
         if (!file_exists($swFile)) {
