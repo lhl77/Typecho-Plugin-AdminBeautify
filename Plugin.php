@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.13
+ * @version 2.1.14
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -43,7 +43,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         Typecho_Plugin::factory('admin/footer.php')->begin = array(__CLASS__, 'renderFooter');
         Typecho_Plugin::factory('admin/footer.php')->end = array(__CLASS__, 'renderLoginFooter');
         Utils\Helper::addAction('admin-beautify', 'AdminBeautify_Action');
-        return _t('AdminBeautify 已启用（含登录页美化）');
+        return _t('AdminBeautify 已启用');
     }
 
     /**
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.13';
+        $abVer = '2.1.14';
 
         // ====== 插件信息头部 ======
         echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
@@ -100,6 +100,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                     插件文档
                 </a>
+                <button id="ab-btn-donate" type="button" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.22);color:#fff;border-radius:20px;font-size:13px;font-weight:500;line-height:1.6;border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);transition:background .2s;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.2)" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseout="this.style.background=\'rgba(255,255,255,.22)\'">
+                    <span class="material-icons-round" style="font-size:16px">volunteer_activism</span> 捐助
+                </button>
                 <button id="ab-btn-update" type="button" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.22);color:#fff;border-radius:20px;font-size:13px;font-weight:500;line-height:1.6;border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);transition:background .2s;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.2)" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseout="this.style.background=\'rgba(255,255,255,.22)\'">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
                     检查更新
@@ -317,6 +320,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('小：横排胶囊按钮（图标 + 文字并排）；大：网格图标卡片（图标在上、文字在下）')
         );
         $form->addInput($dashboardQuickStyle);
+
+        // 是否显示“添加快捷按钮”提示
+        $dashboardQuickHint = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardQuickHint',
+            array(
+                '1' => '显示 (默认)',
+                '0' => '隐藏',
+            ),
+            '1',
+            _t('添加快捷按钮"自定义"'),
+            _t('是否在概要页中显示添加"自定义"快捷按钮')
+        );
+        $form->addInput($dashboardQuickHint);
 
         // 概要页自定义快捷按钮
         $dashboardCustomButtons = new Typecho_Widget_Helper_Form_Element_Textarea(
@@ -596,10 +612,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
             'staticResource',
             array(
-                'google'    => _t('🌐 Google CDN（fonts.googleapis.com）'),
-                'loli'      => _t('🇨🇳 loli.net 镜像（fonts.loli.net，国内推荐）'),
-                'local'     => _t('💾 本地文件（需自行托管字体+图标，零外部依赖）'),
-                'custom'    => _t('🔧 自定义 URL')
+                'google'    => _t('Google CDN（fonts.googleapis.com）'),
+                'loli'      => _t('loli.net 镜像（fonts.loli.net）'),
+                'jsdelivr'  => _t('jsDelivr CDN（cdn.jsdelivr.net）'),
+                // 'local'     => _t('本地文件（需自行托管字体+图标，零外部依赖）'),
+                'custom'    => _t('自定义 URL')
             ),
             'loli',
             _t('字体 & 图标资源来源'),
@@ -756,7 +773,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","navPosition","pluginCardView","dashboardQuickShow","dashboardQuickStyle","dashboardCustomButtons","dashboardRecentStyle"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardCustomButtons","dashboardRecentStyle","navPosition","pluginCardView"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -765,6 +782,36 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             var form=firstAdminUl.parentNode;
             form.insertBefore(adminCard,firstAdminUl);
             for(var i=0;i<adminFields.length;i++){
+                // 在"样式"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="primaryColor"){
+                    var abDivider=document.createElement("div");
+                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
+                    abGroupLabel.textContent="样式";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"导航栏"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="navPosition"){
+                    var abDivider=document.createElement("div");
+                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
+                    abGroupLabel.textContent="导航栏";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"插件管理页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="pluginCardView"){
+                    var abDivider=document.createElement("div");
+                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
+                    abGroupLabel.textContent="插件管理页";
+                    adminBody.appendChild(abGroupLabel);
+                }
                 // 在"概要页"分组前插入分割线 + 分组标签
                 if(adminFields[i]==="dashboardQuickShow"){
                     var abDivider=document.createElement("div");
@@ -778,7 +825,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 var ul=findFieldUl(adminFields[i]);
                 if(ul) adminBody.appendChild(ul);
             }
-            adminBody.style.paddingBottom="16px";
+            adminBody.style.padding="0px 38px 16px";
         }
 
         // ---- 编辑器设置卡片（插在管理后台卡片之后）----
@@ -798,7 +845,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 var eu=findFieldUl(editorFields[e]);
                 if(eu) editorBody.appendChild(eu);
             }
-            editorBody.style.paddingBottom="16px";
+            editorBody.style.padding="0px 38px 16px";
         }
 
         // ---- 登录页卡片 ----
@@ -818,7 +865,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
             var preview=document.getElementById("lb-preview");
             if(preview) loginBody.appendChild(preview);
-            loginBody.style.paddingBottom="16px";
+            loginBody.style.padding="0px 38px 16px";
         }
 
         // ---- 兼容脚本卡片（插在登录页卡片之后）----
@@ -837,7 +884,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             // 外部兼容 JS 字段
             var extUl=findFieldUl("compat_externalJs");
             if(extUl) compatBody.appendChild(extUl);
-            compatBody.style.paddingBottom="16px";
+            compatBody.style.padding="0px 38px 16px";
         }
         // 隐藏 hidden 字段
         var hiddenUl=findFieldUl("compat_disabledScripts");
@@ -917,7 +964,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 installBar.appendChild(tipSpan);
                 pwaBody.appendChild(installBar);
             })();
-            pwaBody.style.paddingBottom="16px";
+            pwaBody.style.padding="0px 38px 16px";
         }
 
         // ---- 性能优化卡片（插在 PWA 卡片之后） ----
@@ -932,7 +979,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 var qu=findFieldUl(perfFields[q]);
                 if(qu) perfBody.appendChild(qu);
             }
-            perfBody.style.paddingBottom="16px";
+            perfBody.style.padding="0px 38px 16px";
         }
         // 自定义/本地 URL 字段的显示/隐藏
         (function(){
@@ -1190,7 +1237,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
                 <!-- ── 作者的其他项目 ── -->
                 <div style="margin-top:20px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚀 作者推荐(友情链接)</div>
+                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚀 作者的服务</div>
                     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
                         <a href="https://img.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
                             <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🖼️ LHL\'s Images 聚合图床</div>
@@ -1209,19 +1256,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                     <div class="ab-about-support-tip" style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:#fdf6ff;border:1px solid ' . $abC1 . '22;border-radius:16px">
                         <div style="flex:1;min-width:0">
                             <div class="ab-about-support-title" style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:6px">如果插件对你有帮助，欢迎请作者喝杯咖啡 ☕</div>
-                            <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">备注支持时请在备注中填写：您的名字 + GitHub 或 个人博客，作者会定期把您的名字加入鸣谢列表。</span></div>
+                            <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">请在备注中填写：您的昵称 + GitHub 或 个人博客，作者会定期把您加入鸣谢列表。</span></div>
                             <div style="display:flex;gap:8px;flex-wrap:wrap">
                                 <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" class="ab-star-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:' . $abC1 . ';color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
                                     <span class="material-icons-round">star</span> 给个 Star
                                 </a>
                                 <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(90deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
-                                    <span class="material-icons-round">volunteer_activism</span> 捐助
+                                    <span class="material-icons-round" style="font-size:16px">volunteer_activism</span> 捐助
                                 </a>
                             </div>
                         </div>
                         <div style="flex-shrink:0;text-align:center">
-                            <img src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:110px;height:110px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08)">
-                            <div class="ab-about-support-qr-label" style="font-size:10px;color:#79747e;margin-top:6px">赞赏码</div>
+                            <img id="ab-donate-qr-img" src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:110px;height:110px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08);cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity=\'.8\'" onmouseout="this.style.opacity=\'1\'">
+                            <div class="ab-about-support-qr-label" style="font-size:10px;color:#79747e;margin-top:6px">赞赏码（点击放大）</div>
                         </div>
                     </div>
                 </div>
@@ -1230,12 +1277,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 <div style="margin-top:18px">
                     <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
                     <div id="ab-about-thanks" style="border-radius:12px;padding:12px;background:var(--md-surface-container-low);border:1px solid var(--md-outline-variant);">
-                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">感谢朋友们：</div>
+                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">特别鸣谢：</div>
                         <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
                             <!-- 列表将由作者维护或由后台脚本追加 -->
                             <li><a href="https://mzrme.com/" target="_blank" style="color:inherit">MZRME</a></li>
+                            <li><a href="https://github.com/leletheme" target="_blank" style="color:inherit">Lele</a></li>
+                            <li><a href="https://github.com/QingSongYaya" target="_blank" style="color:inherit">QingSongYaya</a></li>
                         </ul><br/>
-                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">你们的支持是我开发的最大动力（将按周期更新）：</div>
+                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">你们的支持是我开发的最大动力：</div>
                         <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
                             <!-- 列表将由作者维护或由后台脚本追加 -->
                             <li>感谢 <a href="https://github.com/Yilimmilk" target="_blank" style="color:inherit">Yilimmilk</a> 的 20元 打赏</li>
@@ -1261,6 +1310,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                     <div id="ab-telemetry-field-container"></div>
                 </div>
 
+            </div>
+        </div>
+
+        <!-- ── 赞赏码全屏弹窗（挂载到 body 后显示，避免 stacking-context 问题） ── -->
+        <div id="ab-donate-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2147483647;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-sizing:border-box;align-items:center;justify-content:center">
+            <div id="ab-donate-modal-inner" style="position:relative;text-align:center;padding:28px 24px 24px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.35);width:280px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-y:auto;box-sizing:border-box">
+                <button id="ab-donate-modal-close" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:#666;padding:0">✕</button>
+                <div style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:14px">☕ 请作者喝杯咖啡</div>
+                <img src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:220px;height:220px;border-radius:16px;object-fit:cover;border:1px solid rgba(0,0,0,.08);display:block;margin:0 auto">
+                <div style="font-size:11px;color:#79747e;margin-top:8px"><b>微信赞赏码</b><br/>请在备注中填写：您的昵称 + GitHub 或 个人博客，作者会定期把您加入鸣谢列表。</div>
+                <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:9px 20px;background:linear-gradient(90deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.18)">
+                    <span class="material-icons-round" style="font-size:15px">payments</span> 其他支付方式
+                </a>
             </div>
         </div>';
 
@@ -1429,6 +1491,43 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             var notifyUl=findFieldUlAbout("notifyOptOut");
             if(notifyUl) telContainer.appendChild(notifyUl);
         }
+
+        // ── 赞赏码弹窗逻辑 ──
+        // 注入弹窗动画关键帧（只注入一次）
+        if(!document.getElementById("ab-donate-modal-anim")){
+            var st=document.createElement("style");
+            st.id="ab-donate-modal-anim";
+            st.textContent="@keyframes ab-donatePopIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}";
+            document.head.appendChild(st);
+        }
+        function closeDonateModal(){
+            var m=document.getElementById("ab-donate-modal");
+            if(m){ m.style.display="none"; }
+            document.body.style.overflow="";
+        }
+        function openDonateModal(){
+            var m=document.getElementById("ab-donate-modal");
+            if(!m) return;
+            // 移到 body 最顶层，避免祖先 transform/overflow 影响 position:fixed
+            if(m.parentNode!==document.body) document.body.appendChild(m);
+            // 绑定关闭事件（只绑一次）
+            if(!m._abEvtBound){
+                m._abEvtBound=true;
+                m.addEventListener("click",function(e){ if(e.target===m) closeDonateModal(); });
+                var closeBtn=document.getElementById("ab-donate-modal-close");
+                if(closeBtn) closeBtn.addEventListener("click",closeDonateModal);
+                // ESC 键关闭
+                document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&m.style.display==="flex") closeDonateModal(); });
+            }
+            var inner=document.getElementById("ab-donate-modal-inner");
+            if(inner){ inner.style.animation="none"; void inner.offsetWidth; inner.style.animation="ab-donatePopIn .25s cubic-bezier(.34,1.56,.64,1)"; }
+            m.style.display="flex";
+            document.body.style.overflow="hidden";
+        }
+        var donateBtn=document.getElementById("ab-btn-donate");
+        if(donateBtn) donateBtn.addEventListener("click",openDonateModal);
+        var donateQr=document.getElementById("ab-donate-qr-img");
+        if(donateQr) donateQr.addEventListener("click",openDonateModal);
     }
 
     if(document.readyState==="loading"){
@@ -1591,21 +1690,28 @@ if(document.readyState==="loading"){
 
     $cssUrl = Typecho_Common::url('AdminBeautify/assets/AdminBeautify', $options->pluginUrl);
 
-        // ⚠️ 必须在所有 CSS 之前执行：设置 data-theme / data-nav / data-animation，并立即设置 html 内联背景与 color-scheme，
+        // 设置 data-theme / data-nav / data-animation，并立即设置 html 内联背景与 color-scheme，
         // 以尽量保证首次渲染时初始画布颜色与插件主题一致，减少在非 AJAX 跳转中的闪黑/闪白。
+        // 主题检测：优先读取前台同步写入的 localStorage.adminBeautifyTheme，
+        // 若未设置则 fallback 到插件 darkMode 配置项，auto 时再跟随系统偏好。
         $earlyScript = '<script>';
+        $earlyScript .= '(function(){';
+        $earlyScript .= 'var s;try{s=localStorage.getItem("adminBeautifyTheme");}catch(e){s=null;}';
+        $earlyScript .= 'var d;';
+        $earlyScript .= 'if(s==="dark"){d=true;}';
+        $earlyScript .= 'else if(s==="light"){d=false;}';
+        $earlyScript .= 'else{';
         if ($darkMode === 'dark') {
-            $earlyScript .= 'document.documentElement.setAttribute("data-theme","dark");';
-            $earlyScript .= 'document.documentElement.style.background="' . $darkBg . '";';
-            $earlyScript .= 'document.documentElement.style.setProperty("color-scheme","dark");';
+            $earlyScript .= 'd=true;';
         } elseif ($darkMode === 'light') {
-            $earlyScript .= 'document.documentElement.removeAttribute("data-theme");';
-            $earlyScript .= 'document.documentElement.style.background="' . $lightBg . '";';
-            $earlyScript .= 'document.documentElement.style.setProperty("color-scheme","light");';
-        } elseif ($darkMode === 'auto') {
-            // 根据系统偏好即时设置 data-theme 与 html 内联背景
-            $earlyScript .= '(function(){var m=window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)");if(m&&m.matches){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.background="' . $darkBg . '";document.documentElement.style.setProperty("color-scheme","dark");}else{document.documentElement.removeAttribute("data-theme");document.documentElement.style.background="' . $lightBg . '";document.documentElement.style.setProperty("color-scheme","light");}})();';
+            $earlyScript .= 'd=false;';
+        } else {
+            $earlyScript .= 'd=!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme:dark)").matches);';
         }
+        $earlyScript .= '}';
+        $earlyScript .= 'if(d){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.setProperty("color-scheme","dark");}';
+        $earlyScript .= 'else{document.documentElement.removeAttribute("data-theme");document.documentElement.style.setProperty("color-scheme","light");}';
+        $earlyScript .= '})();';
         if ($navPosition === 'left') {
             $earlyScript .= 'document.documentElement.setAttribute("data-nav","left");if(localStorage.getItem("adminBeautifySidebarCollapsed")==="1"){document.documentElement.setAttribute("data-nav-collapsed","");}';
         }
@@ -1634,8 +1740,9 @@ if(document.readyState==="loading"){
         //         3. style.css <link>
         //         4. 字体等外部资源 + DOMContentLoaded + PWA
 
-        // 0. 色彩模式值
-        $colorSchemeValue = ($darkMode === 'dark') ? 'dark' : (($darkMode === 'light') ? 'light' : 'light dark');
+        // 0. 色彩模式值：PHP 无法读取 localStorage，始终声明 light dark（告知浏览器两种模式均受支持）；
+        // 实际 color-scheme 已在上方 earlyScript 中由 JS 根据 adminBeautifyTheme 动态设置为 light 或 dark。
+        $colorSchemeValue = 'light dark';
 
         // ─── HEAD 注入：必须在 Typecho CSS 之前 ───────────────────────────────────
         // color-scheme meta：告知浏览器该页面支持的色彩模式
@@ -1699,7 +1806,7 @@ if(document.readyState==="loading"){
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.13' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.14' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -1717,16 +1824,16 @@ if(document.readyState==="loading"){
         $localIconUrl   = isset($pluginOptions->localIconUrl)   ? trim((string) $pluginOptions->localIconUrl)   : '';
 
         if ($staticResource === 'google') {
-            $resFontUrl = 'https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
+            $resFontUrl = 'https://fonts.googleapis.com/css2?family=Not o+Sans+SC:wght@400;500;600;700&display=swap';
             $resIconUrl = 'https://fonts.googleapis.com/icon?family=Material+Icons+Round';
         } elseif ($staticResource === 'loli') {
             // loli.net 镜像（fonts.googleapis.com → fonts.loli.net）
             $resFontUrl = 'https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
             $resIconUrl = 'https://fonts.loli.net/icon?family=Material+Icons+Round';
         } elseif ($staticResource === 'jsdelivr') {
-            // jsDelivr CDN：@fontsource/noto-sans-sc + material-icons npm 包
-            $resFontUrl = 'https://cdn.jsdelivr.net/npm/@fontsource/noto-sans-sc@5/index.css';
-            $resIconUrl = 'https://cdn.jsdelivr.net/npm/material-icons@1/iconfont/round.css';
+            // jsDelivr CDN
+            $resFontUrl = 'https://cdn.jsdelivr.net/npm/noto-sans-sc@37.0.0/noto_sans_sc_medium/css.min.css';
+            $resIconUrl = 'https://cdn.jsdelivr.net/npm/material-icons@1.13.14/iconfont/material-icons.min.css';
         } elseif ($staticResource === 'local') {
             // 本地文件（从插件 assets/fonts/ 目录加载，或使用用户自定义路径）
             $localPluginFontDefault = Typecho_Common::url('AdminBeautify/assets/fonts/NotoSansSC.css', $options->pluginUrl);
@@ -1810,6 +1917,7 @@ if(document.readyState==="loading"){
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
         $dashboardQuickStyle = isset($pluginOptions->dashboardQuickStyle) ? (string)$pluginOptions->dashboardQuickStyle : 'small';
+        $dashboardQuickHint = isset($pluginOptions->dashboardQuickHint) ? (string)$pluginOptions->dashboardQuickHint : '1';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
 
@@ -1916,10 +2024,11 @@ if(document.readyState==="loading"){
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.13',
+            'pluginVersion'          => '2.1.14',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
+            'dashboardQuickHint'     => $dashboardQuickHint,
             'dashboardCustomButtons' => $customBtnsParsed,
             'dashboardRecentStyle'   => $dashboardRecentStyle,
             'enabledCompatPlugins'       => $enabledCompatPlugins,
@@ -1929,16 +2038,15 @@ if(document.readyState==="loading"){
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.13.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.14.js"></script>';
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
         }
 
-        // 匿名统计：通过 umami.track() 发送含域名的自定义事件，可在 Umami 后台 Events 中直接看到来源域名
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.13"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.14"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -2135,7 +2243,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.13";';
+        echo 'var __AB_VER__="2.1.14";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
