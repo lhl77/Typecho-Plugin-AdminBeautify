@@ -1,3 +1,5 @@
+![](https://i.see.you/2026/03/17/Fm6w/ba8ff85ae1ee57e2de18062967cd8455.png)
+
 <h1 align="center">Admin Beautify</h1>
 
 <p align="center">
