@@ -98,6 +98,11 @@ your-site/
 - 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues)
 - 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
 
+## ⭐ Stars
+
+[![Star History Chart](https://api.star-history.com/image?repos=lhl77/Typecho-Plugin-AdminBeautify&type=date&legend=top-left)](https://www.star-history.com/?repos=lhl77%2FTypecho-Plugin-AdminBeautify&type=date&legend=top-left)
+
+
 ---
 
 <p align="center">
