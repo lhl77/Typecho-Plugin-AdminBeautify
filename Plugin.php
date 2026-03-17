@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.14
+ * @version 2.1.15
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,135 +80,21 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.14';
+        $abVer = '2.1.15';
 
         // ====== 插件信息头部 ======
-        echo '<div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
-            <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
-                <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
-                <div style="flex:1">
-                    <h2 style="margin:0 0 6px;font-size:22px;font-weight:600;letter-spacing:-0.02em">Admin Beautify <span style="font-size:13px;font-weight:400;opacity:.8;margin-left:4px">v' . $abVer . '</span></h2>
-                    <p style="margin:0;font-size:14px;opacity:0.9;line-height:1.6">后台管理界面 + 登录界面美化 · Material Design 3 风格</p>
-                </div>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;text-shadow:none">
-                <a id="ab-btn-github" href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.22);color:#fff !important;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);transition:background .2s;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.2)" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseout="this.style.background=\'rgba(255,255,255,.22)\'">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                    GitHub
-                </a>
-                <a id="ab-btn-blog" href="https://blog.lhl.one/artical/977.html" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.22);color:#fff !important;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.35);transition:background .2s;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.2)" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseout="this.style.background=\'rgba(255,255,255,.22)\'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    插件文档
-                </a>
-                <button id="ab-btn-donate" type="button" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.22);color:#fff;border-radius:20px;font-size:13px;font-weight:500;line-height:1.6;border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);transition:background .2s;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.2)" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseout="this.style.background=\'rgba(255,255,255,.22)\'">
-                    <span class="material-icons-round" style="font-size:16px">volunteer_activism</span> 捐助
-                </button>
-                <button id="ab-btn-update" type="button" style="display:inline-flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(255,255,255,.22);color:#fff;border-radius:20px;font-size:13px;font-weight:500;line-height:1.6;border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(6px);transition:background .2s;cursor:pointer;text-shadow:0 1px 2px rgba(0,0,0,.2)" onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" onmouseout="this.style.background=\'rgba(255,255,255,.22)\'">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
-                    检查更新
-                </button>
-            </div>
-        </div>';
+        include dirname(__FILE__) . '/assets/templates/config/header.php';
 
         // ================================================================
-        // ====== MD3 折叠卡片 — 暗色模式适配 ======
+        // ====== 配置面板全局样式（卡片、提示框、暗色模式、动画） ======
         // ================================================================
-        echo '<style>
-[data-theme="dark"] #ab-card-admin,
-[data-theme="dark"] #ab-card-login {
-    background: var(--md-surface-container-low, #1d1b20) !important;
-    border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,.4), 0 2px 8px rgba(0,0,0,.25) !important;
-}
-[data-theme="dark"] #ab-card-admin-hdr:hover,
-[data-theme="dark"] #ab-card-login-hdr:hover {
-    background: rgba(255,255,255,.05) !important;
-}
-[data-theme="dark"] .ab-card-title {
-    color: var(--md-on-surface, #e6e1e5) !important;
-}
-[data-theme="dark"] .ab-card-subtitle {
-    color: var(--md-on-surface-variant, #cac4d0) !important;
-}
-[data-theme="dark"] .ab-card-tip {
-    background: rgba(96,165,250,.1) !important;
-    border-color: rgba(96,165,250,.25) !important;
-}
-[data-theme="dark"] .ab-card-tip-text {
-    color: #93c5fd !important;
-}
-[data-theme="dark"] .ab-card-tip-green {
-    background: rgba(74,222,128,.08) !important;
-    border-color: rgba(74,222,128,.2) !important;
-}
-[data-theme="dark"] .ab-card-tip-green-text {
-    color: #86efac !important;
-}
-[data-theme="dark"] .ab-card-tip-green-text code {
-    background: rgba(74,222,128,.15) !important;
-    color: #86efac !important;
-}
-[data-theme="dark"] #ab-compat-scripts-list .ab-compat-list-title {
-    color: var(--md-on-surface, #e6e1e5) !important;
-}
-[data-theme="dark"] .ab-compat-script-item {
-    background: var(--md-surface-container, #211f26) !important;
-    border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
-}
-[data-theme="dark"] .ab-compat-script-item .ab-compat-name {
-    color: var(--md-on-surface, #e6e1e5) !important;
-}
-[data-theme="dark"] .ab-compat-script-item .ab-compat-desc {
-    color: var(--md-on-surface-variant, #cac4d0) !important;
-}
-[data-theme="dark"] .ab-compat-script-item .ab-compat-meta {
-    color: rgba(255,255,255,.4) !important;
-}
-[data-theme="dark"] .ab-compat-script-item .ab-compat-meta[style*="background"] {
-    background: rgba(255,255,255,.08) !important;
-}
-[data-theme="dark"] .ab-compat-script-item .ab-compat-toggle-bg {
-    background: rgba(255,255,255,.2) !important;
-}
-[data-theme="dark"] .ab-compat-script-item .ab-compat-toggle-bg.active {
-    background: var(--md-primary, #d0bcff) !important;
-}
-[data-theme="dark"] .ab-compat-empty {
-    background: rgba(250,204,21,.08) !important;
-    border-color: rgba(250,204,21,.2) !important;
-    color: #fde68a !important;
-}
-[data-theme="dark"] #ab-card-pwa,
-[data-theme="dark"] #ab-card-compat,
-[data-theme="dark"] #ab-card-perf,
-[data-theme="dark"] #ab-card-editor {
-    background: var(--md-surface-container-low, #1d1b20) !important;
-    border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,.3), 0 2px 12px rgba(0,0,0,.2) !important;
-}
-[data-theme="dark"] #ab-card-pwa-hdr:hover,
-[data-theme="dark"] #ab-card-compat-hdr:hover,
-[data-theme="dark"] #ab-card-perf-hdr:hover,
-[data-theme="dark"] #ab-card-editor-hdr:hover {
-    background: rgba(255,255,255,.04) !important;
-}
-</style>';
+        include dirname(__FILE__) . '/assets/templates/config/config.style.php';
+        include_once dirname(__FILE__) . '/assets/templates/config/card-create.php';
 
         // ================================================================
         // ====== 管理后台设置（MD3 折叠卡片） ======
         // ================================================================
-        echo '<div id="ab-card-admin" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-admin-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-admin-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div id="ab-card-admin-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">⚙️</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">管理后台设置</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">主题色、暗色模式、圆角、动画、布局</div>
-                </div>
-                <svg id="ab-card-admin-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-admin-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)"></div>
-        </div>';
+        abCard('admin', $abC1, '⚙️', '管理后台设置', '主题色、暗色模式、圆角、动画、布局');
 
         // 主题色选择
         $primaryColor = new Typecho_Widget_Helper_Form_Element_Select(
@@ -360,25 +246,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ================================================================
         // ====== 编辑器设置（MD3 折叠卡片） ======
         // ================================================================
-        echo '<div id="ab-card-editor" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-editor-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-editor-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div id="ab-card-editor-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">✏️</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">编辑器设置</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">Vditor Markdown 编辑器，所见即所得 / 实时预览 / 分屏编辑</div>
-                </div>
-                <svg id="ab-card-editor-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-editor-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
-                <div class="ab-card-tip" style="margin:4px 6px 8px;padding:12px 15px;background:#f0f9ff;border:1px solid #bfdbfe;border-radius:12px">
-                    <div style="display:flex;align-items:flex-start;gap:10px">
-                        <span style="font-size:15px;flex-shrink:0;margin-top:1px">✏️</span>
-                        <div class="ab-card-tip-text" style="flex:1;font-size:13px;color:#1e40af;line-height:1.7">开启 Vditor 后，文章 / 页面编辑界面将使用 Vditor 替代原版 PageDown 编辑器。原工具栏将被 Vditor 内置工具栏接管，原"撰写/预览"切换将变为 <strong>所见即所得 / 实时预览 / 分屏编辑</strong> 三种模式切换按钮。</div>
-                    </div>
-                </div>
-            </div>
-        </div>';
+        abCard('editor', $abC1, '✏️', '编辑器设置', 'Vditor Markdown 编辑器，所见即所得 / 实时预览 / 分屏编辑',
+            abCardTip('✏️', '开启 Vditor 后，文章 / 页面编辑界面将使用 Vditor 替代原版 PageDown 编辑器。原工具栏将被 Vditor 内置工具栏接管，原"撰写/预览"切换将变为 <strong>所见即所得 / 实时预览 / 分屏编辑</strong> 三种模式切换按钮。')
+        );
 
         // 编辑器 - Vditor 开关
         $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
@@ -410,25 +280,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ================================================================
         // ====== 登录页设置（MD3 折叠卡片） ======
         // ================================================================
-        echo '<div id="ab-card-login" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-login-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-login-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div id="ab-card-login-icon" style="width:40px;height:40px;background:' . $abC2 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">🔐</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">登录页设置</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">配色方案、背景图片、虚化效果、自定义样式</div>
-                </div>
-                <svg id="ab-card-login-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC2 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-login-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
-                <div class="ab-card-tip" style="margin:4px 6px 8px;padding:12px 15px;background:#f0f9ff;border:1px solid #bfdbfe;border-radius:12px">
-                    <div style="display:flex;align-items:flex-start;gap:10px">
-                        <span style="font-size:15px;flex-shrink:0;margin-top:1px">💡</span>
-                        <div class="ab-card-tip-text" style="flex:1;font-size:13px;color:#1e40af;line-height:1.7">以下设置控制登录页面的样式，支持自定义配色、背景图片、虚化效果等。</div>
-                    </div>
-                </div>
-            </div>
-        </div>';
+        abCard('login', $abC2, '🔐', '登录页设置', '配色方案、背景图片、虚化效果、自定义样式',
+            abCardTip('💡', '以下设置控制登录页面的样式，支持自定义配色、背景图片、虚化效果等。')
+        );
 
         // 登录页 - 颜色预设方案
         $loginColorPreset = new Typecho_Widget_Helper_Form_Element_Select(
@@ -558,18 +412,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ================================================================
         // ====== PWA 应用设置（MD3 折叠卡片） ======
         // ================================================================
-        echo '<div id="ab-card-pwa" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-pwa-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-pwa-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div id="ab-card-pwa-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">📱</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">PWA 应用设置</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">将管理后台安装为渐进式 Web 应用，自定义名称和图标</div>
-                </div>
-                <svg id="ab-card-pwa-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-pwa-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)"></div>
-        </div>';
+        abCard('pwa', $abC1, '📱', 'PWA 应用设置', '将管理后台安装为渐进式 Web 应用，自定义名称和图标');
 
         // PWA 应用名称
         $pwaAppName = new Typecho_Widget_Helper_Form_Element_Text(
@@ -594,19 +437,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ================================================================
         // ====== 速度优化设置（MD3 折叠卡片） ======
         // ================================================================
-        echo '<div id="ab-card-perf" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-perf-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-perf-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div id="ab-card-perf-icon" style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">⚡</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">速度优化</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">字体与图标静态资源来源，支持 Google CDN、国内镜像或自定义</div>
-                </div>
-                <svg id="ab-card-perf-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-perf-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
-            </div>
-        </div>';
+        abCard('perf', $abC1, '⚡', '速度优化', '字体与图标静态资源来源，支持 Google CDN、国内镜像或自定义');
 
         // 静态资源来源
         $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
@@ -667,29 +498,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ================================================================
         // ====== 兼容脚本管理（MD3 折叠卡片） ======
         // ================================================================
-        echo '<div id="ab-card-compat" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-compat-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-compat-strip" style="width:3px;height:36px;background:' . $abC2 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div id="ab-card-compat-icon" style="width:40px;height:40px;background:' . $abC2 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:background .3s">🧩</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">兼容脚本管理</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">手动启用兼容脚本，修复其他插件/旧版 Typecho 的页面排版</div>
-                </div>
-                <svg id="ab-card-compat-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC2 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-compat-body" style="overflow:hidden;max-height:9999px;padding:0 16px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
-                <div class="ab-card-tip-green" style="margin:4px 6px 8px;padding:12px 15px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px">
-                    <div style="display:flex;align-items:flex-start;gap:10px">
-                        <span style="font-size:15px;flex-shrink:0;margin-top:1px">📦</span>
-                        <div class="ab-card-tip-green-text" style="flex:1;font-size:13px;color:#166534;line-height:1.7">
-                            兼容脚本默认不加载，请根据需要手动开启。脚本位于 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">assets/compat/</code> 目录。<br>
-                            开发者可参考 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">assets/compat/README.md</code> 编写兼容脚本（需包含 <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@name</code> / <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@plugins</code> / <code style="background:#dcfce7;padding:2px 6px;border-radius:4px;font-size:12px">@description</code> 元数据）。<br/>
-                            文档：<a href="https://blog.lhl.one/artical/977.html" target="_blank">https://blog.lhl.one/artical/977.html</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>';
+        abCard('compat', $abC2, '🧩', '兼容脚本管理', '手动启用兼容脚本，修复其他插件/旧版 Typecho 的页面排版',
+            abCardTip('📦',
+                '兼容脚本默认不加载，请根据需要手动开启。脚本位于 <code>assets/compat/</code> 目录。<br>'
+                . '开发者可参考 <code>assets/compat/README.md</code> 编写兼容脚本（需包含 <code>@name</code> / <code>@plugins</code> / <code>@description</code> 元数据）。<br>'
+                . '文档：<a href="https://blog.lhl.one/artical/977.html" target="_blank">https://blog.lhl.one/artical/977.html</a>',
+                true  // 绿色提示框
+            )
+        );
 
         // --- 扫描本地兼容脚本并展示列表 ---
         $compatDir = dirname(__FILE__) . '/assets/compat/';
@@ -753,898 +569,15 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $form->addInput($notifyOptOut);
 
         // ====== MD3 折叠卡片 + 颜色跟随 + 检查更新 ======
-        echo '<script>
-// ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
-(function(){
-    // 查找字段对应的外层 <ul class="typecho-option"> 元素
-    function findFieldUl(name){
-        // Typecho 1.3 格式：ul[id^="typecho-option-item-{name}-"]
-        var el=document.querySelector("ul[id^=\'typecho-option-item-"+name+"-\']");
-        if(el) return el;
-        // fallback：从 input[name] 向上找最近的 <ul>
-        var form=document.querySelector("form.protected")||document.querySelector("form");
-        if(!form) return null;
-        var inp=form.querySelector("[name=\""+name+"\"]");
-        if(!inp) return null;
-        var c=inp.parentNode;
-        while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
-        return null;
-    }
-
-    function buildCards(){
-        // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardCustomButtons","dashboardRecentStyle","navPosition","pluginCardView"];
-        var firstAdminUl=findFieldUl("primaryColor");
-        var adminCard=document.getElementById("ab-card-admin");
-        var adminBody=document.getElementById("ab-card-admin-body");
-
-        if(adminCard&&adminBody&&firstAdminUl){
-            var form=firstAdminUl.parentNode;
-            form.insertBefore(adminCard,firstAdminUl);
-            for(var i=0;i<adminFields.length;i++){
-                // 在"样式"分组前插入分割线 + 分组标签
-                if(adminFields[i]==="primaryColor"){
-                    var abDivider=document.createElement("div");
-                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
-                    adminBody.appendChild(abDivider);
-                    var abGroupLabel=document.createElement("div");
-                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
-                    abGroupLabel.textContent="样式";
-                    adminBody.appendChild(abGroupLabel);
-                }
-                // 在"导航栏"分组前插入分割线 + 分组标签
-                if(adminFields[i]==="navPosition"){
-                    var abDivider=document.createElement("div");
-                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
-                    adminBody.appendChild(abDivider);
-                    var abGroupLabel=document.createElement("div");
-                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
-                    abGroupLabel.textContent="导航栏";
-                    adminBody.appendChild(abGroupLabel);
-                }
-                // 在"插件管理页"分组前插入分割线 + 分组标签
-                if(adminFields[i]==="pluginCardView"){
-                    var abDivider=document.createElement("div");
-                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
-                    adminBody.appendChild(abDivider);
-                    var abGroupLabel=document.createElement("div");
-                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
-                    abGroupLabel.textContent="插件管理页";
-                    adminBody.appendChild(abGroupLabel);
-                }
-                // 在"概要页"分组前插入分割线 + 分组标签
-                if(adminFields[i]==="dashboardQuickShow"){
-                    var abDivider=document.createElement("div");
-                    abDivider.style.cssText="height:1px;background:var(--md-outline-variant,rgba(0,0,0,.1));margin:8px 0 4px;";
-                    adminBody.appendChild(abDivider);
-                    var abGroupLabel=document.createElement("div");
-                    abGroupLabel.style.cssText="font-size:11px;font-weight:600;color:var(--md-on-surface-variant,#79747e);padding:4px 6px 2px;letter-spacing:.08em;text-transform:uppercase;";
-                    abGroupLabel.textContent="概要页";
-                    adminBody.appendChild(abGroupLabel);
-                }
-                var ul=findFieldUl(adminFields[i]);
-                if(ul) adminBody.appendChild(ul);
-            }
-            adminBody.style.padding="0px 38px 16px";
-        }
-
-        // ---- 编辑器设置卡片（插在管理后台卡片之后）----
-        var editorFields=["editor_vditor","editor_vditorMode"];
-        var editorCard=document.getElementById("ab-card-editor");
-        var editorBody=document.getElementById("ab-card-editor-body");
-        if(editorCard&&editorBody){
-            var firstEditorUl=findFieldUl("editor_vditor");
-            if(firstEditorUl){
-                var formE=firstEditorUl.parentNode;
-                formE.insertBefore(editorCard,firstEditorUl);
-            } else if(adminCard){
-                if(adminCard.nextSibling) adminCard.parentNode.insertBefore(editorCard,adminCard.nextSibling);
-                else adminCard.parentNode.appendChild(editorCard);
-            }
-            for(var e=0;e<editorFields.length;e++){
-                var eu=findFieldUl(editorFields[e]);
-                if(eu) editorBody.appendChild(eu);
-            }
-            editorBody.style.padding="0px 38px 16px";
-        }
-
-        // ---- 登录页卡片 ----
-        var loginFields=["login_colorPreset","login_primaryColor","login_primaryColor2",
-            "login_showSiteName","login_themeMode","login_showThemeToggle",
-            "login_bgImage","login_blurType","login_blurSize","login_customCss","login_customJs"];
-        var firstLoginUl=findFieldUl("login_colorPreset");
-        var loginCard=document.getElementById("ab-card-login");
-        var loginBody=document.getElementById("ab-card-login-body");
-
-        if(loginCard&&loginBody&&firstLoginUl){
-            var form2=firstLoginUl.parentNode;
-            form2.insertBefore(loginCard,firstLoginUl);
-            for(var j=0;j<loginFields.length;j++){
-                var lu=findFieldUl(loginFields[j]);
-                if(lu) loginBody.appendChild(lu);
-            }
-            var preview=document.getElementById("lb-preview");
-            if(preview) loginBody.appendChild(preview);
-            loginBody.style.padding="0px 38px 16px";
-        }
-
-        // ---- 兼容脚本卡片（插在登录页卡片之后）----
-        var compatCard=document.getElementById("ab-card-compat");
-        var compatBody=document.getElementById("ab-card-compat-body");
-        if(compatCard&&compatBody){
-            // 重新定位到登录页卡片之后
-            if(loginCard){
-                var formC=loginCard.parentNode;
-                if(loginCard.nextSibling) formC.insertBefore(compatCard,loginCard.nextSibling);
-                else formC.appendChild(compatCard);
-            }
-            // 兼容脚本列表
-            var csList=document.getElementById("ab-compat-scripts-list");
-            if(csList) compatBody.appendChild(csList);
-            // 外部兼容 JS 字段
-            var extUl=findFieldUl("compat_externalJs");
-            if(extUl) compatBody.appendChild(extUl);
-            compatBody.style.padding="0px 38px 16px";
-        }
-        // 隐藏 hidden 字段
-        var hiddenUl=findFieldUl("compat_disabledScripts");
-        if(hiddenUl) hiddenUl.style.display="none";
-
-        // ---- PWA 应用卡片（插在兼容脚本卡片之后）----
-        var pwaFields=["pwa_appName","pwa_appIcon"];
-        var pwaCard=document.getElementById("ab-card-pwa");
-        var pwaBody=document.getElementById("ab-card-pwa-body");
-        if(pwaCard&&pwaBody&&compatCard){
-            var form3=compatCard.parentNode;
-            if(compatCard.nextSibling) form3.insertBefore(pwaCard,compatCard.nextSibling);
-            else form3.appendChild(pwaCard);
-            for(var p=0;p<pwaFields.length;p++){
-                var pu=findFieldUl(pwaFields[p]);
-                if(pu) pwaBody.appendChild(pu);
-            }
-            // ---- 一键安装 PWA 按钮区 ----
-            (function(){
-                var installBar=document.createElement("div");
-                installBar.id="ab-pwa-install-bar";
-                installBar.style.cssText="display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:8px 0 4px;padding:14px 16px;background:rgba(103,80,164,.06);border-radius:14px;border:1px solid rgba(103,80,164,.12);";
-                // 安装按钮
-                var installBtn=document.createElement("button");
-                installBtn.type="button";
-                installBtn.id="ab-pwa-install-btn";
-                installBtn.textContent="📲 安装到桌面";
-                installBtn.style.cssText="padding:8px 18px;border-radius:20px;border:none;background:#6750a4;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:opacity .2s;white-space:nowrap;";
-                installBtn.onmouseover=function(){this.style.opacity=".85";};
-                installBtn.onmouseout=function(){this.style.opacity="1";};
-                // 提示文字
-                var tipSpan=document.createElement("span");
-                tipSpan.id="ab-pwa-install-tip";
-                tipSpan.style.cssText="font-size:12px;color:#79747e;line-height:1.5;";
-                // 检测 beforeinstallprompt 支持
-                var deferredPrompt=null;
-                var supported="onbeforeinstallprompt" in window;
-                if(supported){
-                    tipSpan.textContent="支持一键安装（Chrome / Edge Chromium）";
-                    window.addEventListener("beforeinstallprompt",function(e){
-                        e.preventDefault();
-                        deferredPrompt=e;
-                        installBtn.disabled=false;
-                        installBtn.style.opacity="1";
-                        tipSpan.textContent="点击按钮即可安装到桌面（Chrome / Edge Chromium）";
-                    });
-                    window.addEventListener("appinstalled",function(){
-                        deferredPrompt=null;
-                        installBtn.disabled=true;
-                        installBtn.style.opacity=".5";
-                        tipSpan.textContent="✅ 已安装到桌面";
-                    });
-                    installBtn.disabled=true;
-                    installBtn.style.opacity=".5";
-                    installBtn.onclick=function(){
-                        if(!deferredPrompt){
-                            tipSpan.textContent="⚠️ 当前页面暂不满足安装条件（需通过 HTTPS 访问，且尚未安装）";
-                            return;
-                        }
-                        deferredPrompt.prompt();
-                        deferredPrompt.userChoice.then(function(r){
-                            if(r.outcome==="accepted"){
-                                tipSpan.textContent="✅ 安装已确认";
-                            } else {
-                                tipSpan.textContent="已取消安装";
-                            }
-                            deferredPrompt=null;
-                        });
-                    };
-                } else {
-                    // 不支持 beforeinstallprompt（Safari / Firefox 等）
-                    installBtn.disabled=true;
-                    installBtn.style.opacity=".45";
-                    tipSpan.innerHTML="⚠️ 当前浏览器不支持一键安装。<br>仅 <strong>Chrome</strong>、<strong>Edge（Chromium 内核）</strong> 支持此功能；<br>Safari 请在浏览器菜单中选择「添加到主屏幕」。";
-                }
-                installBar.appendChild(installBtn);
-                installBar.appendChild(tipSpan);
-                pwaBody.appendChild(installBar);
-            })();
-            pwaBody.style.padding="0px 38px 16px";
-        }
-
-        // ---- 性能优化卡片（插在 PWA 卡片之后） ----
-        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl"];
-        var perfCard=document.getElementById("ab-card-perf");
-        var perfBody=document.getElementById("ab-card-perf-body");
-        if(perfCard&&perfBody&&pwaCard){
-            var form4=pwaCard.parentNode;
-            if(pwaCard.nextSibling) form4.insertBefore(perfCard,pwaCard.nextSibling);
-            else form4.appendChild(perfCard);
-            for(var q=0;q<perfFields.length;q++){
-                var qu=findFieldUl(perfFields[q]);
-                if(qu) perfBody.appendChild(qu);
-            }
-            perfBody.style.padding="0px 38px 16px";
-        }
-        // 自定义/本地 URL 字段的显示/隐藏
-        (function(){
-            var sel=document.querySelector("[name=\"staticResource\"]");
-            if(!sel) return;
-            function toggleCustom(){
-                var v=sel.value;
-                var isCustom=(v==="custom");
-                var isLocal=(v==="local");
-                var fontUl=findFieldUl("customFontUrl");
-                var iconUl=findFieldUl("customIconUrl");
-                var localFontUl=findFieldUl("localFontUrl");
-                var localIconUl=findFieldUl("localIconUrl");
-                if(fontUl)      fontUl.style.display=isCustom?"":"none";
-                if(iconUl)      iconUl.style.display=isCustom?"":"none";
-                if(localFontUl) localFontUl.style.display=isLocal?"":"none";
-                if(localIconUl) localIconUl.style.display=isLocal?"":"none";
-            }
-            sel.addEventListener("change",toggleCustom);
-            toggleCustom();
-        })();
-
-        // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","editor","login","pwa","perf","compat"].forEach(function(id){
-            var hdr=document.getElementById("ab-card-"+id+"-hdr");
-            if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
-            restoreCard(id);
-        });
-    }
-
-    window.abToggleCard=function(id){
-        var body=document.getElementById("ab-card-"+id+"-body");
-        var chev=document.getElementById("ab-card-"+id+"-chev");
-        var card=document.getElementById("ab-card-"+id);
-        if(!body) return;
-        var collapsed=body.getAttribute("data-collapsed")==="1";
-        if(collapsed){
-            // 展开：先恢复 paddingBottom，再展开高度
-            body.style.paddingBottom="16px";
-            body.style.maxHeight=body.scrollHeight+"px";
-            setTimeout(function(){ body.style.maxHeight="9999px"; },420);
-            body.setAttribute("data-collapsed","0");
-            if(chev) chev.style.transform="";
-            if(card) card.style.boxShadow="0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04)";
-            try{ localStorage.setItem("ab-card-"+id,"1"); }catch(e){}
-        } else {
-            // 折叠：先锁定当前高度，再清除 paddingBottom，然后折叠到 0
-            body.style.maxHeight=body.scrollHeight+"px";
-            requestAnimationFrame(function(){ requestAnimationFrame(function(){
-                body.style.paddingBottom="0";
-                body.style.maxHeight="0";
-            }); });
-            body.setAttribute("data-collapsed","1");
-            if(chev) chev.style.transform="rotate(-90deg)";
-            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
-            try{ localStorage.setItem("ab-card-"+id,"0"); }catch(e){}
-        }
-    };
-
-    // 默认折叠；仅当 localStorage 明确为 "1" 时才展开
-    function restoreCard(id){
-        var saved=null;
-        try{ saved=localStorage.getItem("ab-card-"+id); }catch(e){}
-        var body=document.getElementById("ab-card-"+id+"-body");
-        var chev=document.getElementById("ab-card-"+id+"-chev");
-        var card=document.getElementById("ab-card-"+id);
-        if(!body) return;
-        if(saved==="1"){
-            // 用户曾手动展开，保持展开
-            body.setAttribute("data-collapsed","0");
-        } else {
-            // 默认折叠（首次访问或曾手动折叠）
-            body.style.transition="none";
-            body.style.paddingBottom="0";
-            body.style.maxHeight="0";
-            body.setAttribute("data-collapsed","1");
-            if(chev) chev.style.transform="rotate(-90deg)";
-            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
-            setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
-        }
-    }
-
-    if(document.readyState==="loading"){
-        document.addEventListener("DOMContentLoaded",buildCards);
-    } else {
-        buildCards();
-    }
-})();
-
-// ---- 卡片颜色跟随主题色 & 检查更新 ----
-(function(){
-    var abColorMap={
-        purple:["#7D5260","#9E7B8A"],
-        blue:  ["#556270","#7A8A9E"],
-        teal:  ["#4A6363","#6A8A8A"],
-        green: ["#55624C","#7A8A6E"],
-        orange:["#725A42","#9E8062"],
-        pink:  ["#74565F","#9E7A85"],
-        red:   ["#775654","#A27A78"]
-    };
-    function applyConfigColors(scheme){
-        var c=abColorMap[scheme]||abColorMap.purple;
-        // Banner
-        var banner=document.getElementById("ab-header-banner");
-        if(banner) banner.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";
-        // 管理后台卡片
-        var s1=document.getElementById("ab-card-admin-strip");
-        if(s1) s1.style.background=c[0];
-        var i1=document.getElementById("ab-card-admin-icon");
-        if(i1) i1.style.background=c[0]+"1a";
-        var v1=document.getElementById("ab-card-admin-chev");
-        if(v1) v1.setAttribute("stroke",c[0]);
-        // 编辑器设置卡片
-        var se=document.getElementById("ab-card-editor-strip");
-        if(se) se.style.background=c[0];
-        var ie=document.getElementById("ab-card-editor-icon");
-        if(ie) ie.style.background=c[0]+"1a";
-        var ve=document.getElementById("ab-card-editor-chev");
-        if(ve) ve.setAttribute("stroke",c[0]);
-        // PWA 卡片
-        var s3=document.getElementById("ab-card-pwa-strip");
-        if(s3) s3.style.background=c[0];
-        var i3=document.getElementById("ab-card-pwa-icon");
-        if(i3) i3.style.background=c[0]+"1a";
-        var v3=document.getElementById("ab-card-pwa-chev");
-        if(v3) v3.setAttribute("stroke",c[0]);
-        // 兼容脚本卡片
-        var s4=document.getElementById("ab-card-compat-strip");
-        if(s4) s4.style.background=c[1];
-        var i4=document.getElementById("ab-card-compat-icon");
-        if(i4) i4.style.background=c[1]+"1a";
-        var v4=document.getElementById("ab-card-compat-chev");
-        if(v4) v4.setAttribute("stroke",c[1]);
-        // 登录页卡片
-        var s2=document.getElementById("ab-card-login-strip");
-        if(s2) s2.style.background=c[1];
-        var i2=document.getElementById("ab-card-login-icon");
-        if(i2) i2.style.background=c[1]+"1a";
-        var v2=document.getElementById("ab-card-login-chev");
-        if(v2) v2.setAttribute("stroke",c[1]);
-        // 性能优化卡片
-        var s5=document.getElementById("ab-card-perf-strip");
-        if(s5) s5.style.background=c[0];
-        var i5=document.getElementById("ab-card-perf-icon");
-        if(i5) i5.style.background=c[0]+"1a";
-        var v5=document.getElementById("ab-card-perf-chev");
-        if(v5) v5.setAttribute("stroke",c[0]);
-        // 关于插件卡片
-        var s6=document.getElementById("ab-card-about-strip");
-        if(s6) s6.style.background=c[0];
-        var v6=document.getElementById("ab-card-about-chev");
-        if(v6) v6.setAttribute("stroke",c[0]);
-    }
-    function initColorFollow(){
-        var sel=document.querySelector("[name=\"primaryColor\"]");
-        if(!sel) return;
-        sel.addEventListener("change",function(){ applyConfigColors(this.value); });
-    }
-
-    // 检查更新（调用全局 abCheckUpdate，定义于 renderFooter 注入的脚本）
-    function initUpdateCheck(){
-        var btn=document.getElementById("ab-btn-update");
-        if(!btn) return;
-        btn.addEventListener("click",function(){ window.abCheckUpdate&&window.abCheckUpdate(true); });
-    }
-
-    // 注入动画
-    if(!document.getElementById("ab-config-anim")){
-        var st=document.createElement("style");
-        st.id="ab-config-anim";
-        st.textContent="@keyframes ab-spin{to{transform:rotate(360deg)}} @keyframes ab-fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}";
-        document.head.appendChild(st);
-    }
-
-    if(document.readyState==="loading"){
-        document.addEventListener("DOMContentLoaded",function(){ initColorFollow(); initUpdateCheck(); });
-    } else {
-        initColorFollow(); initUpdateCheck();
-    }
-})();
-</script>';
+        include dirname(__FILE__) . '/assets/templates/config/config.script.php';
 
         // ================================================================
         // ====== 关于插件（MD3 折叠卡片） ======
         // ================================================================
-        echo '<style>
-[data-theme="dark"] #ab-card-about {
-    background: var(--md-surface-container-low, #1d1b20) !important;
-    border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important;
-}
-[data-theme="dark"] #ab-card-about-hdr:hover { background: rgba(255,255,255,.05) !important; }
-[data-theme="dark"] .ab-about-section-title { color: var(--md-on-surface-variant, #cac4d0) !important; }
-[data-theme="dark"] .ab-about-author-name { color: var(--md-on-surface, #e6e1e5) !important; }
-[data-theme="dark"] .ab-about-author-bio { color: var(--md-on-surface-variant, #cac4d0) !important; }
-[data-theme="dark"] .ab-about-link-btn { background: rgba(255,255,255,.08) !important; color: var(--md-on-surface, #e6e1e5) !important; border-color: rgba(255,255,255,.12) !important; }
-[data-theme="dark"] .ab-about-link-btn:hover { background: rgba(255,255,255,.14) !important; }
-[data-theme="dark"] .ab-about-plugin-card { background: var(--md-surface-container, #211f26) !important; border-color: var(--md-outline-variant, rgba(255,255,255,.12)) !important; }
-[data-theme="dark"] .ab-about-plugin-name { color: var(--md-on-surface, #e6e1e5) !important; }
-[data-theme="dark"] .ab-about-plugin-desc { color: var(--md-on-surface-variant, #cac4d0) !important; }
-[data-theme="dark"] .ab-about-changelog-item { border-color: rgba(255,255,255,.08) !important; }
-[data-theme="dark"] .ab-about-tag-version { background: rgba(255,255,255,.1) !important; color: var(--md-on-surface, #e6e1e5) !important; }
-[data-theme="dark"] .ab-about-changelog-body { color: var(--md-on-surface-variant, #cac4d0) !important; }
-[data-theme="dark"] .ab-about-support-tip { background: rgba(255,255,255,.04) !important; border-color: rgba(255,255,255,.1) !important; }
-[data-theme="dark"] .ab-about-support-title { color: var(--md-on-surface, #e6e1e5) !important; }
-[data-theme="dark"] .ab-about-support-desc { color: var(--md-on-surface-variant, #cac4d0) !important; }
-[data-theme="dark"] .ab-about-support-qr-label { color: var(--md-on-surface-variant, #cac4d0) !important; }
-</style>';
-
-        echo '<div id="ab-card-about" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
-            <div id="ab-card-about-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background=\'rgba(0,0,0,.025)\'" onmouseout="this.style.background=\'\'">
-                <div id="ab-card-about-strip" style="width:3px;height:36px;background:' . $abC1 . ';border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-                <div style="width:40px;height:40px;background:' . $abC1 . '1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💡</div>
-                <div style="flex:1;min-width:0">
-                    <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">关于插件</div>
-                    <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">作者信息 · 更新日志 · 支持作者</div>
-                </div>
-                <svg id="ab-card-about-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="' . $abC1 . '" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-            <div id="ab-card-about-body" style="overflow:hidden;max-height:9999px;padding:0 22px 24px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
-
-                <!-- ── 作者信息 ── -->
-                <div style="margin:16px 0 0;padding:18px;background:linear-gradient(135deg,' . $abC1 . '18,' . $abC2 . '10);border-radius:16px;border:1px solid ' . $abC1 . '22">
-                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
-                        <img src="https://i.see.you/2026/03/08/Uei3/26ee132f48bd9453e9c4d1d3fa1d312d.jpg" alt="lhl77" style="width:52px;height:52px;border-radius:50%;border:2px solid ' . $abC1 . '44;flex-shrink:0">
-                        <div>
-                            <div class="ab-about-author-name" style="font-size:17px;font-weight:700;color:#1c1b1f;letter-spacing:-.01em">LHL (lhl77)</div>
-                            <div class="ab-about-author-bio" style="font-size:12px;color:#79747e;margin-top:3px">插件作者</div>
-                        </div>
-                    </div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap">
-                        <a href="https://github.com/lhl77" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
-                            <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-                            GitHub
-                        </a>
-                        <a href="https://blog.lhl.one" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            个人博客
-                        </a>
-                        <a href="https://t.me/+S_rnDEUlSPPRzvW_" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.667l-2.96-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.978.892z"/></svg>
-                            Telegram 群
-                        </a>
-                        <a href="https://qm.qq.com/q/OOzG20idi2" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background=\'#f5f5f5\'" onmouseout="this.style.background=\'#fff\'">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 2.717.99 5.198 2.618 7.107C4.232 20.525 3 22 3 22s1.81-.474 3.49-1.388A9.947 9.947 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1.5 14.5h-3v-5h3v5zm0-7h-3V7.5h3V9.5z"/></svg>
-                            QQ 群
-                        </a>
-                    </div>
-                </div>
-
-                <!-- ── 作者的其他插件 ── -->
-                <div style="margin-top:20px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🧩 作者的其他插件</div>
-                    <div id="ab-about-more-plugins" style="margin-top:8px"><!-- GitHub API 动态加载 --></div>
-                </div>
-
-                <!-- ── 作者的其他项目 ── -->
-                <div style="margin-top:20px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚀 作者的服务</div>
-                    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
-                        <a href="https://img.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
-                            <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🖼️ LHL\'s Images 聚合图床</div>
-                            <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">个人博客可申请免费使用•Telegram Bot上传•中国优化储存•S.EE•R2•OSS•Edge One</div>
-                        </a>
-                        <a href="https://shop.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'" onmouseout="this.style.boxShadow=\'none\'">
-                            <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🛒 LHL\'s Shop 小店</div>
-                            <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">售卖作者的一些付费服务、虚拟主机、源码等</div>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- ── 支持作者 ── -->
-                <div style="margin-top:20px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">❤️ 支持作者</div>
-                    <div class="ab-about-support-tip" style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:#fdf6ff;border:1px solid ' . $abC1 . '22;border-radius:16px">
-                        <div style="flex:1;min-width:0">
-                            <div class="ab-about-support-title" style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:6px">如果插件对你有帮助，欢迎请作者喝杯咖啡 ☕</div>
-                            <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">请在备注中填写：您的昵称 + GitHub 或 个人博客，作者会定期把您加入鸣谢列表。</span></div>
-                            <div style="display:flex;gap:8px;flex-wrap:wrap">
-                                <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" class="ab-star-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:' . $abC1 . ';color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
-                                    <span class="material-icons-round">star</span> 给个 Star
-                                </a>
-                                <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:linear-gradient(90deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
-                                    <span class="material-icons-round" style="font-size:16px">volunteer_activism</span> 捐助
-                                </a>
-                            </div>
-                        </div>
-                        <div style="flex-shrink:0;text-align:center">
-                            <img id="ab-donate-qr-img" src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:110px;height:110px;border-radius:12px;object-fit:cover;border:1px solid rgba(0,0,0,.08);cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity=\'.8\'" onmouseout="this.style.opacity=\'1\'">
-                            <div class="ab-about-support-qr-label" style="font-size:10px;color:#79747e;margin-top:6px">赞赏码（点击放大）</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── 鸣谢（支持者） ── -->
-                <div style="margin-top:18px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
-                    <div id="ab-about-thanks" style="border-radius:12px;padding:12px;background:var(--md-surface-container-low);border:1px solid var(--md-outline-variant);">
-                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">特别鸣谢：</div>
-                        <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
-                            <!-- 列表将由作者维护或由后台脚本追加 -->
-                            <li><a href="https://mzrme.com/" target="_blank" style="color:inherit">MZRME</a></li>
-                            <li><a href="https://github.com/leletheme" target="_blank" style="color:inherit">Lele</a></li>
-                            <li><a href="https://github.com/QingSongYaya" target="_blank" style="color:inherit">QingSongYaya</a></li>
-                        </ul><br/>
-                        <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">你们的支持是我开发的最大动力：</div>
-                        <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
-                            <!-- 列表将由作者维护或由后台脚本追加 -->
-                            <li>感谢 <a href="https://github.com/Yilimmilk" target="_blank" style="color:inherit">Yilimmilk</a> 的 20元 打赏</li>
-                        </ul>
-                        <br/><div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">（将按周期随版本更新，如有调整后续更新）</div>
-                    </div>
-                </div>
-
-                <!-- ── 更新日志 ── -->
-                <div style="margin-top:20px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📋 更新日志</div>
-                    <div id="ab-about-changelog" style="border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.07)">
-                        <div style="padding:20px;text-align:center;color:#79747e;font-size:13px">
-                            <div style="animation:ab-spin 1s linear infinite;display:inline-block;width:20px;height:20px;border:2px solid rgba(0,0,0,.1);border-top-color:#79747e;border-radius:50%;margin-bottom:8px"></div>
-                            <div>正在从 GitHub 加载更新日志...</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ── 数据与隐私 ── -->
-                <div style="margin-top:20px">
-                    <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🔒 数据与隐私</div>
-                    <div id="ab-telemetry-field-container"></div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- ── 赞赏码全屏弹窗（挂载到 body 后显示，避免 stacking-context 问题） ── -->
-        <div id="ab-donate-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2147483647;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-sizing:border-box;align-items:center;justify-content:center">
-            <div id="ab-donate-modal-inner" style="position:relative;text-align:center;padding:28px 24px 24px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.35);width:280px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-y:auto;box-sizing:border-box">
-                <button id="ab-donate-modal-close" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:#666;padding:0">✕</button>
-                <div style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:14px">☕ 请作者喝杯咖啡</div>
-                <img src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:220px;height:220px;border-radius:16px;object-fit:cover;border:1px solid rgba(0,0,0,.08);display:block;margin:0 auto">
-                <div style="font-size:11px;color:#79747e;margin-top:8px"><b>微信赞赏码</b><br/>请在备注中填写：您的昵称 + GitHub 或 个人博客，作者会定期把您加入鸣谢列表。</div>
-                <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:9px 20px;background:linear-gradient(90deg,' . $abC1 . ',' . $abC2 . ');color:#fff;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.18)">
-                    <span class="material-icons-round" style="font-size:15px">payments</span> 其他支付方式
-                </a>
-            </div>
-        </div>';
-
-        echo '<script>
-(function(){
-    // ── 初始化关于卡片折叠 ──
-    var aboutHdr=document.getElementById("ab-card-about-hdr");
-    if(aboutHdr) aboutHdr.addEventListener("click",function(){ window.abToggleCard&&window.abToggleCard("about"); });
-
-    function restoreAboutCard(){
-        var saved=null;
-        try{ saved=localStorage.getItem("ab-card-about"); }catch(e){}
-        var body=document.getElementById("ab-card-about-body");
-        var chev=document.getElementById("ab-card-about-chev");
-        var card=document.getElementById("ab-card-about");
-        if(!body) return;
-        if(saved==="1"){
-            body.setAttribute("data-collapsed","0");
-        } else {
-            body.style.transition="none";
-            body.style.paddingBottom="0";
-            body.style.maxHeight="0";
-            body.setAttribute("data-collapsed","1");
-            if(chev) chev.style.transform="rotate(-90deg)";
-            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
-            setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
-        }
-    }
-
-    // ── 更新颜色 ──
-    function updateAboutColors(c1){
-        var s=document.getElementById("ab-card-about-strip");
-        if(s) s.style.background=c1;
-        var v=document.getElementById("ab-card-about-chev");
-        if(v) v.setAttribute("stroke",c1);
-    }
-
-    // ── 从 GitHub API 加载更新日志 ──
-    function loadChangelog(){
-        var el=document.getElementById("ab-about-changelog");
-        if(!el) return;
-        var xhr=new XMLHttpRequest();
-        xhr.open("GET","https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases?per_page=5",true);
-        xhr.withCredentials=false;
-        xhr.timeout=8000;
-        xhr.onload=function(){
-            try{
-                var releases=JSON.parse(xhr.responseText);
-                if(!Array.isArray(releases)||releases.length===0){
-                    el.innerHTML="<div style=\"padding:16px;text-align:center;font-size:13px;color:#79747e\">暂无更新日志</div>";
-                    return;
-                }
-                var html="";
-                releases.forEach(function(r,i){
-                    var date=r.published_at?r.published_at.substring(0,10):"";
-                    var body=(r.body||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>").replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/`(.*?)`/g,"<code style=\"background:rgba(0,0,0,.06);padding:1px 5px;border-radius:4px;font-size:11px\">$1</code>").replace(/^- /gm,"• ").replace(/<br>• /g,"<br>&nbsp;&nbsp;• ");
-                    var isLatest=(i===0);
-                    var itemId="ab-cl-item-"+i;
-                    html+="<div class=\"ab-about-changelog-item\" style=\""+(i>0?"border-top:1px solid rgba(0,0,0,.06)":"")+"\">";
-                    html+="<div class=\"ab-cl-hdr\" data-idx=\""+i+"\" style=\"display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:"+(isLatest?"default":"pointer")+"\">";
-                    html+="<span class=\"ab-about-tag-version\" style=\"display:inline-block;padding:2px 10px;background:rgba(0,0,0,.06);border-radius:10px;font-size:12px;font-weight:600;color:#333\">"+r.tag_name+"</span>";
-                    if(r.prerelease) html+="<span style=\"display:inline-block;padding:2px 8px;background:#fef3c7;border-radius:10px;font-size:11px;color:#92400e\">预发布</span>";
-                    if(date) html+="<span style=\"font-size:11px;color:#79747e;margin-left:auto\">"+date+"</span>";
-                    if(!isLatest) html+="<svg class=\"ab-cl-chev\" width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"#79747e\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" style=\"flex-shrink:0;transition:transform .25s;transform:rotate(-90deg)\"><polyline points=\"6 9 12 15 18 9\"/></svg>";
-                    html+="</div>";
-                    html+="<div id=\""+itemId+"\" class=\"ab-about-changelog-body\" style=\"padding:0 16px 12px;font-size:12px;color:#49454f;line-height:1.8;"+(isLatest?"":"display:none")+"\">"+body+"</div>";
-                    html+="</div>";
-                });
-                el.innerHTML=html;
-                el.addEventListener("click",function(e){
-                    var hdr=e.target.closest?e.target.closest(".ab-cl-hdr"):null;
-                    if(!hdr)return;
-                    var idx=parseInt(hdr.getAttribute("data-idx"),10);
-                    if(idx===0)return;
-                    var bd=document.getElementById("ab-cl-item-"+idx);
-                    if(!bd)return;
-                    var open=bd.style.display!=="none";
-                    bd.style.display=open?"none":"block";
-                    var chev=hdr.querySelector(".ab-cl-chev");
-                    if(chev)chev.style.transform=open?"rotate(-90deg)":"rotate(0)";
-                });
-                el.innerHTML=html;
-            }catch(e){
-                el.innerHTML="<div style=\"padding:16px;text-align:center;font-size:13px;color:#79747e\">加载失败，请访问 <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases\" target=\"_blank\" style=\"color:inherit\">GitHub Releases</a> 查看</div>";
-            }
-        };
-        xhr.onerror=xhr.ontimeout=function(){
-            el.innerHTML="<div style=\"padding:16px;text-align:center;font-size:13px;color:#79747e\">加载超时，请访问 <a href=\"https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases\" target=\"_blank\" style=\"color:inherit\">GitHub Releases</a> 查看</div>";
-        };
-        xhr.send();
-    }
-
-    // ── 从 GitHub API 加载作者其他 Repo ──
-    function loadGithubRepos(){
-        var xhr=new XMLHttpRequest();
-        xhr.open("GET","https://api.github.com/users/lhl77/repos?sort=updated&per_page=20",true);
-        xhr.withCredentials=false;
-        xhr.timeout=8000;
-        xhr.onload=function(){
-            try{
-                var repos=JSON.parse(xhr.responseText);
-                if(!Array.isArray(repos)) return;
-                // 过滤出 Typecho 插件 repo（名称包含 Typecho 或含 typecho topic）
-                var plugins=repos.filter(function(r){ return /typecho/i.test(r.name)&&r.name!=="Typecho-Plugin-AdminBeautify"&&r.name!=="Typecho-Raw-Nontification"; });
-                var otherRepos=repos.filter(function(r){ return !/typecho/i.test(r.name)&&!r.fork&&r.description; }).slice(0,4);
-                // 渲染其他插件
-                var pEl=document.getElementById("ab-about-more-plugins");
-                if(pEl&&plugins.length>0){
-                    var ph="<div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px\">";
-                    plugins.slice(0,8).forEach(function(r){
-                        ph+="<a href=\""+r.html_url+"\" target=\"_blank\" rel=\"noopener\" class=\"ab-about-plugin-card\" style=\"display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s\" onmouseover=\"this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.1)\'\" onmouseout=\"this.style.boxShadow=\'none\'\">";
-                        ph+="<div class=\"ab-about-plugin-name\" style=\"font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px\">"+r.name.replace(/^Typecho-Plugin-/,"")+"</div>";
-                        ph+="<div class=\"ab-about-plugin-desc\" style=\"font-size:11px;color:#79747e;line-height:1.5\">"+(r.description||"")+"</div>";
-                        ph+="</a>";
-                    });
-                    ph+="</div>";
-                    pEl.innerHTML=ph;
-                }
-            }catch(e){}
-        };
-        xhr.onerror=function(){};
-        xhr.send();
-    }
-
-    function initAbout(){
-        restoreAboutCard();
-        // 颜色跟随主题色
-        var sel=document.querySelector("[name=\"primaryColor\"]");
-        if(sel){
-            sel.addEventListener("change",function(){
-                var abColorMap={purple:"#7D5260",blue:"#556270",teal:"#4A6363",green:"#55624C",orange:"#725A42",pink:"#74565F",red:"#775654"};
-                updateAboutColors(abColorMap[this.value]||abColorMap.purple);
-            });
-        }
-        // 插入卡片到 perf 卡片之后（顺序：admin→login→compat→pwa→perf→about）
-        var perfCard=document.getElementById("ab-card-perf");
-        var aboutCard=document.getElementById("ab-card-about");
-        if(perfCard&&aboutCard){
-            if(perfCard.nextSibling) perfCard.parentNode.insertBefore(aboutCard,perfCard.nextSibling);
-            else perfCard.parentNode.appendChild(aboutCard);
-        } else if(aboutCard){
-            // fallback：找到任何一个已定位的卡片，追加在末尾
-            var anyCard=document.getElementById("ab-card-compat")||document.getElementById("ab-card-login")||document.getElementById("ab-card-admin");
-            if(anyCard&&anyCard.parentNode){
-                anyCard.parentNode.appendChild(aboutCard);
-            }
-        }
-        // 延迟加载异步内容（卡片展开后才有意义）
-        setTimeout(function(){ loadChangelog(); loadGithubRepos(); }, 800);
-        // 将「匿名使用统计」表单字段注入「数据与隐私」区块
-        var telContainer=document.getElementById("ab-telemetry-field-container");
-        if(telContainer){
-            function findFieldUlAbout(name){
-                var el=document.querySelector("ul[id^=\'typecho-option-item-"+name+"-\']");
-                if(el) return el;
-                var form=document.querySelector("form.protected")||document.querySelector("form");
-                if(!form) return null;
-                var inp=form.querySelector("[name=\""+name+"\"]");
-                if(!inp) return null;
-                var c=inp.parentNode;
-                while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
-                return null;
-            }
-            var telUl=findFieldUlAbout("telemetryOptOut");
-            if(telUl) telContainer.appendChild(telUl);
-            var notifyUl=findFieldUlAbout("notifyOptOut");
-            if(notifyUl) telContainer.appendChild(notifyUl);
-        }
-
-        // ── 赞赏码弹窗逻辑 ──
-        // 注入弹窗动画关键帧（只注入一次）
-        if(!document.getElementById("ab-donate-modal-anim")){
-            var st=document.createElement("style");
-            st.id="ab-donate-modal-anim";
-            st.textContent="@keyframes ab-donatePopIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}";
-            document.head.appendChild(st);
-        }
-        function closeDonateModal(){
-            var m=document.getElementById("ab-donate-modal");
-            if(m){ m.style.display="none"; }
-            document.body.style.overflow="";
-        }
-        function openDonateModal(){
-            var m=document.getElementById("ab-donate-modal");
-            if(!m) return;
-            // 移到 body 最顶层，避免祖先 transform/overflow 影响 position:fixed
-            if(m.parentNode!==document.body) document.body.appendChild(m);
-            // 绑定关闭事件（只绑一次）
-            if(!m._abEvtBound){
-                m._abEvtBound=true;
-                m.addEventListener("click",function(e){ if(e.target===m) closeDonateModal(); });
-                var closeBtn=document.getElementById("ab-donate-modal-close");
-                if(closeBtn) closeBtn.addEventListener("click",closeDonateModal);
-                // ESC 键关闭
-                document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&m.style.display==="flex") closeDonateModal(); });
-            }
-            var inner=document.getElementById("ab-donate-modal-inner");
-            if(inner){ inner.style.animation="none"; void inner.offsetWidth; inner.style.animation="ab-donatePopIn .25s cubic-bezier(.34,1.56,.64,1)"; }
-            m.style.display="flex";
-            document.body.style.overflow="hidden";
-        }
-        var donateBtn=document.getElementById("ab-btn-donate");
-        if(donateBtn) donateBtn.addEventListener("click",openDonateModal);
-        var donateQr=document.getElementById("ab-donate-qr-img");
-        if(donateQr) donateQr.addEventListener("click",openDonateModal);
-    }
-
-    if(document.readyState==="loading"){
-        document.addEventListener("DOMContentLoaded",initAbout);
-    } else {
-        initAbout();
-    }
-})();
-</script>';
+        include dirname(__FILE__) . '/assets/templates/config/about.php';
 
         // ====== 公告弹窗通知（仅设置页，从 GitHub 拉取 notice.md） ======
-        echo '<script>(function(){
-function abInitModal(){
-    var CFG=window.__AB_CONFIG__||{};
-    if((CFG.notifyOptOut||"0")==="1") return;
-    var noticeUrl="https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md";
-    fetch(noticeUrl,{cache:"no-cache"})
-        .then(function(r){return r.ok?r.text():null;})
-        .then(function(md){
-            if(!md) return;
-            // 解析 YAML frontmatter
-            var fm={id:"",title:""};
-            var m=md.match(/^---\r?\n([\s\S]*?)\r?\n---/);
-            if(m){
-                var raw=m[1];
-                var idM=raw.match(/id:\s*(.+)/);
-                var ttM=raw.match(/title:\s*(.+)/);
-                if(idM) fm.id=idM[1].trim();
-                if(ttM) fm.title=ttM[1].trim();
-            }
-            if(!fm.id) return;
-            var lsKey="ab-notice-"+fm.id;
-            var dismissed="";
-            try{dismissed=localStorage.getItem(lsKey)||"";}catch(e){}
-            if(dismissed==="1") return;
-            // 提取正文
-            var body=md.replace(/^---[\s\S]*?---\r?\n/,"").trim();
-            showModal(fm,body,lsKey);
-        })
-        .catch(function(){});
-
-    function simpleMarkdown(text){
-        return text
-            .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
-            .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
-            .replace(/\*(.+?)\*/g,"<em>$1</em>")
-            .replace(/`(.+?)`/g,"<code>$1</code>")
-            .replace(/^#{1,3}\s+(.+)$/gm,"<strong>$1</strong>")
-            .replace(/^[-*]\s+(.+)$/gm,"• $1")
-            .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"<a href=\"$2\" target=\"_blank\" rel=\"noopener\">$1</a>")
-            .replace(/\n/g,"<br>");
-    }
-
-    function showModal(fm,body,lsKey){
-        var overlay=document.createElement("div");
-        overlay.id="ab-modal-notify";
-        overlay.style.opacity="0";
-        var modal=document.createElement("div");
-        modal.className="ab-modal-dialog";
-        modal.setAttribute("role","dialog");
-        modal.setAttribute("aria-modal","true");
-        modal.setAttribute("aria-labelledby","ab-modal-title");
-        modal.style.transform="translateY(24px) scale(.96)";
-        // 标题栏
-        var hdr=document.createElement("div");
-        hdr.className="ab-modal-hdr";
-        var ic=document.createElement("span");ic.textContent="📢";ic.style.fontSize="20px";
-        var ttl=document.createElement("h3");
-        ttl.id="ab-modal-title";
-        ttl.className="ab-modal-title";
-        ttl.textContent=fm.title||"插件公告";
-        var cls=document.createElement("button");
-        cls.className="ab-modal-close";
-        cls.setAttribute("aria-label","关闭");
-        cls.textContent="×";
-        cls.onclick=function(){ closeModal(false); };
-        hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(cls);
-        // 正文
-        var bd=document.createElement("div");
-        bd.className="ab-modal-bd";
-        bd.innerHTML=simpleMarkdown(body);
-        // 底部按钮
-        var ft=document.createElement("div");
-        ft.className="ab-modal-ft";
-        var btnNever=document.createElement("button");
-        btnNever.className="ab-modal-btn-outline";
-        btnNever.textContent="不再显示";
-        btnNever.onclick=function(){ closeModal(true); };
-        var btnOk=document.createElement("button");
-        btnOk.className="ab-modal-btn-filled";
-        btnOk.textContent="知道了";
-        btnOk.onclick=function(){ closeModal(false); };
-        ft.appendChild(btnNever);ft.appendChild(btnOk);
-        modal.appendChild(hdr);modal.appendChild(bd);modal.appendChild(ft);
-        overlay.appendChild(modal);
-        document.body.appendChild(overlay);
-        // 点击遮罩关闭
-        overlay.addEventListener("click",function(e){ if(e.target===overlay) closeModal(false); });
-        // 入场动画
-        requestAnimationFrame(function(){
-            overlay.style.opacity="1";
-            modal.style.transform="translateY(0) scale(1)";
-        });
-        function closeModal(never){
-            if(never){try{localStorage.setItem(lsKey,"1");}catch(e){}}
-            overlay.style.opacity="0";
-            modal.style.transform="translateY(12px) scale(.97)";
-            setTimeout(function(){overlay.parentNode&&overlay.parentNode.removeChild(overlay);},300);
-        }
-    }
-}
-if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",abInitModal);
-} else {
-    abInitModal();
-}
-})();</script>';
+        include dirname(__FILE__) . '/assets/templates/config/notice.script.php';
     }
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
     {
@@ -1806,7 +739,7 @@ if(document.readyState==="loading"){
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.14' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.15' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -2024,7 +957,7 @@ if(document.readyState==="loading"){
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.14',
+            'pluginVersion'          => '2.1.15',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -2038,7 +971,7 @@ if(document.readyState==="loading"){
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.14.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.15.js"></script>';
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
@@ -2046,7 +979,7 @@ if(document.readyState==="loading"){
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.14"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.15"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -2243,7 +1176,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.14";';
+        echo 'var __AB_VER__="2.1.15";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){

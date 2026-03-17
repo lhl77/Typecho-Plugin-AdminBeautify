@@ -479,23 +479,5 @@ if (trim($customCss) !== '') {
 </style>
 
 <script id="loginbeautify-theme-init">
-(function(){
-    try{
-      var mode = <?php echo $jsThemeMode; ?>;
-      var saved = localStorage.getItem('lb-theme');
-      var dark = false;
-
-      if (saved === 'light' || saved === 'dark') {
-        dark = saved === 'dark';
-      } else if (mode === 'dark') {
-        dark = true;
-      } else if (mode === 'light') {
-        dark = false;
-      } else {
-        dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
-
-      document.documentElement.setAttribute('data-lb-theme', dark ? 'dark' : 'light');
-    }catch(e){}
-})();
+(function(){try{var mode=<?php echo $jsThemeMode;?>;var saved=localStorage.getItem('lb-theme');var dark=false;if(saved==='light'||saved==='dark'){dark=saved==='dark'}else if(mode==='dark'){dark=true}else if(mode==='light'){dark=false}else{dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}document.documentElement.setAttribute('data-lb-theme',dark?'dark':'light')}catch(e){}})();
 </script>
