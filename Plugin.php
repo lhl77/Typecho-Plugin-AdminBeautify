@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.15
+ * @version 2.1.16
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.15';
+        $abVer = '2.1.16';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -254,12 +254,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
             'editor_vditor',
             array(
-                '0' => '关闭（使用原版 PageDown 编辑器）',
-                '1' => '开启（使用 Vditor）',
+                '0' => 'AB Typecho 优化',
+                '1' => 'AB Vditor',
+                '2' => '兼容其他编辑器',
             ),
             '0',
-            _t('Vditor 编辑器'),
-            _t('开启后，文章/页面编辑页将使用 Vditor Markdown 编辑器，支持所见即所得、实时预览、分屏编辑三种模式')
+            _t('编辑器'),
+            _t('AB Typecho 优化：使用 AdminBeautify 优化后的原版编辑器（含 AB 工具栏）；AB Vditor：替换为 Vditor Markdown 编辑器；兼容其他编辑器：不注入任何编辑器相关 CSS / JS，适合已安装第三方编辑器插件时使用。')
         );
         $form->addInput($editorVditor);
 
@@ -272,10 +273,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 'sv'      => '分屏编辑（宽屏推荐）',
             ),
             'ir',
-            _t('Vditor 默认模式'),
+            _t('AB Vditor 默认模式'),
             _t('首次打开编辑器时使用的模式，用户可通过编辑器上方的模式切换按钮随时切换')
         );
         $form->addInput($editorVditorMode);
+
+        // 编辑器 - 隐藏原有工具栏（仅"兼容其他编辑器"模式下可见）
+        $editorHideToolbar = new Typecho_Widget_Helper_Form_Element_Select(
+            'editor_hideToolbar',
+            array(
+                '0' => '保留原有工具栏',
+                '1' => '隐藏原有工具栏',
+            ),
+            '0',
+            _t('原有工具栏'),
+            _t('仅在"兼容其他编辑器"模式下生效。开启后将强制隐藏 Typecho 原有编辑工具栏（#wmd-button-bar），以避免与第三方编辑器的工具栏叠加显示。')
+        );
+        $form->addInput($editorHideToolbar);
 
         // ================================================================
         // ====== 登录页设置（MD3 折叠卡片） ======
@@ -739,7 +753,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.15' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.16' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -747,6 +761,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePage) {
             $injectTail .= "\n" . '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vditor/dist/index.css">';
+        }
+        // 兼容其他编辑器模式 + 隐藏原有工具栏：注入 CSS 覆盖 AB 的 !important
+        $editorHideToolbar = isset($pluginOptions->editor_hideToolbar) ? (string)$pluginOptions->editor_hideToolbar : '0';
+        if ($editorVditor === '2' && $editorHideToolbar === '1' && $isWritePage) {
+            $injectTail .= '<style>body #wmd-button-bar,body .wmd-button-bar{display:none!important;}</style>';
         }
 
         // 4. 外部字体/图标（根据「静态资源来源」设置加载）
@@ -957,7 +976,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.15',
+            'pluginVersion'          => '2.1.16',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -971,7 +990,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.15.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.16.js"></script>';
+
+        // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
+        $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
+        if ($editorVditor === '2' && $isWritePageForEditor) {
+            echo '<script>if(window.AdminBeautify){AdminBeautify.initEditorToolbar=function(){};}</script>';
+        }
 
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
@@ -979,7 +1005,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.15"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.16"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1176,7 +1202,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.15";';
+        echo 'var __AB_VER__="2.1.16";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
