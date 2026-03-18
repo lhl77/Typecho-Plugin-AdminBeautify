@@ -100,6 +100,14 @@ your-site/
 - 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues)
 - 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
 
+
+
+## ☕ 捐助
+
+| ![](https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg) |
+| ------------------------------------------------------------ |
+| <p align="center">微信赞赏码</p>                             |
+
 ## ⭐ Stars
 
 <a href="https://www.star-history.com/?repos=lhl77%2FTypecho-Plugin-AdminBeautify&type=date&legend=top-left">
