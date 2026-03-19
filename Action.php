@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.17
+ * @version 2.1.18
  * @link https://blog.lhl.one
  */
 
@@ -190,7 +190,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.17';
+        $pluginVer  = '2.1.18';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -424,6 +424,24 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
      *   - download_url: ZIP 下载地址（直接更新时使用）
      *   - body: Release 说明
      */
+    /**
+     * 服务端代理拉取 GitHub 公告 notice.md，解决浏览器直连 CORS / 被墙问题
+     * 访问方式：/action/admin-beautify?do=get-notice
+     */
+    public function getNotice()
+    {
+        $this->checkAdmin();
+
+        $noticeUrl = 'https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md';
+        $content   = $this->httpGetWithMirror($noticeUrl);
+
+        if ($content === false || trim($content) === '') {
+            $this->jsonError('无法获取公告内容', 502);
+        }
+
+        $this->jsonSuccess(array('content' => $content), 'ok');
+    }
+
     public function checkUpdate()
     {
         $this->checkAdmin();
@@ -523,9 +541,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError('本地 assets/compat/ 目录不可写，请检查文件权限', 500);
         }
 
-        // GitHub Contents API — 列出目录
+        // GitHub Contents API — 列出目录（直连失败时走镜像代理）
         $apiUrl = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/contents/assets/compat';
-        $listJson = $this->httpGet($apiUrl);
+        $listJson = $this->httpGetWithMirror($apiUrl);
         if ($listJson === false) {
             $this->jsonError('无法连接 GitHub API，请检查服务器网络', 502);
         }
@@ -547,8 +565,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $downloadUrl = isset($item['download_url']) ? $item['download_url'] : '';
             if ($downloadUrl === '') continue;
 
-            // 下载远程文件内容
-            $remoteContent = $this->httpGet($downloadUrl);
+            // 下载远程文件内容（download_url 通常为 raw.githubusercontent.com，直连失败走镜像）
+            $remoteContent = $this->httpGetWithMirror($downloadUrl);
             if ($remoteContent === false) {
                 $results[] = array('file' => $filename, 'status' => 'error', 'msg' => '下载失败');
                 continue;
@@ -611,6 +629,29 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'total'   => count($results),
             ),
         ), '同步完成：新增 ' . $added . ' 个，更新 ' . $updated . ' 个，跳过 ' . $skipped . ' 个' . ($errors > 0 ? '，失败 ' . $errors . ' 个' : ''));
+    }
+
+    /**
+     * GitHub 镜像代理列表（大陆可用），格式：直接附在原始 URL 前缀即可
+     */
+    private static $GH_MIRRORS = array(
+        'https://gh-proxy.org/',
+        'https://ghfast.top/',
+        'https://ghproxy.com/',
+    );
+
+    /**
+     * HTTP GET，直连失败时依次尝试大陆镜像代理（适用于 github.com / api.github.com / raw.githubusercontent.com）
+     */
+    private function httpGetWithMirror($url)
+    {
+        $result = $this->httpGet($url);
+        if ($result !== false) return $result;
+        foreach (self::$GH_MIRRORS as $mirror) {
+            $result = $this->httpGet($mirror . $url);
+            if ($result !== false) return $result;
+        }
+        return false;
     }
 
     /**
@@ -708,26 +749,35 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
         // 下载 ZIP（超时 60 秒，支持重定向）
         $zipUrl = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore/archive/refs/heads/main.zip';
-        $ctx = stream_context_create(array(
-            'http' => array(
-                'method'          => 'GET',
-                'timeout'         => 60,
-                'follow_location' => 1,
-                'max_redirects'   => 5,
-                'user_agent'      => 'AdminBeautify-Typecho-Plugin/2.0 (+https://github.com/lhl77/Typecho-Plugin-AdminBeautify)',
-                'header'          => "Accept: application/zip\r\n",
-            ),
-            'ssl' => array(
-                'verify_peer'      => false,
-                'verify_peer_name' => false,
-            ),
-        ));
+        // 大陆镜像代理兜底列表
+        $zipMirrors = array(
+            $zipUrl,
+            'https://gh-proxy.com/' . $zipUrl,
+            'https://ghproxy.com/' . $zipUrl,
+        );
+        $zipContent = false;
+        foreach ($zipMirrors as $tryUrl) {
+            $ctx = stream_context_create(array(
+                'http' => array(
+                    'method'          => 'GET',
+                    'timeout'         => 60,
+                    'follow_location' => 1,
+                    'max_redirects'   => 5,
+                    'user_agent'      => 'AdminBeautify-Typecho-Plugin/2.0 (+https://github.com/lhl77/Typecho-Plugin-AdminBeautify)',
+                    'header'          => "Accept: application/zip\r\n",
+                ),
+                'ssl' => array(
+                    'verify_peer'      => false,
+                    'verify_peer_name' => false,
+                ),
+            ));
+            $zipContent = @file_get_contents($tryUrl, false, $ctx);
+            if ($zipContent !== false && strlen($zipContent) >= 100) break;
+            $zipContent = false;
 
-        $zipContent = @file_get_contents($zipUrl, false, $ctx);
-        if ($zipContent === false || strlen($zipContent) < 100) {
-            // 回退到 cURL
+            // cURL 回退
             if (function_exists('curl_init')) {
-                $ch = curl_init($zipUrl);
+                $ch = curl_init($tryUrl);
                 curl_setopt_array($ch, array(
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT        => 60,
@@ -739,12 +789,12 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 $zipContent = curl_exec($ch);
                 $httpCode   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
-                if ($zipContent === false || $httpCode !== 200 || strlen($zipContent) < 100) {
-                    $this->jsonError('下载失败（HTTP ' . (int)$httpCode . '），请检查服务器网络或稍后重试', 502);
-                }
-            } else {
-                $this->jsonError('下载失败，请检查服务器网络或稍后重试', 502);
+                if ($zipContent !== false && $httpCode === 200 && strlen($zipContent) >= 100) break;
+                $zipContent = false;
             }
+        }
+        if ($zipContent === false) {
+            $this->jsonError('下载失败，已尝试直连及镜像代理，请检查服务器网络或稍后重试', 502);
         }
 
         $tmpFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'abs_install_' . md5(time()) . '.zip';
@@ -849,6 +899,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
             case 'check-update':
                 $this->checkUpdate();
+                break;
+
+            case 'get-notice':
+                $this->getNotice();
                 break;
 
             case 'do-update':

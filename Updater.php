@@ -11,11 +11,21 @@ class AdminBeautify_Updater
     /** GitHub Releases API */
     const GITHUB_API_RELEASES = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest';
 
+    /**
+     * GitHub 镜像代理列表（大陆可访问），按优先级排列。
+     * 用法：将原始 GitHub URL 直接附在代理前缀之后即可。
+     */
+    private static $GITHUB_MIRRORS = array(
+        'https://gh-proxy.top/',
+        'https://ghfast.top/',
+        'https://ghproxy.com/',
+    );
+
     /** GitHub Releases 页面（用于引导手动更新） */
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
 
     /** 当前版本 */
-    const CURRENT_VERSION = '2.1.17';
+    const CURRENT_VERSION = '2.1.18';
 
     /** 插件根目录 */
     private $pluginDir;
@@ -40,7 +50,7 @@ class AdminBeautify_Updater
      */
     public function fetchLatestRelease()
     {
-        $json = $this->httpGet(self::GITHUB_API_RELEASES);
+        $json = $this->httpGetWithMirror(self::GITHUB_API_RELEASES);
         if ($json === false) return false;
 
         $data = @json_decode($json, true);
@@ -129,9 +139,9 @@ class AdminBeautify_Updater
     {
         $details = array();
 
-        // 1. 下载 ZIP
+        // 1. 下载 ZIP（先尝试直连，失败则依次尝试镜像代理）
         $details[] = '正在下载 ' . $downloadUrl . ' ...';
-        $zipContent = $this->httpGet($downloadUrl);
+        $zipContent = $this->httpGetWithMirror($downloadUrl);
         if ($zipContent === false || strlen($zipContent) < 100) {
             return array('ok' => false, 'msg' => '下载失败，请检查服务器网络或手动更新', 'details' => $details);
         }
@@ -346,5 +356,25 @@ class AdminBeautify_Updater
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         return ($result !== false && $httpCode >= 200 && $httpCode < 400) ? $result : false;
+    }
+
+    /**
+     * HTTP GET，直连失败时依次通过大陆可用的 GitHub 镜像代理重试。
+     * 适用于 api.github.com、github.com、codeload.github.com 等在大陆不稳定的地址。
+     */
+    private function httpGetWithMirror($url)
+    {
+        // 1. 优先直连
+        $result = $this->httpGet($url);
+        if ($result !== false) return $result;
+
+        // 2. 依次尝试镜像代理（将原始 URL 附在代理前缀后即可）
+        foreach (self::$GITHUB_MIRRORS as $mirror) {
+            $mirroredUrl = $mirror . $url;
+            $result = $this->httpGet($mirroredUrl);
+            if ($result !== false) return $result;
+        }
+
+        return false;
     }
 }

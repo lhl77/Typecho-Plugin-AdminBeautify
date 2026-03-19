@@ -1,8 +1,117 @@
 <?php
 /**
- * 配置面板 - 公告弹窗脚本（从 GitHub 拉取 notice.md）
- * 纯 JS，无 PHP 变量插值
+ * 配置面板 - 公告弹窗脚本（通过服务端代理拉取 notice.md，避免浏览器 CORS 限制）
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 ?>
-<script>var _0x9aed=['return\x20(function()\x20','https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md','<strong>$1</strong>','removeChild','ab-modal-ft','createElement','trim','button','aria-modal','fontSize','trace','exception','<a\x20href=\x22$2\x22\x20target=\x22_blank\x22\x20rel=\x22noopener\x22>$1</a>','body','ab-modal-notify','translateY(24px)\x20scale(.96)','log','apply','aria-labelledby','&amp;','ab-modal-close','transform','getItem','replace','target','true','test','<em>$1</em>','setAttribute','return\x20/\x22\x20+\x20this\x20+\x20\x22/','no-cache','ab-notice-','debug','className','span','compile','div','info','20px','match','error','dialog','onclick','ab-modal-btn-outline','constructor','^([^\x20]+(\x20+[^\x20]+)+)+[^\x20]}','appendChild','<br>','warn','插件公告','table','textContent','<code>$1</code>','不再显示','•\x20$1','addEventListener','console','click','__AB_CONFIG__','DOMContentLoaded','opacity','ab-modal-dialog','ab-modal-title','ab-modal-btn-filled','&gt;','知道了','parentNode','catch','style'];(function(_0x4f3cdf,_0x9aede5){var _0x335306=function(_0x418e7e){while(--_0x418e7e){_0x4f3cdf['push'](_0x4f3cdf['shift']());}};var _0x4f06e5=function(){var _0x5c78fc={'data':{'key':'cookie','value':'timeout'},'setCookie':function(_0x3e2096,_0x4b1759,_0x3ec713,_0x1da291){_0x1da291=_0x1da291||{};var _0x153dc2=_0x4b1759+'='+_0x3ec713;var _0x4a62d6=0x0;for(var _0x3b5c8c=0x0,_0x2060f2=_0x3e2096['length'];_0x3b5c8c<_0x2060f2;_0x3b5c8c++){var _0x57db73=_0x3e2096[_0x3b5c8c];_0x153dc2+=';\x20'+_0x57db73;var _0x4e371f=_0x3e2096[_0x57db73];_0x3e2096['push'](_0x4e371f);_0x2060f2=_0x3e2096['length'];if(_0x4e371f!==!![]){_0x153dc2+='='+_0x4e371f;}}_0x1da291['cookie']=_0x153dc2;},'removeCookie':function(){return'dev';},'getCookie':function(_0x2421b8,_0x164a11){_0x2421b8=_0x2421b8||function(_0x307965){return _0x307965;};var _0x35b8f6=_0x2421b8(new RegExp('(?:^|;\x20)'+_0x164a11['replace'](/([.$?*|{}()[]\/+^])/g,'$1')+'=([^;]*)'));var _0x75c543=function(_0xb068b1,_0x119d4c){_0xb068b1(++_0x119d4c);};_0x75c543(_0x335306,_0x9aede5);return _0x35b8f6?decodeURIComponent(_0x35b8f6[0x1]):undefined;}};var _0x548406=function(){var _0x51c9b6=new RegExp('\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*[\x27|\x22].+[\x27|\x22];?\x20*}');return _0x51c9b6['test'](_0x5c78fc['removeCookie']['toString']());};_0x5c78fc['updateCookie']=_0x548406;var _0x5dc1a0='';var _0x165fef=_0x5c78fc['updateCookie']();if(!_0x165fef){_0x5c78fc['setCookie'](['*'],'counter',0x1);}else if(_0x165fef){_0x5dc1a0=_0x5c78fc['getCookie'](null,'counter');}else{_0x5c78fc['removeCookie']();}};_0x4f06e5();}(_0x9aed,0x1b1));var _0x3353=function(_0x4f3cdf,_0x9aede5){_0x4f3cdf=_0x4f3cdf-0x0;var _0x335306=_0x9aed[_0x4f3cdf];return _0x335306;};(function(){var _0x5460b7=function(){var _0x565c1e=!![];return function(_0x57b905,_0x59e381){var _0x2439c7=_0x565c1e?function(){if(_0x59e381){var _0x1d07cb=_0x59e381['apply'](_0x57b905,arguments);_0x59e381=null;return _0x1d07cb;}}:function(){};_0x565c1e=![];return _0x2439c7;};}();var _0x552b7d=function(){var _0x3c8ba3=!![];return function(_0x203082,_0x3186a2){var _0x5b1927=_0x3c8ba3?function(){if(_0x3186a2){var _0x390265=_0x3186a2[_0x3353('0x43')](_0x203082,arguments);_0x3186a2=null;return _0x390265;}}:function(){};_0x3c8ba3=![];return _0x5b1927;};}();function _0x21fd06(){var _0x28732d=_0x5460b7(this,function(){var _0x21e7cf=function(){var _0x59e89f=_0x21e7cf[_0x3353('0x19')](_0x3353('0xa'))()[_0x3353('0x10')](_0x3353('0x1a'));return!_0x59e89f[_0x3353('0x7')](_0x28732d);};return _0x21e7cf();});_0x28732d();var _0x165472=_0x552b7d(this,function(){var _0xe192a3=function(){};var _0x4706cb=function(){var _0x72eb32;try{_0x72eb32=Function(_0x3353('0x32')+'{}.constructor(\x22return\x20this\x22)(\x20)'+');')();}catch(_0x1fba64){_0x72eb32=window;}return _0x72eb32;};var _0x50bfec=_0x4706cb();if(!_0x50bfec[_0x3353('0x25')]){_0x50bfec[_0x3353('0x25')]=function(_0x7c8ce0){var _0x5fc427={};_0x5fc427['log']=_0x7c8ce0;_0x5fc427[_0x3353('0x1d')]=_0x7c8ce0;_0x5fc427[_0x3353('0xd')]=_0x7c8ce0;_0x5fc427['info']=_0x7c8ce0;_0x5fc427[_0x3353('0x15')]=_0x7c8ce0;_0x5fc427['exception']=_0x7c8ce0;_0x5fc427[_0x3353('0x1f')]=_0x7c8ce0;_0x5fc427['trace']=_0x7c8ce0;return _0x5fc427;}(_0xe192a3);}else{_0x50bfec['console'][_0x3353('0x42')]=_0xe192a3;_0x50bfec[_0x3353('0x25')][_0x3353('0x1d')]=_0xe192a3;_0x50bfec[_0x3353('0x25')]['debug']=_0xe192a3;_0x50bfec['console'][_0x3353('0x12')]=_0xe192a3;_0x50bfec[_0x3353('0x25')][_0x3353('0x15')]=_0xe192a3;_0x50bfec['console'][_0x3353('0x3d')]=_0xe192a3;_0x50bfec[_0x3353('0x25')][_0x3353('0x1f')]=_0xe192a3;_0x50bfec[_0x3353('0x25')][_0x3353('0x3c')]=_0xe192a3;}});_0x165472();var _0x2b3345=window[_0x3353('0x27')]||{};if((_0x2b3345['notifyOptOut']||'0')==='1')return;var _0x4c1de6=_0x3353('0x33');fetch(_0x4c1de6,{'cache':_0x3353('0xb')})['then'](function(_0x12d72c){return _0x12d72c['ok']?_0x12d72c['text']():null;})['then'](function(_0x1a56e3){if(!_0x1a56e3)return;var _0x3e4fdc={'id':'','title':''};var _0x5179bf=_0x1a56e3[_0x3353('0x14')](/^---\r?\n([\s\S]*?)\r?\n---/);if(_0x5179bf){var _0x2c1031=_0x5179bf[0x1];var _0x4c7825=_0x2c1031['match'](/id:\s*(.+)/);var _0x27bd15=_0x2c1031[_0x3353('0x14')](/title:\s*(.+)/);if(_0x4c7825)_0x3e4fdc['id']=_0x4c7825[0x1][_0x3353('0x38')]();if(_0x27bd15)_0x3e4fdc['title']=_0x27bd15[0x1][_0x3353('0x38')]();}if(!_0x3e4fdc['id'])return;var _0x8cef40=_0x3353('0xc')+_0x3e4fdc['id'];var _0x57d784='';try{_0x57d784=localStorage[_0x3353('0x3')](_0x8cef40)||'';}catch(_0x13c45a){}if(_0x57d784==='1')return;var _0x1609b2=_0x1a56e3['replace'](/^---[\s\S]*?---\r?\n/,'')[_0x3353('0x38')]();_0x5873b0(_0x3e4fdc,_0x1609b2,_0x8cef40);})[_0x3353('0x30')](function(){});function _0x4f418d(_0x5f52a2){return _0x5f52a2[_0x3353('0x4')](/&/g,_0x3353('0x0'))['replace'](/</g,'&lt;')[_0x3353('0x4')](/>/g,_0x3353('0x2d'))[_0x3353('0x4')](/\*\*(.+?)\*\*/g,'<strong>$1</strong>')[_0x3353('0x4')](/\*(.+?)\*/g,_0x3353('0x8'))[_0x3353('0x4')](/`(.+?)`/g,_0x3353('0x21'))[_0x3353('0x4')](/^#{1,3}\s+(.+)$/gm,_0x3353('0x34'))[_0x3353('0x4')](/^[-*]\s+(.+)$/gm,_0x3353('0x23'))[_0x3353('0x4')](/\[([^\]]+)\]\(([^)]+)\)/g,_0x3353('0x3e'))[_0x3353('0x4')](/\n/g,_0x3353('0x1c'));}function _0x5873b0(_0x478ce4,_0x4fcec8,_0x3fc04e){var _0x57d1dc=document[_0x3353('0x37')](_0x3353('0x11'));_0x57d1dc['id']=_0x3353('0x40');_0x57d1dc[_0x3353('0x31')][_0x3353('0x29')]='0';var _0x56fe01=document[_0x3353('0x37')](_0x3353('0x11'));_0x56fe01[_0x3353('0xe')]=_0x3353('0x2a');_0x56fe01[_0x3353('0x9')]('role',_0x3353('0x16'));_0x56fe01[_0x3353('0x9')](_0x3353('0x3a'),_0x3353('0x6'));_0x56fe01[_0x3353('0x9')](_0x3353('0x44'),'ab-modal-title');_0x56fe01[_0x3353('0x31')][_0x3353('0x2')]=_0x3353('0x41');var _0x105af1=document[_0x3353('0x37')](_0x3353('0x11'));_0x105af1[_0x3353('0xe')]='ab-modal-hdr';var _0x7bb740=document[_0x3353('0x37')](_0x3353('0xf'));_0x7bb740[_0x3353('0x20')]='📢';_0x7bb740[_0x3353('0x31')][_0x3353('0x3b')]=_0x3353('0x13');var _0x13e4f0=document[_0x3353('0x37')]('h3');_0x13e4f0['id']='ab-modal-title';_0x13e4f0[_0x3353('0xe')]=_0x3353('0x2b');_0x13e4f0[_0x3353('0x20')]=_0x478ce4['title']||_0x3353('0x1e');var _0x3d8c0f=document[_0x3353('0x37')](_0x3353('0x39'));_0x3d8c0f[_0x3353('0xe')]=_0x3353('0x1');_0x3d8c0f[_0x3353('0x9')]('aria-label','关闭');_0x3d8c0f[_0x3353('0x20')]='×';_0x3d8c0f[_0x3353('0x17')]=function(){_0x25e919(![]);};_0x105af1[_0x3353('0x1b')](_0x7bb740);_0x105af1[_0x3353('0x1b')](_0x13e4f0);_0x105af1['appendChild'](_0x3d8c0f);var _0x1b8587=document[_0x3353('0x37')](_0x3353('0x11'));_0x1b8587[_0x3353('0xe')]='ab-modal-bd';_0x1b8587['innerHTML']=_0x4f418d(_0x4fcec8);var _0x5f3170=document[_0x3353('0x37')](_0x3353('0x11'));_0x5f3170[_0x3353('0xe')]=_0x3353('0x36');var _0x246fb1=document['createElement']('button');_0x246fb1['className']=_0x3353('0x18');_0x246fb1['textContent']=_0x3353('0x22');_0x246fb1[_0x3353('0x17')]=function(){_0x25e919(!![]);};var _0x443b50=document[_0x3353('0x37')](_0x3353('0x39'));_0x443b50[_0x3353('0xe')]=_0x3353('0x2c');_0x443b50[_0x3353('0x20')]=_0x3353('0x2e');_0x443b50[_0x3353('0x17')]=function(){_0x25e919(![]);};_0x5f3170[_0x3353('0x1b')](_0x246fb1);_0x5f3170[_0x3353('0x1b')](_0x443b50);_0x56fe01[_0x3353('0x1b')](_0x105af1);_0x56fe01[_0x3353('0x1b')](_0x1b8587);_0x56fe01['appendChild'](_0x5f3170);_0x57d1dc[_0x3353('0x1b')](_0x56fe01);document[_0x3353('0x3f')][_0x3353('0x1b')](_0x57d1dc);_0x57d1dc[_0x3353('0x24')](_0x3353('0x26'),function(_0x367373){if(_0x367373[_0x3353('0x5')]===_0x57d1dc)_0x25e919(![]);});requestAnimationFrame(function(){_0x57d1dc[_0x3353('0x31')][_0x3353('0x29')]='1';_0x56fe01[_0x3353('0x31')][_0x3353('0x2')]='translateY(0)\x20scale(1)';});function _0x25e919(_0x55dfdc){if(_0x55dfdc){try{localStorage['setItem'](_0x3fc04e,'1');}catch(_0xa0c4a2){}}_0x57d1dc[_0x3353('0x31')][_0x3353('0x29')]='0';_0x56fe01['style'][_0x3353('0x2')]='translateY(12px)\x20scale(.97)';setTimeout(function(){_0x57d1dc['parentNode']&&_0x57d1dc[_0x3353('0x2f')][_0x3353('0x35')](_0x57d1dc);},0x12c);}}}if(document['readyState']==='loading'){document[_0x3353('0x24')](_0x3353('0x28'),_0x21fd06);}else{_0x21fd06();}}());</script>
+<script>(function(){
+function abInitModal(){
+    var CFG=window.__AB_CONFIG__||{};
+    if((CFG.notifyOptOut||"0")==="1") return;
+    // 通过本站  action 代理请求，规避浏览器 CORS 及国内 GitHub 访问问题
+    var ajax=window.__AB_AJAX__||{};
+    if(!ajax.url) return;
+    fetch(ajax.url+"?do=get-notice",{cache:"no-cache",credentials:"include"})
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(res){
+            if(!res||res.code!==0||!res.data||!res.data.content) return;
+            var md=res.data.content;
+            if(!md) return;
+            // 解析 YAML frontmatter
+            var fm={id:"",title:""};
+            var m=md.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+            if(m){
+                var raw=m[1];
+                var idM=raw.match(/id:\s*(.+)/);
+                var ttM=raw.match(/title:\s*(.+)/);
+                if(idM) fm.id=idM[1].trim();
+                if(ttM) fm.title=ttM[1].trim();
+            }
+            if(!fm.id) return;
+            var lsKey="ab-notice-"+fm.id;
+            var dismissed="";
+            try{dismissed=localStorage.getItem(lsKey)||"";}catch(e){}
+            if(dismissed==="1") return;
+            // 提取正文
+            var body=md.replace(/^---[\s\S]*?---\r?\n/,"").trim();
+            showModal(fm,body,lsKey);
+        })
+        .catch(function(){});
+
+    function simpleMarkdown(text){
+        return text
+            .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+            .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+            .replace(/\*(.+?)\*/g,"<em>$1</em>")
+            .replace(/`(.+?)`/g,"<code>$1</code>")
+            .replace(/^#{1,3}\s+(.+)$/gm,"<strong>$1</strong>")
+            .replace(/^[-*]\s+(.+)$/gm,"• $1")
+            .replace(/\[([^\]]+)\]\(([^)]+)\)/g,"<a href=\"$2\" target=\"_blank\" rel=\"noopener\">$1</a>")
+            .replace(/\n/g,"<br>");
+    }
+
+    function showModal(fm,body,lsKey){
+        var overlay=document.createElement("div");
+        overlay.id="ab-modal-notify";
+        overlay.style.opacity="0";
+        var modal=document.createElement("div");
+        modal.className="ab-modal-dialog";
+        modal.setAttribute("role","dialog");
+        modal.setAttribute("aria-modal","true");
+        modal.setAttribute("aria-labelledby","ab-modal-title");
+        modal.style.transform="translateY(24px) scale(.96)";
+        // 标题栏
+        var hdr=document.createElement("div");
+        hdr.className="ab-modal-hdr";
+        var ic=document.createElement("span");ic.textContent="📢";ic.style.fontSize="20px";
+        var ttl=document.createElement("h3");
+        ttl.id="ab-modal-title";
+        ttl.className="ab-modal-title";
+        ttl.textContent=fm.title||"插件公告";
+        var cls=document.createElement("button");
+        cls.className="ab-modal-close";
+        cls.setAttribute("aria-label","关闭");
+        cls.textContent="×";
+        cls.onclick=function(){ closeModal(false); };
+        hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(cls);
+        // 正文
+        var bd=document.createElement("div");
+        bd.className="ab-modal-bd";
+        bd.innerHTML=simpleMarkdown(body);
+        // 底部按钮
+        var ft=document.createElement("div");
+        ft.className="ab-modal-ft";
+        var btnNever=document.createElement("button");
+        btnNever.className="ab-modal-btn-outline";
+        btnNever.textContent="不再显示";
+        btnNever.onclick=function(){ closeModal(true); };
+        var btnOk=document.createElement("button");
+        btnOk.className="ab-modal-btn-filled";
+        btnOk.textContent="知道了";
+        btnOk.onclick=function(){ closeModal(false); };
+        ft.appendChild(btnNever);ft.appendChild(btnOk);
+        modal.appendChild(hdr);modal.appendChild(bd);modal.appendChild(ft);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        // 点击遮罩关闭
+        overlay.addEventListener("click",function(e){ if(e.target===overlay) closeModal(false); });
+        // 入场动画
+        requestAnimationFrame(function(){
+            overlay.style.opacity="1";
+            modal.style.transform="translateY(0) scale(1)";
+        });
+        function closeModal(never){
+            if(never){try{localStorage.setItem(lsKey,"1");}catch(e){}}
+            overlay.style.opacity="0";
+            modal.style.transform="translateY(12px) scale(.97)";
+            setTimeout(function(){overlay.parentNode&&overlay.parentNode.removeChild(overlay);},300);
+        }
+    }
+}
+if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",abInitModal);
+} else {
+    abInitModal();
+}
+})();</script>
+

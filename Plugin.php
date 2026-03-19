@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.17
+ * @version 2.1.18
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.17';
+        $abVer = '2.1.18';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -753,7 +753,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.17' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.18' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -976,7 +976,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.17',
+            'pluginVersion'          => '2.1.18',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -990,7 +990,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.17.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.18.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1005,7 +1005,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.17"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.18"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1086,10 +1086,16 @@ function mkBanner(release){
     document.body.appendChild(wrap);
     setTimeout(function(){wrap.style.transform="translateX(0)";},50);
 }
-fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest",{cache:"no-cache"})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(d){if(d&&d.tag_name) mkBanner(d);})
-    .catch(function(){});
+// 镜像代理兜底（直连 api.github.com 失败时依次尝试）
+var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghproxy.com/"];
+(function tryGhApi(idx){
+    if(idx>=ghApiMirrors.length)return;
+    var url=ghApiMirrors[idx]+"https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest";
+    fetch(url,{cache:"no-cache"})
+        .then(function(r){return r.ok?r.json():Promise.reject();})
+        .then(function(d){if(d&&d.tag_name)mkBanner(d);})
+        .catch(function(){tryGhApi(idx+1);});
+}(0));
 })();</script>';
         }
 
@@ -1202,7 +1208,7 @@ fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.17";';
+        echo 'var __AB_VER__="2.1.18";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
@@ -1227,6 +1233,14 @@ window.abCheckUpdate=function(manual){
             var d=res.data;
             try{ localStorage.setItem("ab-update-check",JSON.stringify({ts:Date.now(),data:d})); }catch(e){}
             if(!d.has_update){
+                // 已是最新版：顺带清理所有旧版本的"已忽略"标记
+                try{
+                    var keysToRemove=[];
+                    for(var k in localStorage){
+                        if(k.indexOf("ab-update-dismissed-v")===0) keysToRemove.push(k);
+                    }
+                    keysToRemove.forEach(function(k){ localStorage.removeItem(k); });
+                }catch(e){}
                 if(manual) abShowUpdateToast("ok","✅ 已是最新版本 v"+d.current);
                 return;
             }
@@ -1313,6 +1327,15 @@ window.abDoUpdate=function(){
                 notify.style.background="linear-gradient(90deg,#059669,#10b981)";
                 notify.innerHTML='<span style="flex:1">✅ '+res.message+'</span><span style="font-size:12px;opacity:.85">3 秒后自动刷新...</span>';
                 try{ localStorage.removeItem("ab-update-check"); }catch(e){}
+                // 通知 SW 清除旧版缓存，并强制检查新 sw.js（让新版静态文件立即生效）
+                try{
+                    if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+                        navigator.serviceWorker.controller.postMessage({type:"CLEAR_CACHE"});
+                    }
+                    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){
+                        navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update();}).catch(function(){});
+                    }
+                }catch(e){}
                 setTimeout(function(){ location.reload(); },3000);
             } else {
                 notify.innerHTML='<span style="flex:1;color:#fca5a5">❌ '+(res.message||"更新失败")+'</span><a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases" target="_blank" style="color:#fff;text-decoration:underline;font-size:12px">前往 GitHub 手动下载</a>';
@@ -1355,11 +1378,28 @@ if(!document.getElementById("ab-update-anim")){
     document.head.appendChild(st);
 }
 
+// ---- abVerCompare: 返回 1(a>b) / -1(a<b) / 0(a===b) ----
+function abVerCompare(a,b){
+    var pa=(a||"").replace(/^v/i,"").split(".").map(Number);
+    var pb=(b||"").replace(/^v/i,"").split(".").map(Number);
+    for(var i=0;i<Math.max(pa.length,pb.length);i++){
+        var na=pa[i]||0, nb=pb[i]||0;
+        if(na>nb) return 1;
+        if(na<nb) return -1;
+    }
+    return 0;
+}
+
 // ---- 自动检查（每小时一次，页面加载后 4 秒执行）----
 setTimeout(function(){
     try{
         var cached=JSON.parse(localStorage.getItem("ab-update-check")||"null");
         var ONE_HOUR=3600000;
+        // 若缓存中记录的"最新版"不高于当前运行版本，说明已更新完成但缓存未清除，直接丢弃
+        if(cached&&cached.data&&cached.data.latest&&abVerCompare(cached.data.latest,__AB_VER__)<=0){
+            try{ localStorage.removeItem("ab-update-check"); }catch(e){}
+            cached=null;
+        }
         if(!cached||(Date.now()-cached.ts)>ONE_HOUR){
             // 缓存已过期或不存在，发起网络请求
             window.abCheckUpdate(false);
