@@ -1,0 +1,22 @@
+{
+  "name": "noto-sans-sc",
+  "version": "37.0.0",
+  "description": "(Noto Sans SC) Optimized CSS file and font files for local host.",
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jfcherng/Noto-Sans-SC-CSS.git"
+  },
+  "keywords": [
+    "font",
+    "noto-sans"
+  ],
+  "author": "Jack Cherng <jfcherng@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jfcherng/Noto-Sans-SC-CSS/issues"
+  },
+  "homepage": "https://github.com/jfcherng/Noto-Sans-SC-CSS#readme"
+}
