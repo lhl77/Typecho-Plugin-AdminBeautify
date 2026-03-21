@@ -1,1 +1,207 @@
-var _0x12ae=['<h2>当前处于离线状态</h2><p>请检查网络连接后重试</p>','text/html;\x20charset=utf-8','indexOf','网络不可用，请检查连接后重试','window','accept','type','catch','delete','method','button{margin-top:24px;padding:12px\x2028px;border:none;border-radius:999px;','return\x20(function()\x20','<!DOCTYPE\x20html><html><head><meta\x20charset=\x22utf-8\x22><title>离线</title>','status','clients','-pages','Service\x20Unavailable','match','fetch','ab-','waitUntil','apply','trace','keys','headers','SW_UPDATED','constructor','data','search','/AdminBeautify/assets/','put','request','clone','test','</style></head><body>','<div\x20class=\x22box\x22><svg\x20width=\x2256\x22\x20height=\x2256\x22\x20viewBox=\x220\x200\x2024\x2024\x22\x20fill=\x22none\x22\x20stroke=\x22#7D5260\x22\x20stroke-width=\x221.5\x22><path\x20d=\x22M1\x201l22\x2022M16.72\x2011.06A10.94\x2010.94\x200\x200\x201\x2019\x2012.55M5\x205a10.94\x2010.94\x200\x200\x200-2.28\x202M10.41\x2010.41a2\x202\x200\x201\x200\x202.83\x202.83\x22/><path\x20d=\x22M10.73\x205.08A10.43\x2010.43\x200\x200\x201\x2012\x205c7\x200\x2010\x207\x2010\x207a13.16\x2013.16\x200\x200\x201-1.67\x202.68M6.61\x206.61A13.526\x2013.526\x200\x200\x200\x202\x2012s3\x207\x2010\x207a9.74\x209.74\x200\x200\x200\x205.39-1.61\x22/></svg>','map','opaqueredirect','all','background:#7D5260;color:#fff;font-size:1em;cursor:pointer;}','{}.constructor(\x22return\x20this\x22)(\x20)','fonts.googleapis.com','box-shadow:0\x204px\x2016px\x20rgba(0,0,0,.1);max-width:360px;}','login.php','postMessage','^([^\x20]+(\x20+[^\x20]+)+)+[^\x20]}','hostname','forEach','skipWaiting','ab-v2.1.18','text/html','action/','console','get','debug','length','-static','.box{text-align:center;padding:40px;background:#fff;border-radius:24px;','info','log','addAll','url','exception','claim','do=','matchAll','h2{margin:16px\x200\x208px;font-size:1.4em;}p{color:#49454F;margin:0;font-size:.95em;}','min-height:100vh;margin:0;background:#F3EDF7;color:#1C1B1F;}','warn','open','startsWith','table','then','addEventListener','CLEAR_CACHE','pathname','error','respondWith','<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;'];(function(_0x1bef3e,_0x12ae79){var _0x2f36f6=function(_0x50207c){while(--_0x50207c){_0x1bef3e['push'](_0x1bef3e['shift']());}};var _0x4ed50c=function(){var _0x2bf558={'data':{'key':'cookie','value':'timeout'},'setCookie':function(_0x57ad5b,_0x23484a,_0x361c02,_0x4a2b6d){_0x4a2b6d=_0x4a2b6d||{};var _0x571a20=_0x23484a+'='+_0x361c02;var _0x567b3e=0x0;for(var _0x27df9d=0x0,_0x1cda73=_0x57ad5b['length'];_0x27df9d<_0x1cda73;_0x27df9d++){var _0xa68354=_0x57ad5b[_0x27df9d];_0x571a20+=';\x20'+_0xa68354;var _0x471842=_0x57ad5b[_0xa68354];_0x57ad5b['push'](_0x471842);_0x1cda73=_0x57ad5b['length'];if(_0x471842!==!![]){_0x571a20+='='+_0x471842;}}_0x4a2b6d['cookie']=_0x571a20;},'removeCookie':function(){return'dev';},'getCookie':function(_0x27b1fd,_0x3ce110){_0x27b1fd=_0x27b1fd||function(_0x312cb2){return _0x312cb2;};var _0x3e4594=_0x27b1fd(new RegExp('(?:^|;\x20)'+_0x3ce110['replace'](/([.$?*|{}()[]\/+^])/g,'$1')+'=([^;]*)'));var _0x187ee3=function(_0x136711,_0x5e9816){_0x136711(++_0x5e9816);};_0x187ee3(_0x2f36f6,_0x12ae79);return _0x3e4594?decodeURIComponent(_0x3e4594[0x1]):undefined;}};var _0x3d5501=function(){var _0x19f256=new RegExp('\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*[\x27|\x22].+[\x27|\x22];?\x20*}');return _0x19f256['test'](_0x2bf558['removeCookie']['toString']());};_0x2bf558['updateCookie']=_0x3d5501;var _0x4bba68='';var _0x8475cf=_0x2bf558['updateCookie']();if(!_0x8475cf){_0x2bf558['setCookie'](['*'],'counter',0x1);}else if(_0x8475cf){_0x4bba68=_0x2bf558['getCookie'](null,'counter');}else{_0x2bf558['removeCookie']();}};_0x4ed50c();}(_0x12ae,0xd9));var _0x2f36=function(_0x1bef3e,_0x12ae79){_0x1bef3e=_0x1bef3e-0x0;var _0x2f36f6=_0x12ae[_0x1bef3e];return _0x2f36f6;};var _0x57ad5b=function(){var _0x43151a=!![];return function(_0xfd915d,_0x546d9f){var _0x10069c=_0x43151a?function(){if(_0x546d9f){var _0x5d48e5=_0x546d9f[_0x2f36('0x29')](_0xfd915d,arguments);_0x546d9f=null;return _0x5d48e5;}}:function(){};_0x43151a=![];return _0x10069c;};}();var _0x8475cf=_0x57ad5b(this,function(){var _0x408f02=function(){var _0xd44793=_0x408f02[_0x2f36('0x2e')]('return\x20/\x22\x20+\x20this\x20+\x20\x22/')()['compile'](_0x2f36('0x41'));return!_0xd44793[_0x2f36('0x35')](_0x8475cf);};return _0x408f02();});_0x8475cf();var _0x2bf558=function(){var _0x484980=!![];return function(_0x1d3ad4,_0x20a331){var _0x409648=_0x484980?function(){if(_0x20a331){var _0x2f7327=_0x20a331[_0x2f36('0x29')](_0x1d3ad4,arguments);_0x20a331=null;return _0x2f7327;}}:function(){};_0x484980=![];return _0x409648;};}();var _0x50207c=_0x2bf558(this,function(){var _0x4f290b=function(){};var _0x4996af=function(){var _0x8e0eb9;try{_0x8e0eb9=Function(_0x2f36('0x1f')+_0x2f36('0x3c')+');')();}catch(_0x55a9fb){_0x8e0eb9=window;}return _0x8e0eb9;};var _0x154ade=_0x4996af();if(!_0x154ade[_0x2f36('0x48')]){_0x154ade[_0x2f36('0x48')]=function(_0x46e9ca){var _0x1bf643={};_0x1bf643[_0x2f36('0x0')]=_0x46e9ca;_0x1bf643[_0x2f36('0x9')]=_0x46e9ca;_0x1bf643[_0x2f36('0x4a')]=_0x46e9ca;_0x1bf643[_0x2f36('0x4e')]=_0x46e9ca;_0x1bf643['error']=_0x46e9ca;_0x1bf643[_0x2f36('0x3')]=_0x46e9ca;_0x1bf643[_0x2f36('0xc')]=_0x46e9ca;_0x1bf643[_0x2f36('0x2a')]=_0x46e9ca;return _0x1bf643;}(_0x4f290b);}else{_0x154ade['console'][_0x2f36('0x0')]=_0x4f290b;_0x154ade['console'][_0x2f36('0x9')]=_0x4f290b;_0x154ade[_0x2f36('0x48')][_0x2f36('0x4a')]=_0x4f290b;_0x154ade[_0x2f36('0x48')][_0x2f36('0x4e')]=_0x4f290b;_0x154ade['console'][_0x2f36('0x11')]=_0x4f290b;_0x154ade[_0x2f36('0x48')]['exception']=_0x4f290b;_0x154ade[_0x2f36('0x48')][_0x2f36('0xc')]=_0x4f290b;_0x154ade[_0x2f36('0x48')][_0x2f36('0x2a')]=_0x4f290b;}});_0x50207c();var CACHE_VERSION=_0x2f36('0x45');var STATIC_CACHE=CACHE_VERSION+_0x2f36('0x4c');var PAGE_CACHE=CACHE_VERSION+_0x2f36('0x23');var PRECACHE_URLS=[];self['addEventListener']('install',function(_0x145c27){self[_0x2f36('0x44')]();_0x145c27[_0x2f36('0x28')](caches[_0x2f36('0xa')](STATIC_CACHE)[_0x2f36('0xd')](function(_0x3686ff){if(PRECACHE_URLS[_0x2f36('0x4b')]){return _0x3686ff[_0x2f36('0x1')](PRECACHE_URLS);}}));});self[_0x2f36('0xe')]('activate',function(_0x46d2ee){_0x46d2ee['waitUntil'](caches[_0x2f36('0x2b')]()[_0x2f36('0xd')](function(_0x4c722d){return Promise[_0x2f36('0x3a')](_0x4c722d['filter'](function(_0x2002c6){return _0x2002c6[_0x2f36('0xb')](_0x2f36('0x27'))&&_0x2002c6!==STATIC_CACHE&&_0x2002c6!==PAGE_CACHE;})[_0x2f36('0x38')](function(_0x528403){return caches[_0x2f36('0x1c')](_0x528403);}));})[_0x2f36('0xd')](function(){return self[_0x2f36('0x22')][_0x2f36('0x4')]();})[_0x2f36('0xd')](function(){return self[_0x2f36('0x22')][_0x2f36('0x6')]({'type':_0x2f36('0x18'),'includeUncontrolled':!![]})[_0x2f36('0xd')](function(_0x350898){_0x350898[_0x2f36('0x43')](function(_0x16f653){_0x16f653[_0x2f36('0x40')]({'type':_0x2f36('0x2d')});});});}));});self['addEventListener'](_0x2f36('0x26'),function(_0x3c6b3e){var _0x4ddf3e=_0x3c6b3e[_0x2f36('0x33')];var _0x3c41ee=new URL(_0x4ddf3e[_0x2f36('0x2')]);if(_0x4ddf3e[_0x2f36('0x1d')]!=='GET')return;if(_0x3c41ee[_0x2f36('0x10')]['indexOf'](_0x2f36('0x3f'))!==-0x1||_0x3c41ee[_0x2f36('0x10')][_0x2f36('0x16')](_0x2f36('0x47'))!==-0x1||_0x3c41ee[_0x2f36('0x30')][_0x2f36('0x16')](_0x2f36('0x5'))!==-0x1){_0x3c6b3e[_0x2f36('0x12')](fetch(_0x4ddf3e)[_0x2f36('0x1b')](function(){return caches[_0x2f36('0x25')](_0x4ddf3e)[_0x2f36('0xd')](function(_0x5a3c3a){return _0x5a3c3a||new Response(JSON['stringify']({'code':0x1f7,'message':_0x2f36('0x17')}),{'status':0x1f7,'statusText':_0x2f36('0x24'),'headers':{'Content-Type':'application/json'}});});}));return;}if(_0x3c41ee[_0x2f36('0x42')]===_0x2f36('0x3d')||_0x3c41ee['hostname']==='fonts.gstatic.com'){_0x3c6b3e[_0x2f36('0x12')](staleWhileRevalidate(STATIC_CACHE,_0x4ddf3e));return;}if(_0x3c41ee[_0x2f36('0x10')]['indexOf'](_0x2f36('0x31'))!==-0x1){_0x3c6b3e[_0x2f36('0x12')](cacheFirst(STATIC_CACHE,_0x4ddf3e));return;}if(_0x4ddf3e[_0x2f36('0x2c')][_0x2f36('0x49')](_0x2f36('0x19'))&&_0x4ddf3e[_0x2f36('0x2c')][_0x2f36('0x49')](_0x2f36('0x19'))[_0x2f36('0x16')](_0x2f36('0x46'))!==-0x1){_0x3c6b3e[_0x2f36('0x12')](networkFirst(PAGE_CACHE,_0x4ddf3e));return;}});function cacheFirst(_0x58d31d,_0x572f28){return caches[_0x2f36('0xa')](_0x58d31d)[_0x2f36('0xd')](function(_0x24328f){return _0x24328f[_0x2f36('0x25')](_0x572f28)['then'](function(_0x32240d){if(_0x32240d)return _0x32240d;return fetch(_0x572f28)[_0x2f36('0xd')](function(_0x21b676){if(_0x21b676&&_0x21b676[_0x2f36('0x21')]===0xc8){_0x24328f[_0x2f36('0x32')](_0x572f28,_0x21b676[_0x2f36('0x34')]());}return _0x21b676;});});});}function networkFirst(_0x217ed2,_0x2fcdcd){return caches[_0x2f36('0xa')](_0x217ed2)[_0x2f36('0xd')](function(_0x4b6184){return fetch(_0x2fcdcd)[_0x2f36('0xd')](function(_0x963b32){if(_0x963b32&&_0x963b32['status']===0xc8&&_0x963b32[_0x2f36('0x1a')]!==_0x2f36('0x39')){var _0xc7797c=_0x963b32['url']||'';if(_0xc7797c['indexOf'](_0x2f36('0x3f'))===-0x1){_0x4b6184[_0x2f36('0x32')](_0x2fcdcd,_0x963b32[_0x2f36('0x34')]());}}if(_0x963b32&&_0x963b32[_0x2f36('0x21')]>=0x1f4){return _0x4b6184['match'](_0x2fcdcd)[_0x2f36('0xd')](function(_0x45fd6e){return _0x45fd6e||_0x963b32;});}return _0x963b32;})[_0x2f36('0x1b')](function(){return _0x4b6184['match'](_0x2fcdcd)[_0x2f36('0xd')](function(_0x205a08){if(_0x205a08)return _0x205a08;return new Response(_0x2f36('0x20')+'<meta\x20name=\x22viewport\x22\x20content=\x22width=device-width,initial-scale=1\x22>'+_0x2f36('0x13')+_0x2f36('0x8')+_0x2f36('0x4d')+_0x2f36('0x3e')+_0x2f36('0x7')+_0x2f36('0x1e')+_0x2f36('0x3b')+_0x2f36('0x36')+_0x2f36('0x37')+_0x2f36('0x14')+'<button\x20onclick=\x22location.reload()\x22>重新加载</button></div></body></html>',{'headers':{'Content-Type':_0x2f36('0x15')}});});});});}function staleWhileRevalidate(_0x1ef3ce,_0x4218d0){return caches['open'](_0x1ef3ce)[_0x2f36('0xd')](function(_0x49bf68){return _0x49bf68[_0x2f36('0x25')](_0x4218d0)[_0x2f36('0xd')](function(_0x160b57){var _0x1bdb35=fetch(_0x4218d0)['then'](function(_0x495f72){if(_0x495f72&&_0x495f72[_0x2f36('0x21')]===0xc8){_0x49bf68[_0x2f36('0x32')](_0x4218d0,_0x495f72[_0x2f36('0x34')]());}return _0x495f72;});return _0x160b57||_0x1bdb35;});});}self[_0x2f36('0xe')]('message',function(_0x255dd2){if(_0x255dd2[_0x2f36('0x2f')]&&_0x255dd2[_0x2f36('0x2f')][_0x2f36('0x1a')]==='SKIP_WAITING'){self[_0x2f36('0x44')]();}if(_0x255dd2[_0x2f36('0x2f')]&&_0x255dd2[_0x2f36('0x2f')][_0x2f36('0x1a')]===_0x2f36('0xf')){_0x255dd2[_0x2f36('0x28')](caches['keys']()['then'](function(_0x45c9e3){return Promise[_0x2f36('0x3a')](_0x45c9e3[_0x2f36('0x38')](function(_0x3d4c06){return caches[_0x2f36('0x1c')](_0x3d4c06);}));})[_0x2f36('0xd')](function(){return self['clients']['matchAll']({'type':_0x2f36('0x18'),'includeUncontrolled':!![]});})['then'](function(_0x355135){_0x355135[_0x2f36('0x43')](function(_0x2266be){_0x2266be[_0x2f36('0x40')]({'type':'CACHE_CLEARED'});});}));}});
+/**
+ * AdminBeautify Service Worker
+ * 渐进式 Web 应用（PWA）支持
+ *
+ * 策略：
+ *  - 插件静态资源（CSS / JS / 字体图标）→ Cache-First（离线可用）
+ *  - 后台 HTML 页面                      → Network-First（优先最新，降级离线页）
+ *  - Google Fonts 字体                   → StaleWhileRevalidate（后台静默更新）
+ */
+
+var CACHE_VERSION = 'ab-v2.1.19';
+var STATIC_CACHE  = CACHE_VERSION + '-static';
+var PAGE_CACHE    = CACHE_VERSION + '-pages';
+
+/* 安装时预缓存的核心静态资源 */
+var PRECACHE_URLS = [
+    /* 会由 Plugin.php 在 sw 注册时通过 __SW_ASSETS__ 动态注入实际带版本号的 URL */
+];
+
+/* ------------------------------------------------------------------ */
+/*  Install — 预缓存静态资源                                            */
+/* ------------------------------------------------------------------ */
+self.addEventListener('install', function (event) {
+    self.skipWaiting();
+    event.waitUntil(
+        caches.open(STATIC_CACHE).then(function (cache) {
+            if (PRECACHE_URLS.length) {
+                return cache.addAll(PRECACHE_URLS);
+            }
+        })
+    );
+});
+
+/* ------------------------------------------------------------------ */
+/*  Activate — 清理旧版本缓存，并通知所有客户端 SW 已更新               */
+/* ------------------------------------------------------------------ */
+self.addEventListener('activate', function (event) {
+    event.waitUntil(
+        caches.keys().then(function (keys) {
+            return Promise.all(
+                keys.filter(function (key) {
+                    return key.startsWith('ab-') && key !== STATIC_CACHE && key !== PAGE_CACHE;
+                }).map(function (key) {
+                    return caches.delete(key);
+                })
+            );
+        }).then(function () {
+            return self.clients.claim();
+        }).then(function () {
+            /* 通知所有已打开的页面：新版本 SW 已激活，可以刷新 */
+            return self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clients) {
+                clients.forEach(function (client) {
+                    client.postMessage({ type: 'SW_UPDATED' });
+                });
+            });
+        })
+    );
+});
+
+/* ------------------------------------------------------------------ */
+/*  Fetch — 请求拦截                                                    */
+/* ------------------------------------------------------------------ */
+self.addEventListener('fetch', function (event) {
+    var req = event.request;
+    var url = new URL(req.url);
+
+    /* 只处理 GET 请求 */
+    if (req.method !== 'GET') return;
+
+    /* 登录页 / action 接口 — 始终走网络，不缓存（保证认证状态正确） */
+    if (url.pathname.indexOf('login.php') !== -1 ||
+        url.pathname.indexOf('action/') !== -1 ||
+        url.search.indexOf('do=') !== -1) {
+        /* 直接透传网络，不做任何缓存处理；网络失败时尝试回退缓存，缓存也无则返回 503 */
+        event.respondWith(
+            fetch(req).catch(function () {
+                return caches.match(req).then(function (cached) {
+                    return cached || new Response(
+                        JSON.stringify({ code: 503, message: '网络不可用，请检查连接后重试' }),
+                        { status: 503, statusText: 'Service Unavailable',
+                          headers: { 'Content-Type': 'application/json' } }
+                    );
+                });
+            })
+        );
+        return;
+    }
+
+    /* Google Fonts — StaleWhileRevalidate */
+    if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+        event.respondWith(staleWhileRevalidate(STATIC_CACHE, req));
+        return;
+    }
+
+    /* 插件静态资源（CSS / JS）— Cache-First */
+    if (url.pathname.indexOf('/AdminBeautify/assets/') !== -1) {
+        event.respondWith(cacheFirst(STATIC_CACHE, req));
+        return;
+    }
+
+    /* 后台 HTML 页面 — Network-First，网络失败时返回离线提示 */
+    if (req.headers.get('accept') && req.headers.get('accept').indexOf('text/html') !== -1) {
+        event.respondWith(networkFirst(PAGE_CACHE, req));
+        return;
+    }
+});
+
+/* ------------------------------------------------------------------ */
+/*  缓存策略实现                                                        */
+/* ------------------------------------------------------------------ */
+
+/** Cache-First：先查缓存，缓存未命中则走网络并存入缓存 */
+function cacheFirst(cacheName, request) {
+    return caches.open(cacheName).then(function (cache) {
+        return cache.match(request).then(function (cached) {
+            if (cached) return cached;
+            return fetch(request).then(function (response) {
+                if (response && response.status === 200) {
+                    cache.put(request, response.clone());
+                }
+                return response;
+            });
+        });
+    });
+}
+
+/** Network-First：先走网络，失败时回退缓存 */
+function networkFirst(cacheName, request) {
+    return caches.open(cacheName).then(function (cache) {
+        return fetch(request).then(function (response) {
+            /* 只缓存 200 成功的响应；不缓存重定向到登录页的 302 */
+            if (response && response.status === 200 && response.type !== 'opaqueredirect') {
+                /* 跳过包含登录页的响应 */
+                var respUrl = response.url || '';
+                if (respUrl.indexOf('login.php') === -1) {
+                    cache.put(request, response.clone());
+                }
+            }
+            /* 服务端错误（5xx，含 Cloudflare 524）→ 优先回退缓存，避免暴露错误页 */
+            if (response && response.status >= 500) {
+                return cache.match(request).then(function (cached) {
+                    return cached || response;
+                });
+            }
+            return response;
+        }).catch(function () {
+            return cache.match(request).then(function (cached) {
+                if (cached) return cached;
+                /* 离线兜底：返回简单的离线提示页 */
+                return new Response(
+                    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>离线</title>' +
+                    '<meta name="viewport" content="width=device-width,initial-scale=1">' +
+                    '<style>body{font-family:sans-serif;display:flex;align-items:center;justify-content:center;' +
+                    'min-height:100vh;margin:0;background:#F3EDF7;color:#1C1B1F;}' +
+                    '.box{text-align:center;padding:40px;background:#fff;border-radius:24px;' +
+                    'box-shadow:0 4px 16px rgba(0,0,0,.1);max-width:360px;}' +
+                    'h2{margin:16px 0 8px;font-size:1.4em;}p{color:#49454F;margin:0;font-size:.95em;}' +
+                    'button{margin-top:24px;padding:12px 28px;border:none;border-radius:999px;' +
+                    'background:#7D5260;color:#fff;font-size:1em;cursor:pointer;}' +
+                    '</style></head><body>' +
+                    '<div class="box"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#7D5260" stroke-width="1.5"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 5a10.94 10.94 0 0 0-2.28 2M10.41 10.41a2 2 0 1 0 2.83 2.83"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/></svg>' +
+                    '<h2>当前处于离线状态</h2><p>请检查网络连接后重试</p>' +
+                    '<button onclick="location.reload()">重新加载</button></div></body></html>',
+                    { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+                );
+            });
+        });
+    });
+}
+
+/** StaleWhileRevalidate：立即返回缓存，同时后台更新 */
+function staleWhileRevalidate(cacheName, request) {
+    return caches.open(cacheName).then(function (cache) {
+        return cache.match(request).then(function (cached) {
+            var fetchPromise = fetch(request).then(function (response) {
+                if (response && response.status === 200) {
+                    cache.put(request, response.clone());
+                }
+                return response;
+            });
+            return cached || fetchPromise;
+        });
+    });
+}
+
+/* ------------------------------------------------------------------ */
+/*  接收来自页面的消息                                                   */
+/* ------------------------------------------------------------------ */
+self.addEventListener('message', function (event) {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        self.skipWaiting();
+    }
+    /* 清空所有缓存（供设置页"清除缓存"按钮调用），完成后通知所有客户端 */
+    if (event.data && event.data.type === 'CLEAR_CACHE') {
+        event.waitUntil(
+            caches.keys().then(function (keys) {
+                return Promise.all(keys.map(function (k) { return caches.delete(k); }));
+            }).then(function () {
+                return self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+            }).then(function (clients) {
+                clients.forEach(function (c) {
+                    c.postMessage({ type: 'CACHE_CLEARED' });
+                });
+            })
+        );
+    }
+});
