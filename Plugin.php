@@ -1,10 +1,10 @@
 <?php
 /**
- * AB-Admin (Admin Beautify) - 后台管理界面美化插件，包含登录界面美化 (原LoginBeautify)，Material Design 3风格
+ * AB-Admin (Admin Beautify) - 最美 Typecho 后台美化插件，Material Design 3风格
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.18
+ * @version 2.1.19
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.18';
+        $abVer = '2.1.19';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -460,10 +460,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 'google'    => _t('Google CDN（fonts.googleapis.com）'),
                 'loli'      => _t('loli.net 镜像（fonts.loli.net）'),
                 'jsdelivr'  => _t('jsDelivr CDN（cdn.jsdelivr.net）'),
-                // 'local'     => _t('本地文件（需自行托管字体+图标，零外部依赖）'),
+                'local'     => _t('本地文件（零外部依赖）'),
                 'custom'    => _t('自定义 URL')
             ),
-            'loli',
+            'local',
             _t('字体 & 图标资源来源'),
             _t('选择 Noto Sans SC 字体与 Material Icons 图标的加载方式')
         );
@@ -494,8 +494,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'localFontUrl',
             null,
             '',
-            _t('本地字体 CSS 路径（可选）'),
-            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/NotoSansSC.css）。需将 NotoSansSC.css 及对应字体文件放入该目录，否则显示会不正常。')
+            _t('本地字体 CSS 路径（留空则使用默认）'),
+            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/Noto-Sans-SC-CSS/all.css）。')
         );
         $form->addInput($localFontUrl);
 
@@ -504,8 +504,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'localIconUrl',
             null,
             '',
-            _t('本地图标 CSS 路径（可选）'),
-            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/MaterialIconsRound.css）。需将 MaterialIconsRound.css 及 woff2 字体放入该目录，否则显示会不正常。')
+            _t('本地图标 CSS 路径（留空则使用默认）'),
+            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/MDIR/MaterialIconsRound.css）。')
         );
         $form->addInput($localIconUrl);
 
@@ -753,7 +753,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.18' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.19' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -788,8 +788,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $resIconUrl = 'https://cdn.jsdelivr.net/npm/material-icons@1.13.14/iconfont/material-icons.min.css';
         } elseif ($staticResource === 'local') {
             // 本地文件（从插件 assets/fonts/ 目录加载，或使用用户自定义路径）
-            $localPluginFontDefault = Typecho_Common::url('AdminBeautify/assets/fonts/NotoSansSC.css', $options->pluginUrl);
-            $localPluginIconDefault = Typecho_Common::url('AdminBeautify/assets/fonts/MaterialIconsRound.css', $options->pluginUrl);
+            $localPluginFontDefault = Typecho_Common::url('AdminBeautify/assets/fonts/Noto-Sans-SC-CSS/all.css', $options->pluginUrl);
+            $localPluginIconDefault = Typecho_Common::url('AdminBeautify/assets/fonts/MDIR/MaterialIconsRound.css', $options->pluginUrl);
             $resFontUrl = ($localFontUrl !== '') ? $localFontUrl : $localPluginFontDefault;
             $resIconUrl = ($localIconUrl !== '') ? $localIconUrl : $localPluginIconDefault;
         } elseif ($staticResource === 'custom') {
@@ -976,7 +976,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.18',
+            'pluginVersion'          => '2.1.19',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -990,7 +990,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.18.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.19.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1005,7 +1005,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.18"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.19"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1208,7 +1208,7 @@ var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghpr
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.18";';
+        echo 'var __AB_VER__="2.1.19";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 window.abCheckUpdate=function(manual){
