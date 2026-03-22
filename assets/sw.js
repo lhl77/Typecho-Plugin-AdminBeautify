@@ -8,7 +8,7 @@
  *  - Google Fonts 字体                   → StaleWhileRevalidate（后台静默更新）
  */
 
-var CACHE_VERSION = 'ab-v2.1.20';
+var CACHE_VERSION = 'ab-v2.1.21';
 var STATIC_CACHE  = CACHE_VERSION + '-static';
 var PAGE_CACHE    = CACHE_VERSION + '-pages';
 
