@@ -1210,7 +1210,9 @@ var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghpr
         echo '<script>(function(){';
         echo 'var __AB_VER__="2.1.21";';
         echo <<<'UPDATEJS'
-// ---- abCheckUpdate: 向后端请求最新版信息（stale-while-revalidate：立即返回缓存，后台刷新）----
+// ---- abCheckUpdate: 向后端请求最新版信息 ----
+// manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
+// manual=false → 自动后台模式，stale-while-revalidate，立即返回缓存
 window.abCheckUpdate=function(manual){
     var btn=document.getElementById("ab-btn-update");
     var origHTML=btn?btn.innerHTML:"";
@@ -1218,11 +1220,13 @@ window.abCheckUpdate=function(manual){
     if(!ajax.url) return;
     var spinSVG='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:ab-spin 1s linear infinite"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>';
     if(btn){ btn.disabled=true; btn.innerHTML=spinSVG+' 检查中...'; }
+    var url=ajax.url+(manual?"?do=check-update&force=1":"?do=check-update");
     var xhr=new XMLHttpRequest();
-    xhr.open("GET",ajax.url+"?do=check-update",true);
+    xhr.open("GET",url,true);
     xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
-    // 后端会立即返回（缓存或占位），无需长超时
-    xhr.timeout=8000;
+    // 手动：等待 GitHub 实时响应（最多 4 节点×5s=20s，预留余量）
+    // 自动：后端立即返回缓存，8s 已足够
+    xhr.timeout=manual?25000:8000;
     xhr.onload=function(){
         if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }
         try{
@@ -1233,33 +1237,31 @@ window.abCheckUpdate=function(manual){
             }
             var d=res.data;
 
-            // 后台正在刷新（stale 或首次）：不写入 localStorage，稍后重新自动检查
-            if(d.cache_stale){
-                if(manual){
-                    // 手动触发时提示用户
-                    if(d.checking){
-                        abShowUpdateToast("info","⏳ 正在后台检查更新，请稍候...");
-                    } else {
-                        abShowUpdateToast("info","🔄 后台刷新中，10秒后自动更新结果...");
-                    }
-                }
+            // ── 自动后台模式：stale-while-revalidate 处理 ──
+            if(!manual && d.cache_stale){
                 // 若有旧缓存数据且有更新，仍然展示（不阻止旧通知）
                 if(d.has_update && d.latest){
                     try{ if(localStorage.getItem("ab-update-dismissed-v"+d.latest)) return; }catch(e){}
                     abShowUpdateAvailable(d);
                 }
-                // 10 秒后自动重新检查（仅在非手动调用时，避免刷太频繁）
-                if(!manual){
-                    setTimeout(function(){ window.abCheckUpdate(false); }, 10000);
-                }
+                // 10 秒后自动重新检查，等后台刷新完成
+                setTimeout(function(){ window.abCheckUpdate(false); }, 10000);
                 return;
             }
 
-            // 新鲜数据：写入 localStorage 供下次页面加载使用
-            try{ localStorage.setItem("ab-update-check",JSON.stringify({ts:Date.now(),data:d})); }catch(e){}
+            // ── 手动模式且网络不通（force_failed）：已降级返回缓存 ──
+            if(manual && d.force_failed){
+                abShowUpdateToast("error","⚠️ 无法连接 GitHub，以下为缓存结果");
+                // 继续往下展示缓存内容，不 return
+            }
+
+            // 写入 localStorage（手动直连的新鲜数据，或自动命中新鲜缓存）
+            if(!d.cache_stale && !d.force_failed){
+                try{ localStorage.setItem("ab-update-check",JSON.stringify({ts:Date.now(),data:d})); }catch(e){}
+            }
 
             if(!d.has_update){
-                // 已是最新版：顺带清理所有旧版本的"已忽略"标记
+                // 已是最新版：清理旧"已忽略"标记
                 try{
                     var keysToRemove=[];
                     for(var k in localStorage){
@@ -1279,7 +1281,7 @@ window.abCheckUpdate=function(manual){
     };
     xhr.onerror=xhr.ontimeout=function(){
         if(btn){ btn.disabled=false; btn.innerHTML=origHTML; }
-        if(manual) abShowUpdateToast("error","❌ 检查失败，请检查网络");
+        if(manual) abShowUpdateToast("error","❌ 检查超时，服务器无法访问 GitHub");
     };
     xhr.send();
 };
