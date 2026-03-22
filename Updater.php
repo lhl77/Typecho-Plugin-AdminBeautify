@@ -25,7 +25,7 @@ class AdminBeautify_Updater
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
 
     /** 当前版本 */
-    const CURRENT_VERSION = '2.1.20';
+    const CURRENT_VERSION = '2.1.21';
 
     /** 插件根目录 */
     private $pluginDir;
@@ -274,6 +274,10 @@ class AdminBeautify_Updater
         @unlink($zipFile);
         $this->removeDir($extractDir);
 
+        // 9. 删除更新检查缓存，避免更新后仍提示"有新版本"
+        @unlink($this->tmpDir . '/.update_cache.json');
+        @unlink($this->tmpDir . '/.update_lock');
+
         call_user_func($emit, 'done',
             '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。',
             100
@@ -470,6 +474,10 @@ class AdminBeautify_Updater
         @unlink($zipFile);
         $this->removeDir($extractDir);
         $details[] = '临时文件已清理';
+
+        // 9. 删除更新检查缓存，避免更新后仍提示"有新版本"
+        @unlink($this->tmpDir . '/.update_cache.json');
+        @unlink($this->tmpDir . '/.update_lock');
 
         return array('ok' => true, 'msg' => '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。', 'details' => $details);
     }
