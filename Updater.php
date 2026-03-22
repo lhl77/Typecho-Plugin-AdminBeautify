@@ -274,9 +274,31 @@ class AdminBeautify_Updater
         @unlink($zipFile);
         $this->removeDir($extractDir);
 
-        // 9. 删除更新检查缓存，避免更新后仍提示"有新版本"
-        @unlink($this->tmpDir . '/.update_cache.json');
+        // 9. 用新版本号直接覆写更新缓存，并清除 lock 文件。
+        //    不能只删缓存：PHP opcache 可能仍持有旧 Updater.php 字节码，
+        //    导致后台重建缓存时 CURRENT_VERSION 仍读到旧值（2.1.20），
+        //    再次显示"有新版本"。直接写入已知的正确状态可绕过该问题。
+        $postUpdateData = array(
+            'has_update'   => false,
+            'current'      => $newVersion,
+            'latest'       => $newVersion,
+            'can_direct'   => false,
+            'html_url'     => '',
+            'download_url' => '',
+            'body'         => '',
+        );
+        @file_put_contents(
+            $this->tmpDir . '/.update_cache.json',
+            json_encode(array('ts' => time(), 'data' => $postUpdateData), JSON_UNESCAPED_UNICODE)
+        );
         @unlink($this->tmpDir . '/.update_lock');
+
+        // 尝试让 opcache 重新加载插件核心文件，使新版本号对后续请求生效
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($this->pluginDir . '/Updater.php', true);
+            @opcache_invalidate($this->pluginDir . '/Plugin.php',  true);
+            @opcache_invalidate($this->pluginDir . '/Action.php',  true);
+        }
 
         call_user_func($emit, 'done',
             '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。',
@@ -475,9 +497,27 @@ class AdminBeautify_Updater
         $this->removeDir($extractDir);
         $details[] = '临时文件已清理';
 
-        // 9. 删除更新检查缓存，避免更新后仍提示"有新版本"
-        @unlink($this->tmpDir . '/.update_cache.json');
+        // 9. 用新版本号直接覆写更新缓存（同 doUpdateStreaming，避免 opcache 旧常量问题）
+        $postUpdateData = array(
+            'has_update'   => false,
+            'current'      => $newVersion,
+            'latest'       => $newVersion,
+            'can_direct'   => false,
+            'html_url'     => '',
+            'download_url' => '',
+            'body'         => '',
+        );
+        @file_put_contents(
+            $this->tmpDir . '/.update_cache.json',
+            json_encode(array('ts' => time(), 'data' => $postUpdateData), JSON_UNESCAPED_UNICODE)
+        );
         @unlink($this->tmpDir . '/.update_lock');
+
+        if (function_exists('opcache_invalidate')) {
+            @opcache_invalidate($this->pluginDir . '/Updater.php', true);
+            @opcache_invalidate($this->pluginDir . '/Plugin.php',  true);
+            @opcache_invalidate($this->pluginDir . '/Action.php',  true);
+        }
 
         return array('ok' => true, 'msg' => '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。', 'details' => $details);
     }
