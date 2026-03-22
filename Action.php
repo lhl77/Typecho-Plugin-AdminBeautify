@@ -551,6 +551,62 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $lockFile  = dirname(__FILE__) . '/tmp_update/.update_lock';
         $cacheTTL  = 3600; // 1 小时
 
+        // ── 手动强制检查（force=1）：跳过缓存，直接请求 GitHub 获取实时结果 ──
+        if ($this->request->get('force', '0') === '1') {
+            // 释放 Session 锁，避免 GitHub 请求（最长 ~20s）期间阻塞其他页面跳转
+            if (session_status() === PHP_SESSION_ACTIVE) {
+                @session_write_close();
+            }
+
+            $updater = new AdminBeautify_Updater();
+            $release = $updater->fetchLatestRelease();
+
+            if ($release === false) {
+                // 网络不通：降级返回缓存（如有）
+                if (file_exists($cacheFile)) {
+                    $raw = @file_get_contents($cacheFile);
+                    $obj = $raw ? @json_decode($raw, true) : null;
+                    if (is_array($obj) && isset($obj['data'])) {
+                        $this->jsonSuccess(
+                            array_merge($obj['data'], array('from_cache' => true, 'force_failed' => true)),
+                            '网络不可用，显示上次缓存结果'
+                        );
+                    }
+                }
+                $this->jsonError('无法连接 GitHub，请检查服务器网络', 502);
+            }
+
+            $current   = AdminBeautify_Updater::CURRENT_VERSION;
+            $latest    = $release['version'];
+            $hasUpdate = AdminBeautify_Updater::compareVersion($latest, $current) > 0;
+            $canDirect = $hasUpdate && AdminBeautify_Updater::canDirectUpdate($current, $latest);
+
+            $freshData = array(
+                'has_update'   => $hasUpdate,
+                'current'      => $current,
+                'latest'       => $latest,
+                'can_direct'   => $canDirect,
+                'html_url'     => $release['html_url'],
+                'download_url' => $release['download_url'],
+                'body'         => $release['body'],
+                'from_cache'   => false,
+            );
+
+            // 写入缓存，同时清除 lock，让后续自动检查直接命中新鲜缓存
+            $cacheDir = dirname($cacheFile);
+            if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+            $cacheData = $freshData;
+            unset($cacheData['from_cache']);
+            @file_put_contents($cacheFile, json_encode(array('ts' => time(), 'data' => $cacheData)));
+            @unlink($lockFile);
+
+            $this->jsonSuccess(
+                $freshData,
+                $hasUpdate ? '发现新版本 v' . $latest : '已是最新版本 v' . $current
+            );
+        }
+
+        // ── 自动后台检查（非手动）：stale-while-revalidate，立即返回缓存 ──
         $cachedData = null;
         $cacheAge   = PHP_INT_MAX;
 
