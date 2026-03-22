@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.19
+ * @version 2.1.20
  * @link https://blog.lhl.one
  */
 
@@ -81,6 +81,56 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'message' => $message,
             'data'    => null,
         ));
+    }
+
+    /**
+     * 立即将 JSON 发送给客户端并关闭 HTTP 连接，
+     * 调用方在此之后仍可执行后台任务（不阻塞用户）。
+     *
+     * 兼容：PHP-FPM (fastcgi_finish_request) 和 mod_php (flush)。
+     *
+     * 关键：调用前必须已完成所有 Session 读写操作。
+     * 本方法会在 flush 前主动 session_write_close()，
+     * 释放 PHP Session 文件锁，避免后续同 Session 的请求（如 index.php 跳转）
+     * 因等待锁而阻塞长达数十秒。
+     */
+    private function _sendJsonAndContinue(array $payload)
+    {
+        $body = json_encode($payload, JSON_UNESCAPED_UNICODE);
+
+        // 清空所有输出缓冲区
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+
+        // ── 释放 Session 文件锁 ──────────────────────────────────────────────
+        // 必须在 flush/fastcgi_finish_request 之前调用：
+        // 虽然 fastcgi_finish_request() 关闭了 HTTP 连接，但 Session 锁仍然被
+        // 当前 PHP 进程持有，直到脚本结束或显式释放。
+        // 若此时用户跳转到新后台页面，新请求的 session_start() 将阻塞等待这把锁，
+        // 造成 index.php 卡 20 秒的假象。
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_write_close();
+        }
+
+        // 发送响应头
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+            header('Connection: close');
+            header('Content-Length: ' . strlen($body));
+        }
+
+        echo $body;
+
+        // 刷新并关闭连接
+        @ob_start();
+        @ob_end_flush();
+        @flush();
+
+        // PHP-FPM：立即通知 FastCGI 前端（Nginx/Apache）连接已完成
+        if (function_exists('fastcgi_finish_request')) {
+            @fastcgi_finish_request();
+        }
     }
 
     // ================================================================
@@ -190,7 +240,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.19';
+        $pluginVer  = '2.1.20';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -427,19 +477,68 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     /**
      * 服务端代理拉取 GitHub 公告 notice.md，解决浏览器直连 CORS / 被墙问题
      * 访问方式：/action/admin-beautify?do=get-notice
+     *
+     * 策略（stale-while-revalidate）：
+     *   - 有缓存（任何新旧）→ 立即返回缓存，若已过期则在客户端连接关闭后后台刷新
+     *   - 无缓存 → 立即返回空，同时后台异步拉取并写缓存（下次访问生效）
      */
     public function getNotice()
     {
         $this->checkAdmin();
 
-        $noticeUrl = 'https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md';
-        $content   = $this->httpGetWithMirror($noticeUrl);
+        $cacheFile = dirname(__FILE__) . '/tmp_update/.notice_cache.txt';
+        $lockFile  = dirname(__FILE__) . '/tmp_update/.notice_lock';
+        $cacheTTL  = 1800; // 30 分钟
 
-        if ($content === false || trim($content) === '') {
-            $this->jsonError('无法获取公告内容', 502);
+        $cachedContent = null;
+        $cacheAge      = PHP_INT_MAX;
+
+        if (file_exists($cacheFile)) {
+            $raw = @file_get_contents($cacheFile);
+            if ($raw !== false && trim($raw) !== '') {
+                $cachedContent = $raw;
+                $cacheAge      = time() - (int) @filemtime($cacheFile);
+            }
         }
 
-        $this->jsonSuccess(array('content' => $content), 'ok');
+        $isStale        = ($cacheAge >= $cacheTTL);
+        $alreadyLocked  = (file_exists($lockFile) && (time() - (int) @filemtime($lockFile)) < 60);
+        $needsBgRefresh = ($isStale || $cachedContent === null) && !$alreadyLocked;
+
+        // ── 立即响应 ──
+        if ($cachedContent !== null) {
+            $this->_sendJsonAndContinue(array(
+                'code'    => 0,
+                'message' => 'ok',
+                'data'    => array('content' => $cachedContent, 'from_cache' => true, 'cache_stale' => $isStale),
+            ));
+        } else {
+            // 完全没有缓存时也立即返回空（前端静默忽略）
+            $this->_sendJsonAndContinue(array(
+                'code'    => 0,
+                'message' => 'ok',
+                'data'    => array('content' => '', 'from_cache' => false, 'cache_stale' => true),
+            ));
+        }
+
+        // ── 后台刷新（客户端已断开，不再阻塞任何 worker）──
+        if ($needsBgRefresh) {
+            $cacheDir = dirname($cacheFile);
+            if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+            @file_put_contents($lockFile, time());
+
+            @ignore_user_abort(true);
+            @set_time_limit(60);
+
+            $noticeUrl = 'https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/notice.md';
+            $content   = $this->httpGetWithMirror($noticeUrl, 8);
+            if ($content !== false && trim($content) !== '') {
+                @file_put_contents($cacheFile, $content);
+            }
+            @unlink($lockFile);
+        }
+
+        exit;
     }
 
     public function checkUpdate()
@@ -447,27 +546,90 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->checkAdmin();
 
         require_once dirname(__FILE__) . '/Updater.php';
-        $updater = new AdminBeautify_Updater();
 
-        $release = $updater->fetchLatestRelease();
-        if ($release === false) {
-            $this->jsonError('无法连接 GitHub，请检查服务器网络', 502);
+        $cacheFile = dirname(__FILE__) . '/tmp_update/.update_cache.json';
+        $lockFile  = dirname(__FILE__) . '/tmp_update/.update_lock';
+        $cacheTTL  = 3600; // 1 小时
+
+        $cachedData = null;
+        $cacheAge   = PHP_INT_MAX;
+
+        if (file_exists($cacheFile)) {
+            $raw = @file_get_contents($cacheFile);
+            $obj = $raw ? @json_decode($raw, true) : null;
+            if (is_array($obj) && isset($obj['ts'], $obj['data'])) {
+                $cacheAge   = time() - (int) $obj['ts'];
+                $cachedData = $obj['data'];
+            }
         }
 
-        $current   = AdminBeautify_Updater::CURRENT_VERSION;
-        $latest    = $release['version'];
-        $hasUpdate = AdminBeautify_Updater::compareVersion($latest, $current) > 0;
-        $canDirect = $hasUpdate && AdminBeautify_Updater::canDirectUpdate($current, $latest);
+        $isStale        = ($cacheAge >= $cacheTTL);
+        $alreadyLocked  = (file_exists($lockFile) && (time() - (int) @filemtime($lockFile)) < 60);
+        $needsBgRefresh = ($isStale || $cachedData === null) && !$alreadyLocked;
 
-        $this->jsonSuccess(array(
-            'has_update'   => $hasUpdate,
-            'current'      => $current,
-            'latest'       => $latest,
-            'can_direct'   => $canDirect,
-            'html_url'     => $release['html_url'],
-            'download_url' => $release['download_url'],
-            'body'         => $release['body'],
-        ), $hasUpdate ? '发现新版本 v' . $latest : '已是最新版本 v' . $current);
+        // ── 立即响应：不管缓存新旧，先把现有数据推给客户端 ──
+        if ($cachedData !== null) {
+            $this->_sendJsonAndContinue(array(
+                'code'    => 0,
+                'message' => $isStale ? '检查中，显示上次缓存' : (
+                    (isset($cachedData['has_update']) && $cachedData['has_update'])
+                        ? '发现新版本 v' . $cachedData['latest']
+                        : '已是最新版本 v' . $cachedData['current']
+                ),
+                'data'    => array_merge($cachedData, array(
+                    'from_cache'  => true,
+                    'cache_stale' => $isStale,
+                )),
+            ));
+        } else {
+            // 完全没有缓存：立即返回"正在检查"占位，后台填充
+            $this->_sendJsonAndContinue(array(
+                'code'    => 0,
+                'message' => '正在后台检查更新...',
+                'data'    => array(
+                    'has_update'  => false,
+                    'current'     => AdminBeautify_Updater::CURRENT_VERSION,
+                    'latest'      => null,
+                    'cache_stale' => true,
+                    'checking'    => true,
+                ),
+            ));
+        }
+
+        // ── 后台刷新（客户端连接已关闭，不占用用户等待时间）──
+        if ($needsBgRefresh) {
+            $cacheDir = dirname($cacheFile);
+            if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+            @file_put_contents($lockFile, time());
+
+            @ignore_user_abort(true);
+            @set_time_limit(60);
+
+            $updater = new AdminBeautify_Updater();
+            $release = $updater->fetchLatestRelease(); // 内部使用 5s 短超时 + 镜像兜底
+
+            if ($release !== false) {
+                $current   = AdminBeautify_Updater::CURRENT_VERSION;
+                $latest    = $release['version'];
+                $hasUpdate = AdminBeautify_Updater::compareVersion($latest, $current) > 0;
+                $canDirect = $hasUpdate && AdminBeautify_Updater::canDirectUpdate($current, $latest);
+
+                $freshData = array(
+                    'has_update'   => $hasUpdate,
+                    'current'      => $current,
+                    'latest'       => $latest,
+                    'can_direct'   => $canDirect,
+                    'html_url'     => $release['html_url'],
+                    'download_url' => $release['download_url'],
+                    'body'         => $release['body'],
+                );
+                @file_put_contents($cacheFile, json_encode(array('ts' => time(), 'data' => $freshData)));
+            }
+
+            @unlink($lockFile);
+        }
+
+        exit;
     }
 
     /**
@@ -516,6 +678,77 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         } else {
             $this->jsonError($result['msg'] . "\n详情：" . implode("\n", $result['details']), 500);
         }
+    }
+
+    /**
+     * 流式更新（SSE 版本）——实时推送下载/解压/覆盖进度
+     * 访问方式（GET）：/action/admin-beautify?do=do-update-stream&download_url=xxx&new_version=xxx
+     *
+     * 响应格式：text/event-stream
+     *   data: {"type":"downloading","message":"下载中 512 KB / 1024 KB","progress":50}
+     *   data: {"type":"done","message":"更新成功！...","progress":100}
+     *   data: {"type":"error","message":"...","progress":-1}
+     */
+    public function doUpdateStream()
+    {
+        $this->checkAdmin();
+
+        require_once dirname(__FILE__) . '/Updater.php';
+
+        $downloadUrl = trim($this->request->get('download_url', ''));
+        $newVersion  = trim($this->request->get('new_version', ''));
+
+        // 参数校验（此时尚未切换到 SSE，可以正常输出 JSON 错误）
+        if ($downloadUrl === '') {
+            $this->response->setContentType('application/json');
+            $this->jsonError('缺少 download_url 参数');
+        }
+        if ($newVersion === '') {
+            $this->response->setContentType('application/json');
+            $this->jsonError('缺少 new_version 参数');
+        }
+
+        $current = AdminBeautify_Updater::CURRENT_VERSION;
+        if (!AdminBeautify_Updater::canDirectUpdate($current, $newVersion)) {
+            $this->response->setContentType('application/json');
+            $this->jsonError('版本跨度过大（当前 v' . $current . ' → v' . $newVersion . '），请前往 GitHub 手动更新', 400);
+        }
+
+        if (strpos($downloadUrl, 'github.com') === false && strpos($downloadUrl, 'codeload.github.com') === false) {
+            $this->response->setContentType('application/json');
+            $this->jsonError('下载地址不合法', 400);
+        }
+
+        // ── 切换到 SSE 模式 ──
+        // 关闭所有输出缓冲，确保 flush 实时生效
+        while (ob_get_level() > 0) { @ob_end_clean(); }
+        @set_time_limit(300); // 5 分钟足够完成更新
+
+        // 释放 Session 锁，SSE 可能持续数分钟，不应阻塞同 Session 的其他请求
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_write_close();
+        }
+
+        header('Content-Type: text/event-stream; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('X-Accel-Buffering: no');   // 禁用 nginx 缓冲
+        header('Connection: keep-alive');
+
+        $emit = function ($type, $message, $progress) {
+            $data = json_encode(array(
+                'type'     => $type,
+                'message'  => $message,
+                'progress' => $progress,
+            ), JSON_UNESCAPED_UNICODE);
+            echo "data: {$data}\n\n";
+            if (ob_get_level() > 0) @ob_flush();
+            @flush();
+        };
+
+        $updater = new AdminBeautify_Updater();
+        $updater->doUpdateStreaming($downloadUrl, $newVersion, $emit);
+
+        exit;
     }
 
     /**
@@ -642,13 +875,16 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
     /**
      * HTTP GET，直连失败时依次尝试大陆镜像代理（适用于 github.com / api.github.com / raw.githubusercontent.com）
+     *
+     * @param string $url     目标 URL
+     * @param int    $timeout 每个节点超时秒数（默认 15s；检查类操作建议传 5s）
      */
-    private function httpGetWithMirror($url)
+    private function httpGetWithMirror($url, $timeout = 15)
     {
-        $result = $this->httpGet($url);
+        $result = $this->httpGet($url, $timeout);
         if ($result !== false) return $result;
         foreach (self::$GH_MIRRORS as $mirror) {
-            $result = $this->httpGet($mirror . $url);
+            $result = $this->httpGet($mirror . $url, $timeout);
             if ($result !== false) return $result;
         }
         return false;
@@ -656,13 +892,16 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
     /**
      * 简单 HTTP GET（支持 file_get_contents 和 cURL 回退）
+     *
+     * @param string $url
+     * @param int    $timeout 超时秒数
      */
-    private function httpGet($url)
+    private function httpGet($url, $timeout = 15)
     {
         $opts = array(
             'http' => array(
                 'method'  => 'GET',
-                'timeout' => 15,
+                'timeout' => $timeout,
                 'header'  => "User-Agent: AdminBeautify-Typecho-Plugin/2.1.0\r\n"
                            . "Accept: application/vnd.github.v3+json\r\n",
             ),
@@ -680,7 +919,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $ch = curl_init($url);
         curl_setopt_array($ch, array(
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_TIMEOUT        => 15,
+            CURLOPT_TIMEOUT        => $timeout,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_SSL_VERIFYHOST => false,
@@ -866,6 +1105,11 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         if ($do === 'sw') {
             $this->sw();
+            return;
+        }
+        /* SSE 流式更新也需要在设置 JSON Content-Type 之前分发 */
+        if ($do === 'do-update-stream') {
+            $this->doUpdateStream();
             return;
         }
 
