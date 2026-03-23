@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.21
+ * @version 2.1.22
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.21';
+        $abVer = '2.1.22';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -297,6 +297,15 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         abCard('login', $abC2, '🔐', '登录页设置', '配色方案、背景图片、虚化效果、自定义样式',
             abCardTip('💡', '以下设置控制登录页面的样式，支持自定义配色、背景图片、虚化效果等。')
         );
+
+        // 登录页 - 站点名称显示
+        $loginIsEnabled = new Typecho_Widget_Helper_Form_Element_Radio(
+            'login_isEnabled',
+            array('1' => _t('使用AB登录页'), '0' => _t('不使用/使用其他登录页美化')),
+            '1',
+            _t('登录页启用状态')
+        );
+        $form->addInput($loginIsEnabled);
 
         // 登录页 - 颜色预设方案
         $loginColorPreset = new Typecho_Widget_Helper_Form_Element_Select(
@@ -603,11 +612,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     public static function renderHeader($header)
     {
         // 登录页 → 注入 LoginBeautify 样式
-        if (self::isLoginPage()) {
+        $options = Typecho_Widget::widget('Widget_Options');
+        $pluginOptions = $options->plugin('AdminBeautify');
+        $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
+        if (self::isLoginPage() && $loginIsEnabled == '1') {
             ob_start();
             self::outputLoginHeaderCss();
             $inject = ob_get_clean();
             return $header . $inject;
+        } else if (self::isLoginPage()) {
+            return $header;  // 登录页但未启用 → 不注入样式
         }
 
         // 管理页 → 注入 AdminBeautify 样式
@@ -753,7 +767,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.21' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.22' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -976,7 +990,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.21',
+            'pluginVersion'          => '2.1.22',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -990,7 +1004,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.21.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.22.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1005,7 +1019,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.21"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.22"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1208,7 +1222,7 @@ var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghpr
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.21";';
+        echo 'var __AB_VER__="2.1.22";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2102,6 +2116,14 @@ window.abSyncCompat = function(){
             return;
         }
 
+        // 登录页
+        $options = Typecho_Widget::widget('Widget_Options');
+        $pluginOptions = $options->plugin('AdminBeautify');
+        $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
+        if ($loginIsEnabled !== '1') {
+            return;
+        }
+
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
 
@@ -2126,6 +2148,14 @@ window.abSyncCompat = function(){
      */
     private static function outputLoginHeaderCss()
     {
+        // 登录页
+        $options = Typecho_Widget::widget('Widget_Options');
+        $pluginOptions = $options->plugin('AdminBeautify');
+
+        $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
+        if ($loginIsEnabled !== '1') {
+            return;
+        }
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
 
