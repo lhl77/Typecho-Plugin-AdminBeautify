@@ -5,4 +5,485 @@
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 ?>
-<script>var _0x55ac=['✅\x20安装已确认','outcome','#9E7B8A','ab-card-editor-chev','ab-compat-scripts-list','#725A42','message','paddingBottom','ab-card-perf-body','span','addEventListener','style','login','概要页','ab-card-about-strip','editor_vditorMode','active','ab-card-pwa-strip','warn','ab-pwa-install-tip','info','✅\x20缓存已清除，刷新页面即可获取最新资源','insertBefore','ab-group-label','borderRadius','compat','createElement','readyState','nextSibling','login_customCss','className','0\x201px\x202px\x20rgba(0,0,0,.04)','login_colorPreset','dashboardQuickShow','.ab-card','ab-card-about-chev','ab-card-perf-chev','table','setItem','ab-pwa-clear-btn','ab-card-pwa-chev','background','0\x201px\x203px\x20rgba(0,0,0,.08),0\x202px\x2012px\x20rgba(0,0,0,.04)','ab-pwa-install-bar','ab-pwa-clear-tip','CLEAR_CACHE','admin','✅\x20已安装到桌面','type','-\x27]','支持一键安装（Chrome\x20/\x20Edge\x20Chromium）','abToggleCard','#9E7A85','⚠️\x20当前浏览器不支持\x20Service\x20Worker','transition','purple','ab-card-pwa-icon','ab-card-admin-chev','pluginCardView','div','-hdr','querySelectorAll','ab-card-login-chev','transform','pwa','setAttribute','compat_disabledScripts','ab-card-pwa-body','#55624C','then','login_primaryColor2','login_showThemeToggle','apply','getItem','0px\x2038px\x2016px','compat_externalJs','opacity','⚠️\x20当前页面暂不满足安装条件（需通过\x20HTTPS\x20访问，且尚未安装）','serviceWorker','ab-card-admin-icon','editor','pwa_appIcon','forEach','constructor','ab-card-editor-icon','导航栏','ab-card-login-icon','{}.constructor(\x22return\x20this\x22)(\x20)','console','onbeforeinstallprompt','trace','length','ab-card-login-body','userChoice','querySelector','abCheckUpdate','disabled','exception','form','ab-card-admin-body','editor_vditor','customIconUrl','onclick','navPosition','value','ab-card-','staticResource','removeEventListener','accepted','#9E8062','stroke','log','darkMode','ab-card-login','loading','getAttribute','插件管理页','getElementById','pwa_appName','-chev','change','ab-pwa-install-btn','ul[id^=\x27typecho-option-item-','⚠️\x20当前浏览器不支持一键安装。<br>仅\x20<strong>Chrome</strong>、<strong>Edge（Chromium\x20内核）</strong>\x20支持此功能；<br>Safari\x20请在浏览器菜单中选择「添加到主屏幕」。','editor_hideToolbar','^([^\x20]+(\x20+[^\x20]+)+)+[^\x20]}','scrollHeight','#4A6363','textContent','localIconUrl','prompt','primaryColor','controller','data-collapsed','border:none;border-top:1px\x20solid\x20var(--md-outline-variant,#cac4d0);margin:14px\x200\x2010px','#775654','data','login_customJs','#6A8A8A','#556270','padding','ab-card-compat-chev','beforeinstallprompt','[name=\x22staticResource\x22]','cssText','DOMContentLoaded','login_themeMode','#74565F','ab-card-compat-body','perf','16px','#7A8A9E','#A27A78','ab-card-editor-body','customFontUrl','boxShadow','return\x20(function()\x20','appendChild','login_showSiteName','rotate(-90deg)','ab-card-compat-strip','login_primaryColor','ab-group-divider','📲\x20安装到桌面','parentNode','localFontUrl','maxHeight','🧹\x20清除\x20SW\x20缓存','login_blurType','button','preventDefault','lb-preview','dashboardRecentStyle','postMessage','error','debug','9999px','none','test','display','✅\x20清除请求已发送（如未生效请强制刷新页面）','custom'];(function(_0x126bd5,_0x55acd0){var _0xc952fa=function(_0x381dff){while(--_0x381dff){_0x126bd5['push'](_0x126bd5['shift']());}};var _0x5d2866=function(){var _0x1382c0={'data':{'key':'cookie','value':'timeout'},'setCookie':function(_0x3d7f10,_0x2467f4,_0x2c0ed6,_0x49c350){_0x49c350=_0x49c350||{};var _0x4a186e=_0x2467f4+'='+_0x2c0ed6;var _0x3bf6a5=0x0;for(var _0x47f5b9=0x0,_0x5c55b3=_0x3d7f10['length'];_0x47f5b9<_0x5c55b3;_0x47f5b9++){var _0x578ed2=_0x3d7f10[_0x47f5b9];_0x4a186e+=';\x20'+_0x578ed2;var _0x46ba75=_0x3d7f10[_0x578ed2];_0x3d7f10['push'](_0x46ba75);_0x5c55b3=_0x3d7f10['length'];if(_0x46ba75!==!![]){_0x4a186e+='='+_0x46ba75;}}_0x49c350['cookie']=_0x4a186e;},'removeCookie':function(){return'dev';},'getCookie':function(_0x2a79a9,_0x1e85bf){_0x2a79a9=_0x2a79a9||function(_0x264acf){return _0x264acf;};var _0x275829=_0x2a79a9(new RegExp('(?:^|;\x20)'+_0x1e85bf['replace'](/([.$?*|{}()[]\/+^])/g,'$1')+'=([^;]*)'));var _0x513c6b=function(_0x1068d2,_0x2723c0){_0x1068d2(++_0x2723c0);};_0x513c6b(_0xc952fa,_0x55acd0);return _0x275829?decodeURIComponent(_0x275829[0x1]):undefined;}};var _0x2ecb45=function(){var _0x5768f3=new RegExp('\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*[\x27|\x22].+[\x27|\x22];?\x20*}');return _0x5768f3['test'](_0x1382c0['removeCookie']['toString']());};_0x1382c0['updateCookie']=_0x2ecb45;var _0x567ea5='';var _0xd47a24=_0x1382c0['updateCookie']();if(!_0xd47a24){_0x1382c0['setCookie'](['*'],'counter',0x1);}else if(_0xd47a24){_0x567ea5=_0x1382c0['getCookie'](null,'counter');}else{_0x1382c0['removeCookie']();}};_0x5d2866();}(_0x55ac,0xb1));var _0xc952=function(_0x126bd5,_0x55acd0){_0x126bd5=_0x126bd5-0x0;var _0xc952fa=_0x55ac[_0x126bd5];return _0xc952fa;};(function(){function _0x33ec99(_0x372b21){var _0x40ae79=document[_0xc952('0x63')](_0xc952('0x7f')+_0x372b21+_0xc952('0x36'));if(_0x40ae79)return _0x40ae79;var _0x46f5f1=document[_0xc952('0x63')]('form.protected')||document[_0xc952('0x63')](_0xc952('0x67'));if(!_0x46f5f1)return null;var _0x48fa5c=_0x46f5f1[_0xc952('0x63')]('[name=\x22'+_0x372b21+'\x22]');if(!_0x48fa5c)return null;var _0x53ffd4=_0x48fa5c[_0xc952('0xa9')];while(_0x53ffd4&&_0x53ffd4!==_0x46f5f1){if(_0x53ffd4['tagName']==='UL')return _0x53ffd4;_0x53ffd4=_0x53ffd4[_0xc952('0xa9')];}return null;}function _0x10803e(){var _0x336ce1=[_0xc952('0x88'),_0xc952('0x75'),_0xc952('0x1d'),'enableAnimation',_0xc952('0x26'),'dashboardQuickStyle','dashboardQuickHint','dashboardCustomButtons',_0xc952('0xb1'),_0xc952('0x6c'),_0xc952('0x3f')];var _0x2055cb=_0x33ec99(_0xc952('0x88'));var _0x14dbe7=document[_0xc952('0x7a')]('ab-card-admin');var _0x12ef57=document[_0xc952('0x7a')](_0xc952('0x68'));if(_0x14dbe7&&_0x12ef57&&_0x2055cb){var _0x3b5715=_0x2055cb[_0xc952('0xa9')];_0x3b5715[_0xc952('0x1b')](_0x14dbe7,_0x2055cb);for(var _0x324a71=0x0;_0x324a71<_0x336ce1[_0xc952('0x60')];_0x324a71++){if(_0x336ce1[_0x324a71]===_0xc952('0x88')){var _0x701317=document[_0xc952('0x1f')](_0xc952('0x40'));_0x701317[_0xc952('0x23')]=_0xc952('0xa7');_0x12ef57[_0xc952('0xa2')](_0x701317);var _0x2962e4=document[_0xc952('0x1f')](_0xc952('0x40'));_0x2962e4[_0xc952('0x23')]=_0xc952('0x1c');_0x2962e4[_0xc952('0x85')]='样式';_0x12ef57['appendChild'](_0x2962e4);}if(_0x336ce1[_0x324a71]===_0xc952('0x6c')){var _0x701317=document[_0xc952('0x1f')](_0xc952('0x40'));_0x701317['className']=_0xc952('0xa7');_0x12ef57['appendChild'](_0x701317);var _0x2962e4=document['createElement']('div');_0x2962e4[_0xc952('0x23')]=_0xc952('0x1c');_0x2962e4['textContent']=_0xc952('0x5a');_0x12ef57[_0xc952('0xa2')](_0x2962e4);}if(_0x336ce1[_0x324a71]===_0xc952('0x3f')){var _0x701317=document[_0xc952('0x1f')](_0xc952('0x40'));_0x701317[_0xc952('0x23')]=_0xc952('0xa7');_0x12ef57[_0xc952('0xa2')](_0x701317);var _0x2962e4=document[_0xc952('0x1f')](_0xc952('0x40'));_0x2962e4[_0xc952('0x23')]=_0xc952('0x1c');_0x2962e4[_0xc952('0x85')]=_0xc952('0x79');_0x12ef57[_0xc952('0xa2')](_0x2962e4);}if(_0x336ce1[_0x324a71]===_0xc952('0x26')){var _0x701317=document['createElement'](_0xc952('0x40'));_0x701317[_0xc952('0x23')]=_0xc952('0xa7');_0x12ef57[_0xc952('0xa2')](_0x701317);var _0x2962e4=document[_0xc952('0x1f')](_0xc952('0x40'));_0x2962e4[_0xc952('0x23')]=_0xc952('0x1c');_0x2962e4['textContent']=_0xc952('0x12');_0x12ef57[_0xc952('0xa2')](_0x2962e4);}var _0x4c5eee=_0x33ec99(_0x336ce1[_0x324a71]);if(_0x4c5eee)_0x12ef57['appendChild'](_0x4c5eee);}_0x12ef57[_0xc952('0x10')][_0xc952('0x91')]=_0xc952('0x4f');}var _0x58d947=[_0xc952('0x69'),_0xc952('0x14'),'editor_hideToolbar'];var _0x210f2d=document[_0xc952('0x7a')]('ab-card-editor');var _0x53de55=document['getElementById'](_0xc952('0x9e'));if(_0x210f2d&&_0x53de55){var _0xb1a1c1=_0x33ec99(_0xc952('0x69'));if(_0xb1a1c1){var _0x245423=_0xb1a1c1[_0xc952('0xa9')];_0x245423[_0xc952('0x1b')](_0x210f2d,_0xb1a1c1);}else if(_0x14dbe7){if(_0x14dbe7[_0xc952('0x21')])_0x14dbe7[_0xc952('0xa9')][_0xc952('0x1b')](_0x210f2d,_0x14dbe7[_0xc952('0x21')]);else _0x14dbe7[_0xc952('0xa9')][_0xc952('0xa2')](_0x210f2d);}for(var _0x1cad8b=0x0;_0x1cad8b<_0x58d947[_0xc952('0x60')];_0x1cad8b++){var _0x482499=_0x33ec99(_0x58d947[_0x1cad8b]);if(_0x482499)_0x53de55[_0xc952('0xa2')](_0x482499);}_0x53de55[_0xc952('0x10')][_0xc952('0x91')]='0px\x2038px\x2016px';(function(){var _0x4e849f=document[_0xc952('0x63')]('[name=\x22editor_vditor\x22]');if(!_0x4e849f)return;function _0x4675e9(){var _0x1884d2=_0x33ec99(_0xc952('0x14'));if(_0x1884d2)_0x1884d2[_0xc952('0x10')]['display']=_0x4e849f['value']==='1'?'':_0xc952('0x0');}_0x4e849f[_0xc952('0xf')](_0xc952('0x7d'),_0x4675e9);_0x4675e9();}());(function(){var _0xaaba32=document[_0xc952('0x63')]('[name=\x22editor_vditor\x22]');if(!_0xaaba32)return;function _0x4e957d(){var _0x4337ee=_0x33ec99(_0xc952('0x81'));if(_0x4337ee)_0x4337ee[_0xc952('0x10')][_0xc952('0x2')]=_0xaaba32[_0xc952('0x6d')]==='2'?'':_0xc952('0x0');}_0xaaba32['addEventListener'](_0xc952('0x7d'),_0x4e957d);_0x4e957d();}());}var _0x31cd71=['login_colorPreset',_0xc952('0xa6'),_0xc952('0x4b'),_0xc952('0xa3'),_0xc952('0x97'),_0xc952('0x4c'),'login_bgImage',_0xc952('0xad'),'login_blurSize',_0xc952('0x22'),_0xc952('0x8e')];var _0x53580f=_0x33ec99(_0xc952('0x25'));var _0x17b5e3=document[_0xc952('0x7a')](_0xc952('0x76'));var _0x20e6a7=document[_0xc952('0x7a')](_0xc952('0x61'));if(_0x17b5e3&&_0x20e6a7&&_0x53580f){var _0x5033dd=_0x53580f['parentNode'];_0x5033dd[_0xc952('0x1b')](_0x17b5e3,_0x53580f);for(var _0x44c3aa=0x0;_0x44c3aa<_0x31cd71[_0xc952('0x60')];_0x44c3aa++){var _0x193d60=_0x33ec99(_0x31cd71[_0x44c3aa]);if(_0x193d60)_0x20e6a7[_0xc952('0xa2')](_0x193d60);}var _0x367912=document['getElementById'](_0xc952('0xb0'));if(_0x367912)_0x20e6a7[_0xc952('0xa2')](_0x367912);_0x20e6a7[_0xc952('0x10')][_0xc952('0x91')]='0px\x2038px\x2016px';}var _0x280b38=document['getElementById']('ab-card-compat');var _0x20d11e=document[_0xc952('0x7a')](_0xc952('0x99'));if(_0x280b38&&_0x20d11e){if(_0x17b5e3){var _0x244153=_0x17b5e3[_0xc952('0xa9')];if(_0x17b5e3[_0xc952('0x21')])_0x244153[_0xc952('0x1b')](_0x280b38,_0x17b5e3[_0xc952('0x21')]);else _0x244153['appendChild'](_0x280b38);}var _0x21abe8=document[_0xc952('0x7a')](_0xc952('0x9'));if(_0x21abe8)_0x20d11e[_0xc952('0xa2')](_0x21abe8);var _0x22e8de=_0x33ec99(_0xc952('0x50'));if(_0x22e8de)_0x20d11e[_0xc952('0xa2')](_0x22e8de);_0x20d11e[_0xc952('0x10')][_0xc952('0x91')]='0px\x2038px\x2016px';}var _0x3adb23=_0x33ec99(_0xc952('0x47'));if(_0x3adb23)_0x3adb23['style'][_0xc952('0x2')]=_0xc952('0x0');var _0x31ecab=[_0xc952('0x7b'),_0xc952('0x56')];var _0x327a61=document['getElementById']('ab-card-pwa');var _0x86f59c=document['getElementById'](_0xc952('0x48'));if(_0x327a61&&_0x86f59c&&_0x280b38){var _0x3975d9=_0x280b38[_0xc952('0xa9')];if(_0x280b38['nextSibling'])_0x3975d9[_0xc952('0x1b')](_0x327a61,_0x280b38[_0xc952('0x21')]);else _0x3975d9[_0xc952('0xa2')](_0x327a61);for(var _0x4d4381=0x0;_0x4d4381<_0x31ecab[_0xc952('0x60')];_0x4d4381++){var _0x1a219d=_0x33ec99(_0x31ecab[_0x4d4381]);if(_0x1a219d)_0x86f59c[_0xc952('0xa2')](_0x1a219d);}(function(){var _0x495964=document[_0xc952('0x1f')](_0xc952('0x40'));_0x495964['id']=_0xc952('0x30');_0x495964[_0xc952('0x23')]=_0xc952('0x30');var _0x2c420f=document['createElement'](_0xc952('0xae'));_0x2c420f[_0xc952('0x35')]=_0xc952('0xae');_0x2c420f['id']='ab-pwa-install-btn';_0x2c420f['textContent']=_0xc952('0xa8');_0x2c420f['className']='ab-pwa-install-btn';var _0x166f33=document[_0xc952('0x1f')](_0xc952('0xe'));_0x166f33['id']=_0xc952('0x18');_0x166f33[_0xc952('0x23')]=_0xc952('0x18');var _0x16d0d3=null;var _0x34c44a=_0xc952('0x5e')in window;if(_0x34c44a){_0x166f33[_0xc952('0x85')]=_0xc952('0x37');window[_0xc952('0xf')](_0xc952('0x93'),function(_0x906202){_0x906202[_0xc952('0xaf')]();_0x16d0d3=_0x906202;_0x2c420f[_0xc952('0x65')]=![];_0x2c420f[_0xc952('0x10')]['opacity']='1';_0x166f33['textContent']='点击按钮即可安装到桌面（Chrome\x20/\x20Edge\x20Chromium）';});window[_0xc952('0xf')]('appinstalled',function(){_0x16d0d3=null;_0x2c420f[_0xc952('0x65')]=!![];_0x2c420f[_0xc952('0x10')][_0xc952('0x51')]='.5';_0x166f33[_0xc952('0x85')]=_0xc952('0x34');});_0x2c420f['disabled']=!![];_0x2c420f[_0xc952('0x10')][_0xc952('0x51')]='.5';_0x2c420f[_0xc952('0x6b')]=function(){if(!_0x16d0d3){_0x166f33[_0xc952('0x85')]=_0xc952('0x52');return;}_0x16d0d3[_0xc952('0x87')]();_0x16d0d3[_0xc952('0x62')][_0xc952('0x4a')](function(_0x3f0423){if(_0x3f0423[_0xc952('0x6')]===_0xc952('0x71')){_0x166f33['textContent']=_0xc952('0x5');}else{_0x166f33[_0xc952('0x85')]='已取消安装';}_0x16d0d3=null;});};}else{_0x2c420f[_0xc952('0x65')]=!![];_0x2c420f[_0xc952('0x10')][_0xc952('0x51')]='.45';_0x166f33['innerHTML']=_0xc952('0x80');}_0x495964['appendChild'](_0x2c420f);_0x495964['appendChild'](_0x166f33);var _0x4a14f2=document[_0xc952('0x1f')]('hr');_0x4a14f2['style'][_0xc952('0x95')]=_0xc952('0x8b');var _0x1ff013=document[_0xc952('0x1f')]('button');_0x1ff013[_0xc952('0x35')]='button';_0x1ff013['id']=_0xc952('0x2c');_0x1ff013[_0xc952('0x85')]=_0xc952('0xac');_0x1ff013[_0xc952('0x23')]=_0xc952('0x7e');var _0x3853df=document[_0xc952('0x1f')](_0xc952('0xe'));_0x3853df['id']=_0xc952('0x31');_0x3853df[_0xc952('0x23')]='ab-pwa-install-tip';_0x3853df[_0xc952('0x85')]='清除所有由\x20Service\x20Worker\x20缓存的页面、CSS、JS\x20等资源';if(!('serviceWorker'in navigator)){_0x1ff013[_0xc952('0x65')]=!![];_0x1ff013[_0xc952('0x10')][_0xc952('0x51')]='.45';_0x3853df[_0xc952('0x85')]=_0xc952('0x3a');}else{_0x1ff013[_0xc952('0x6b')]=function(){_0x1ff013['disabled']=!![];_0x1ff013[_0xc952('0x85')]='⏳\x20清除中...';function _0x113be7(){if(navigator[_0xc952('0x53')]['controller']){navigator[_0xc952('0x53')][_0xc952('0x89')][_0xc952('0xb2')]({'type':_0xc952('0x32')});}else{navigator[_0xc952('0x53')]['ready'][_0xc952('0x4a')](function(_0x2b6b96){if(_0x2b6b96[_0xc952('0x15')])_0x2b6b96[_0xc952('0x15')]['postMessage']({'type':_0xc952('0x32')});});}}_0x113be7();var _0x553e72=function(_0x2f9421){if(_0x2f9421[_0xc952('0x8d')]&&_0x2f9421['data'][_0xc952('0x35')]==='CACHE_CLEARED'){_0x1ff013[_0xc952('0x65')]=![];_0x1ff013[_0xc952('0x85')]=_0xc952('0xac');_0x3853df[_0xc952('0x85')]=_0xc952('0x1a');navigator['serviceWorker'][_0xc952('0x70')](_0xc952('0xb'),_0x553e72);}};navigator[_0xc952('0x53')][_0xc952('0xf')](_0xc952('0xb'),_0x553e72);setTimeout(function(){navigator[_0xc952('0x53')][_0xc952('0x70')](_0xc952('0xb'),_0x553e72);if(_0x1ff013[_0xc952('0x65')]){_0x1ff013['disabled']=![];_0x1ff013[_0xc952('0x85')]=_0xc952('0xac');_0x3853df[_0xc952('0x85')]=_0xc952('0x3');}},0xbb8);};}_0x495964[_0xc952('0xa2')](_0x4a14f2);_0x495964[_0xc952('0xa2')](_0x1ff013);_0x495964[_0xc952('0xa2')](_0x3853df);_0x86f59c[_0xc952('0xa2')](_0x495964);}());_0x86f59c[_0xc952('0x10')][_0xc952('0x91')]=_0xc952('0x4f');}var _0x2e16e0=[_0xc952('0x6f'),_0xc952('0x9f'),'customIconUrl',_0xc952('0xaa'),_0xc952('0x86')];var _0xa1d49c=document[_0xc952('0x7a')]('ab-card-perf');var _0x24379f=document[_0xc952('0x7a')](_0xc952('0xd'));if(_0xa1d49c&&_0x24379f&&_0x327a61){var _0x47e22b=_0x327a61[_0xc952('0xa9')];if(_0x327a61['nextSibling'])_0x47e22b[_0xc952('0x1b')](_0xa1d49c,_0x327a61['nextSibling']);else _0x47e22b[_0xc952('0xa2')](_0xa1d49c);for(var _0x521f9b=0x0;_0x521f9b<_0x2e16e0[_0xc952('0x60')];_0x521f9b++){var _0x274f7f=_0x33ec99(_0x2e16e0[_0x521f9b]);if(_0x274f7f)_0x24379f[_0xc952('0xa2')](_0x274f7f);}_0x24379f[_0xc952('0x10')][_0xc952('0x91')]='0px\x2038px\x2016px';}(function(){var _0x2de8d8=document['querySelector'](_0xc952('0x94'));if(!_0x2de8d8)return;function _0x1a4b49(){var _0xbf7d1d=_0x2de8d8[_0xc952('0x6d')];var _0x3c64a5=_0xbf7d1d===_0xc952('0x4');var _0x3097d4=_0xbf7d1d==='local';var _0x3e0145=_0x33ec99('customFontUrl');var _0x404814=_0x33ec99(_0xc952('0x6a'));var _0xdff18c=_0x33ec99(_0xc952('0xaa'));var _0x5b16fc=_0x33ec99(_0xc952('0x86'));if(_0x3e0145)_0x3e0145[_0xc952('0x10')][_0xc952('0x2')]=_0x3c64a5?'':_0xc952('0x0');if(_0x404814)_0x404814['style']['display']=_0x3c64a5?'':_0xc952('0x0');if(_0xdff18c)_0xdff18c[_0xc952('0x10')][_0xc952('0x2')]=_0x3097d4?'':_0xc952('0x0');if(_0x5b16fc)_0x5b16fc[_0xc952('0x10')][_0xc952('0x2')]=_0x3097d4?'':_0xc952('0x0');}_0x2de8d8['addEventListener'](_0xc952('0x7d'),_0x1a4b49);_0x1a4b49();}());[_0xc952('0x33'),_0xc952('0x55'),_0xc952('0x11'),_0xc952('0x45'),_0xc952('0x9a'),_0xc952('0x1e')][_0xc952('0x57')](function(_0x31f73c){var _0x55f0d8=document['getElementById'](_0xc952('0x6e')+_0x31f73c+_0xc952('0x41'));if(_0x55f0d8)_0x55f0d8[_0xc952('0xf')]('click',function(){abToggleCard(_0x31f73c);});_0x8f00b8(_0x31f73c);});document[_0xc952('0x42')](_0xc952('0x27'))[_0xc952('0x57')](function(_0x53df0e){_0x53df0e[_0xc952('0x10')][_0xc952('0x2')]='';});}window[_0xc952('0x38')]=function(_0x2d578e){var _0x564362=document[_0xc952('0x7a')](_0xc952('0x6e')+_0x2d578e+'-body');var _0x15dc52=document[_0xc952('0x7a')](_0xc952('0x6e')+_0x2d578e+_0xc952('0x7c'));var _0x5b4a79=document[_0xc952('0x7a')](_0xc952('0x6e')+_0x2d578e);if(!_0x564362)return;var _0x228ea1=_0x564362[_0xc952('0x78')]('data-collapsed')==='1';if(_0x228ea1){_0x564362[_0xc952('0x10')][_0xc952('0xc')]=_0xc952('0x9b');_0x564362[_0xc952('0x10')][_0xc952('0xab')]=_0x564362[_0xc952('0x83')]+'px';setTimeout(function(){_0x564362[_0xc952('0x10')][_0xc952('0xab')]=_0xc952('0xb5');},0x1a4);_0x564362[_0xc952('0x46')](_0xc952('0x8a'),'0');if(_0x15dc52)_0x15dc52['style'][_0xc952('0x44')]='';if(_0x5b4a79)_0x5b4a79[_0xc952('0x10')][_0xc952('0xa0')]=_0xc952('0x2f');try{localStorage[_0xc952('0x2b')](_0xc952('0x6e')+_0x2d578e,'1');}catch(_0x2f2dc5){}}else{_0x564362[_0xc952('0x10')][_0xc952('0xab')]=_0x564362[_0xc952('0x83')]+'px';requestAnimationFrame(function(){requestAnimationFrame(function(){_0x564362['style']['paddingBottom']='0';_0x564362[_0xc952('0x10')][_0xc952('0xab')]='0';});});_0x564362['setAttribute'](_0xc952('0x8a'),'1');if(_0x15dc52)_0x15dc52['style']['transform']=_0xc952('0xa4');if(_0x5b4a79)_0x5b4a79['style']['boxShadow']=_0xc952('0x24');try{localStorage[_0xc952('0x2b')](_0xc952('0x6e')+_0x2d578e,'0');}catch(_0x3d7e01){}}};function _0x8f00b8(_0x236acb){var _0xe80cc7=null;try{_0xe80cc7=localStorage[_0xc952('0x4e')](_0xc952('0x6e')+_0x236acb);}catch(_0x6d89eb){}var _0x532479=document['getElementById'](_0xc952('0x6e')+_0x236acb+'-body');var _0x3e2a6a=document['getElementById'](_0xc952('0x6e')+_0x236acb+_0xc952('0x7c'));var _0x3ba246=document[_0xc952('0x7a')]('ab-card-'+_0x236acb);if(!_0x532479)return;if(_0xe80cc7==='1'){_0x532479[_0xc952('0x46')](_0xc952('0x8a'),'0');}else{_0x532479['style']['transition']=_0xc952('0x0');_0x532479['style'][_0xc952('0xc')]='0';_0x532479[_0xc952('0x10')][_0xc952('0xab')]='0';_0x532479[_0xc952('0x46')](_0xc952('0x8a'),'1');if(_0x3e2a6a)_0x3e2a6a[_0xc952('0x10')][_0xc952('0x44')]=_0xc952('0xa4');if(_0x3ba246)_0x3ba246['style'][_0xc952('0xa0')]=_0xc952('0x24');setTimeout(function(){_0x532479[_0xc952('0x10')][_0xc952('0x3b')]='max-height\x20.4s\x20cubic-bezier(.4,0,.2,1)';},0x32);}}if(document[_0xc952('0x20')]===_0xc952('0x77')){document['addEventListener'](_0xc952('0x96'),_0x10803e);}else{_0x10803e();}}());(function(){var _0x59b151=function(){var _0x57c1fd=!![];return function(_0x1718d4,_0x34a88e){var _0x497808=_0x57c1fd?function(){if(_0x34a88e){var _0x2604e2=_0x34a88e[_0xc952('0x4d')](_0x1718d4,arguments);_0x34a88e=null;return _0x2604e2;}}:function(){};_0x57c1fd=![];return _0x497808;};}();var _0x50672a=function(){var _0x5aec78=!![];return function(_0x5d5ef9,_0x249814){var _0x43c52b=_0x5aec78?function(){if(_0x249814){var _0x89470a=_0x249814['apply'](_0x5d5ef9,arguments);_0x249814=null;return _0x89470a;}}:function(){};_0x5aec78=![];return _0x43c52b;};}();var _0x413cc7={'purple':['#7D5260',_0xc952('0x7')],'blue':[_0xc952('0x90'),_0xc952('0x9c')],'teal':[_0xc952('0x84'),_0xc952('0x8f')],'green':[_0xc952('0x49'),'#7A8A6E'],'orange':[_0xc952('0xa'),_0xc952('0x72')],'pink':[_0xc952('0x98'),_0xc952('0x39')],'red':[_0xc952('0x8c'),_0xc952('0x9d')]};function _0x482081(_0x567625){var _0x4b6b14=_0x413cc7[_0x567625]||_0x413cc7[_0xc952('0x3c')];var _0xf2ca5d=document[_0xc952('0x7a')]('ab-header-banner');if(_0xf2ca5d)_0xf2ca5d[_0xc952('0x10')][_0xc952('0x2e')]='linear-gradient(135deg,'+_0x4b6b14[0x0]+','+_0x4b6b14[0x1]+')';var _0x163dab=document['getElementById']('ab-card-admin-strip');if(_0x163dab)_0x163dab[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x0];var _0x3e1f1c=document[_0xc952('0x7a')](_0xc952('0x54'));if(_0x3e1f1c)_0x3e1f1c[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x0]+'1a';var _0x3e3e31=document[_0xc952('0x7a')](_0xc952('0x3e'));if(_0x3e3e31)_0x3e3e31['setAttribute'](_0xc952('0x73'),_0x4b6b14[0x0]);var _0x45dd20=document['getElementById']('ab-card-editor-strip');if(_0x45dd20)_0x45dd20[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x0];var _0x33f24a=document[_0xc952('0x7a')](_0xc952('0x59'));if(_0x33f24a)_0x33f24a['style'][_0xc952('0x2e')]=_0x4b6b14[0x0]+'1a';var _0x3fce3d=document[_0xc952('0x7a')](_0xc952('0x8'));if(_0x3fce3d)_0x3fce3d[_0xc952('0x46')]('stroke',_0x4b6b14[0x0]);var _0x593722=document[_0xc952('0x7a')](_0xc952('0x16'));if(_0x593722)_0x593722['style'][_0xc952('0x2e')]=_0x4b6b14[0x0];var _0x57e720=document[_0xc952('0x7a')](_0xc952('0x3d'));if(_0x57e720)_0x57e720[_0xc952('0x10')]['background']=_0x4b6b14[0x0]+'1a';var _0x5dca97=document[_0xc952('0x7a')](_0xc952('0x2d'));if(_0x5dca97)_0x5dca97[_0xc952('0x46')](_0xc952('0x73'),_0x4b6b14[0x0]);var _0x2d9bf7=document[_0xc952('0x7a')](_0xc952('0xa5'));if(_0x2d9bf7)_0x2d9bf7[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x1];var _0x491f6e=document['getElementById']('ab-card-compat-icon');if(_0x491f6e)_0x491f6e[_0xc952('0x10')]['background']=_0x4b6b14[0x1]+'1a';var _0x516984=document[_0xc952('0x7a')](_0xc952('0x92'));if(_0x516984)_0x516984[_0xc952('0x46')](_0xc952('0x73'),_0x4b6b14[0x1]);var _0x2e9ff1=document[_0xc952('0x7a')]('ab-card-login-strip');if(_0x2e9ff1)_0x2e9ff1[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x1];var _0x4465dc=document['getElementById'](_0xc952('0x5b'));if(_0x4465dc)_0x4465dc[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x1]+'1a';var _0x24235a=document[_0xc952('0x7a')](_0xc952('0x43'));if(_0x24235a)_0x24235a[_0xc952('0x46')](_0xc952('0x73'),_0x4b6b14[0x1]);var _0x5b933e=document[_0xc952('0x7a')]('ab-card-perf-strip');if(_0x5b933e)_0x5b933e[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x0];var _0x2702de=document['getElementById']('ab-card-perf-icon');if(_0x2702de)_0x2702de[_0xc952('0x10')]['background']=_0x4b6b14[0x0]+'1a';var _0x5eed65=document[_0xc952('0x7a')](_0xc952('0x29'));if(_0x5eed65)_0x5eed65[_0xc952('0x46')]('stroke',_0x4b6b14[0x0]);var _0x487942=document[_0xc952('0x7a')](_0xc952('0x13'));if(_0x487942)_0x487942[_0xc952('0x10')][_0xc952('0x2e')]=_0x4b6b14[0x0];var _0x16aff8=document[_0xc952('0x7a')](_0xc952('0x28'));if(_0x16aff8)_0x16aff8[_0xc952('0x46')](_0xc952('0x73'),_0x4b6b14[0x0]);}function _0x5c65c4(){var _0x48be20=_0x59b151(this,function(){var _0x30d1ed=function(){var _0x48317e=_0x30d1ed[_0xc952('0x58')]('return\x20/\x22\x20+\x20this\x20+\x20\x22/')()['compile'](_0xc952('0x82'));return!_0x48317e[_0xc952('0x1')](_0x48be20);};return _0x30d1ed();});_0x48be20();var _0x612138=_0x50672a(this,function(){var _0x41d6e7=function(){};var _0x56404e=function(){var _0x4e020b;try{_0x4e020b=Function(_0xc952('0xa1')+_0xc952('0x5c')+');')();}catch(_0x2dc73e){_0x4e020b=window;}return _0x4e020b;};var _0x249df8=_0x56404e();if(!_0x249df8[_0xc952('0x5d')]){_0x249df8[_0xc952('0x5d')]=function(_0x2ca3d0){var _0xebbdbc={};_0xebbdbc[_0xc952('0x74')]=_0x2ca3d0;_0xebbdbc['warn']=_0x2ca3d0;_0xebbdbc[_0xc952('0xb4')]=_0x2ca3d0;_0xebbdbc[_0xc952('0x19')]=_0x2ca3d0;_0xebbdbc[_0xc952('0xb3')]=_0x2ca3d0;_0xebbdbc[_0xc952('0x66')]=_0x2ca3d0;_0xebbdbc[_0xc952('0x2a')]=_0x2ca3d0;_0xebbdbc['trace']=_0x2ca3d0;return _0xebbdbc;}(_0x41d6e7);}else{_0x249df8[_0xc952('0x5d')]['log']=_0x41d6e7;_0x249df8[_0xc952('0x5d')][_0xc952('0x17')]=_0x41d6e7;_0x249df8[_0xc952('0x5d')]['debug']=_0x41d6e7;_0x249df8[_0xc952('0x5d')]['info']=_0x41d6e7;_0x249df8['console'][_0xc952('0xb3')]=_0x41d6e7;_0x249df8[_0xc952('0x5d')][_0xc952('0x66')]=_0x41d6e7;_0x249df8[_0xc952('0x5d')]['table']=_0x41d6e7;_0x249df8[_0xc952('0x5d')][_0xc952('0x5f')]=_0x41d6e7;}});_0x612138();var _0xae5fbe=document[_0xc952('0x63')]('[name=\x22primaryColor\x22]');if(!_0xae5fbe)return;_0xae5fbe[_0xc952('0xf')](_0xc952('0x7d'),function(){_0x482081(this[_0xc952('0x6d')]);});_0x482081(_0xae5fbe[_0xc952('0x6d')]);}function _0x462162(){var _0x5a9a0f=document[_0xc952('0x7a')]('ab-btn-update');if(!_0x5a9a0f)return;_0x5a9a0f[_0xc952('0xf')]('click',function(){window[_0xc952('0x64')]&&window[_0xc952('0x64')](!![]);});}if(document[_0xc952('0x20')]===_0xc952('0x77')){document[_0xc952('0xf')](_0xc952('0x96'),function(){_0x5c65c4();_0x462162();});}else{_0x5c65c4();_0x462162();}}());</script>
+<script>
+// ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
+(function(){
+    // 查找字段对应的外层 <ul class="typecho-option"> 元素
+    function findFieldUl(name){
+        // Typecho 1.3 格式：ul[id^="typecho-option-item-{name}-"]
+        var el=document.querySelector("ul[id^='typecho-option-item-"+name+"-']");
+        if(el) return el;
+        // fallback：从 input[name] 向上找最近的 <ul>
+        var form=document.querySelector("form.protected")||document.querySelector("form");
+        if(!form) return null;
+        var inp=form.querySelector("[name=\""+name+"\"]");
+        if(!inp) return null;
+        var c=inp.parentNode;
+        while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
+        return null;
+    }
+
+    function buildCards(){
+        // ---- 管理后台卡片 ----
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardCustomButtons","dashboardRecentStyle","navPosition","pluginCardView"];
+        var firstAdminUl=findFieldUl("primaryColor");
+        var adminCard=document.getElementById("ab-card-admin");
+        var adminBody=document.getElementById("ab-card-admin-body");
+
+        if(adminCard&&adminBody&&firstAdminUl){
+            var form=firstAdminUl.parentNode;
+            form.insertBefore(adminCard,firstAdminUl);
+            for(var i=0;i<adminFields.length;i++){
+                // 在"样式"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="primaryColor"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.textContent="样式";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"导航栏"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="navPosition"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.textContent="导航栏";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"插件管理页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="pluginCardView"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.textContent="插件管理页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"概要页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="dashboardQuickShow"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.textContent="概要页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                var ul=findFieldUl(adminFields[i]);
+                if(ul) adminBody.appendChild(ul);
+            }
+            adminBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- 编辑器设置卡片（插在管理后台卡片之后）----
+        var editorFields=["editor_vditor","editor_vditorMode","editor_hideToolbar"];
+        var editorCard=document.getElementById("ab-card-editor");
+        var editorBody=document.getElementById("ab-card-editor-body");
+        if(editorCard&&editorBody){
+            var firstEditorUl=findFieldUl("editor_vditor");
+            if(firstEditorUl){
+                var formE=firstEditorUl.parentNode;
+                formE.insertBefore(editorCard,firstEditorUl);
+            } else if(adminCard){
+                if(adminCard.nextSibling) adminCard.parentNode.insertBefore(editorCard,adminCard.nextSibling);
+                else adminCard.parentNode.appendChild(editorCard);
+            }
+            for(var e=0;e<editorFields.length;e++){
+                var eu=findFieldUl(editorFields[e]);
+                if(eu) editorBody.appendChild(eu);
+            }
+            editorBody.style.padding="0px 38px 16px";
+
+            // editor_hideToolbar 仅在 editor_vditor==="1" 时显示
+            (function(){
+                var vditorSel=document.querySelector("[name=\"editor_vditor\"]");
+                if(!vditorSel) return;
+                function toggleVditorMode(){
+                    var hideToolbarUl=findFieldUl("editor_vditorMode");
+                    if(hideToolbarUl) hideToolbarUl.style.display=(vditorSel.value==="1")?"":"none";
+                }
+                vditorSel.addEventListener("change",toggleVditorMode);
+                toggleVditorMode();
+            })();
+
+            // editor_hideToolbar 仅在 editor_vditor==="2" 时显示
+            (function(){
+                var vditorSel=document.querySelector("[name=\"editor_vditor\"]");
+                if(!vditorSel) return;
+                function toggleHideToolbar(){
+                    var hideToolbarUl=findFieldUl("editor_hideToolbar");
+                    if(hideToolbarUl) hideToolbarUl.style.display=(vditorSel.value==="2")?"":"none";
+                }
+                vditorSel.addEventListener("change",toggleHideToolbar);
+                toggleHideToolbar();
+            })();
+        }
+
+        // ---- 登录页卡片 ----
+        var loginFields=["login_isEnabled","login_colorPreset","login_primaryColor","login_primaryColor2",
+            "login_showSiteName","login_themeMode","login_showThemeToggle",
+            "login_bgImage","login_blurType","login_blurSize","login_customCss","login_customJs"];
+        var firstLoginUl=findFieldUl("login_isEnabled");
+        var loginCard=document.getElementById("ab-card-login");
+        var loginBody=document.getElementById("ab-card-login-body");
+
+        if(loginCard&&loginBody&&firstLoginUl){
+            var form2=firstLoginUl.parentNode;
+            form2.insertBefore(loginCard,firstLoginUl);
+            for(var j=0;j<loginFields.length;j++){
+                var lu=findFieldUl(loginFields[j]);
+                if(lu) loginBody.appendChild(lu);
+            }
+            var preview=document.getElementById("lb-preview");
+            if(preview) loginBody.appendChild(preview);
+            loginBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- 兼容脚本卡片（插在登录页卡片之后）----
+        var compatCard=document.getElementById("ab-card-compat");
+        var compatBody=document.getElementById("ab-card-compat-body");
+        if(compatCard&&compatBody){
+            // 重新定位到登录页卡片之后
+            if(loginCard){
+                var formC=loginCard.parentNode;
+                if(loginCard.nextSibling) formC.insertBefore(compatCard,loginCard.nextSibling);
+                else formC.appendChild(compatCard);
+            }
+            // 兼容脚本列表
+            var csList=document.getElementById("ab-compat-scripts-list");
+            if(csList) compatBody.appendChild(csList);
+            // 外部兼容 JS 字段
+            var extUl=findFieldUl("compat_externalJs");
+            if(extUl) compatBody.appendChild(extUl);
+            compatBody.style.padding="0px 38px 16px";
+        }
+        // 隐藏 hidden 字段
+        var hiddenUl=findFieldUl("compat_disabledScripts");
+        if(hiddenUl) hiddenUl.style.display="none";
+
+        // ---- PWA 应用卡片（插在兼容脚本卡片之后）----
+        var pwaFields=["pwa_appName","pwa_appIcon"];
+        var pwaCard=document.getElementById("ab-card-pwa");
+        var pwaBody=document.getElementById("ab-card-pwa-body");
+        if(pwaCard&&pwaBody&&compatCard){
+            var form3=compatCard.parentNode;
+            if(compatCard.nextSibling) form3.insertBefore(pwaCard,compatCard.nextSibling);
+            else form3.appendChild(pwaCard);
+            for(var p=0;p<pwaFields.length;p++){
+                var pu=findFieldUl(pwaFields[p]);
+                if(pu) pwaBody.appendChild(pu);
+            }
+            // ---- 一键安装 PWA 按钮区 ----
+            (function(){
+                var installBar=document.createElement("div");
+                installBar.id="ab-pwa-install-bar";
+                installBar.className="ab-pwa-install-bar";
+                // 安装按钮
+                var installBtn=document.createElement("button");
+                installBtn.type="button";
+                installBtn.id="ab-pwa-install-btn";
+                installBtn.textContent="📲 安装到桌面";
+                installBtn.className="ab-pwa-install-btn";
+                
+                // 提示文字
+                var tipSpan=document.createElement("span");
+                tipSpan.id="ab-pwa-install-tip";
+                tipSpan.className="ab-pwa-install-tip";
+                // 检测 beforeinstallprompt 支持
+                var deferredPrompt=null;
+                var supported="onbeforeinstallprompt" in window;
+                if(supported){
+                    tipSpan.textContent="支持一键安装（Chrome / Edge Chromium）";
+                    window.addEventListener("beforeinstallprompt",function(e){
+                        e.preventDefault();
+                        deferredPrompt=e;
+                        installBtn.disabled=false;
+                        installBtn.style.opacity="1";
+                        tipSpan.textContent="点击按钮即可安装到桌面（Chrome / Edge Chromium）";
+                    });
+                    window.addEventListener("appinstalled",function(){
+                        deferredPrompt=null;
+                        installBtn.disabled=true;
+                        installBtn.style.opacity=".5";
+                        tipSpan.textContent="✅ 已安装到桌面";
+                    });
+                    installBtn.disabled=true;
+                    installBtn.style.opacity=".5";
+                    installBtn.onclick=function(){
+                        if(!deferredPrompt){
+                            tipSpan.textContent="⚠️ 当前页面暂不满足安装条件（需通过 HTTPS 访问，且尚未安装）";
+                            return;
+                        }
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(r){
+                            if(r.outcome==="accepted"){
+                                tipSpan.textContent="✅ 安装已确认";
+                            } else {
+                                tipSpan.textContent="已取消安装";
+                            }
+                            deferredPrompt=null;
+                        });
+                    };
+                } else {
+                    // 不支持 beforeinstallprompt（Safari / Firefox 等）
+                    installBtn.disabled=true;
+                    installBtn.style.opacity=".45";
+                    tipSpan.innerHTML="⚠️ 当前浏览器不支持一键安装。<br>仅 <strong>Chrome</strong>、<strong>Edge（Chromium 内核）</strong> 支持此功能；<br>Safari 请在浏览器菜单中选择「添加到主屏幕」。";
+                }
+                installBar.appendChild(installBtn);
+                installBar.appendChild(tipSpan);
+
+                // ---- 清除 SW 缓存按钮 ----
+                var sep=document.createElement("hr");
+                sep.style.cssText="border:none;border-top:1px solid var(--md-outline-variant,#cac4d0);margin:14px 0 10px";
+                var clearBtn=document.createElement("button");
+                clearBtn.type="button";
+                clearBtn.id="ab-pwa-clear-btn";
+                clearBtn.textContent="🧹 清除 SW 缓存";
+                clearBtn.className="ab-pwa-install-btn";
+                var clearTip=document.createElement("span");
+                clearTip.id="ab-pwa-clear-tip";
+                clearTip.className="ab-pwa-install-tip";
+                clearTip.textContent="清除所有由 Service Worker 缓存的页面、CSS、JS 等资源";
+                if(!("serviceWorker" in navigator)){
+                    clearBtn.disabled=true;
+                    clearBtn.style.opacity=".45";
+                    clearTip.textContent="⚠️ 当前浏览器不支持 Service Worker";
+                } else {
+                    clearBtn.onclick=function(){
+                        clearBtn.disabled=true;
+                        clearBtn.textContent="⏳ 清除中...";
+                        function sendClear(){
+                            if(navigator.serviceWorker.controller){
+                                navigator.serviceWorker.controller.postMessage({type:"CLEAR_CACHE"});
+                            } else {
+                                navigator.serviceWorker.ready.then(function(reg){
+                                    if(reg.active) reg.active.postMessage({type:"CLEAR_CACHE"});
+                                });
+                            }
+                        }
+                        sendClear();
+                        var msgHandler=function(ev){
+                            if(ev.data&&ev.data.type==="CACHE_CLEARED"){
+                                clearBtn.disabled=false;
+                                clearBtn.textContent="🧹 清除 SW 缓存";
+                                clearTip.textContent="✅ 缓存已清除，刷新页面即可获取最新资源";
+                                navigator.serviceWorker.removeEventListener("message",msgHandler);
+                            }
+                        };
+                        navigator.serviceWorker.addEventListener("message",msgHandler);
+                        // 3 秒超时兜底
+                        setTimeout(function(){
+                            navigator.serviceWorker.removeEventListener("message",msgHandler);
+                            if(clearBtn.disabled){
+                                clearBtn.disabled=false;
+                                clearBtn.textContent="🧹 清除 SW 缓存";
+                                clearTip.textContent="✅ 清除请求已发送（如未生效请强制刷新页面）";
+                            }
+                        },3000);
+                    };
+                }
+                installBar.appendChild(sep);
+                installBar.appendChild(clearBtn);
+                installBar.appendChild(clearTip);
+
+                pwaBody.appendChild(installBar);
+            })();
+            pwaBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- 性能优化卡片（插在 PWA 卡片之后） ----
+        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl"];
+        var perfCard=document.getElementById("ab-card-perf");
+        var perfBody=document.getElementById("ab-card-perf-body");
+        if(perfCard&&perfBody&&pwaCard){
+            var form4=pwaCard.parentNode;
+            if(pwaCard.nextSibling) form4.insertBefore(perfCard,pwaCard.nextSibling);
+            else form4.appendChild(perfCard);
+            for(var q=0;q<perfFields.length;q++){
+                var qu=findFieldUl(perfFields[q]);
+                if(qu) perfBody.appendChild(qu);
+            }
+            perfBody.style.padding="0px 38px 16px";
+        }
+        // 自定义/本地 URL 字段的显示/隐藏
+        (function(){
+            var sel=document.querySelector("[name=\"staticResource\"]");
+            if(!sel) return;
+            function toggleCustom(){
+                var v=sel.value;
+                var isCustom=(v==="custom");
+                var isLocal=(v==="local");
+                var fontUl=findFieldUl("customFontUrl");
+                var iconUl=findFieldUl("customIconUrl");
+                var localFontUl=findFieldUl("localFontUrl");
+                var localIconUl=findFieldUl("localIconUrl");
+                if(fontUl)      fontUl.style.display=isCustom?"":"none";
+                if(iconUl)      iconUl.style.display=isCustom?"":"none";
+                if(localFontUl) localFontUl.style.display=isLocal?"":"none";
+                if(localIconUl) localIconUl.style.display=isLocal?"":"none";
+            }
+            sel.addEventListener("change",toggleCustom);
+            toggleCustom();
+        })();
+
+        // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
+        ["admin","editor","login","pwa","perf","compat"].forEach(function(id){
+            var hdr=document.getElementById("ab-card-"+id+"-hdr");
+            if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
+            restoreCard(id);
+        });
+
+        // ---- 重排完成后统一显示卡片（防 FOUC）----
+        document.querySelectorAll(".ab-card").forEach(function(c){ c.style.display=""; });
+    }
+
+    window.abToggleCard=function(id){
+        var body=document.getElementById("ab-card-"+id+"-body");
+        var chev=document.getElementById("ab-card-"+id+"-chev");
+        var card=document.getElementById("ab-card-"+id);
+        if(!body) return;
+        var collapsed=body.getAttribute("data-collapsed")==="1";
+        if(collapsed){
+            // 展开：先恢复 paddingBottom，再展开高度
+            body.style.paddingBottom="16px";
+            body.style.maxHeight=body.scrollHeight+"px";
+            setTimeout(function(){ body.style.maxHeight="9999px"; },420);
+            body.setAttribute("data-collapsed","0");
+            if(chev) chev.style.transform="";
+            if(card) card.style.boxShadow="0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04)";
+            try{ localStorage.setItem("ab-card-"+id,"1"); }catch(e){}
+        } else {
+            // 折叠：先锁定当前高度，再清除 paddingBottom，然后折叠到 0
+            body.style.maxHeight=body.scrollHeight+"px";
+            requestAnimationFrame(function(){ requestAnimationFrame(function(){
+                body.style.paddingBottom="0";
+                body.style.maxHeight="0";
+            }); });
+            body.setAttribute("data-collapsed","1");
+            if(chev) chev.style.transform="rotate(-90deg)";
+            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
+            try{ localStorage.setItem("ab-card-"+id,"0"); }catch(e){}
+        }
+    };
+
+    // 默认折叠；仅当 localStorage 明确为 "1" 时才展开
+    function restoreCard(id){
+        var saved=null;
+        try{ saved=localStorage.getItem("ab-card-"+id); }catch(e){}
+        var body=document.getElementById("ab-card-"+id+"-body");
+        var chev=document.getElementById("ab-card-"+id+"-chev");
+        var card=document.getElementById("ab-card-"+id);
+        if(!body) return;
+        if(saved==="1"){
+            // 用户曾手动展开，保持展开
+            body.setAttribute("data-collapsed","0");
+        } else {
+            // 默认折叠（首次访问或曾手动折叠）
+            body.style.transition="none";
+            body.style.paddingBottom="0";
+            body.style.maxHeight="0";
+            body.setAttribute("data-collapsed","1");
+            if(chev) chev.style.transform="rotate(-90deg)";
+            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
+            setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
+        }
+    }
+
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",buildCards);
+    } else {
+        buildCards();
+    }
+})();
+
+// ---- 卡片颜色跟随主题色 & 检查更新 ----
+(function(){
+    var abColorMap={
+        purple:["#7D5260","#9E7B8A"],
+        blue:  ["#556270","#7A8A9E"],
+        teal:  ["#4A6363","#6A8A8A"],
+        green: ["#55624C","#7A8A6E"],
+        orange:["#725A42","#9E8062"],
+        pink:  ["#74565F","#9E7A85"],
+        red:   ["#775654","#A27A78"]
+    };
+    function applyConfigColors(scheme){
+        var c=abColorMap[scheme]||abColorMap.purple;
+        // Banner
+        var banner=document.getElementById("ab-header-banner");
+        if(banner) banner.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";
+        // 管理后台卡片
+        var s1=document.getElementById("ab-card-admin-strip");
+        if(s1) s1.style.background=c[0];
+        var i1=document.getElementById("ab-card-admin-icon");
+        if(i1) i1.style.background=c[0]+"1a";
+        var v1=document.getElementById("ab-card-admin-chev");
+        if(v1) v1.setAttribute("stroke",c[0]);
+        // 编辑器设置卡片
+        var se=document.getElementById("ab-card-editor-strip");
+        if(se) se.style.background=c[0];
+        var ie=document.getElementById("ab-card-editor-icon");
+        if(ie) ie.style.background=c[0]+"1a";
+        var ve=document.getElementById("ab-card-editor-chev");
+        if(ve) ve.setAttribute("stroke",c[0]);
+        // PWA 卡片
+        var s3=document.getElementById("ab-card-pwa-strip");
+        if(s3) s3.style.background=c[0];
+        var i3=document.getElementById("ab-card-pwa-icon");
+        if(i3) i3.style.background=c[0]+"1a";
+        var v3=document.getElementById("ab-card-pwa-chev");
+        if(v3) v3.setAttribute("stroke",c[0]);
+        // 兼容脚本卡片
+        var s4=document.getElementById("ab-card-compat-strip");
+        if(s4) s4.style.background=c[1];
+        var i4=document.getElementById("ab-card-compat-icon");
+        if(i4) i4.style.background=c[1]+"1a";
+        var v4=document.getElementById("ab-card-compat-chev");
+        if(v4) v4.setAttribute("stroke",c[1]);
+        // 登录页卡片
+        var s2=document.getElementById("ab-card-login-strip");
+        if(s2) s2.style.background=c[1];
+        var i2=document.getElementById("ab-card-login-icon");
+        if(i2) i2.style.background=c[1]+"1a";
+        var v2=document.getElementById("ab-card-login-chev");
+        if(v2) v2.setAttribute("stroke",c[1]);
+        // 性能优化卡片
+        var s5=document.getElementById("ab-card-perf-strip");
+        if(s5) s5.style.background=c[0];
+        var i5=document.getElementById("ab-card-perf-icon");
+        if(i5) i5.style.background=c[0]+"1a";
+        var v5=document.getElementById("ab-card-perf-chev");
+        if(v5) v5.setAttribute("stroke",c[0]);
+        // 关于插件卡片
+        var s6=document.getElementById("ab-card-about-strip");
+        if(s6) s6.style.background=c[0];
+        var v6=document.getElementById("ab-card-about-chev");
+        if(v6) v6.setAttribute("stroke",c[0]);
+    }
+    function initColorFollow(){
+        var sel=document.querySelector("[name=\"primaryColor\"]");
+        if(!sel) return;
+        sel.addEventListener("change",function(){ applyConfigColors(this.value); });
+        applyConfigColors(sel.value);
+    }
+
+    // 检查更新（调用全局 abCheckUpdate，定义于 renderFooter 注入的脚本）
+    function initUpdateCheck(){
+        var btn=document.getElementById("ab-btn-update");
+        if(!btn) return;
+        btn.addEventListener("click",function(){ window.abCheckUpdate&&window.abCheckUpdate(true); });
+    }
+
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",function(){ initColorFollow(); initUpdateCheck(); });
+    } else {
+        initColorFollow(); initUpdateCheck();
+    }
+})();
+</script>
