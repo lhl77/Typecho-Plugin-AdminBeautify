@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.22
+ * @version 2.1.23
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.22';
+        $abVer = '2.1.23';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -767,7 +767,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.22' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.23' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -970,7 +970,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 }
             }
         }
-        $pluginSettingsUrl = Typecho_Common::url('/admin/options-plugin.php?config=AdminBeautify', $options->index);
+        $pluginSettingsUrl = $options->adminUrl . 'options-plugin.php?config=AdminBeautify';
 
         // 当前页面的兼容性标识符（插件名 / 外观名，小写）
         $currentPageCompatKey = '';
@@ -990,7 +990,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.22',
+            'pluginVersion'          => '2.1.23',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1004,7 +1004,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.22.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.23.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1019,7 +1019,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.22"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.23"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1222,7 +1222,7 @@ var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghpr
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.22";';
+        echo 'var __AB_VER__="2.1.23";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -1617,15 +1617,15 @@ UPDATEJS;
             $absAction    = 'install';
         } elseif (!$absActivated) {
             // 已安装但未启用：指向 plugins.php 启用
-            $absStoreUrl  = Typecho_Common::url('/admin/plugins.php', $options->index);
+            $absStoreUrl  = $options->adminUrl . 'plugins.php';
             $absBtnText   = 'AB插件仓库';
             $absTarget    = '_self';
             $absWarnText  = '插件未启用，请先启用 AB-Store';
-            $absWarnUrl   = Typecho_Common::url('/admin/plugins.php', $options->index);
+            $absWarnUrl   = $options->adminUrl . 'plugins.php';
             $absAction    = 'go';
         } else {
             // 已启用：直接进入面板
-            $absStoreUrl  = Typecho_Common::url('/admin/extending.php?panel=' . urlencode('AdminBeautifyStore/Panel.php'), $options->index);
+            $absStoreUrl  = $options->adminUrl . 'extending.php?panel=' . urlencode('AdminBeautifyStore/Panel.php');
             $absBtnText   = 'AB插件仓库';
             $absTarget    = '_self';
             $absWarnText  = '';
