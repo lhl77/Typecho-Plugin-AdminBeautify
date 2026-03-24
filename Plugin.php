@@ -1403,7 +1403,7 @@ window.abShowUpdateAvailable=function(d){
     }
 };
 
-// ---- abDoUpdate: 执行直接更新（SSE 流式版，实时显示下载/解压/覆盖进度）----
+// ---- abDoUpdate: 执行直接更新（SSE 流式版，全屏进度遮罩）----
 window.abDoUpdate=function(){
     var notify=document.getElementById("ab-update-notify");
     if(!notify) return;
@@ -1413,40 +1413,130 @@ window.abDoUpdate=function(){
     var ajax=window.__AB_AJAX__||{};
     if(!ajax.url) return;
 
-    var btn=document.getElementById("ab-btn-do-update");
-    if(btn){ btn.disabled=true; btn.innerHTML="⏳ 准备中..."; btn.style.opacity=".7"; }
+    // ---- 注入全屏进度遮罩 ----
+    var oldOvl=document.getElementById("ab-update-overlay");
+    if(oldOvl) oldOvl.remove();
 
-    // ---- 注入进度条 UI ----
-    var oldProg=document.getElementById("ab-update-progress");
-    if(oldProg) oldProg.remove();
-    var progWrap=document.createElement("div");
-    progWrap.id="ab-update-progress";
-    progWrap.style.cssText="margin-top:10px;font-size:12px;";
-
-    // 进度条轨道
-    var barTrack=document.createElement("div");
-    barTrack.style.cssText="height:4px;border-radius:2px;background:rgba(255,255,255,.3);overflow:hidden;margin-bottom:5px;";
-    var barFill=document.createElement("div");
-    barFill.style.cssText="height:100%;width:0%;background:#fff;border-radius:2px;transition:width .4s ease;";
-    barTrack.appendChild(barFill);
-
-    // 文字描述
-    var progText=document.createElement("div");
-    progText.style.cssText="opacity:.9;line-height:1.5;";
-    progText.textContent="连接服务器...";
-
-    progWrap.appendChild(barTrack);
-    progWrap.appendChild(progText);
-
-    // 插入到 notify 内（固定顶栏或 banner 内）
-    var notifyContent=notify.querySelector("[style*='flex:1']")||notify.firstChild;
-    if(notifyContent&&notifyContent.parentNode===notify){
-        notify.insertBefore(progWrap, notifyContent.nextSibling||null);
-    } else {
-        notify.appendChild(progWrap);
+    // 注入遮罩样式（幂等）
+    if(!document.getElementById("ab-update-overlay-style")){
+        var st=document.createElement("style");
+        st.id="ab-update-overlay-style";
+        st.textContent=[
+            "#ab-update-overlay{",
+            "  position:fixed;inset:0;z-index:999999;",
+            "  display:flex;align-items:center;justify-content:center;",
+            "  background:rgba(0,0,0,.55);backdrop-filter:blur(6px);",
+            "  -webkit-backdrop-filter:blur(6px);",
+            "  animation:ab-ovl-in .25s ease;",
+            "  padding:16px;box-sizing:border-box;",
+            "}",
+            "@keyframes ab-ovl-in{from{opacity:0}to{opacity:1}}",
+            "#ab-update-card{",
+            "  width:100%;max-width:420px;",
+            "  background:var(--md-surface,#fff);",
+            "  color:var(--md-on-surface,#1c1b1f);",
+            "  border-radius:28px;",
+            "  padding:32px 28px 28px;",
+            "  box-shadow:0 8px 40px rgba(0,0,0,.28);",
+            "  box-sizing:border-box;",
+            "  animation:ab-card-in .3s cubic-bezier(.4,0,.2,1);",
+            "}",
+            "[data-theme=dark] #ab-update-card{",
+            "  background:var(--md-dark-surface,#1c1b1f);",
+            "  color:var(--md-dark-on-surface,#e6e1e5);",
+            "  box-shadow:0 8px 40px rgba(0,0,0,.55);",
+            "}",
+            "@keyframes ab-card-in{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}",
+            "#ab-update-card .ab-ovl-icon{font-size:36px;text-align:center;margin-bottom:16px;}",
+            "#ab-update-card .ab-ovl-title{",
+            "  font-size:18px;font-weight:700;text-align:center;",
+            "  margin-bottom:6px;",
+            "  color:var(--md-on-surface,#1c1b1f);",
+            "}",
+            "[data-theme=dark] #ab-update-card .ab-ovl-title{color:var(--md-dark-on-surface,#e6e1e5);}",
+            "#ab-update-card .ab-ovl-sub{",
+            "  font-size:13px;text-align:center;",
+            "  color:var(--md-on-surface-variant,#49454f);",
+            "  margin-bottom:24px;",
+            "}",
+            "[data-theme=dark] #ab-update-card .ab-ovl-sub{color:var(--md-dark-on-surface-variant,#cac4d0);}",
+            "#ab-ovl-bar-track{",
+            "  height:6px;border-radius:3px;overflow:hidden;",
+            "  background:var(--md-surface-variant,#e7e0ec);",
+            "  margin-bottom:10px;",
+            "}",
+            "[data-theme=dark] #ab-ovl-bar-track{background:var(--md-dark-surface-variant,#49454f);}",
+            "#ab-ovl-bar-fill{",
+            "  height:100%;border-radius:3px;",
+            "  background:var(--md-primary,#6750a4);",
+            "  transition:width .45s cubic-bezier(.4,0,.2,1);",
+            "  width:0%;",
+            "}",
+            "#ab-ovl-msg{",
+            "  font-size:13px;text-align:center;min-height:20px;",
+            "  color:var(--md-on-surface-variant,#49454f);",
+            "}",
+            "[data-theme=dark] #ab-ovl-msg{color:var(--md-dark-on-surface-variant,#cac4d0);}",
+            "#ab-ovl-pct{",
+            "  font-size:12px;text-align:right;",
+            "  color:var(--md-on-surface-variant,#49454f);",
+            "  margin-bottom:4px;min-height:16px;",
+            "}",
+            "[data-theme=dark] #ab-ovl-pct{color:var(--md-dark-on-surface-variant,#cac4d0);}",
+            "@keyframes ab-bar-pulse{0%,100%{opacity:.5}50%{opacity:1}}",
+            "@media(max-width:480px){",
+            "  #ab-update-card{padding:24px 18px 20px;border-radius:20px;}",
+            "  #ab-update-card .ab-ovl-title{font-size:16px;}",
+            "}"
+        ].join("");
+        document.head.appendChild(st);
     }
 
-    // ---- 构造 SSE URL（GET 参数传递，无需 POST）----
+    var overlay=document.createElement("div");
+    overlay.id="ab-update-overlay";
+    overlay.innerHTML=[
+        '<div id="ab-update-card">',
+        '  <div class="ab-ovl-icon">⬇️</div>',
+        '  <div class="ab-ovl-title">正在更新到 v'+newVer+'</div>',
+        '  <div class="ab-ovl-sub">请勿关闭或刷新页面</div>',
+        '  <div id="ab-ovl-pct"></div>',
+        '  <div id="ab-ovl-bar-track"><div id="ab-ovl-bar-fill"></div></div>',
+        '  <div id="ab-ovl-msg">连接服务器...</div>',
+        '</div>'
+    ].join("");
+    document.body.appendChild(overlay);
+
+    // 屏蔽键盘退出（ESC / 返回键）和页面关闭提示
+    function onBeforeUnload(e){ e.preventDefault(); e.returnValue=''; }
+    window.addEventListener("beforeunload", onBeforeUnload);
+    document.addEventListener("keydown", function onKey(e){
+        if(e.key==="Escape"){ e.stopPropagation(); e.preventDefault(); }
+    }, true);
+
+    var barFill=document.getElementById("ab-ovl-bar-fill");
+    var barMsg =document.getElementById("ab-ovl-msg");
+    var barPct =document.getElementById("ab-ovl-pct");
+    var card   =document.getElementById("ab-update-card");
+
+    function setProgress(pct, msg){
+        if(barMsg) barMsg.textContent=msg||"";
+        if(pct>=0){
+            if(barFill){
+                barFill.style.animation="";
+                barFill.style.width=Math.min(100,pct)+"%";
+            }
+            if(barPct) barPct.textContent=Math.min(100,pct)+"%";
+        } else {
+            // 不确定进度：脉冲动画
+            if(barFill){
+                barFill.style.animation="ab-bar-pulse 1.2s ease infinite";
+                barFill.style.width="35%";
+            }
+            if(barPct) barPct.textContent="";
+        }
+    }
+
+    // ---- 构造 SSE URL ----
     var sseUrl=ajax.url+"?do=do-update-stream"
         +"&download_url="+encodeURIComponent(dlUrl)
         +"&new_version="+encodeURIComponent(newVer)
@@ -1459,35 +1549,21 @@ window.abDoUpdate=function(){
         var ev; try{ ev=JSON.parse(e.data); }catch(ex){ return; }
         var type=ev.type, msg=ev.message, pct=ev.progress;
         lastType=type;
-
-        // 更新文字
-        progText.textContent=msg||"";
-
-        // 更新进度条（pct === -1 表示不确定，用脉冲动画；>=0 则直接设宽）
-        if(pct>=0){
-            barFill.style.animation="";
-            barFill.style.width=Math.min(100,pct)+"%";
-        } else {
-            // 不确定进度：跑马灯效果
-            if(!document.getElementById("ab-progress-anim")){
-                var st=document.createElement("style");
-                st.id="ab-progress-anim";
-                st.textContent="@keyframes ab-progress-pulse{0%,100%{opacity:.4}50%{opacity:1}}";
-                document.head.appendChild(st);
-            }
-            barFill.style.animation="ab-progress-pulse 1.2s ease infinite";
-            barFill.style.width="40%";
-        }
+        setProgress(pct, msg);
 
         if(type==="done"){
             es.close();
-            barFill.style.width="100%";
-            barFill.style.animation="";
-            // 1 秒后切换为成功态
+            window.removeEventListener("beforeunload", onBeforeUnload);
+            if(barFill){ barFill.style.animation=""; barFill.style.width="100%"; }
+            if(barPct) barPct.textContent="100%";
+            // 成功态：图标+标题+副标题切换
             setTimeout(function(){
-                notify.style.background="linear-gradient(90deg,#059669,#10b981)";
-                progWrap.remove();
-                notify.innerHTML='<span style="flex:1">✅ '+msg+'</span><span style="font-size:12px;opacity:.85">3 秒后自动刷新...</span>';
+                if(card){
+                    card.querySelector(".ab-ovl-icon").textContent="✅";
+                    card.querySelector(".ab-ovl-title").textContent="更新成功！";
+                    card.querySelector(".ab-ovl-sub").textContent="即将自动刷新页面...";
+                }
+                // 清理更新缓存
                 try{ localStorage.removeItem("ab-update-check"); }catch(e){}
                 try{
                     if(navigator.serviceWorker&&navigator.serviceWorker.controller){
@@ -1497,22 +1573,64 @@ window.abDoUpdate=function(){
                         navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update();}).catch(function(){});
                     }
                 }catch(e){}
-                setTimeout(function(){ location.reload(); },3000);
-            },800);
+                setTimeout(function(){ location.reload(); },2500);
+            }, 600);
         } else if(type==="error"){
             es.close();
-            progWrap.remove();
-            notify.innerHTML='<span style="flex:1;color:#fca5a5">❌ '+msg+'</span>'
-                +'<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases" target="_blank" style="color:#fff;text-decoration:underline;font-size:12px">前往 GitHub 手动下载</a>';
+            window.removeEventListener("beforeunload", onBeforeUnload);
+            if(card){
+                card.querySelector(".ab-ovl-icon").textContent="❌";
+                card.querySelector(".ab-ovl-title").style.color="#dc2626";
+                card.querySelector(".ab-ovl-title").textContent="更新失败";
+                card.querySelector(".ab-ovl-sub").textContent=msg||"请前往 GitHub 手动下载";
+                if(barFill) barFill.style.background="#dc2626";
+                // 添加手动下载按钮
+                var btnWrap=document.createElement("div");
+                btnWrap.style.cssText="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;";
+                btnWrap.innerHTML=[
+                    '<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases" target="_blank"',
+                    ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
+                    ' background:var(--md-primary,#6750a4);color:#fff;font-size:13px;font-weight:500;',
+                    ' text-decoration:none;gap:6px;">',
+                    ' 前往 GitHub 下载</a>',
+                    '<button onclick="document.getElementById(\'ab-update-overlay\').remove()"',
+                    ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
+                    ' background:var(--md-surface-variant,#e7e0ec);',
+                    ' color:var(--md-on-surface,#1c1b1f);',
+                    ' font-size:13px;font-weight:500;border:none;cursor:pointer;gap:6px;">',
+                    ' 关闭</button>'
+                ].join("");
+                card.appendChild(btnWrap);
+            }
         }
     };
 
     es.onerror=function(){
         es.close();
-        if(lastType==="done"||lastType==="error") return; // 已正常结束，忽略 onerror
-        if(progWrap.parentNode) progWrap.remove();
-        if(btn){ btn.disabled=false; btn.innerHTML="立即更新"; btn.style.opacity="1"; }
-        abShowUpdateToast("error","❌ 更新连接中断，请稍后重试或手动下载");
+        window.removeEventListener("beforeunload", onBeforeUnload);
+        if(lastType==="done"||lastType==="error") return;
+        // 连接意外断开
+        if(card){
+            card.querySelector(".ab-ovl-icon").textContent="⚠️";
+            card.querySelector(".ab-ovl-title").textContent="连接中断";
+            card.querySelector(".ab-ovl-sub").textContent="更新状态未知，请手动检查后台文件是否已更新";
+            var btnWrap2=document.createElement("div");
+            btnWrap2.style.cssText="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;";
+            btnWrap2.innerHTML=[
+                '<button onclick="location.reload()"',
+                ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
+                ' background:var(--md-primary,#6750a4);color:#fff;',
+                ' font-size:13px;font-weight:500;border:none;cursor:pointer;">',
+                ' 刷新页面</button>',
+                '<button onclick="document.getElementById(\'ab-update-overlay\').remove()"',
+                ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
+                ' background:var(--md-surface-variant,#e7e0ec);',
+                ' color:var(--md-on-surface,#1c1b1f);',
+                ' font-size:13px;font-weight:500;border:none;cursor:pointer;">',
+                ' 关闭</button>'
+            ].join("");
+            card.appendChild(btnWrap2);
+        }
     };
 };
 
