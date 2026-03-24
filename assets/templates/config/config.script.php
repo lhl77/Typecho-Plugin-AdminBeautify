@@ -298,7 +298,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         }
 
         // ---- 性能优化卡片（插在 PWA 卡片之后） ----
-        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl"];
+        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl","avatarSource","customAvatarUrl"];
         var perfCard=document.getElementById("ab-card-perf");
         var perfBody=document.getElementById("ab-card-perf-body");
         if(perfCard&&perfBody&&pwaCard){
