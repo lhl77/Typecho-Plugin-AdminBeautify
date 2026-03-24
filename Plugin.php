@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.23
+ * @version 2.1.24
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.23';
+        $abVer = '2.1.24';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -518,6 +518,31 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($localIconUrl);
 
+        // Gravatar 头像源
+        $avatarSource = new Typecho_Widget_Helper_Form_Element_Select(
+            'avatarSource',
+            array(
+                'loli'     => _t('loli.net 镜像（gravatar.loli.net，推荐）'),
+                'gravatar' => _t('Gravatar 官方（www.gravatar.com）'),
+                'cravatar' => _t('Cravatar（cravatar.cn）'),
+                'custom'   => _t('自定义域名'),
+            ),
+            'loli',
+            _t('Gravatar 头像源'),
+            _t('选择后台头像（侧栏、移动端、个人设置页、评论管理页）的加载域名。')
+        );
+        $form->addInput($avatarSource);
+
+        // 自定义头像域名（选"自定义域名"时生效）
+        $customAvatarUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'customAvatarUrl',
+            null,
+            '',
+            _t('自定义头像域名'),
+            _t('选「自定义域名」后生效。填入完整头像服务地址，如 https://example.com/avatar，末尾不加斜线，格式需与 Gravatar 兼容（路径后接 MD5 邮箱哈希）。')
+        );
+        $form->addInput($customAvatarUrl);
+
         // ================================================================
         // ====== 兼容脚本管理（MD3 折叠卡片） ======
         // ================================================================
@@ -767,7 +792,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.23' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.24' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -889,10 +914,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // Inject user avatar URL for sidebar header
         $user = Typecho_Widget::widget('Widget_User');
-        $avatarUrl = '';
+        $avatarUrl  = '';
+        $avatarHost = 'https://gravatar.loli.net/avatar';
         if ($user->hasLogin() && $user->mail) {
+            // 根据配置选择头像域名
+            $avatarSrcOpt   = isset($pluginOptions->avatarSource)    ? (string)$pluginOptions->avatarSource    : 'loli';
+            $customAvatarOpt = isset($pluginOptions->customAvatarUrl) ? trim((string)$pluginOptions->customAvatarUrl) : '';
+            $avatarHostMap = array(
+                'loli'     => 'https://gravatar.loli.net/avatar',
+                'gravatar' => 'https://www.gravatar.com/avatar',
+                'cravatar' => 'https://cravatar.cn/avatar',
+                'custom'   => rtrim($customAvatarOpt, '/'),
+            );
+            $avatarHost = (isset($avatarHostMap[$avatarSrcOpt]) && $avatarHostMap[$avatarSrcOpt] !== '')
+                ? $avatarHostMap[$avatarSrcOpt]
+                : 'https://gravatar.loli.net/avatar';
             $hash = md5(strtolower(trim($user->mail)));
-            $avatarUrl = 'https://cravatar.cn/avatar/' . $hash . '?s=80&d=mp';
+            $avatarUrl = $avatarHost . '/' . $hash . '?s=80&d=mp';
         }
         $screenName = $user->hasLogin() ? $user->screenName : '';
         $ajaxUrl = Typecho_Common::url('/action/admin-beautify', $options->index);
@@ -906,6 +944,27 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'url'   => $ajaxUrl,
             'token' => $token,
         )) . ';';
+        // 头像域名，供 JS 替换 profile / manage-comments 页面中 Typecho 原生输出的头像 src
+        echo 'window.__AB_AVATAR_HOST__=' . json_encode($avatarHost) . ';';
+        echo '</script>';
+        // 替换个人设置页、评论管理页中 Typecho 原生输出的 gravatar 头像域名
+        echo '<script>(function(){';
+        echo 'var host=window.__AB_AVATAR_HOST__;';
+        echo 'if(!host)return;';
+        echo 'function replaceAvatar(img){';
+        echo '  var src=img.getAttribute("src")||"";';
+        echo '  var m=src.match(/https?:\/\/[^\/]+\/avatar\/([a-f0-9]{32})(.*)/);';
+        echo '  if(m)img.setAttribute("src",host+"/"+m[1]+m[2]);';
+        echo '}';
+        echo 'function runReplace(){';
+        echo '  var imgs=document.querySelectorAll(".profile-avatar img,.ab-profile-avatar-wrap img,td.author img,.typecho-list-table td img");';
+        echo '  [].forEach.call(imgs,function(img){replaceAvatar(img);});';
+        echo '}';
+        echo 'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",runReplace);}';
+        echo 'else{runReplace();}';
+        echo 'document.addEventListener("ab:pageload",runReplace);';
+        echo '})();</script>';
+        echo '<script>';
         $notifyOptOut = isset($pluginOptions->notifyOptOut) ? (string)$pluginOptions->notifyOptOut : '0';
         // 解析自定义快捷按钮：每行 名称:地址:图标，生成 JSON 数组
         $customBtnsRaw = $dashboardCustomButtons;
@@ -990,7 +1049,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.23',
+            'pluginVersion'          => '2.1.24',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1004,7 +1063,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.23.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.24.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1019,7 +1078,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.23"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.24"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1100,16 +1159,13 @@ function mkBanner(release){
     document.body.appendChild(wrap);
     setTimeout(function(){wrap.style.transform="translateX(0)";},50);
 }
-// 镜像代理兜底（直连 api.github.com 失败时依次尝试）
-var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghproxy.com/"];
-(function tryGhApi(idx){
-    if(idx>=ghApiMirrors.length)return;
-    var url=ghApiMirrors[idx]+"https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest";
-    fetch(url,{cache:"no-cache"})
+// api.github.com 直连（不走代理，避免封禁）
+(function(){
+    fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest",{cache:"no-cache"})
         .then(function(r){return r.ok?r.json():Promise.reject();})
         .then(function(d){if(d&&d.tag_name)mkBanner(d);})
-        .catch(function(){tryGhApi(idx+1);});
-}(0));
+        .catch(function(){});
+}());
 })();</script>';
         }
 
@@ -1222,7 +1278,7 @@ var ghApiMirrors=["","https://gh-proxy.org/","https://ghfast.top/","https://ghpr
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.23";';
+        echo 'var __AB_VER__="2.1.24";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）

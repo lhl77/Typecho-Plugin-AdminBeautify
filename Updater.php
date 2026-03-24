@@ -12,20 +12,19 @@ class AdminBeautify_Updater
     const GITHUB_API_RELEASES = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest';
 
     /**
-     * GitHub 镜像代理列表（大陆可访问），按优先级排列。
+     * GitHub 镜像代理（大陆可访问）。
      * 用法：将原始 GitHub URL 直接附在代理前缀之后即可。
+     * 仅用于下载 ZIP Release，api.github.com 直连不走代理。
      */
     private static $GITHUB_MIRRORS = array(
-        'https://gh-proxy.top/',
-        'https://ghfast.top/',
-        'https://ghproxy.com/',
+        'https://gh1.lhl.one/',
     );
 
     /** GitHub Releases 页面（用于引导手动更新） */
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
 
     /** 当前版本 */
-    const CURRENT_VERSION = '2.1.23';
+    const CURRENT_VERSION = '2.1.24';
 
     /** 插件根目录 */
     private $pluginDir;
@@ -50,8 +49,8 @@ class AdminBeautify_Updater
      */
     public function fetchLatestRelease()
     {
-        // 版本检查使用短超时（5s/节点），避免阻塞后台页面加载
-        $json = $this->httpGetWithMirror(self::GITHUB_API_RELEASES, 5);
+        // 版本检查直连 api.github.com（不走镜像，避免代理被封禁），使用短超时（5s）
+        $json = $this->httpGet(self::GITHUB_API_RELEASES, 5);
         if ($json === false) return false;
 
         $data = @json_decode($json, true);
@@ -657,19 +656,15 @@ class AdminBeautify_Updater
     }
 
     /**
-     * HTTP GET，直连失败时依次通过大陆可用的 GitHub 镜像代理重试。
-     * 适用于 api.github.com、github.com、codeload.github.com 等在大陆不稳定的地址。
+     * HTTP GET，通过 gh1.lhl.one 镜像代理下载 GitHub Release ZIP 等资源。
+     * 注意：api.github.com 请直接用 httpGet()，不应走此方法。
      *
-     * @param string $url     目标 URL
-     * @param int    $timeout 每个节点的超时秒数（默认 30s；版本检查建议传 5s 避免阻塞）
+     * @param string $url     目标 URL（github.com / codeload.github.com 等）
+     * @param int    $timeout 每个节点的超时秒数（默认 30s）
      */
     private function httpGetWithMirror($url, $timeout = 30)
     {
-        // 1. 优先直连
-        $result = $this->httpGet($url, $timeout);
-        if ($result !== false) return $result;
-
-        // 2. 依次尝试镜像代理（将原始 URL 附在代理前缀后即可）
+        // 仅走镜像，不尝试直连（下载 ZIP 走代理，避免直连失败）
         foreach (self::$GITHUB_MIRRORS as $mirror) {
             $mirroredUrl = $mirror . $url;
             $result = $this->httpGet($mirroredUrl, $timeout);

@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.23
+ * @version 2.1.24
  * @link https://blog.lhl.one
  */
 
@@ -240,7 +240,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.23';
+        $pluginVer  = '2.1.24';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -830,9 +830,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError('本地 assets/compat/ 目录不可写，请检查文件权限', 500);
         }
 
-        // GitHub Contents API — 列出目录（直连失败时走镜像代理）
+        // GitHub Contents API — 直连 api.github.com（不走镜像代理，避免封禁）
         $apiUrl = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/contents/assets/compat';
-        $listJson = $this->httpGetWithMirror($apiUrl);
+        $listJson = $this->httpGet($apiUrl);
         if ($listJson === false) {
             $this->jsonError('无法连接 GitHub API，请检查服务器网络', 502);
         }
@@ -924,9 +924,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
      * GitHub 镜像代理列表（大陆可用），格式：直接附在原始 URL 前缀即可
      */
     private static $GH_MIRRORS = array(
-        'https://gh-proxy.org/',
-        'https://ghfast.top/',
-        'https://ghproxy.com/',
+        'https://gh1.lhl.one/',
     );
 
     /**
@@ -937,8 +935,6 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
      */
     private function httpGetWithMirror($url, $timeout = 15)
     {
-        $result = $this->httpGet($url, $timeout);
-        if ($result !== false) return $result;
         foreach (self::$GH_MIRRORS as $mirror) {
             $result = $this->httpGet($mirror . $url, $timeout);
             if ($result !== false) return $result;
@@ -1044,11 +1040,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
         // 下载 ZIP（超时 60 秒，支持重定向）
         $zipUrl = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore/archive/refs/heads/main.zip';
-        // 大陆镜像代理兜底列表
+        // 统一走 gh1.lhl.one 镜像
         $zipMirrors = array(
-            $zipUrl,
-            'https://gh-proxy.com/' . $zipUrl,
-            'https://ghproxy.com/' . $zipUrl,
+            'https://gh1.lhl.one/' . $zipUrl,
         );
         $zipContent = false;
         foreach ($zipMirrors as $tryUrl) {
