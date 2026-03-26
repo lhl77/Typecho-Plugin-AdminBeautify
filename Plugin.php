@@ -2,9 +2,9 @@
 /**
  * AB-Admin (Admin Beautify) - 最美 Typecho 后台美化插件，Material Design 3风格
  *
- * @package AB-Admin (Admin Beautify)
+ * @package AB-Admin
  * @author LHL
- * @version 2.1.25
+ * @version 2.1.26
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.25';
+        $abVer = '2.1.26';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -215,10 +215,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 '0' => '隐藏',
             ),
             '1',
-            _t('添加快捷按钮"自定义"'),
+            _t('快捷按钮 - "自定义"'),
             _t('是否在概要页中显示添加"自定义"快捷按钮')
         );
         $form->addInput($dashboardQuickHint);
+
+        // 是否隐藏"捐助作者"快捷按钮
+        $dashboardHideDonate = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardHideDonate',
+            array(
+                '0' => '显示 (默认)',
+                '1' => '隐藏',
+            ),
+            '0',
+            _t('快捷按钮 - "捐助作者"'),
+            _t('是否在概要页快捷操作中显示"捐助作者"按钮')
+        );
+        $form->addInput($dashboardHideDonate);
 
         // 概要页自定义快捷按钮
         $dashboardCustomButtons = new Typecho_Widget_Helper_Form_Element_Textarea(
@@ -226,7 +239,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             null,
             '',
             _t('概要页自定义快捷按钮'),
-            _t('每行一个按钮，格式：<code>名称:地址:图标</code>，图标名称来自 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a>。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:/:public</code><br><code>管理评论:manage-comments.php:comment</code>')
+            _t('每行一个按钮，格式：<code>名称:地址:图标</code> 或 <code>名称:地址:图标:highlight</code>（加 <code>:highlight</code> 为强调样式）。<br>图标名称来自 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a>。<br>⚠️ 外链地址必须以 <code>http://</code> 或 <code>https://</code> 开头，站内路径无需协议头。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:https://example.com:public:highlight</code><br><code>管理评论:manage-comments.php:comment</code>')
         );
         $form->addInput($dashboardCustomButtons);
 
@@ -720,6 +733,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
      */
     public static function renderHeader($header)
     {
+        // ── MD3 风格 console banner（所有 /admin 页面均注入，含登录页）──
+        $header .= '<script>(function(){try{'
+            . 'console.log('
+            .   '"%c AB-Admin %c v2.1.26 %c",'
+            .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
+            .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
+            .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
+            . ');'
+            . 'console.log("%c  \uD83D\uDD17 https://see.lhl.one/Typecho-AB-Admin ","color:#6750a4;font-size:11px");'
+            . '}catch(e){}})();</script>';
+
         // 登录页 → 注入 LoginBeautify 样式
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = $options->plugin('AdminBeautify');
@@ -876,7 +900,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.25' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.26' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -993,6 +1017,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
         $dashboardQuickStyle = isset($pluginOptions->dashboardQuickStyle) ? (string)$pluginOptions->dashboardQuickStyle : 'small';
         $dashboardQuickHint = isset($pluginOptions->dashboardQuickHint) ? (string)$pluginOptions->dashboardQuickHint : '1';
+        $dashboardHideDonate = isset($pluginOptions->dashboardHideDonate) ? (string)$pluginOptions->dashboardHideDonate : '0';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
         $overviewChartEnabled = isset($pluginOptions->overviewChartEnabled) ? (string)$pluginOptions->overviewChartEnabled : '1';
@@ -1063,16 +1088,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         echo '})();</script>';
         echo '<script>';
         $notifyOptOut = isset($pluginOptions->notifyOptOut) ? (string)$pluginOptions->notifyOptOut : '0';
-        // 解析自定义快捷按钮：每行 名称:地址:图标，生成 JSON 数组
+        // 解析自定义快捷按钮：每行 名称:地址:图标[:highlight]，生成 JSON 数组
         $customBtnsRaw = $dashboardCustomButtons;
         $customBtnsParsed = array();
         foreach (array_filter(array_map('trim', explode("\n", $customBtnsRaw))) as $line) {
-            $parts = array_map('trim', explode(':', $line, 3));
+            $parts = array_map('trim', explode(':', $line, 4));
             if (count($parts) >= 2 && $parts[0] !== '' && $parts[1] !== '') {
                 $customBtnsParsed[] = array(
-                    'label' => $parts[0],
-                    'href'  => $parts[1],
-                    'icon'  => isset($parts[2]) && $parts[2] !== '' ? $parts[2] : 'link',
+                    'label'     => $parts[0],
+                    'href'      => $parts[1],
+                    'icon'      => isset($parts[2]) && $parts[2] !== '' ? $parts[2] : 'link',
+                    'highlight' => isset($parts[3]) && trim(strtolower($parts[3])) === 'highlight',
                 );
             }
         }
@@ -1146,11 +1172,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.25',
+            'pluginVersion'          => '2.1.26',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
             'dashboardQuickHint'     => $dashboardQuickHint,
+            'dashboardHideDonate'    => $dashboardHideDonate,
             'dashboardCustomButtons' => $customBtnsParsed,
             'dashboardRecentStyle'   => $dashboardRecentStyle,
             'overviewChartEnabled'   => $overviewChartEnabled,
@@ -1169,7 +1196,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.25.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.26.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1184,7 +1211,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.25"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.26"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1384,7 +1411,7 @@ function mkBanner(release){
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.25";';
+        echo 'var __AB_VER__="2.1.26";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
