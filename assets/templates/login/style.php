@@ -470,6 +470,60 @@ margin-top: 2px;
 
 .lb-hide { display:none !important; }
 
+.lb-more-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 20px 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--lb-border);
+}
+
+.lb-more-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lb-primary);
+  text-decoration: none;
+  background: transparent;
+  transition: background .2s ease, transform .1s ease;
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.lb-more-link a:hover {
+  background: color-mix(in srgb, var(--lb-primary) 10%, transparent);
+}
+
+@supports not (color: color-mix(in srgb, red, blue)) {
+  .lb-more-link a:hover {
+    background: rgba(103, 80, 164, 0.10);
+  }
+}
+
+html[data-lb-theme="dark"] .lb-more-link a:hover {
+  background: rgba(208, 188, 255, 0.10);
+}
+
+.lb-more-link a:active {
+  background: color-mix(in srgb, var(--lb-primary) 18%, transparent);
+  transform: scale(0.97);
+}
+
+.lb-more-link a svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
 <?php
 if (trim($customCss) !== '') {
     echo "\n/* --- custom login css --- */\n";
@@ -479,5 +533,23 @@ if (trim($customCss) !== '') {
 </style>
 
 <script id="loginbeautify-theme-init">
-(function(){try{var mode=<?php echo $jsThemeMode;?>;var saved=localStorage.getItem('lb-theme');var dark=false;if(saved==='light'||saved==='dark'){dark=saved==='dark'}else if(mode==='dark'){dark=true}else if(mode==='light'){dark=false}else{dark=window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches}document.documentElement.setAttribute('data-lb-theme',dark?'dark':'light')}catch(e){}})();
+(function(){
+    try{
+      var mode = <?php echo $jsThemeMode; ?>;
+      var saved = localStorage.getItem('lb-theme');
+      var dark = false;
+
+      if (saved === 'light' || saved === 'dark') {
+        dark = saved === 'dark';
+      } else if (mode === 'dark') {
+        dark = true;
+      } else if (mode === 'light') {
+        dark = false;
+      } else {
+        dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+
+      document.documentElement.setAttribute('data-lb-theme', dark ? 'dark' : 'light');
+    }catch(e){}
+})();
 </script>
