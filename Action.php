@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.24
+ * @version 2.1.25
  * @link https://blog.lhl.one
  */
 
@@ -240,7 +240,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.24';
+        $pluginVer  = '2.1.25';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -382,6 +382,163 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'thisWeek' => null,
                 'lastWeek' => null,
             ),
+        ));
+    }
+
+    /**
+     * 概要页图表数据
+     * 访问方式：/action/admin-beautify?do=chart-data&days=30
+     *
+     * 返回：
+     *   frequency      => [{date, count}]  — 文章发布频率（按日聚合）
+     *   commentsByCat  => [{name, count}]  — 评论按分类分布
+     */
+    public function chartData()
+    {
+        $this->checkAuth();
+
+        $db   = $this->db;
+        $days = (int) $this->request->get('days', 30);
+        // 0 = 全部；否则取指定天数
+        $since = ($days > 0) ? (time() - $days * 86400) : 0;
+
+        // ---- 1. 文章发布频率（按天聚合） ----
+        $freqSelect = $db->select('created')
+            ->from('table.contents')
+            ->where('type = ?', 'post')
+            ->where('status = ?', 'publish');
+        if ($since > 0) {
+            $freqSelect = $freqSelect->where('created >= ?', $since);
+        }
+        $freqRows = $db->fetchAll($freqSelect);
+
+        // 在 PHP 中按日聚合（兼容 MySQL / SQLite / PostgreSQL）
+        $dayBucket = array();
+        foreach ($freqRows as $row) {
+            $dateKey = date('Y-m-d', (int) $row['created']);
+            $dayBucket[$dateKey] = isset($dayBucket[$dateKey]) ? $dayBucket[$dateKey] + 1 : 1;
+        }
+        // 补全日期范围，未发文的天数填 0
+        if ($days > 0) {
+            $fullRange = array();
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $d = date('Y-m-d', time() - $i * 86400);
+                $fullRange[$d] = isset($dayBucket[$d]) ? $dayBucket[$d] : 0;
+            }
+            $frequency = array();
+            foreach ($fullRange as $d => $c) {
+                $frequency[] = array('date' => $d, 'count' => $c);
+            }
+        } else {
+            ksort($dayBucket);
+            $frequency = array();
+            foreach ($dayBucket as $d => $c) {
+                $frequency[] = array('date' => $d, 'count' => $c);
+            }
+        }
+
+        // ---- 2. 近期评论按分类分布 ----
+        // 先取符合时间范围的已审核评论的 cid 列表
+        $commentSelect = $db->select('cid')
+            ->from('table.comments')
+            ->where('status = ?', 'approved');
+        if ($since > 0) {
+            $commentSelect = $commentSelect->where('created >= ?', $since);
+        }
+        $commentRows = $db->fetchAll($commentSelect);
+
+        $cids = array();
+        foreach ($commentRows as $r) {
+            $cid = (int) $r['cid'];
+            $cids[$cid] = isset($cids[$cid]) ? $cids[$cid] + 1 : 1;
+        }
+
+        $commentsByCat = array();
+        if (!empty($cids)) {
+            // 加载全部分类（含层级关系）
+            $allCatRows = $db->fetchAll(
+                $db->select('mid', 'name', 'parent')
+                   ->from('table.metas')
+                   ->where('type = ?', 'category')
+            );
+            // 构建 catMap[mid] = ['name'=>..., 'parent'=>...]
+            $catMap = array();
+            foreach ($allCatRows as $cr) {
+                $catMap[(int)$cr['mid']] = array('name' => $cr['name'], 'parent' => (int)$cr['parent']);
+            }
+            // 找出叶子分类（没有子分类的节点）
+            $childMids = array();
+            foreach ($catMap as $mid => $info) {
+                if ($info['parent'] > 0) {
+                    $childMids[$info['parent']] = true;
+                }
+            }
+            $leafMids = array();
+            foreach ($catMap as $mid => $info) {
+                if (!isset($childMids[$mid])) {
+                    $leafMids[$mid] = true;
+                }
+            }
+            // 构建分类完整路径：从叶子向上追溯，生成 "顶级-二级-最小分类"
+            $catPathCache = array();
+            $buildPath = function($mid) use (&$catMap, &$catPathCache, &$buildPath) {
+                if (isset($catPathCache[$mid])) return $catPathCache[$mid];
+                if (!isset($catMap[$mid])) return '';
+                $info = $catMap[$mid];
+                if ($info['parent'] > 0 && isset($catMap[$info['parent']])) {
+                    $parentPath = $buildPath($info['parent']);
+                    $path = ($parentPath !== '') ? $parentPath . '-' . $info['name'] : $info['name'];
+                } else {
+                    $path = $info['name'];
+                }
+                $catPathCache[$mid] = $path;
+                return $path;
+            };
+
+            // 查询文章与分类的关系
+            $relRows = $db->fetchAll(
+                $db->select('table.relationships.cid', 'table.relationships.mid')
+                   ->from('table.relationships')
+                   ->join('table.metas', 'table.relationships.mid = table.metas.mid')
+                   ->where('table.metas.type = ?', 'category')
+                   ->where('table.relationships.cid IN ?', array_keys($cids))
+            );
+
+            // 按文章 cid 分组，收集该文章的所有分类 mid
+            $cidMids = array();
+            foreach ($relRows as $rr) {
+                $rc = (int)$rr['cid'];
+                $rm = (int)$rr['mid'];
+                if (!isset($cidMids[$rc])) $cidMids[$rc] = array();
+                $cidMids[$rc][] = $rm;
+            }
+
+            // 对每篇文章：只取最小叶子分类（若存在叶子则过滤，否则退回任意分类）
+            $catBucket = array();
+            foreach ($cidMids as $rc => $mids) {
+                $cnt = isset($cids[$rc]) ? $cids[$rc] : 0;
+                // 优先使用叶子分类
+                $useMids = array_filter($mids, function($m) use (&$leafMids) {
+                    return isset($leafMids[$m]);
+                });
+                if (empty($useMids)) $useMids = $mids;
+                // 若同一篇文章属于多个叶子分类，各自累计
+                foreach ($useMids as $m) {
+                    $path = $buildPath($m);
+                    if ($path === '') continue;
+                    $catBucket[$path] = isset($catBucket[$path]) ? $catBucket[$path] + $cnt : $cnt;
+                }
+            }
+            arsort($catBucket);
+            foreach ($catBucket as $name => $count) {
+                $commentsByCat[] = array('name' => $name, 'count' => $count);
+            }
+        }
+
+        $this->jsonSuccess(array(
+            'days'          => $days,
+            'frequency'     => $frequency,
+            'commentsByCat' => $commentsByCat,
         ));
     }
 
@@ -777,8 +934,13 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
         // ── 切换到 SSE 模式 ──
         // 关闭所有输出缓冲，确保 flush 实时生效
+        // 禁用 gzip 压缩，防止数据积压导致 SSE 帧无法实时到达客户端
+        @ini_set('zlib.output_compression', 'Off');
+
         while (ob_get_level() > 0) { @ob_end_clean(); }
         @set_time_limit(300); // 5 分钟足够完成更新
+        // 隐式 flush：每次 echo 后自动发送，不依赖显式调用 flush()
+        @ob_implicit_flush(1);
 
         // 释放 Session 锁，SSE 可能持续数分钟，不应阻塞同 Session 的其他请求
         if (session_status() === PHP_SESSION_ACTIVE) {
@@ -788,6 +950,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         header('Content-Type: text/event-stream; charset=utf-8');
         header('Cache-Control: no-cache, no-store, must-revalidate');
         header('X-Accel-Buffering: no');   // 禁用 nginx 缓冲
+        header('X-Content-Type-Options: nosniff');
         header('Connection: keep-alive');
 
         $emit = function ($type, $message, $progress) {
@@ -1177,6 +1340,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
             case 'stats':
                 $this->stats();
+                break;
+
+            case 'chart-data':
+                $this->chartData();
                 break;
 
             case 'get-settings':

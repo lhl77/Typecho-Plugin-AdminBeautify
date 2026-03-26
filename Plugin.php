@@ -4,7 +4,7 @@
  *
  * @package AB-Admin (Admin Beautify)
  * @author LHL
- * @version 2.1.24
+ * @version 2.1.25
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.24';
+        $abVer = '2.1.25';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -242,6 +242,90 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('MD卡片：Material Design 3 列表风格，时间居右，文章单行、评论双行；原版：Typecho 原有样式。同时会隐藏"官方最新日志"卡片。')
         );
         $form->addInput($dashboardRecentStyle);
+
+        // 概要页图表 - 开关
+        $overviewChartEnabled = new Typecho_Widget_Helper_Form_Element_Select(
+            'overviewChartEnabled',
+            array(
+                '1' => '开启（默认）',
+                '0' => '关闭',
+            ),
+            '1',
+            _t('概要页图表'),
+            _t('是否在概要页底部显示「更新频率」折线图和「近期评论分类」极坐标图')
+        );
+        $form->addInput($overviewChartEnabled);
+
+        // 概要页图表 - 时间范围
+        $overviewTimeRange = new Typecho_Widget_Helper_Form_Element_Select(
+            'overviewTimeRange',
+            array(
+                '7'  => '近 7 天',
+                '30' => '近 30 天（默认）',
+                '0'  => '全部',
+            ),
+            '30',
+            _t('图表统计时间范围'),
+            _t('「更新频率」和「近期评论分类」图表的数据统计时间范围')
+        );
+        $form->addInput($overviewTimeRange);
+
+        // Umami 统计 - 开关
+        $umamiEnabled = new Typecho_Widget_Helper_Form_Element_Select(
+            'umamiEnabled',
+            array(
+                '0' => '关闭（默认）',
+                '1' => '开启',
+            ),
+            '0',
+            _t('Umami 访问统计'),
+            _t('开启后在概要页显示 Umami 访问统计卡片（今日访问量、总访问量、热门文章、跳出率）。需同时填写下方 API 配置。')
+        );
+        $form->addInput($umamiEnabled);
+
+        // Umami API 地址
+        $umamiApiBase = new Typecho_Widget_Helper_Form_Element_Text(
+            'umamiApiBase',
+            null,
+            '',
+            _t('Umami API 地址'),
+            _t('Umami 实例地址，不含末尾斜线，例如：<code>https://umami.example.com</code>')
+        );
+        $form->addInput($umamiApiBase);
+
+        // Umami 网站 ID
+        $umamiWebsiteId = new Typecho_Widget_Helper_Form_Element_Text(
+            'umamiWebsiteId',
+            null,
+            '',
+            _t('Umami 网站 ID'),
+            _t('在 Umami → 网站设置 中查看 Website ID（UUID 格式）')
+        );
+        $form->addInput($umamiWebsiteId);
+
+        // Umami API Token
+        $umamiApiToken = new Typecho_Widget_Helper_Form_Element_Text(
+            'umamiApiToken',
+            null,
+            '',
+            _t('Umami API Token'),
+            _t('Token 需要手动 Post 获取，详情见<a href="https://docs.umami.is/docs/api/authentication" href="_blank">官方文档</a>')
+        );
+        $form->addInput($umamiApiToken);
+
+        // Umami 数据时间范围
+        $umamiTimeRange = new Typecho_Widget_Helper_Form_Element_Select(
+            'umamiTimeRange',
+            array(
+                '7'  => '近 7 天',
+                '30' => '近 30 天（默认）',
+                '0'  => '全部',
+            ),
+            '30',
+            _t('Umami 数据时间范围'),
+            _t('访客数量、平均访问时长、跳出率 这三项的统计时间范围（今日访问量 / 总访问量 始终固定为今日 / 全部时间）')
+        );
+        $form->addInput($umamiTimeRange);
 
         // ================================================================
         // ====== 编辑器设置（MD3 折叠卡片） ======
@@ -792,7 +876,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.24' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.25' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -911,6 +995,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardQuickHint = isset($pluginOptions->dashboardQuickHint) ? (string)$pluginOptions->dashboardQuickHint : '1';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
+        $overviewChartEnabled = isset($pluginOptions->overviewChartEnabled) ? (string)$pluginOptions->overviewChartEnabled : '1';
+        $overviewTimeRange    = isset($pluginOptions->overviewTimeRange)    ? (string)$pluginOptions->overviewTimeRange    : '30';
+        $umamiEnabled         = isset($pluginOptions->umamiEnabled)         ? (string)$pluginOptions->umamiEnabled         : '0';
+        $umamiApiBase         = isset($pluginOptions->umamiApiBase)         ? (string)$pluginOptions->umamiApiBase         : '';
+        $umamiWebsiteId       = isset($pluginOptions->umamiWebsiteId)       ? (string)$pluginOptions->umamiWebsiteId       : '';
+        $umamiApiToken        = isset($pluginOptions->umamiApiToken)        ? (string)$pluginOptions->umamiApiToken        : '';
+        $umamiTimeRange       = isset($pluginOptions->umamiTimeRange)       ? (string)$pluginOptions->umamiTimeRange       : '30';
+
+        // 主题色十六进制（供图表使用）
+        $primaryColorScheme = $pluginOptions->primaryColor ?: 'purple';
+        $colorSchemeData = self::getColorScheme($primaryColorScheme);
+        $primaryColorHex     = $colorSchemeData['--md-primary'];
+        $primaryColorDarkHex = $colorSchemeData['--md-dark-primary'];
 
         // Inject user avatar URL for sidebar header
         $user = Typecho_Widget::widget('Widget_User');
@@ -1049,13 +1146,22 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.24',
+            'pluginVersion'          => '2.1.25',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
             'dashboardQuickHint'     => $dashboardQuickHint,
             'dashboardCustomButtons' => $customBtnsParsed,
             'dashboardRecentStyle'   => $dashboardRecentStyle,
+            'overviewChartEnabled'   => $overviewChartEnabled,
+            'overviewTimeRange'      => $overviewTimeRange,
+            'umamiEnabled'           => $umamiEnabled,
+            'umamiApiBase'           => $umamiApiBase,
+            'umamiWebsiteId'         => $umamiWebsiteId,
+            'umamiApiToken'          => $umamiApiToken,
+            'umamiTimeRange'         => $umamiTimeRange,
+            'primaryColorHex'        => $primaryColorHex,
+            'primaryColorDarkHex'    => $primaryColorDarkHex,
             'enabledCompatPlugins'       => $enabledCompatPlugins,
             'currentPageCompatKey'       => $currentPageCompatKey,
             'pendingCompatSuggestions'   => $pendingCompatSuggestions,
@@ -1063,7 +1169,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.24.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.25.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1078,7 +1184,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.24"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.25"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1278,7 +1384,7 @@ function mkBanner(release){
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.24";';
+        echo 'var __AB_VER__="2.1.25";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -1403,7 +1509,7 @@ window.abShowUpdateAvailable=function(d){
     }
 };
 
-// ---- abDoUpdate: 执行直接更新（SSE 流式版，全屏进度遮罩）----
+// ---- abDoUpdate: 执行直接更新（fetch 流式版，全屏进度遮罩）----
 window.abDoUpdate=function(){
     var notify=document.getElementById("ab-update-notify");
     if(!notify) return;
@@ -1484,9 +1590,30 @@ window.abDoUpdate=function(){
             "}",
             "[data-theme=dark] #ab-ovl-pct{color:var(--md-dark-on-surface-variant,#cac4d0);}",
             "@keyframes ab-bar-pulse{0%,100%{opacity:.5}50%{opacity:1}}",
+            /* ---- 按钮样式（含暗色适配）---- */
+            ".ab-ovl-btn-primary{",
+            "  display:inline-flex;align-items:center;justify-content:center;",
+            "  padding:10px 20px;border-radius:20px;",
+            "  background:var(--md-primary,#6750a4);color:#fff;",
+            "  font-size:13px;font-weight:500;border:none;cursor:pointer;",
+            "  text-decoration:none;gap:6px;",
+            "}",
+            ".ab-ovl-btn-secondary{",
+            "  display:inline-flex;align-items:center;justify-content:center;",
+            "  padding:10px 20px;border-radius:20px;",
+            "  background:var(--md-surface-variant,#e7e0ec);",
+            "  color:var(--md-on-surface,#1c1b1f);",
+            "  font-size:13px;font-weight:500;border:none;cursor:pointer;gap:6px;",
+            "  text-decoration:none;",
+            "}",
+            "[data-theme=dark] .ab-ovl-btn-secondary{",
+            "  background:var(--md-dark-surface-variant,#49454f);",
+            "  color:var(--md-dark-on-surface,#e6e1e5);",
+            "}",
             "@media(max-width:480px){",
             "  #ab-update-card{padding:24px 18px 20px;border-radius:20px;}",
             "  #ab-update-card .ab-ovl-title{font-size:16px;}",
+            "  .ab-ovl-btn-primary,.ab-ovl-btn-secondary{padding:9px 16px;font-size:12px;}",
             "}"
         ].join("");
         document.head.appendChild(st);
@@ -1496,7 +1623,7 @@ window.abDoUpdate=function(){
     overlay.id="ab-update-overlay";
     overlay.innerHTML=[
         '<div id="ab-update-card">',
-        '  <div class="ab-ovl-icon">⬇️</div>',
+        '  <div class="ab-ovl-icon">☁️</div>',
         '  <div class="ab-ovl-title">正在更新到 v'+newVer+'</div>',
         '  <div class="ab-ovl-sub">请勿关闭或刷新页面</div>',
         '  <div id="ab-ovl-pct"></div>',
@@ -1517,6 +1644,7 @@ window.abDoUpdate=function(){
     var barMsg =document.getElementById("ab-ovl-msg");
     var barPct =document.getElementById("ab-ovl-pct");
     var card   =document.getElementById("ab-update-card");
+    var lastType="";
 
     function setProgress(pct, msg){
         if(barMsg) barMsg.textContent=msg||"";
@@ -1527,7 +1655,6 @@ window.abDoUpdate=function(){
             }
             if(barPct) barPct.textContent=Math.min(100,pct)+"%";
         } else {
-            // 不确定进度：脉冲动画
             if(barFill){
                 barFill.style.animation="ab-bar-pulse 1.2s ease infinite";
                 barFill.style.width="35%";
@@ -1536,102 +1663,148 @@ window.abDoUpdate=function(){
         }
     }
 
-    // ---- 构造 SSE URL ----
-    var sseUrl=ajax.url+"?do=do-update-stream"
-        +"&download_url="+encodeURIComponent(dlUrl)
-        +"&new_version="+encodeURIComponent(newVer)
-        +"&_="+encodeURIComponent(ajax.token||"");
+    function showBtns(html){
+        if(!card) return;
+        var w=document.createElement("div");
+        w.style.cssText="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;";
+        w.innerHTML=html;
+        card.appendChild(w);
+    }
 
-    var es=new EventSource(sseUrl);
-    var lastType="";
-
-    es.onmessage=function(e){
-        var ev; try{ ev=JSON.parse(e.data); }catch(ex){ return; }
-        var type=ev.type, msg=ev.message, pct=ev.progress;
-        lastType=type;
-        setProgress(pct, msg);
-
-        if(type==="done"){
-            es.close();
-            window.removeEventListener("beforeunload", onBeforeUnload);
-            if(barFill){ barFill.style.animation=""; barFill.style.width="100%"; }
-            if(barPct) barPct.textContent="100%";
-            // 成功态：图标+标题+副标题切换
-            setTimeout(function(){
-                if(card){
-                    card.querySelector(".ab-ovl-icon").textContent="✅";
-                    card.querySelector(".ab-ovl-title").textContent="更新成功！";
-                    card.querySelector(".ab-ovl-sub").textContent="即将自动刷新页面...";
-                }
-                // 清理更新缓存
-                try{ localStorage.removeItem("ab-update-check"); }catch(e){}
-                try{
-                    if(navigator.serviceWorker&&navigator.serviceWorker.controller){
-                        navigator.serviceWorker.controller.postMessage({type:"CLEAR_CACHE"});
-                    }
-                    if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){
-                        navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update();}).catch(function(){});
-                    }
-                }catch(e){}
-                setTimeout(function(){ location.reload(); },2500);
-            }, 600);
-        } else if(type==="error"){
-            es.close();
-            window.removeEventListener("beforeunload", onBeforeUnload);
-            if(card){
-                card.querySelector(".ab-ovl-icon").textContent="❌";
-                card.querySelector(".ab-ovl-title").style.color="#dc2626";
-                card.querySelector(".ab-ovl-title").textContent="更新失败";
-                card.querySelector(".ab-ovl-sub").textContent=msg||"请前往 GitHub 手动下载";
-                if(barFill) barFill.style.background="#dc2626";
-                // 添加手动下载按钮
-                var btnWrap=document.createElement("div");
-                btnWrap.style.cssText="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;";
-                btnWrap.innerHTML=[
-                    '<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases" target="_blank"',
-                    ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
-                    ' background:var(--md-primary,#6750a4);color:#fff;font-size:13px;font-weight:500;',
-                    ' text-decoration:none;gap:6px;">',
-                    ' 前往 GitHub 下载</a>',
-                    '<button onclick="document.getElementById(\'ab-update-overlay\').remove()"',
-                    ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
-                    ' background:var(--md-surface-variant,#e7e0ec);',
-                    ' color:var(--md-on-surface,#1c1b1f);',
-                    ' font-size:13px;font-weight:500;border:none;cursor:pointer;gap:6px;">',
-                    ' 关闭</button>'
-                ].join("");
-                card.appendChild(btnWrap);
-            }
-        }
-    };
-
-    es.onerror=function(){
-        es.close();
+    // 成功处理
+    function onDone(){
         window.removeEventListener("beforeunload", onBeforeUnload);
-        if(lastType==="done"||lastType==="error") return;
-        // 连接意外断开
+        if(barFill){ barFill.style.animation=""; barFill.style.width="100%"; }
+        if(barPct) barPct.textContent="100%";
+        setTimeout(function(){
+            if(card){
+                card.querySelector(".ab-ovl-icon").textContent="✅";
+                card.querySelector(".ab-ovl-title").textContent="更新成功！";
+                card.querySelector(".ab-ovl-sub").textContent="即将自动刷新页面...";
+            }
+            try{ localStorage.removeItem("ab-update-check"); }catch(e){}
+            try{
+                if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+                    navigator.serviceWorker.controller.postMessage({type:"CLEAR_CACHE"});
+                }
+                if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){
+                    navigator.serviceWorker.getRegistration().then(function(r){if(r)r.update();}).catch(function(){});
+                }
+            }catch(e){}
+            setTimeout(function(){ location.reload(); },2500);
+        },600);
+    }
+
+    // 失败处理
+    function onError(msg){
+        window.removeEventListener("beforeunload", onBeforeUnload);
+        if(card){
+            card.querySelector(".ab-ovl-icon").textContent="❌";
+            card.querySelector(".ab-ovl-title").style.color="#dc2626";
+            card.querySelector(".ab-ovl-title").textContent="更新失败";
+            card.querySelector(".ab-ovl-sub").textContent=msg||"请前往 GitHub 手动下载";
+            if(barFill) barFill.style.background="#dc2626";
+        }
+        showBtns(
+            '<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases"'+
+            ' target="_blank" class="ab-ovl-btn-primary">前往 GitHub 下载</a>'+
+            '<button class="ab-ovl-btn-secondary"'+
+            ' onclick="document.getElementById(\'ab-update-overlay\').remove()">关闭</button>'
+        );
+    }
+
+    // 连接中断处理
+    function onInterrupt(){
+        window.removeEventListener("beforeunload", onBeforeUnload);
         if(card){
             card.querySelector(".ab-ovl-icon").textContent="⚠️";
             card.querySelector(".ab-ovl-title").textContent="连接中断";
             card.querySelector(".ab-ovl-sub").textContent="更新状态未知，请手动检查后台文件是否已更新";
-            var btnWrap2=document.createElement("div");
-            btnWrap2.style.cssText="display:flex;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap;";
-            btnWrap2.innerHTML=[
-                '<button onclick="location.reload()"',
-                ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
-                ' background:var(--md-primary,#6750a4);color:#fff;',
-                ' font-size:13px;font-weight:500;border:none;cursor:pointer;">',
-                ' 刷新页面</button>',
-                '<button onclick="document.getElementById(\'ab-update-overlay\').remove()"',
-                ' style="display:inline-flex;align-items:center;padding:10px 20px;border-radius:20px;',
-                ' background:var(--md-surface-variant,#e7e0ec);',
-                ' color:var(--md-on-surface,#1c1b1f);',
-                ' font-size:13px;font-weight:500;border:none;cursor:pointer;">',
-                ' 关闭</button>'
-            ].join("");
-            card.appendChild(btnWrap2);
         }
-    };
+        showBtns(
+            '<button class="ab-ovl-btn-primary" onclick="location.reload()">刷新页面</button>'+
+            '<button class="ab-ovl-btn-secondary"'+
+            ' onclick="document.getElementById(\'ab-update-overlay\').remove()">关闭</button>'
+        );
+    }
+
+    // 处理单个 SSE 事件
+    function handleEvent(ev){
+        var type=ev.type, msg=ev.message, pct=ev.progress;
+        lastType=type;
+        setProgress(pct, msg);
+        if(type==="done") onDone();
+        else if(type==="error") onError(msg);
+    }
+
+    // ---- 构造 SSE URL ----
+    var sep=ajax.url.indexOf('?')>=0?'&':'?';
+    var sseUrl=ajax.url+sep+"do=do-update-stream"
+        +"&download_url="+encodeURIComponent(dlUrl)
+        +"&new_version="+encodeURIComponent(newVer)
+        +"&_="+encodeURIComponent(ajax.token||"");
+
+    // ---- 优先使用 fetch + ReadableStream（兼容性更好，可读取错误内容）----
+    // 不支持时降级到非流式 AJAX（do-update）
+    var useStream=!!(window.fetch&&window.ReadableStream&&window.TextDecoder);
+
+    if(useStream){
+        fetch(sseUrl,{credentials:"same-origin",headers:{Accept:"text/event-stream"}})
+        .then(function(resp){
+            if(!resp.ok){
+                return resp.text().then(function(t){
+                    var detail=t?t.replace(/<[^>]+>/g,"").trim().substring(0,200):"";
+                    onError("服务器返回 HTTP "+resp.status+(detail?"\n"+detail:""));
+                });
+            }
+            var ct=resp.headers.get("content-type")||"";
+            if(ct.indexOf("text/event-stream")<0){
+                return resp.text().then(function(t){
+                    var detail=t?t.replace(/<[^>]+>/g,"").trim().substring(0,200):"";
+                    onError("响应格式异常（"+ct+"）"+(detail?"\n"+detail:""));
+                });
+            }
+            // 流式读取 SSE 帧
+            var reader=resp.body.getReader();
+            var dec=new TextDecoder();
+            var buf="";
+            function readChunk(){
+                return reader.read().then(function(r){
+                    if(r.done){
+                        if(lastType!=="done"&&lastType!=="error") onInterrupt();
+                        return;
+                    }
+                    buf+=dec.decode(r.value,{stream:true});
+                    var parts=buf.split("\n\n");
+                    buf=parts.pop();
+                    for(var i=0;i<parts.length;i++){
+                        var m=parts[i].match(/^data:\s*(.+)$/m);
+                        if(m){ try{ handleEvent(JSON.parse(m[1])); }catch(ex){} }
+                    }
+                    return readChunk();
+                });
+            }
+            return readChunk();
+        })
+        .catch(function(err){
+            if(lastType!=="done"&&lastType!=="error") onInterrupt();
+        });
+    } else {
+        // 降级：非流式单次 AJAX（无实时进度，仅 loading 动画）
+        setProgress(-1,"正在更新，请稍候...");
+        var fd=new URLSearchParams();
+        fd.append("do","do-update");
+        fd.append("download_url",dlUrl);
+        fd.append("new_version",newVer);
+        fd.append("_",ajax.token||"");
+        fetch(ajax.url,{method:"POST",body:fd,credentials:"same-origin"})
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if(d&&d.code===0) handleEvent({type:"done",message:"更新成功",progress:100});
+            else onError((d&&d.message)||"更新失败");
+        })
+        .catch(function(){ onInterrupt(); });
+    }
 };
 
 // ---- abShowUpdateToast: 轻量级提示（主要用于配置页手动检查反馈）----
