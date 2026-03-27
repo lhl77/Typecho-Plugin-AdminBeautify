@@ -17,7 +17,8 @@
 
 <p align="center">
 
-📖 [文档](https://blog.lhl.one/artical/977.html) | 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues) | 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
+<a href="https://blog.lhl.one/artical/977.html">📖 文档</a> | 
+<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">🐛 问题反馈</a>
 
 </p>
 
