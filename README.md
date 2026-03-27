@@ -71,7 +71,7 @@ your-site/
 
 ## ☕ 捐助
 
-| <img src="[https://example.com/image.png](https://i.see.you/2026/03/05/yc0T/4ca32aa36972b03bd14c1e480972db55.jpg)" width="50%" /> |
+| <img src="https://i.see.you/2026/03/05/yc0T/4ca32aa36972b03bd14c1e480972db55.jpg" width="50%" /> |
 | ------------------------------------------------------------ |
 | <p align="center">微信赞赏码</p>                             |
 
