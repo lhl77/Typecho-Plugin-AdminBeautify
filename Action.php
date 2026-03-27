@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.26
+ * @version 2.1.27
  * @link https://blog.lhl.one
  */
 
@@ -240,7 +240,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.26';
+        $pluginVer  = '2.1.27';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -605,6 +605,76 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
 
         $this->jsonSuccess($settings);
+    }
+
+    /**
+     * 批量获取媒体文件的实际访问 URL（兼容 PicUp 等插件的 CDN 路径）
+     * 访问方式：GET /action/admin-beautify?do=get-media-urls&cids=1,2,3
+     *
+     * 返回：{ "1": "https://...", "2": "https://..." }
+     */
+    public function getMediaUrls()
+    {
+        $this->checkAuth();
+
+        $cidParam = $this->request->get('cids', '');
+        if (empty($cidParam)) {
+            $this->jsonSuccess(array());
+            return;
+        }
+
+        $rawCids = explode(',', (string)$cidParam);
+        $cids = array_values(array_filter(array_map('intval', $rawCids)));
+        if (empty($cids)) {
+            $this->jsonSuccess(array());
+            return;
+        }
+
+        $result = array();
+        try {
+            $rows = $this->db->fetchAll(
+                $this->db->select('cid', 'text')
+                    ->from('table.contents')
+                    ->where('type = ?', 'attachment')
+                    ->where('cid IN ?', $cids)
+            );
+
+            foreach ($rows as $row) {
+                $cid     = (int)$row['cid'];
+                $content = json_decode($row['text'], true);
+                if (!is_array($content) || empty($content['path'])) {
+                    continue;
+                }
+
+                // 优先通过 Upload::attachmentHandle 获取 URL（触发 PicUp 等插件的 CDN 路径 hook）
+                $url = '';
+                try {
+                    $attachment = new \Typecho\Config($content);
+                    $url = \Widget\Upload::attachmentHandle($attachment);
+                } catch (\Throwable $e) {
+                    // 降级：直接用 path 字段
+                }
+
+                // 二次降级：path 若为完整 URL 直接用；否则拼接站点根
+                if (empty($url)) {
+                    $path = $content['path'];
+                    if (strpos($path, 'http') === 0 || strpos($path, '//') === 0) {
+                        $url = $path;
+                    } else {
+                        $siteUrl = rtrim((string)$this->options->siteUrl, '/');
+                        $url     = $siteUrl . '/' . ltrim($path, '/');
+                    }
+                }
+
+                if (!empty($url)) {
+                    $result[(string)$cid] = $url;
+                }
+            }
+        } catch (Exception $e) {
+            error_log('[AdminBeautify] getMediaUrls error: ' . $e->getMessage());
+        }
+
+        $this->jsonSuccess($result);
     }
 
     /**
@@ -1182,6 +1252,82 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
     /**
      * 一键安装 AdminBeautifyStore 插件
+    /**
+     * Umami API 代理 — 绕过跨域 Authorization 头限制
+     *
+     * 前端调用：/action/admin-beautify?do=umami-proxy&path=/api/websites/xxx/stats?startAt=...
+     * 服务端用 curl/file_get_contents 转发请求并携带 Bearer Token。
+     *
+     * 访问方式：/action/admin-beautify?do=umami-proxy
+     */
+    public function umamiProxy()
+    {
+        $this->checkAuth();
+
+        $opts   = $this->pluginOptions;
+        $base   = rtrim($opts->umamiApiBase ?? '', '/');
+        $token  = $opts->umamiApiToken ?? '';
+
+        if (!$base || !$token) {
+            $this->jsonError('Umami 未配置', 400);
+            return;
+        }
+
+        // 只允许代理 /api/ 路径，防止 SSRF 滥用
+        $path = $this->request->get('path', '');
+        if (!$path || strpos($path, '/api/') !== 0) {
+            $this->jsonError('非法路径', 400);
+            return;
+        }
+
+        $url = $base . $path;
+
+        // 尝试 curl，不存在则 fallback file_get_contents
+        $body = false;
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $token,
+                'Accept: application/json',
+            ]);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            $body   = curl_exec($ch);
+            $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err    = curl_error($ch);
+            curl_close($ch);
+            if ($body === false || $err) {
+                $this->jsonError('代理请求失败: ' . $err, 502);
+                return;
+            }
+        } else {
+            $ctx = stream_context_create([
+                'http' => [
+                    'method'  => 'GET',
+                    'header'  => "Authorization: Bearer {$token}\r\nAccept: application/json\r\n",
+                    'timeout' => 10,
+                ],
+                'ssl' => ['verify_peer' => true],
+            ]);
+            $body   = @file_get_contents($url, false, $ctx);
+            $status = 200;
+            if ($body === false) {
+                $this->jsonError('代理请求失败', 502);
+                return;
+            }
+        }
+
+        $data = json_decode($body, true);
+        if ($data === null) {
+            $this->jsonError('Umami 响应解析失败', 502);
+            return;
+        }
+
+        $this->jsonSuccess($data);
+    }
+
+    /**
      * 访问方式：/action/admin-beautify?do=install-abs
      *
      * 从 GitHub 下载 main 分支 ZIP 并解压到 /usr/plugins/AdminBeautifyStore/
@@ -1350,6 +1496,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 $this->getSettings();
                 break;
 
+            case 'get-media-urls':
+                $this->getMediaUrls();
+                break;
+
             case 'save-settings':
                 $this->saveSettings();
                 break;
@@ -1372,6 +1522,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
             case 'install-abs':
                 $this->installAbs();
+                break;
+
+            case 'umami-proxy':
+                $this->umamiProxy();
                 break;
 
             default:
