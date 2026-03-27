@@ -16,9 +16,9 @@
 </p>
 
 <p align="center">
-
-<a href="https://blog.lhl.one/artical/977.html">📖 文档</a> | 
-<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">🐛 问题反馈</a>
+  快捷链接：
+  <a href="https://blog.lhl.one/artical/977.html">📖 文档</a> | 
+  <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">🐛 问题反馈</a>
 
 </p>
 
