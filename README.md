@@ -15,6 +15,12 @@
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/network/members"><img src="https://img.shields.io/github/forks/lhl77/Typecho-Plugin-AdminBeautify?style=flat-square&logo=github" alt="GitHub Forks"></a>
 </p>
 
+<p align="center">
+## 🔗 相关链接
+
+📖 [文档](https://blog.lhl.one/artical/977.html) | 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues) | 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
+</p>
+
 ---
 
 ## ✨ 功能特色
@@ -25,46 +31,15 @@
 - 📐 **圆角风格** — 小 / 中 / 大三档圆角可调
 - ✨ **过渡动画** — 丝滑的界面过渡动画，可开关
 - 📌 **导航栏位置** — 支持侧边栏（默认）和顶部导航栏两种布局
-- 🔐 **登录页美化** — 独立的登录页面美化，支持：
-  - 12+ 配色预设方案（紫、蓝、粉、绿、橙、红、青、靛蓝、日落渐变、海洋渐变等）
-  - 自定义主色 / 辅色
-  - 背景图片 + 可调虚化效果
-  - 站点名称显示 / 隐藏
-  - 独立的暗色模式控制
-  - 自定义 CSS / JS 注入
+- 🔐 **登录页美化** — 独立的登录页面美化
 - ⚡ **AJAX 导航** — 无刷新页面切换，后台操作更流畅
-- 📱 **PWA 响应式 APP** — 安装到您的电脑/手机，流畅管理博客 (v2.1.0 加入)
-- 🧩 **兼容脚本设计** — 自动修复其他插件的排版和功能 (v2.1.0 加入)
-### 兼容脚本设计文档：[LHL's Blog](https://blog.lhl.one/artical/977.html)
-
-## 📸 截图预览
-
-### 首页
-
-![首页](https://i.see.you/2026/03/17/6Mno/120280d221daa17e1ee30e6d521007fb.png)
-
-### 插件管理
-![](https://i.see.you/2026/03/17/gd4G/7b14279a0538c9b6ba1bc7429b4e41e6.png)
-
-### 个人设置
-![](https://i.see.you/2026/03/09/6obF/adb91d7fa933171c290b5c2b8d2800b3.jpg)
-
-### 顶部导航栏（原版）
-![](https://i.see.you/2026/03/17/9Ypt/d9b6961153f32368133485d12b433df8.png)
-
-### 文章编辑页面
-![](https://i.see.you/2026/03/17/dm0S/b602888ee0a7797e062055afc17f6b1e.png)
-
-### 文章管理
-![](https://i.see.you/2026/03/17/Tn4s/91fcb0c5e025f7995331a3f7a8325d57.png)
-
-### 插件仓库
-
-![AB插件仓库](https://i.see.you/2026/03/17/9aJj/0baed7d89739f94efed00c371226d22d.png)
-
-### 移动端导航栏
-
-![](https://i.see.you/2026/03/09/nGd0/f6e304f2c9d58b622ccd59f334c12c27.png)
+- 📱 **PWA 响应式 APP** — 安装到电脑 / 手机，自定义名称和图标，流畅管理博客
+- 🧩 **兼容脚本设计** — 自动修复其他插件的排版和功能，支持外部兼容脚本 URL
+- 🃏 **插件列表样式** — 支持 MD3 卡片网格 / 原始表格两种展示方式
+- 📊 **概要页增强** — 快捷操作按钮（胶囊 / 图标卡片两种样式）、自定义快捷按钮、MD3 风格最近文章 / 评论卡片
+- 📈 **内置数据图表** — 概要页底部「更新频率」折线图与「近期评论分类」极坐标图，支持 7 天 / 30 天 / 全部时间范围
+- 📡 **Umami 访问统计** — 在概要页展示今日访问量、总访问量、热门文章、跳出率等 Umami 数据卡片
+- ✏️ **Vditor 编辑器** — 可选替换为 Vditor Markdown 编辑器（所见即所得 / 实时预览 / 分屏编辑），或开启第三方编辑器兼容模式
 
 ## 📦 安装
 
@@ -91,15 +66,6 @@ your-site/
     └── plugins/
         └── AdminBeautify/
 ```
-
-### 使用文档 [进入](https://blog.lhl.one/artical/977.html)
-
-## 🔗 相关链接
-
-- 📖 [使用文档](https://blog.lhl.one/artical/977.html)
-- 🐛 [问题反馈](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues)
-- 🌟 [GitHub 仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)
-
 
 
 ## ☕ 捐助
