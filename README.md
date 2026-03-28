@@ -1,4 +1,4 @@
-![](https://i.see.you/2026/03/17/nqD8/pasted-image-1773708323115.webp)
+![](https://i.see.you/2026/03/28/9Jdq/9b3028ef0009824db65eafa8acdd30a6.jpg)
 
 <h1 align="center">Admin Beautify</h1>
 
