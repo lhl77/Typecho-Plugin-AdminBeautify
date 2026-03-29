@@ -38,7 +38,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         </div>
         <svg id="ab-card-about-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="<?php echo $abC1; ?>" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
-    <div id="ab-card-about-body" class="ab-card-body" style="overflow:hidden;max-height:9999px;padding:0 22px 24px;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
+    <div id="ab-card-about-body" class="ab-card-body" style="overflow:hidden;max-height:9999px;padding:0px 36px 16px !important;transition:max-height .4s cubic-bezier(.4,0,.2,1)">
 
         <!-- ── 作者信息 ── -->
         <div style="margin:16px 0 0;padding:18px;background:linear-gradient(135deg,<?php echo $abC1; ?>18,<?php echo $abC2; ?>10);border-radius:16px;border:1px solid <?php echo $abC1; ?>22">
@@ -63,8 +63,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     Telegram 群
                 </a>
                 <a href="https://qm.qq.com/q/OOzG20idi2" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 2.717.99 5.198 2.618 7.107C4.232 20.525 3 22 3 22s1.81-.474 3.49-1.388A9.947 9.947 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm1.5 14.5h-3v-5h3v5zm0-7h-3V7.5h3V9.5z"/></svg>
-                    QQ 群
+                <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="14" height="14" viewBox="0 0 48 48">
+<path fill="#FFC107" d="M17.5,44c-3.6,0-6.5-1.6-6.5-3.5s2.9-3.5,6.5-3.5s6.5,1.6,6.5,3.5S21.1,44,17.5,44z M37,40.5c0-1.9-2.9-3.5-6.5-3.5S24,38.6,24,40.5s2.9,3.5,6.5,3.5S37,42.4,37,40.5z"></path><path fill="#37474F" d="M37.2,22.2c-0.1-0.3-0.2-0.6-0.3-1c0.1-0.5,0.1-1,0.1-1.5c0-1.4-0.1-2.6-0.1-3.6C36.9,9.4,31.1,4,24,4S11,9.4,11,16.1c0,0.9,0,2.2,0,3.6c0,0.5,0,1,0.1,1.5c-0.1,0.3-0.2,0.6-0.3,1c-1.9,2.7-3.8,6-3.8,8.5C7,35.5,8.4,35,8.4,35c0.6,0,1.6-1,2.5-2.1C13,38.8,18,43,24,43s11-4.2,13.1-10.1C38,34,39,35,39.6,35c0,0,1.4,0.5,1.4-4.3C41,28.2,39.1,24.8,37.2,22.2z"></path><path fill="#ECEFF1" d="M14.7,23c-0.5,1.5-0.7,3.1-0.7,4.8C14,35.1,18.5,41,24,41s10-5.9,10-13.2c0-1.7-0.3-3.3-0.7-4.8H14.7z"></path><path fill="#FFF" d="M23,13.5c0,1.9-1.1,3.5-2.5,3.5S18,15.4,18,13.5s1.1-3.5,2.5-3.5S23,11.6,23,13.5z M27.5,10c-1.4,0-2.5,1.6-2.5,3.5s1.1,3.5,2.5,3.5s2.5-1.6,2.5-3.5S28.9,10,27.5,10z"></path><path fill="#37474F" d="M22,13.5c0,0.8-0.4,1.5-1,1.5s-1-0.7-1-1.5s0.4-1.5,1-1.5S22,12.7,22,13.5z M27,12c-0.6,0-1,0.7-1,1.5s0.4-0.5,1-0.5s1,1.3,1,0.5S27.6,12,27,12z"></path><path fill="#FFC107" d="M32,19.5c0,0.8-3.6,2.5-8,2.5s-8-1.7-8-2.5s3.6-1.5,8-1.5S32,18.7,32,19.5z"></path><path fill="#FF3D00" d="M38.7,21.2c-0.4-1.5-1-2.2-2.1-1.3c0,0-5.9,3.1-12.5,3.1v0.1l0-0.1c-6.6,0-12.5-3.1-12.5-3.1c-1.1-0.8-1.7-0.2-2.1,1.3c-0.4,1.5-0.7,2,0.7,2.8c0.1,0.1,1.4,0.8,3.4,1.7c-0.6,3.5-0.5,6.8-0.5,7c0.1,1.5,1.3,1.3,2.9,1.3c1.6-0.1,2.9,0,2.9-1.6c0-0.9,0-2.9,0.3-5c1.6,0.3,3.2,0.6,5,0.6l0,0v0c7.3,0,13.7-3.9,13.9-4C39.3,23.3,39,22.8,38.7,21.2z"></path><path fill="#DD2C00" d="M13.2,27.7c1.6,0.6,3.5,1.3,5.6,1.7c0-0.6,0.1-1.3,0.2-2c-2.1-0.5-4-1.1-5.5-1.7C13.4,26.4,13.3,27.1,13.2,27.7z"></path>
+</svg>    
+                QQ 群
                 </a>
             </div>
         </div>
@@ -85,7 +87,11 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 </a>
                 <a href="https://shop.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
                     <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🛒 LHL's Shop 小店</div>
-                    <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">售卖作者的一些付费服务、虚拟主机、源码等</div>
+                    <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">可领取免费虚拟主机，并售卖作者的一些付费服务、虚拟主机、源码等</div>
+                </a>
+                <a href="https://blog.lhl.one/friends.html" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
+                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">♥️ 欢迎与作者博客交换友链</div>
+                    <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">您的网站需要被至少一个搜索引擎引用，且类型需要为博客。</div>
                 </a>
             </div>
         </div>
@@ -118,15 +124,15 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
             <div id="ab-about-thanks" style="border-radius:12px;padding:12px;background:var(--md-surface-container-low);border:1px solid var(--md-outline-variant);">
                 <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">特别鸣谢：</div>
-                <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
-                    <li><a href="https://mzrme.com/" target="_blank" style="color:inherit">MZRME</a></li>
-                    <li><a href="https://github.com/leletheme" target="_blank" style="color:inherit">Lele</a></li>
-                    <li><a href="https://github.com/QingSongYaya" target="_blank" style="color:inherit">QingSongYaya</a></li>
-                </ul><br/>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+                    <a href="https://mzrme.com/" target="_blank" style="display:inline-flex;align-items:center;padding:3px 12px;background:rgba(0,0,0,.06);border-radius:20px;font-size:12px;color:var(--md-on-surface);text-decoration:none;transition:background .15s" onmouseover="this.style.background='rgba(0,0,0,.12)'" onmouseout="this.style.background='rgba(0,0,0,.06)'">MZRME</a>
+                    <a href="https://github.com/leletheme" target="_blank" style="display:inline-flex;align-items:center;padding:3px 12px;background:rgba(0,0,0,.06);border-radius:20px;font-size:12px;color:var(--md-on-surface);text-decoration:none;transition:background .15s" onmouseover="this.style.background='rgba(0,0,0,.12)'" onmouseout="this.style.background='rgba(0,0,0,.06)'">Lele</a>
+                    <a href="https://github.com/QingSongYaya" target="_blank" style="display:inline-flex;align-items:center;padding:3px 12px;background:rgba(0,0,0,.06);border-radius:20px;font-size:12px;color:var(--md-on-surface);text-decoration:none;transition:background .15s" onmouseover="this.style.background='rgba(0,0,0,.12)'" onmouseout="this.style.background='rgba(0,0,0,.06)'">QingSongYaya</a>
+                </div>
                 <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">你们的支持是我开发的最大动力：</div>
-                <ul style="margin:0;padding-left:18px;color:var(--md-on-surface);font-size:13px">
-                    <li>感谢 <a href="https://github.com/Yilimmilk" target="_blank" style="color:inherit">Yilimmilk</a> 的 20元 打赏</li>
-                </ul>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 12px;background:rgba(0,0,0,.06);border-radius:20px;font-size:12px;color:var(--md-on-surface)">感谢 <a href="https://github.com/Yilimmilk" target="_blank" style="color:var(--md-primary,#6750a4);font-weight:600;text-decoration:none">Yilimmilk</a> 的 20元 打赏</span>
+                </div>
                 <br/><div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">（将按周期随版本更新，如有调整后续更新）</div>
             </div>
         </div>
@@ -139,6 +145,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     <div style="animation:ab-spin 1s linear infinite;display:inline-block;width:20px;height:20px;border:2px solid rgba(0,0,0,.1);border-top-color:#79747e;border-radius:50%;margin-bottom:8px"></div>
                     <div>正在从 GitHub 加载更新日志...</div>
                 </div>
+            </div>
+            <div id="ab-changelog-load-more" style="text-align:center;padding:8px 0 2px;display:none">
+                <button type="button" id="ab-changelog-more-btn" style="background:none;border:none;font-size:12px;color:#79747e;cursor:pointer;padding:4px 14px;border-radius:20px;transition:background .15s;text-decoration:underline;text-underline-offset:3px" onmouseover="this.style.background='rgba(0,0,0,.05)'" onmouseout="this.style.background='none'">加载更多</button>
             </div>
         </div>
 
@@ -200,7 +209,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
     // ── 从 GitHub API 加载更新日志 ──
     // 镜像代理前缀（直连失败时依次尝试）
-    var GH_API_MIRRORS=["","https://gh-proxy.org/","https://ghfast.top/","https://ghproxy.com/"];
+    var GH_API_MIRRORS=["","https://gh-proxy.org/","https://ghfast.top/","https://ghproxy.com/","https://gh1.lhl.one"];
     function ghApiGet(url,cb){
         var idx=0;
         function tryNext(){
@@ -362,4 +371,3 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     }
 })();
 </script>
-
