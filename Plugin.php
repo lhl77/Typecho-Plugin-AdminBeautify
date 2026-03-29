@@ -1,10 +1,10 @@
 <?php
 /**
- * AB-Admin (Admin Beautify) - 最美 Typecho 后台美化插件，Material Design 3风格
+ * AB-Admin (Admin Beautify) - 最美 Typecho 后台美化增强插件，Material Design 3 设计
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.27
+ * @version 2.1.28
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -43,7 +43,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         Typecho_Plugin::factory('admin/footer.php')->begin = array(__CLASS__, 'renderFooter');
         Typecho_Plugin::factory('admin/footer.php')->end = array(__CLASS__, 'renderLoginFooter');
         Utils\Helper::addAction('admin-beautify', 'AdminBeautify_Action');
-        return _t('AdminBeautify 已启用');
+        return _t('AB-Admin 已启用');
     }
 
     /**
@@ -80,7 +80,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.27';
+        $abVer = '2.1.28';
 
         // ====== 插件信息头部 ======
         include dirname(__FILE__) . '/assets/templates/config/header.php';
@@ -357,7 +357,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             ),
             '0',
             _t('编辑器'),
-            _t('AB Typecho 优化：使用 AdminBeautify 优化后的原版编辑器（含 AB 工具栏）；AB Vditor：替换为 Vditor Markdown 编辑器；兼容其他编辑器：不注入任何编辑器相关 CSS / JS，适合已安装第三方编辑器插件时使用。')
+            _t('AB Typecho 优化：使用 AB-Admin 优化后的原版编辑器（含 AB 工具栏）；AB Vditor：替换为 Vditor Markdown 编辑器；兼容其他编辑器：不注入任何编辑器相关 CSS / JS，适合已安装第三方编辑器插件时使用。')
         );
         $form->addInput($editorVditor);
 
@@ -736,7 +736,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ── MD3 风格 console banner（所有 /admin 页面均注入，含登录页）──
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.27 %c",'
+            .   '"%c AB-Admin %c v2.1.28 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -900,7 +900,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.27' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.28' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
@@ -1172,7 +1172,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.27',
+            'pluginVersion'          => '2.1.28',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1196,7 +1196,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.27.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.28.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1211,7 +1211,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.27"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.28"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1411,7 +1411,7 @@ function mkBanner(release){
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.27";';
+        echo 'var __AB_VER__="2.1.28";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -1509,7 +1509,7 @@ window.abShowUpdateAvailable=function(d){
         actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">立即更新</span>'
                    +'<span style="font-size:11px;opacity:.65;align-self:center;">需手动更新</span>';
     }
-    actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;">查看详情</a>';
+    actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;color:white!important">查看详情</a>';
 
     if(banner){
         // 配置页：嵌入 banner 内
@@ -1525,7 +1525,7 @@ window.abShowUpdateAvailable=function(d){
     } else {
         // 其他页面：固定顶部通知栏
         notify.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;background:linear-gradient(90deg,#5c6bc0,#7e57c2);color:#fff;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25);animation:ab-slideDown .3s ease;font-weight:500";
-        notify.innerHTML='<span style="flex:1">🎉 AdminBeautify 发现新版本 <strong>v'+d.latest+'</strong> <span style="opacity:.8;font-size:12px;font-weight:400">（当前 v'+d.current+'）</span></span>'
+        notify.innerHTML='<span style="flex:1">🎉 AB-Admin 发现新版本 <strong>v'+d.latest+'</strong> <span style="opacity:.8;font-size:12px;font-weight:400">（当前 v'+d.current+'）</span></span>'
             +'<div style="display:flex;gap:8px;align-items:center">'+actionBtns+dismissBtn+'</div>';
         document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+40)+'px';
         document.body.insertBefore(notify,document.body.firstChild);
@@ -1961,7 +1961,7 @@ UPDATEJS;
         if ($typechoVer && version_compare($typechoVer, '1.3.0', '<')) {
             $noteMsg = '检测到 Typecho 版本：v' . htmlspecialchars($typechoVer) . '，建议升级到 v1.3.0 以获得最佳兼容性。';
             if (version_compare($typechoVer, '1.2.1', '==')) {
-                $noteMsg .= ' 如果暂时无法升级，请在 AdminBeautify 插件设置中手动启用 Typecho 1.2.1 兼容脚本。';
+                $noteMsg .= ' 如果暂时无法升级，请在 AB-Admin 插件设置中手动启用 Typecho 1.2.1 兼容脚本。';
             }
             // 插入到页面顶部的 JS 提示条（不依赖服务端渲染位置，可安全注入）
             echo '<script>(function(){try{var b=document.createElement("div");b.id="ab-typecho-version-note";b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99998;padding:10px 14px;background:#fef3c7;color:#92400e;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.06);";b.innerHTML=' . json_encode($noteMsg) . ';document.body.insertBefore(b,document.body.firstChild);document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+48)+"px";setTimeout(function(){b.style.transform="translateY(0)";},10);}catch(e){} })();</script>';

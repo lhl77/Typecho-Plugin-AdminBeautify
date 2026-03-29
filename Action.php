@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.27
+ * @version 2.1.28
  * @link https://blog.lhl.one
  */
 
@@ -60,11 +60,30 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
 
     /**
+     * 底层 JSON 输出：清空所有输出缓冲区后直接用 header()+echo+exit 发送。
+     * 完全绕过 Typecho 的 response 链（addResponder / respond / sandbox），
+     * 是最可靠的 JSON 响应方式，对 ob_start / PicUp 等场景均安全。
+     *
+     * @param array $payload
+     */
+    private function sendJsonRaw(array $payload)
+    {
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+
+    /**
      * 输出 JSON 成功响应
      */
     private function jsonSuccess($data = null, $message = 'ok')
     {
-        $this->response->throwJson(array(
+        $this->sendJsonRaw(array(
             'code'    => 0,
             'message' => $message,
             'data'    => $data,
@@ -76,7 +95,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
      */
     private function jsonError($message = 'error', $code = 400)
     {
-        $this->response->throwJson(array(
+        $this->sendJsonRaw(array(
             'code'    => $code,
             'message' => $message,
             'data'    => null,
@@ -240,7 +259,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.27';
+        $pluginVer  = '2.1.28';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -605,6 +624,336 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
 
         $this->jsonSuccess($settings);
+    }
+
+    /**
+     * 上传文件（通过 Typecho 内置上传机制，兼容 PicUp 等插件 hook）
+     * 访问方式：POST /action/admin-beautify?do=upload-media
+     * Content-Type: multipart/form-data
+     *
+     * POST 参数：
+     *   files[]  — 一个或多个文件
+     *   parent   — 归属文章 cid（可选，默认 0 表示未归档）
+     *
+     * 返回：{ code:0, data:[ { cid, name, url, mime, size }, ... ] }
+     */
+    public function uploadMedia()
+    {
+        // 捕获处理过程中所有 PHP 警告/通知等杂散输出，确保 JSON 响应干净
+        ob_start();
+
+        try {
+            $this->_doUploadMedia();
+        } catch (\Throwable $e) {
+            // 捕获任何未处理的 PHP 7+ Error / Exception（含 PicUp 驱动抛出的异常）
+            error_log('[AdminBeautify] uploadMedia fatal: ' . get_class($e) . ': ' . $e->getMessage());
+            $this->jsonError('上传处理出错：' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * uploadMedia 的实际逻辑，由 uploadMedia() 在外层 try/catch 中调用。
+     */
+    private function _doUploadMedia()
+    {
+        $this->checkAuth();
+
+        if (empty($_FILES['files'])) {
+            $this->jsonError('没有收到文件', 400);
+            return;
+        }
+
+        $parent = max(0, (int)$this->request->get('parent', 0));
+
+        // 将 PHP 的 $_FILES['files'] 转为 [文件索引 => 单文件数组] 的形式
+        $rawFiles = $_FILES['files'];
+        $fileList = array();
+        if (is_array($rawFiles['name'])) {
+            $count = count($rawFiles['name']);
+            for ($i = 0; $i < $count; $i++) {
+                if ($rawFiles['error'][$i] !== UPLOAD_ERR_OK) {
+                    continue;
+                }
+                $fileList[] = array(
+                    'name'     => $rawFiles['name'][$i],
+                    'tmp_name' => $rawFiles['tmp_name'][$i],
+                    'size'     => $rawFiles['size'][$i],
+                    'type'     => $rawFiles['type'][$i],
+                    'error'    => $rawFiles['error'][$i],
+                );
+            }
+        } else {
+            if ($rawFiles['error'] === UPLOAD_ERR_OK) {
+                $fileList[] = $rawFiles;
+            }
+        }
+
+        if (empty($fileList)) {
+            $this->jsonError('所有文件上传失败（可能超出大小限制）', 400);
+            return;
+        }
+
+        $results  = array();
+        $failures = array();
+
+        foreach ($fileList as $file) {
+            // 通过 Widget_Upload::uploadHandle 走完整的 Typecho 上传流程（含 PicUp 等 hook）
+            try {
+                $uploadResult = \Widget\Upload::uploadHandle($file);
+            } catch (\Throwable $e) {
+                $failures[] = $file['name'] . ': ' . $e->getMessage();
+                continue;
+            }
+
+            if (!$uploadResult || !is_array($uploadResult) || empty($uploadResult['path'])) {
+                // 尝试给出更具体的失败原因
+                $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                if ($ext && !\Widget\Upload::checkFileType($ext)) {
+                    $failures[] = $file['name'] . ': 不支持的文件类型（.' . $ext . '）';
+                } else {
+                    $failures[] = $file['name'] . ': 上传失败，请检查文件大小限制或服务器权限';
+                }
+                continue;
+            }
+
+            // 写入 table.contents（与原生 Typecho 媒体上传流程一致，不写 table.fields）
+            try {
+                $now   = time();
+                $title = isset($uploadResult['name']) ? $uploadResult['name'] : basename($uploadResult['path']);
+
+                $db   = $this->db;
+                $user = Typecho_Widget::widget('Widget_User');
+
+                // 生成 URL 安全的唯一 slug。
+                // 策略：取 title（原始文件名）去掉扩展名作为可读前缀，
+                // 追加时间戳 + uniqid 随机串，无需 DB 查重，100% 不冲突。
+                $slugBase = pathinfo($title, PATHINFO_FILENAME);
+                $slugBase = preg_replace('/[^a-zA-Z0-9\x{4e00}-\x{9fa5}_-]/u', '-', $slugBase);
+                $slugBase = trim(preg_replace('/-{2,}/', '-', $slugBase), '-');
+                if (empty($slugBase)) {
+                    $slugBase = 'attachment';
+                }
+                $slug = $slugBase . '-' . $now . '-' . substr(md5(uniqid('', true)), 0, 8);
+
+                $insertData = array(
+                    'title'        => $title,
+                    'slug'         => $slug,
+                    'created'      => $now,
+                    'modified'     => $now,
+                    'text'         => json_encode($uploadResult),
+                    'authorId'     => (int)$user->uid,
+                    'type'         => 'attachment',
+                    'status'       => 'publish',
+                    'password'     => '',
+                    'commentsNum'  => 0,
+                    'allowComment' => '0',
+                    'allowPing'    => '0',
+                    'allowFeed'    => '0',
+                    'parent'       => $parent,
+                );
+
+                $cid = (int)$db->query($db->insert('table.contents')->rows($insertData));
+
+                // 获取文件访问 URL（触发 PicUp 等 hook）
+                $url = '';
+                try {
+                    $attachConfig = new Typecho_Config($uploadResult);
+                    $url = \Widget\Upload::attachmentHandle($attachConfig);
+                } catch (\Throwable $e) {
+                    // 降级：URL 在下方通过 path 拼接
+                }
+                if (empty($url)) {
+                    $path = $uploadResult['path'];
+                    if (strpos($path, 'http') === 0 || strpos($path, '//') === 0) {
+                        $url = $path;
+                    } else {
+                        $siteUrl = rtrim((string)$this->options->siteUrl, '/');
+                        $url     = $siteUrl . '/' . ltrim($path, '/');
+                    }
+                }
+
+                $results[] = array(
+                    'cid'  => $cid,
+                    'name' => $title,
+                    'url'  => $url,
+                    'mime' => isset($uploadResult['mime']) ? $uploadResult['mime'] : '',
+                    'size' => isset($uploadResult['size']) ? (int)$uploadResult['size'] : 0,
+                );
+            } catch (\Throwable $e) {
+                error_log('[AdminBeautify] uploadMedia DB error: ' . get_class($e) . ': ' . $e->getMessage());
+                $failures[] = $file['name'] . ': 数据库写入失败（' . $e->getMessage() . '）';
+            }
+        }
+
+        $this->jsonSuccess(array(
+            'uploaded' => $results,
+            'failed'   => $failures,
+        ));
+    }
+
+    /**
+     * 列出附件（分页+搜索，支持按 parent 筛选）
+     * 访问方式：GET /action/admin-beautify?do=list-media&page=1&per=20&parent=0&search=xxx
+     *   parent=-1  → 全部附件
+     *   parent=0   → 未归档（parent=0）
+     *   parent=N   → 属于文章 N 的附件
+     *
+     * 返回：{ total, page, per, items:[ { cid, name, url, mime, size, created } ] }
+     */
+    public function listMedia()
+    {
+        $this->checkAuth();
+
+        $page   = max(1, (int)$this->request->get('page', 1));
+        $per    = min(100, max(1, (int)$this->request->get('per', 20)));
+        $parent = (int)$this->request->get('parent', -1);
+        $search = trim((string)$this->request->get('search', ''));
+        $offset = ($page - 1) * $per;
+
+        try {
+            $db = $this->db;
+
+            // ── 构建基础查询条件 ──
+            $baseQuery = $db->select('COUNT(cid)', 'num')
+                ->from('table.contents')
+                ->where('type = ?', 'attachment');
+
+            $dataQuery = $db->select('cid', 'title', 'text', 'authorId', 'created', 'parent')
+                ->from('table.contents')
+                ->where('type = ?', 'attachment');
+
+            if ($parent >= 0) {
+                $baseQuery->where('parent = ?', $parent);
+                $dataQuery->where('parent = ?', $parent);
+            }
+            if ($search !== '') {
+                $like = '%' . str_replace(array('%', '_'), array('\\%', '\\_'), $search) . '%';
+                $baseQuery->where('title LIKE ?', $like);
+                $dataQuery->where('title LIKE ?', $like);
+            }
+
+            $totalRow = $db->fetchObject($db->select(array('COUNT(cid)' => 'num'))
+                ->from('table.contents')
+                ->where('type = ?', 'attachment'));
+            // 重新构建独立计数查询
+            $countQ = $db->select(array('COUNT(cid)' => 'num'))
+                ->from('table.contents')
+                ->where('type = ?', 'attachment');
+            if ($parent >= 0) {
+                $countQ->where('parent = ?', $parent);
+            }
+            if ($search !== '') {
+                $like = '%' . str_replace(array('%', '_'), array('\\%', '\\_'), $search) . '%';
+                $countQ->where('title LIKE ?', $like);
+            }
+            $totalRow = $db->fetchObject($countQ);
+            $total = $totalRow ? (int)$totalRow->num : 0;
+
+            $dataQ = $db->select('cid', 'title', 'text', 'created', 'parent')
+                ->from('table.contents')
+                ->where('type = ?', 'attachment');
+            if ($parent >= 0) {
+                $dataQ->where('parent = ?', $parent);
+            }
+            if ($search !== '') {
+                $like = '%' . str_replace(array('%', '_'), array('\\%', '\\_'), $search) . '%';
+                $dataQ->where('title LIKE ?', $like);
+            }
+            $dataQ->order('cid', \Typecho\Db::SORT_DESC)->page($page, $per);
+
+            $rows = $db->fetchAll($dataQ);
+            $items = array();
+            foreach ($rows as $row) {
+                $content = json_decode($row['text'], true);
+                if (!is_array($content)) { $content = array(); }
+
+                // 获取访问 URL
+                $url = '';
+                try {
+                    $attachCfg = new \Typecho\Config($content);
+                    $url = \Widget\Upload::attachmentHandle($attachCfg);
+                } catch (\Throwable $e) {}
+                if (empty($url)) {
+                    $path = isset($content['path']) ? $content['path'] : '';
+                    if (strpos($path, 'http') === 0 || strpos($path, '//') === 0) {
+                        $url = $path;
+                    } elseif ($path !== '') {
+                        $siteUrl = rtrim((string)$this->options->siteUrl, '/');
+                        $url     = $siteUrl . '/' . ltrim($path, '/');
+                    }
+                }
+
+                $items[] = array(
+                    'cid'     => (int)$row['cid'],
+                    'name'    => $row['title'],
+                    'url'     => $url,
+                    'mime'    => isset($content['mime']) ? $content['mime'] : '',
+                    'size'    => isset($content['size']) ? (int)$content['size'] : 0,
+                    'created' => (int)$row['created'],
+                    'parent'  => (int)$row['parent'],
+                );
+            }
+
+            $this->jsonSuccess(array(
+                'total' => $total,
+                'page'  => $page,
+                'per'   => $per,
+                'items' => $items,
+            ));
+        } catch (\Throwable $e) {
+            error_log('[AdminBeautify] listMedia error: ' . $e->getMessage());
+            $this->jsonError('获取媒体列表失败：' . $e->getMessage(), 500);
+        }
+    }
+
+    /**
+     * 删除附件（软删除：从 table.contents 移除，同时调用 Widget\Upload::deleteHandle 删除实际文件）
+     * 访问方式：POST /action/admin-beautify?do=delete-media
+     * POST 参数：cid — 附件 cid
+     */
+    public function deleteMedia()
+    {
+        $this->checkAuth();
+
+        $cid = (int)$this->request->get('cid', 0);
+        if ($cid <= 0) {
+            $this->jsonError('缺少 cid 参数', 400);
+            return;
+        }
+
+        try {
+            $db = $this->db;
+
+            // 取出附件信息
+            $row = $db->fetchRow(
+                $db->select('cid', 'text', 'type')
+                    ->from('table.contents')
+                    ->where('cid = ?', $cid)
+                    ->where('type = ?', 'attachment')
+                    ->limit(1)
+            );
+
+            if (!$row) {
+                $this->jsonError('附件不存在', 404);
+                return;
+            }
+
+            $content = json_decode($row['text'], true);
+            if (is_array($content)) {
+                try {
+                    \Widget\Upload::deleteHandle(new \Typecho\Config($content));
+                } catch (\Throwable $e) {
+                    error_log('[AdminBeautify] deleteMedia deleteHandle error: ' . $e->getMessage());
+                }
+            }
+
+            $db->query($db->delete('table.contents')->where('cid = ?', $cid));
+
+            $this->jsonSuccess(array('cid' => $cid));
+        } catch (\Throwable $e) {
+            error_log('[AdminBeautify] deleteMedia error: ' . $e->getMessage());
+            $this->jsonError('删除失败：' . $e->getMessage(), 500);
+        }
     }
 
     /**
@@ -1498,6 +1847,18 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
             case 'get-media-urls':
                 $this->getMediaUrls();
+                break;
+
+            case 'list-media':
+                $this->listMedia();
+                break;
+
+            case 'delete-media':
+                $this->deleteMedia();
+                break;
+
+            case 'upload-media':
+                $this->uploadMedia();
                 break;
 
             case 'save-settings':
