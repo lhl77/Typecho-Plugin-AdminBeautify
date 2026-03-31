@@ -132,6 +132,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">你们的支持是我开发的最大动力：</div>
                 <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:4px">
                     <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 12px;background:rgba(0,0,0,.06);border-radius:20px;font-size:12px;color:var(--md-on-surface)">感谢 <a href="https://github.com/Yilimmilk" target="_blank" style="color:var(--md-primary,#6750a4);font-weight:600;text-decoration:none">Yilimmilk</a> 的 20元 打赏</span>
+                    <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 12px;background:rgba(0,0,0,.06);border-radius:20px;font-size:12px;color:var(--md-on-surface)">感谢 <a href="https://github.com/QingSongYaya" target="_blank" style="color:var(--md-primary,#6750a4);font-weight:600;text-decoration:none">QingSongYaya</a> 的 20元 打赏</span>
                 </div>
                 <br/><div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">（将按周期随版本更新，如有调整后续更新）</div>
             </div>
