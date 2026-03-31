@@ -24,7 +24,7 @@ class AdminBeautify_Updater
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
 
     /** 当前版本 */
-    const CURRENT_VERSION = '2.1.28';
+    const CURRENT_VERSION = '2.1.29';
 
     /** 插件根目录 */
     private $pluginDir;
@@ -263,11 +263,11 @@ class AdminBeautify_Updater
         $this->copyDir($this->pluginDir, $backupDir, array('tmp_update'));
         call_user_func($emit, 'backed_up', '备份完成（' . self::CURRENT_VERSION . '）', 100);
 
-        // 7. 覆盖文件
-        call_user_func($emit, 'copy_start', '正在覆盖插件文件...', 0);
-        $skipDirs = array('tmp_update', 'assets/compat');
-        $copied   = $this->copyDir($sourceDir, $this->pluginDir, $skipDirs);
-        call_user_func($emit, 'copied', "已覆盖 {$copied} 个文件", 100);
+        // 7. 先清理旧版本文件（避免含版本号的 JS/CSS 文件新旧并存），再写入新文件
+        call_user_func($emit, 'copy_start', '正在清理旧版本文件并写入新版本...', 0);
+        $this->cleanPluginDir($sourceDir);
+        $copied   = $this->copyDir($sourceDir, $this->pluginDir, array('tmp_update'));
+        call_user_func($emit, 'copied', "已写入 {$copied} 个文件", 100);
 
         // 8. 清理临时文件（保留 backup）
         @unlink($zipFile);
@@ -486,10 +486,10 @@ class AdminBeautify_Updater
         $this->copyDir($this->pluginDir, $backupDir, array('tmp_update'));
         $details[] = '已备份当前版本到 tmp_update/backup_' . self::CURRENT_VERSION;
 
-        // 7. 将新文件覆盖到插件目录（跳过用户数据目录和本 tmp 目录）
-        $skipDirs = array('tmp_update', 'assets/compat'); // 不覆盖 compat（保留用户自定义脚本）
-        $copied = $this->copyDir($sourceDir, $this->pluginDir, $skipDirs);
-        $details[] = '已覆盖 ' . $copied . ' 个文件';
+        // 7. 先清理旧版本文件（避免含版本号的 JS/CSS 文件新旧并存），再写入新文件
+        $this->cleanPluginDir($sourceDir);
+        $copied = $this->copyDir($sourceDir, $this->pluginDir, array('tmp_update'));
+        $details[] = '已写入 ' . $copied . ' 个文件';
 
         // 8. 清理临时文件（保留 backup）
         @unlink($zipFile);
@@ -542,6 +542,109 @@ class AdminBeautify_Updater
             }
         }
         return false;
+    }
+
+    /**
+     * 更新前清理插件目录中的旧版本文件，避免含版本号的 JS/CSS 等新旧文件并存。
+     *
+     * 规则：
+     *  - 删除 $pluginDir 下所有文件/目录，但保留 tmp_update 目录。
+     *  - 对 assets/compat 目录单独处理：
+     *      若新包中包含该文件 → 用新包文件（即删除旧的，稍后 copyDir 写入新的）
+     *      若新包中不含该文件 → 保留旧文件（用户自定义 / 系统默认脚本）
+     *
+     * @param string $sourceDir  已解压的新版本插件根目录
+     */
+    private function cleanPluginDir($sourceDir)
+    {
+        $pluginDir  = $this->pluginDir;
+        $tmpRelName = 'tmp_update'; // 唯一需要保留的目录
+
+        // --- 处理 assets/compat：先收集新包中的 compat 文件列表 ---
+        $newCompatDir  = $sourceDir . '/assets/compat';
+        $newCompatFiles = array();
+        if (is_dir($newCompatDir)) {
+            $items = @scandir($newCompatDir);
+            if ($items) {
+                foreach ($items as $item) {
+                    if ($item === '.' || $item === '..') continue;
+                    if (is_file($newCompatDir . '/' . $item)) {
+                        $newCompatFiles[$item] = true;
+                    }
+                }
+            }
+        }
+
+        // --- 删除 pluginDir 中的所有条目（除 tmp_update）---
+        $items = @scandir($pluginDir);
+        if (!$items) return;
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            if ($item === $tmpRelName) continue; // 保留 tmp_update
+
+            $path = $pluginDir . '/' . $item;
+
+            // assets/compat 目录需单独处理
+            if ($item === 'assets') {
+                $this->cleanAssetsDir($path, $newCompatFiles);
+                continue;
+            }
+
+            // 其他文件/目录直接删除
+            if (is_dir($path)) {
+                $this->removeDir($path);
+            } else {
+                @unlink($path);
+            }
+        }
+    }
+
+    /**
+     * 清理 assets 目录：递归删除其中的所有内容，
+     * 但对 compat 子目录只删除"新包中存在的"文件，保留新包中没有的文件。
+     *
+     * @param string $assetsDir      当前 assets 目录路径
+     * @param array  $newCompatFiles 新包 compat 目录中的文件名索引（basename => true）
+     */
+    private function cleanAssetsDir($assetsDir, $newCompatFiles)
+    {
+        if (!is_dir($assetsDir)) return;
+
+        $items = @scandir($assetsDir);
+        if (!$items) return;
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $path = $assetsDir . '/' . $item;
+
+            if ($item === 'compat' && is_dir($path)) {
+                // compat 目录：只删除"新包有对应文件"的旧文件
+                $compatItems = @scandir($path);
+                if ($compatItems) {
+                    foreach ($compatItems as $ci) {
+                        if ($ci === '.' || $ci === '..') continue;
+                        $ciPath = $path . '/' . $ci;
+                        if (is_file($ciPath) && isset($newCompatFiles[$ci])) {
+                            // 新包包含此文件 → 删除旧的，让 copyDir 写入新版
+                            @unlink($ciPath);
+                        }
+                        // 新包中没有的文件 → 保留（用户自定义脚本）
+                    }
+                }
+                // 如果 compat 目录在新包中也有，不删目录本身
+                continue;
+            }
+
+            // 其他子目录/文件直接删除
+            if (is_dir($path)) {
+                $this->removeDir($path);
+            } else {
+                @unlink($path);
+            }
+        }
+
+        // 如果 assets 目录里的子目录已全清空（compat 可能还有文件），不删 assets 目录本身
     }
 
     /**

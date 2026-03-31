@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.28
+ * @version 2.1.29
  * @link https://blog.lhl.one
  */
 
@@ -259,7 +259,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.28';
+        $pluginVer  = '2.1.29';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
 
@@ -1677,6 +1677,191 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
 
     /**
+     * 代理获取外观仓库列表
+     * 访问方式：GET /action/admin-beautify?do=fetch-theme-list
+     *
+     * 服务端代理请求 theme.json，避免前端跨域及 GitHub 访问问题。结果缓存 1 小时。
+     */
+    public function fetchThemeList()
+    {
+        $this->checkAuth();
+
+        $cacheDir  = dirname(__FILE__) . '/tmp_update';
+        if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
+        $cacheFile = $cacheDir . '/ab_theme_list_cache.json';
+        $cacheTtl  = 3600;
+
+        if (is_file($cacheFile) && (time() - filemtime($cacheFile) < $cacheTtl)) {
+            $cached = @file_get_contents($cacheFile);
+            if ($cached !== false && strlen($cached) > 5) {
+                while (ob_get_level() > 0) @ob_end_clean();
+                if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
+                echo $cached;
+                exit;
+            }
+        }
+
+        $remoteUrl = 'https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/refs/heads/main/AdminBeautify/theme.json';
+        $mirrors   = array('https://gh1.lhl.one/' . $remoteUrl, $remoteUrl);
+        $content   = false;
+
+        foreach ($mirrors as $url) {
+            $ctx = stream_context_create(array(
+                'http' => array('method' => 'GET', 'timeout' => 15, 'follow_location' => 1,
+                    'max_redirects' => 5, 'user_agent' => 'AdminBeautify-Typecho-Plugin/2.0'),
+                'ssl'  => array('verify_peer' => false, 'verify_peer_name' => false),
+            ));
+            $content = @file_get_contents($url, false, $ctx);
+            if ($content !== false && strlen($content) > 5) break;
+            $content = false;
+            if (function_exists('curl_init')) {
+                $ch = curl_init($url);
+                curl_setopt_array($ch, array(CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15,
+                    CURLOPT_FOLLOWLOCATION => true, CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => false, CURLOPT_USERAGENT => 'AdminBeautify-Typecho-Plugin/2.0'));
+                $content  = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                if ($content !== false && $httpCode === 200 && strlen($content) > 5) break;
+                $content = false;
+            }
+        }
+
+        if ($content === false) {
+            if (is_file($cacheFile)) {
+                $stale = @file_get_contents($cacheFile);
+                if ($stale) {
+                    while (ob_get_level() > 0) @ob_end_clean();
+                    if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
+                    echo $stale;
+                    exit;
+                }
+            }
+            $this->jsonError('获取外观仓库列表失败，请检查服务器网络', 502);
+        }
+
+        $decoded = @json_decode($content, true);
+        if (!is_array($decoded)) $this->jsonError('外观仓库数据格式错误', 500);
+
+        @file_put_contents($cacheFile, $content, LOCK_EX);
+        while (ob_get_level() > 0) @ob_end_clean();
+        if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
+        echo $content;
+        exit;
+    }
+
+    /**
+     * 下载外观 ZIP 并解压到 /usr/themes/
+     * 访问方式：POST /action/admin-beautify?do=download-theme
+     * Body: url=<zip_url>&name=<theme_dir_name>
+     */
+    public function downloadTheme()
+    {
+        $this->checkAdmin();
+
+        if (!class_exists('ZipArchive')) {
+            $this->jsonError('PHP ZipArchive 扩展未安装，无法解压 ZIP', 500);
+        }
+
+        $zipUrl   = isset($_POST['url'])  ? trim($_POST['url'])  : '';
+        $themeName = isset($_POST['name']) ? trim($_POST['name']) : '';
+
+        if (empty($zipUrl) || !preg_match('#^https?://#i', $zipUrl)) {
+            $this->jsonError('无效的下载地址', 400);
+        }
+        // 目录名只允许字母/数字/连字符/下划线，防路径遍历
+        if ($themeName !== '' && !preg_match('/^[a-zA-Z0-9_\-]+$/', $themeName)) {
+            $this->jsonError('主题目录名不合法', 400);
+        }
+
+        $themesDir = rtrim(dirname(dirname(dirname(__FILE__))), '/\\') . DIRECTORY_SEPARATOR . 'themes';
+        if (!is_dir($themesDir))     $this->jsonError('themes 目录不存在: ' . $themesDir, 500);
+        if (!is_writable($themesDir)) $this->jsonError('themes 目录不可写，请检查权限', 500);
+
+        // 下载（先走镜像，再直连）
+        $mirrors    = array('https://gh1.lhl.one/' . $zipUrl, $zipUrl);
+        $zipContent = false;
+        foreach ($mirrors as $tryUrl) {
+            $ctx = stream_context_create(array(
+                'http' => array('method' => 'GET', 'timeout' => 90, 'follow_location' => 1,
+                    'max_redirects' => 5, 'user_agent' => 'AdminBeautify-Typecho-Plugin/2.0'),
+                'ssl'  => array('verify_peer' => false, 'verify_peer_name' => false),
+            ));
+            $zipContent = @file_get_contents($tryUrl, false, $ctx);
+            if ($zipContent !== false && strlen($zipContent) >= 100) break;
+            $zipContent = false;
+            if (function_exists('curl_init')) {
+                $ch = curl_init($tryUrl);
+                curl_setopt_array($ch, array(CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 90,
+                    CURLOPT_FOLLOWLOCATION => true, CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => false, CURLOPT_USERAGENT => 'AdminBeautify-Typecho-Plugin/2.0'));
+                $zipContent = curl_exec($ch);
+                $httpCode   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                if ($zipContent !== false && $httpCode === 200 && strlen($zipContent) >= 100) break;
+                $zipContent = false;
+            }
+        }
+        if ($zipContent === false) $this->jsonError('下载外观 ZIP 失败，请检查服务器网络', 502);
+
+        $tmpFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ab_theme_' . md5(time() . $zipUrl) . '.zip';
+        if (@file_put_contents($tmpFile, $zipContent) === false) {
+            $this->jsonError('无法写入临时文件，请检查 temp 目录权限', 500);
+        }
+        unset($zipContent);
+
+        $zip = new ZipArchive();
+        if ($zip->open($tmpFile) !== true) {
+            @unlink($tmpFile);
+            $this->jsonError('ZIP 文件损坏或无法打开', 500);
+        }
+
+        // 自动检测 ZIP 根目录（GitHub archive 格式有顶层目录）
+        $zipRootDir = '';
+        $firstEntry = $zip->getNameIndex(0);
+        if ($firstEntry !== false) {
+            $parts = explode('/', $firstEntry);
+            if (count($parts) > 1) $zipRootDir = $parts[0] . '/';
+        }
+
+        // 推断 targeted 主题目录名
+        if ($themeName === '') {
+            $dirName   = rtrim($zipRootDir, '/');
+            $dirName   = preg_replace('/-(?:main|master)$/', '', $dirName);
+            $themeName = ($dirName !== '') ? $dirName : 'theme_' . time();
+        }
+        $targetDir = $themesDir . DIRECTORY_SEPARATOR . $themeName;
+
+        $extracted = 0;
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $entry    = $zip->getNameIndex($i);
+            if ($zipRootDir !== '' && strpos($entry, $zipRootDir) !== 0) continue;
+            $relative = ($zipRootDir !== '') ? substr($entry, strlen($zipRootDir)) : $entry;
+            if ($relative === '' || $relative === false) continue;
+            if (strpos($relative, '..') !== false) continue; // 防路径穿越
+
+            $destPath = $targetDir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            if (substr($entry, -1) === '/') {
+                if (!is_dir($destPath)) @mkdir($destPath, 0755, true);
+            } else {
+                $destDir = dirname($destPath);
+                if (!is_dir($destDir)) @mkdir($destDir, 0755, true);
+                @file_put_contents($destPath, $zip->getFromIndex($i));
+                $extracted++;
+            }
+        }
+        $zip->close();
+        @unlink($tmpFile);
+
+        if ($extracted === 0) $this->jsonError('ZIP 解压失败：未找到有效文件，请手动安装', 500);
+
+        $this->jsonSuccess(array(
+            'theme_dir' => $themeName,
+            'files'     => $extracted,
+        ), '外观 "' . $themeName . '" 安装成功，共解压 ' . $extracted . ' 个文件');
+    }
+
+    /**
      * 访问方式：/action/admin-beautify?do=install-abs
      *
      * 从 GitHub 下载 main 分支 ZIP 并解压到 /usr/plugins/AdminBeautifyStore/
@@ -1883,6 +2068,14 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
 
             case 'install-abs':
                 $this->installAbs();
+                break;
+
+            case 'fetch-theme-list':
+                $this->fetchThemeList();
+                break;
+
+            case 'download-theme':
+                $this->downloadTheme();
                 break;
 
             case 'umami-proxy':

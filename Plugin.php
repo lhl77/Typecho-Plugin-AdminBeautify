@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.28
+ * @version 2.1.29
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 
@@ -80,16 +80,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.28';
+        $abVer = '2.1.29';
 
         // ====== 插件信息头部 ======
-        include dirname(__FILE__) . '/assets/templates/config/header.php';
+        include dirname(__FILE__) . '/assets/pages/config/header.php';
 
         // ================================================================
         // ====== 配置面板全局样式（卡片、提示框、暗色模式、动画） ======
         // ================================================================
-        include dirname(__FILE__) . '/assets/templates/config/config.style.php';
-        include_once dirname(__FILE__) . '/assets/templates/config/card-create.php';
+        include dirname(__FILE__) . '/assets/pages/config/config.style.php';
+        include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
 
         // ================================================================
         // ====== 管理后台设置（MD3 折叠卡片） ======
@@ -714,15 +714,15 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $form->addInput($notifyOptOut);
 
         // ====== MD3 折叠卡片 + 颜色跟随 + 检查更新 ======
-        include dirname(__FILE__) . '/assets/templates/config/config.script.php';
+        include dirname(__FILE__) . '/assets/pages/config/config.script.php';
 
         // ================================================================
         // ====== 关于插件（MD3 折叠卡片） ======
         // ================================================================
-        include dirname(__FILE__) . '/assets/templates/config/about.php';
+        include dirname(__FILE__) . '/assets/pages/config/about.php';
 
         // ====== 公告弹窗通知（仅设置页，从 GitHub 拉取 notice.md） ======
-        include dirname(__FILE__) . '/assets/templates/config/notice.script.php';
+        include dirname(__FILE__) . '/assets/pages/config/notice.script.php';
     }
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
     {
@@ -736,7 +736,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         // ── MD3 风格 console banner（所有 /admin 页面均注入，含登录页）──
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.28 %c",'
+            .   '"%c AB-Admin %c v2.1.29 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -900,14 +900,15 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         // ─── TAIL 注入：置于 Typecho CSS 之后 ────────────────────────────────────
         // 3. style.css（此时 CSS 变量已全部就绪，不会出现 var() fallback 闪烁）
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.28' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.29' . '.css">';
 
         // Vditor CSS：仅在编写页面且开启时注入
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePage) {
-            $injectTail .= "\n" . '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vditor/dist/index.css">';
+            $vditorIndexCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.css', $options->pluginUrl);
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorIndexCssUrl) . '">';
         }
         // 兼容其他编辑器模式 + 隐藏原有工具栏：注入 CSS 覆盖 AB 的 !important
         $editorHideToolbar = isset($pluginOptions->editor_hideToolbar) ? (string)$pluginOptions->editor_hideToolbar : '0';
@@ -1172,7 +1173,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.28',
+            'pluginVersion'          => '2.1.29',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1196,7 +1197,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         )) . ';</script>';
 
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.28.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.29.js"></script>';
 
         // 兼容其他编辑器模式：在写作页面禁用 AB toolbar 初始化
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
@@ -1211,7 +1212,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.28"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.29"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
 
         // ====== 横幅更新通知（版本变化时显示，所有后台页面） ======
@@ -1307,8 +1308,8 @@ function mkBanner(release){
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePageFooter) {
             // Vditor 样式与逻辑：从 assets/vditor/ 加载独立文件，避免 PHP 文件膨胀
-            $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.1.css', $options->pluginUrl);
-            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/vditor/vditor_v1.0.2.js', $options->pluginUrl);
+            $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v1.0.1.css', $options->pluginUrl);
+            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v1.0.3.js', $options->pluginUrl);
             echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorCssUrl) . '">';
             echo '<script src="' . htmlspecialchars($vditorJsUrl) . '"></script>';
         }
@@ -1411,7 +1412,7 @@ function mkBanner(release){
 
         // ====== 插件更新检查模块（全局可用） ======
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.28";';
+        echo 'var __AB_VER__="2.1.29";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2075,9 +2076,17 @@ UPDATEJS;
             .     'btn.rel="noopener";'
             .   '}'
             .   'btn.id=BTN_ID;'
-            .   'btn.textContent=BTN_TEXT;'
-            .   'btn.className="btn btn-s btn-primary";'
-            .   'btn.style.cssText="margin-left:auto;flex-shrink:0;";'
+            // MD3 filled-tonal 风格按钮：使用图标 + 文字
+            .   'btn.innerHTML=\'<span class="material-icons-round" style="font-size:18px;margin-right:6px;vertical-align:-3px">store</span>\'+BTN_TEXT;'
+            .   'btn.className="ab-store-shortcut-md3-btn";'
+            .   'btn.style.cssText='
+            .     '"display:inline-flex;align-items:center;margin-left:auto;flex-shrink:0;padding:8px 16px 8px 12px;'
+            .     'border-radius:20px;border:none;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;'
+            .     'background:var(--md-secondary-container,#e8def8);color:var(--md-on-secondary-container,#1d192b);'
+            .     'box-shadow:0 1px 3px rgba(0,0,0,.12);transition:box-shadow .2s,background .2s;line-height:1;white-space:nowrap;'
+            .     'text-decoration:none;";'
+            .   'btn.addEventListener("mouseover",function(){this.style.boxShadow="0 3px 10px rgba(0,0,0,.18)";});'
+            .   'btn.addEventListener("mouseout",function(){this.style.boxShadow="0 1px 3px rgba(0,0,0,.12)";});'
             .   'titleArea.appendChild(btn);'
             . '}'
             . 'function abRemoveStoreBtn(){'
@@ -2144,6 +2153,12 @@ function abCompatAutoSyncToast(n){
     setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},8000);
 }
 })();</script>';
+
+        // ====== AB 外观仓库 — 设置全局变量供外部 JS 使用 ======
+        echo '<script>';
+        echo 'window.__AB_TS_URL__='  . json_encode(Typecho_Common::url('/action/admin-beautify', $options->index)) . ';';
+        echo 'window.__AB_TS_TOKEN__=' . json_encode($token) . ';';
+        echo '</script>';
 
         // ====== 加载兼容性脚本 ======
         self::loadCompatScripts($options, $pluginOptions);
@@ -2510,7 +2525,7 @@ window.abSyncCompat = function(){
         $jsShowSiteName = $showSiteName ? 'true' : 'false';
         $jsShowToggle = $showThemeToggle ? 'true' : 'false';
 
-        include dirname(__FILE__) . '/assets/templates/login/script.php';
+        include dirname(__FILE__) . '/assets/pages/login/script.php';
     }
 
     // ================================================================
@@ -2577,7 +2592,7 @@ window.abSyncCompat = function(){
         $bgCss = $bgImage !== '' ? "url(" . htmlspecialchars($bgImage, ENT_QUOTES, 'UTF-8') . ")" : "none";
         $jsThemeMode = self::jsString($themeMode);
 
-        include dirname(__FILE__) . '/assets/templates/login/style.php';
+        include dirname(__FILE__) . '/assets/pages/login/style.php';
     }
 
 
@@ -2607,7 +2622,7 @@ window.abSyncCompat = function(){
             $blurSizeVal = 12;
         }
 
-        include dirname(__FILE__) . '/assets/templates/login/preview.php';
+        include dirname(__FILE__) . '/assets/pages/login/preview.php';
     }
 
 

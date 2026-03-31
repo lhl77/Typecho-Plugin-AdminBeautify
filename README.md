@@ -3,8 +3,9 @@
 <h1 align="center">Admin Beautify</h1>
 
 <p align="center">
-  <strong>Typecho 后台管理界面美化插件 · Material Design 3 风格</strong>
+  <strong align="center">Typecho 后台管理界面美化插件 · Material Design 3 风格</strong>
 </p>
+
 
 <p align="center">
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases"><img src="https://img.shields.io/github/v/release/lhl77/Typecho-Plugin-AdminBeautify?style=flat-square&label=release&color=blue" alt="Latest Release"></a>
@@ -14,17 +15,17 @@
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/stargazers"><img src="https://img.shields.io/github/stars/lhl77/Typecho-Plugin-AdminBeautify?style=flat-square&logo=github" alt="GitHub Stars"></a>
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/network/members"><img src="https://img.shields.io/github/forks/lhl77/Typecho-Plugin-AdminBeautify?style=flat-square&logo=github" alt="GitHub Forks"></a>
 </p>
-
 <p align="center">
   快捷链接：
   <a href="https://blog.lhl.one/artical/977.html">📖 文档</a> | 
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">🐛 问题反馈</a>
-
 </p>
 
 ---
 
 ## ✨ 功能特色
+
+- 🔧 **内置插件仓库、外观仓库**
 
 - 🎨 **Material Design 3 风格** — 全面采用 MD3 设计规范，现代感十足
 - 🌈 **7 种主题色** — 紫、蓝、青、绿、橙、粉、红，一键切换

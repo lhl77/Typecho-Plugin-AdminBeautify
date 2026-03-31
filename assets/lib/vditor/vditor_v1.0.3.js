@@ -35,6 +35,10 @@
     })();
 
     var defaultMode = cfg.editorVditorMode || 'ir';
+    // 本地 index.min.js 路径：从 pluginUrl 拼接
+    var _abPluginUrl = (cfg.pluginUrl || '').replace(/\/+$/, '');
+    var VDITOR_LOCAL_JS = _abPluginUrl + '/usr/plugins/AdminBeautify/assets/lib/vditor/index.min.js';
+    // cdn 选项依然指向远端，供 Vditor 内部子资源（highlight、math 等）使用
     var VDITOR_CDN = 'https://cdn.jsdelivr.net/npm/vditor';
 
     // ── 拦截 window.Vditor 的所有赋值，捕获任意插件创建的实例 ──────────────
@@ -300,7 +304,7 @@
         }
         window._abVditorCDNLoading = true;
         var s = document.createElement('script');
-        s.src = VDITOR_CDN + '/dist/index.min.js';
+        s.src = VDITOR_LOCAL_JS;
         s.onload = function() { window._abVditorCDNLoading = false; cb(); };
         s.onerror = function() { console.error('[AB] Vditor CDN 加载失败'); };
         document.head.appendChild(s);
