@@ -14,7 +14,7 @@
  *              ⑤ 为「拉黑」按钮及菜单项添加 Material Icon，与其他操作按钮风格一致。
  *              已支持 AdminBeautify AJAX 导航（ab:pageload）。
  * @plugins     FuckAdComment
- * @version     1.1.1
+ * @version     1.1.2
  * @author      LHL
  */
 (function () {
@@ -68,13 +68,31 @@
         '  line-height: 1;',
         '  flex-shrink: 0;',
         '}',
-        /* 移动端保持 auto 宽高 */
+        /* 移动端与其他 chip 统一为 32px 圆形 icon-only */
         '@media (max-width: 768px) {',
         '  .comment-action .fuckAdAction {',
-        '    width: auto !important;',
-        '    height: auto !important;',
-        '    padding: 5px 10px !important;',
+        '    width: 32px !important;',
+        '    height: 32px !important;',
+        '    padding: 0 !important;',
+        '    gap: 0 !important;',
+        '    justify-content: center !important;',
+        '    align-items: center !important;',
+        '    flex-shrink: 0 !important;',
         '  }',
+        '  .comment-action .fuckAdAction .fad-chip-text {',
+        '    display: none !important;',
+        '  }',
+        '  .comment-action .fuckAdAction .material-icons-round {',
+        '    font-size: 16px !important;',
+        '    display: flex !important;',
+        '    align-items: center !important;',
+        '    justify-content: center !important;',
+        '    margin-right: 0 !important;',
+        '  }',
+        '}',
+        /* 拉黑按钮文字标签（桌面端显示，移动端隐藏） */
+        '.comment-action .fuckAdAction .fad-chip-text {',
+        '  display: inline !important;',
         '}',
 
         /* 3. 全局浮层菜单 #ab-fad-menu（append 到 body，position:fixed） */
@@ -171,7 +189,7 @@
         try { commentData = JSON.parse(tr.getAttribute('data-comment') || '{}'); }
         catch (ex) { commentData = {}; }
 
-        var actionMap = (typeof window.actionMap === 'object' && window.actionMap) || {};
+        var actionMap = getActionMap();
         var secUrl    = getSecurityUrl();
         var cid       = (tr.querySelector('input[type="checkbox"]') || {}).value || '';
 
@@ -247,21 +265,47 @@
         var scripts = document.querySelectorAll('script:not([src])');
         for (var i = 0; i < scripts.length; i++) {
             var txt = scripts[i].textContent || '';
-            var m = txt.match(/['"]((?:https?:)?\/\/[^'"]*\/action\/FuckAdComment[^'"]*)['"]/);
+            var m = txt.match(/['"]([^'"]*\/action\/FuckAdComment[^'"]*)['"]/);
             if (m) return m[1];
         }
         return '';
+    }
+
+    /* ── 从页面内联 script 提取 actionMap ────────────────────────────────── */
+    /* action.tpl 使用 let actionMap = {...}; 声明，
+     * let 不会挂载到 window 上，因此必须从 inline script 文本中解析。 */
+    function getActionMap() {
+        var scripts = document.querySelectorAll('script:not([src])');
+        for (var i = 0; i < scripts.length; i++) {
+            var txt = scripts[i].textContent || '';
+            if (txt.indexOf('FuckAdComment') === -1) continue;
+            var m = txt.match(/actionMap\s*=\s*(\{[^}]+\})/);
+            if (m) {
+                try { return JSON.parse(m[1]); } catch (e) {}
+            }
+        }
+        return {};
     }
 
     /* ── 向 .fuckAdAction 按钮注入 Material Icon ─────────────────────────── */
     function injectBtnIcons() {
         var btns = document.querySelectorAll('.fuckAdAction');
         for (var i = 0; i < btns.length; i++) {
-            if (btns[i].querySelector('.material-icons-round')) continue;
+            var btn = btns[i];
+            if (btn.querySelector('.material-icons-round')) continue;
+            /* 插入图标 */
             var ico = document.createElement('span');
             ico.className   = 'material-icons-round';
             ico.textContent = 'person_off';
-            btns[i].insertBefore(ico, btns[i].firstChild);
+            btn.insertBefore(ico, btn.firstChild);
+            /* 将文字节点包裹在 span 中，移动端可隐藏文字只保留图标 */
+            var textNode = ico.nextSibling;
+            if (textNode && textNode.nodeType === 3 && textNode.textContent.trim()) {
+                var span = document.createElement('span');
+                span.className = 'fad-chip-text';
+                span.textContent = textNode.textContent;
+                btn.replaceChild(span, textNode);
+            }
         }
     }
 
