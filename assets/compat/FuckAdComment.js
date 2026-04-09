@@ -1,21 +1,20 @@
 /**
  * @name        FuckAdComment 兼容
  * @description 修复 FuckAdComment 插件「评论管理」页面在 AdminBeautify 下的兼容问题：
- *              ① .typecho-list-table { overflow:hidden } 裁剪了原先 position:absolute 的
+ *              ① .typecho-list-table { overflow:hidden } 裁剪了 position:absolute 的
  *                 下拉菜单，导致单击「拉黑」按钮看不到菜单项；
- *                 修复：将下拉菜单替换为单一 position:fixed 的全局浮层（#ab-fad-menu），
- *                 在点击时动态填充当前行数据并通过 getBoundingClientRect() 定位。
- *              ② 原始 .dropdown-menu 在 AdminBeautify 下没有 display:none，会持续暴露；
- *                 修复：CSS 隐藏原始菜单，完全使用全局浮层。
+ *                 修复：创建单一 position:fixed 全局浮层（#ab-fad-menu append 到 body），
+ *                 点击时动态填充当前行数据并以 getBoundingClientRect() 定位。
+ *              ② 原始 .dropdown-menu 持续暴露或被 chip 样式破坏；修复：CSS 隐藏原始菜单。
  *              ③ AdminBeautify 将 window.prompt 改为异步（同步返回 null），导致
  *                 FuckAdComment 的拉黑操作永远无法执行；
  *                 修复：浮层菜单项直接调用 AdminBeautify.prompt() Promise API。
  *              ④ 移动端 ≤768px AdminBeautify 将 .comment-action a 强制设为 32px 圆形，
  *                 导致「拉黑」按钮变形；修复：排除 .fuckAdAction 不受圆形 chip 约束。
- *              ⑤ 为「拉黑」按钮添加 Material Icon，与其他操作按钮风格一致。
+ *              ⑤ 为「拉黑」按钮及菜单项添加 Material Icon，与其他操作按钮风格一致。
  *              已支持 AdminBeautify AJAX 导航（ab:pageload）。
  * @plugins     FuckAdComment
- * @version     1.1.0
+ * @version     1.1.1
  * @author      LHL
  */
 (function () {
@@ -23,17 +22,21 @@
 
     var STYLE_ID = 'ab-compat-fuckadcomment';
 
-    /* ── 图标映射（与 Model.php ACTION_MAP 一致）─────────────────────────── */
+    /* ── 图标映射（与 Model.php ACTION_MAP 一致）────────────────────────── */
     var ICON_MAP = {
-        author : 'person_off',
-        ip     : 'block',
-        text   : 'short_text',
-        url    : 'link_off',
-        mail   : 'mail_lock'
+        author: 'person_off',
+        ip:     'block',
+        text:   'short_text',
+        url:    'link_off',
+        mail:   'mail_lock'
     };
+
+    /* ── CSS ─────────────────────────────────────────────────────────────── */
     var CSS = [
-        /* 排除 .fuckAdAction 不受 MD3 chip 通用样式约束 */
-        '.comment-action .fuckAdRow { overflow: visible !important; }',
+        /* 1. 彻底隐藏原始下拉菜单（被 overflow:hidden 裁剪 + AB chip 破坏） */
+        '.fuckAdRow > .dropdown-menu { display: none !important; }',
+
+        /* 2. .fuckAdAction 排除 MD3 32px 圆形 chip 约束 */
         '.comment-action .fuckAdAction {',
         '  display: inline-flex !important;',
         '  align-items: center !important;',
@@ -48,59 +51,79 @@
         '  background: transparent !important;',
         '  color: var(--md-on-surface-variant) !important;',
         '  text-decoration: none !important;',
-        '  transition: background var(--md-transition-duration, .2s) var(--md-transition-easing, ease);',
+        '  position: relative !important;',
+        '  overflow: visible !important;',
+        '  width: auto !important;',
+        '  height: auto !important;',
+        '  transition: background var(--md-transition-duration,.2s);',
         '}',
-        '.comment-action .fuckAdAction:hover, .comment-action .fuckAdAction.active {',
+        '.comment-action .fuckAdAction:hover,',
+        '.comment-action .fuckAdAction.fad-btn-active {',
         '  background: var(--md-surface-container) !important;',
         '  color: var(--md-on-surface) !important;',
         '}',
-
-        /* 移动端 ≤768px：排除 .fuckAdAction 不被强制为 32px 圆形 */
+        /* 拉黑按钮内的图标 */
+        '.comment-action .fuckAdAction .material-icons-round {',
+        '  font-size: 15px !important;',
+        '  line-height: 1;',
+        '  flex-shrink: 0;',
+        '}',
+        /* 移动端保持 auto 宽高 */
         '@media (max-width: 768px) {',
-        '  .comment-action .fuckAdRow { display: inline-flex !important; }',
         '  .comment-action .fuckAdAction {',
         '    width: auto !important;',
         '    height: auto !important;',
         '    padding: 5px 10px !important;',
-        '    gap: 4px !important;',
         '  }',
         '}',
 
-        /* 下拉菜单本体：AB 的 .dropdown-menu 已有 position:absolute；
-         * 这里重置为 fixed 由 JS 动态定位，确保不被 overflow:hidden 父元素裁剪 */
-        '.fuckAdRow > .dropdown-menu {',
-        '  position: fixed !important;',
+        /* 3. 全局浮层菜单 #ab-fad-menu（append 到 body，position:fixed） */
+        '#ab-fad-menu {',
+        '  position: fixed;',
+        '  z-index: 99999;',
+        '  min-width: 150px;',
+        '  border: 1px solid var(--md-outline-variant, #cac4d0);',
+        '  background: var(--md-surface-container-low, #f7f2fa);',
+        '  border-radius: var(--md-radius-md, 12px);',
+        '  box-shadow: var(--md-elevation-3, 0 4px 16px rgba(0,0,0,.14));',
+        '  padding: 6px 0;',
+        '  list-style: none;',
+        '  margin: 0;',
         '  display: none;',
-        '  z-index: 9999 !important;',
-        '  min-width: 140px !important;',
         '}',
-        '.fuckAdRow > .dropdown-menu.fad-open {',
-        '  display: block !important;',
+        '#ab-fad-menu.fad-visible {',
+        '  display: block;',
         '}',
-
-        /* 下拉菜单内 a 标签：重置 AB chip 样式，使其显示为普通菜单项 */
-        '.fuckAdRow > .dropdown-menu li > a {',
-        '  display: block !important;',
-        '  width: auto !important;',
-        '  height: auto !important;',
+        '#ab-fad-menu li a {',
+        '  display: flex !important;',
+        '  align-items: center !important;',
+        '  gap: 8px !important;',
         '  padding: 8px 16px !important;',
-        '  border-radius: 0 !important;',
-        '  border: none !important;',
-        '  background: transparent !important;',
-        '  color: var(--md-on-surface) !important;',
+        '  cursor: pointer;',
+        '  color: var(--md-on-surface, #1c1b1f) !important;',
         '  font-size: 0.875em !important;',
         '  font-weight: 400 !important;',
-        '  white-space: nowrap !important;',
-        '  gap: 0 !important;',
-        '}',
-        '.fuckAdRow > .dropdown-menu li > a:hover {',
-        '  background: var(--md-surface-container-high) !important;',
-        '  color: var(--md-on-surface) !important;',
+        '  white-space: nowrap;',
+        '  text-decoration: none !important;',
+        '  width: auto !important;',
+        '  height: auto !important;',
+        '  border: none !important;',
+        '  border-radius: 0 !important;',
+        '  background: transparent !important;',
         '  box-shadow: none !important;',
+        '  transition: background var(--md-transition-duration,.2s);',
+        '}',
+        '#ab-fad-menu li a:hover {',
+        '  background: var(--md-surface-container-high, #ece6f0) !important;',
+        '}',
+        '#ab-fad-menu li a .material-icons-round {',
+        '  font-size: 16px !important;',
+        '  color: var(--md-on-surface-variant, #49454f) !important;',
+        '  flex-shrink: 0;',
         '}'
     ].join('\n');
 
-    /* ── 注入样式 ──────────────────────────────────────────────────────────── */
+    /* ── 注入样式 ─────────────────────────────────────────────────────────── */
     function injectCSS() {
         if (document.getElementById(STYLE_ID)) return;
         var s = document.createElement('style');
@@ -109,187 +132,205 @@
         document.head.appendChild(s);
     }
 
-    /* ── fixed 定位下拉菜单 ────────────────────────────────────────────────────
-     * AdminBeautify 的 .dropdown-menu 用 position:absolute，但父容器
-     * .comment-action 有 overflow:hidden，会裁剪绝对定位子元素。
-     * 解决方案：改用 position:fixed，点击触发时根据触发按钮的 getBoundingClientRect()
-     * 实时计算坐标，并监听 scroll / resize 重新定位。
-     */
-    var _openMenu = null;      // 当前展开的 dropdown-menu 元素
-    var _openBtn  = null;      // 对应的触发按钮
-    var _scrollHandler = null;
-    var _resizeHandler = null;
+    /* ── 全局浮层菜单 ─────────────────────────────────────────────────────── */
+    var _floatMenu = null;   /* ul#ab-fad-menu */
+    var _activeBtn = null;   /* 当前触发按钮 */
 
-    function repositionMenu() {
-        if (!_openMenu || !_openBtn) return;
-        var rect = _openBtn.getBoundingClientRect();
-        _openMenu.style.top  = (rect.bottom + 4) + 'px';
-        _openMenu.style.left = rect.left + 'px';
-        /* 防止超出右侧视口 */
-        var menuW = _openMenu.offsetWidth || 140;
-        if (rect.left + menuW > window.innerWidth) {
-            _openMenu.style.left = Math.max(0, rect.right - menuW) + 'px';
-        }
+    function ensureFloatMenu() {
+        if (_floatMenu && document.body.contains(_floatMenu)) return;
+        _floatMenu = document.createElement('ul');
+        _floatMenu.id = 'ab-fad-menu';
+        document.body.appendChild(_floatMenu);
     }
 
-    function closeMenu() {
-        if (_openMenu) {
-            _openMenu.classList.remove('fad-open');
-            _openMenu.style.top  = '';
-            _openMenu.style.left = '';
-        }
-        if (_openBtn) _openBtn.classList.remove('active');
-        _openMenu = null;
-        _openBtn  = null;
-        if (_scrollHandler) {
-            document.removeEventListener('scroll', _scrollHandler, true);
-            _scrollHandler = null;
-        }
-        if (_resizeHandler) {
-            window.removeEventListener('resize', _resizeHandler);
-            _resizeHandler = null;
-        }
+    function positionFloatMenu(btn) {
+        if (!_floatMenu) return;
+        var rect = btn.getBoundingClientRect();
+        var mh   = _floatMenu.offsetHeight || 0;
+        var mw   = _floatMenu.offsetWidth  || 150;
+        var top  = rect.bottom + 4;
+        var left = rect.left;
+        if (top + mh > window.innerHeight) top = Math.max(0, rect.top - mh - 4);
+        if (left + mw > window.innerWidth) left = Math.max(0, rect.right - mw);
+        _floatMenu.style.top  = top  + 'px';
+        _floatMenu.style.left = left + 'px';
     }
 
-    function openMenu(btn, menu) {
-        if (_openMenu === menu) { closeMenu(); return; }
-        closeMenu();
-        _openBtn  = btn;
-        _openMenu = menu;
-        btn.classList.add('active');
-        menu.classList.add('fad-open');
-        repositionMenu();
-        _scrollHandler = function () { repositionMenu(); };
-        _resizeHandler = function () { repositionMenu(); };
-        document.addEventListener('scroll', _scrollHandler, true);
-        window.addEventListener('resize', _resizeHandler);
+    function openFloatMenu(btn, tr) {
+        ensureFloatMenu();
+
+        /* 再次点同一按钮 → 关闭 */
+        if (_activeBtn === btn && _floatMenu.classList.contains('fad-visible')) {
+            closeFloatMenu();
+            return;
+        }
+        closeFloatMenu();
+
+        /* 解析评论数据 */
+        var commentData;
+        try { commentData = JSON.parse(tr.getAttribute('data-comment') || '{}'); }
+        catch (ex) { commentData = {}; }
+
+        var actionMap = (typeof window.actionMap === 'object' && window.actionMap) || {};
+        var secUrl    = getSecurityUrl();
+        var cid       = (tr.querySelector('input[type="checkbox"]') || {}).value || '';
+
+        /* 动态填充菜单项 */
+        _floatMenu.innerHTML = '';
+        var hasItem = false;
+
+        Object.keys(actionMap).forEach(function (k) {
+            if (!commentData[k]) return;  /* 该字段为空 → 跳过（同 action.tpl 逻辑） */
+            hasItem = true;
+            var label = actionMap[k];
+            var li    = document.createElement('li');
+            var a     = document.createElement('a');
+            a.href    = 'javascript:void(0)';
+
+            /* 图标 */
+            var ico = document.createElement('span');
+            ico.className   = 'material-icons-round';
+            ico.textContent = ICON_MAP[k] || 'block';
+            a.appendChild(ico);
+            a.appendChild(document.createTextNode('拉黑 ' + label));
+
+            li.appendChild(a);
+            _floatMenu.appendChild(li);
+
+            /* 菜单项点击 → 拉黑操作 */
+            a.addEventListener('click', function (ev) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                closeFloatMenu();
+                doBlacklist(k, label, commentData[k], cid, secUrl);
+            });
+        });
+
+        if (!hasItem) return;
+
+        _activeBtn = btn;
+        btn.classList.add('fad-btn-active');
+        _floatMenu.classList.add('fad-visible');
+        positionFloatMenu(btn);
+
+        /* 滚动/缩放时跟随 */
+        window.addEventListener('scroll', onScrollResize, true);
+        window.addEventListener('resize', onScrollResize);
     }
 
-    /* ── 绑定拉黑按钮逻辑 ──────────────────────────────────────────────────────
-     * 替换原始 action.tpl 中绑定的事件（原事件仍挂载，但本脚本在捕获阶段拦截）。
-     * 原始逻辑：
-     *   data.content = prompt(msg, data.content)   ← 同步，AB 覆盖后返回 null
-     *   if (data.content !== null) { window.location.href = url }
-     * 新逻辑：
-     *   AdminBeautify.prompt(msg, data.content).then(val => { if (val !== null) navigate })
-     */
-    function bindBlacklistActions() {
-        /* ── 1. 切换下拉菜单的触发按钮 ── */
-        var actions = document.querySelectorAll('.fuckAdAction');
-        for (var i = 0; i < actions.length; i++) {
-            (function (btn) {
-                /* 移除 action.tpl 中 jQuery .on('click') 注册的旧处理器
-                 * 最简单方式：克隆节点并替换（jQuery 事件挂在 cache 上，克隆后失效）*/
-                var newBtn = btn.cloneNode(true);
-                btn.parentNode.replaceChild(newBtn, btn);
-
-                var menu = newBtn.nextElementSibling;
-                if (!menu || !menu.classList.contains('dropdown-menu')) return;
-
-                newBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    openMenu(newBtn, menu);
-                });
-            })(actions[i]);
-        }
-
-        /* ── 2. 拦截菜单项点击 → 使用 AdminBeautify.prompt() ── */
-        var items = document.querySelectorAll('.fuckAdRow a[action]');
-        for (var j = 0; j < items.length; j++) {
-            (function (el) {
-                var newEl = el.cloneNode(true);
-                el.parentNode.replaceChild(newEl, el);
-
-                newEl.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    closeMenu();
-
-                    /* 复原 action.tpl 中的数据收集逻辑 */
-                    var actionKey = newEl.getAttribute('action');
-                    var tr = newEl.closest ? newEl.closest('tr') : (function () {
-                        var p = newEl; while (p && p.tagName !== 'TR') p = p.parentNode; return p;
-                    })();
-                    if (!tr) return;
-
-                    var commentData = (function () {
-                        try { return JSON.parse(tr.getAttribute('data-comment') || '{}'); } catch (ex) { return {}; }
-                    })();
-                    var cid = (tr.querySelector('input[type=checkbox]') || {}).value || '';
-
-                    /* 获取 actionMap（由 action.tpl 注入到全局 window.actionMap） */
-                    var actionMap = (typeof window.actionMap === 'object' && window.actionMap) || {};
-                    var label = actionMap[actionKey] || actionKey;
-
-                    var defaultContent = commentData[actionKey] || '';
-                    var msg = '请确认需要拉黑评论的【' + label + '】内容\n 新评论 【' + label + '】 包含该内容时将会被拦截\n';
-
-                    /* 获取 securityUrl（由 action.tpl 写入 script 中，尝试从 DOM script 解析） */
-                    var securityUrl = (function () {
-                        /* action.tpl 直接将 URL 硬编码进 script 字符串，
-                         * 我们从已渲染的 <a href> 中获取更可靠 */
-                        var allItems = document.querySelectorAll('.fuckAdRow a[action]');
-                        /* 尝试从任意同行同 action 的链接里取 href（原始模板不生成 href，
-                         * 所以只能从 action.tpl 注入的全局变量中获取） */
-                        /* action.tpl: window.location.href = '{securityUrl}&'+ $.param(data) */
-                        /* 最可靠方式：从 inline script 内容中正则提取 */
-                        var scripts = document.querySelectorAll('script');
-                        for (var si = 0; si < scripts.length; si++) {
-                            var src = scripts[si].textContent || '';
-                            var m = src.match(/['"](\S+\/action\/FuckAdComment[^'"]*)['"]/);
-                            if (m) return m[1];
-                        }
-                        return '';
-                    })();
-
-                    /* 使用 AdminBeautify Promise 版 prompt */
-                    AdminBeautify.prompt(msg, defaultContent).then(function (val) {
-                        if (val === null) return; /* 用户取消 */
-                        var params = { do: actionKey, content: val, cid: cid };
-                        var qs = Object.keys(params).map(function (k) {
-                            return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
-                        }).join('&');
-                        window.location.href = securityUrl + '&' + qs;
-                    });
-                });
-            })(items[j]);
-        }
+    function onScrollResize() {
+        if (_activeBtn && _floatMenu) positionFloatMenu(_activeBtn);
     }
 
-    /* ── 关闭菜单：点击页面其他地方 ──────────────────────────────────────── */
-    function bindGlobalClose() {
-        document.addEventListener('click', function (e) {
-            if (_openMenu && !_openMenu.contains(e.target) &&
-                _openBtn  && !_openBtn.contains(e.target)) {
-                closeMenu();
-            }
+    function closeFloatMenu() {
+        if (_floatMenu) _floatMenu.classList.remove('fad-visible');
+        if (_activeBtn) _activeBtn.classList.remove('fad-btn-active');
+        _activeBtn = null;
+        window.removeEventListener('scroll', onScrollResize, true);
+        window.removeEventListener('resize', onScrollResize);
+    }
+
+    /* ── 拉黑操作（AdminBeautify.prompt Promise API）─────────────────────── */
+    function doBlacklist(actionKey, label, defaultContent, cid, secUrl) {
+        var msg = '请确认需要拉黑评论的【' + label + '】内容\n 新评论 【' + label + '】 包含该内容时将会被拦截';
+        AdminBeautify.prompt(msg, defaultContent).then(function (val) {
+            if (val === null) return;
+            window.location.href = secUrl
+                + 'do='       + encodeURIComponent(actionKey)
+                + '&content=' + encodeURIComponent(val)
+                + '&cid='     + encodeURIComponent(cid);
         });
     }
 
-    /* ── 初始化 ────────────────────────────────────────────────────────────── */
-    function init() {
-        /* 仅在评论管理页面运行 */
-        if (window.location.href.indexOf('manage-comments.php') === -1) return;
-        injectCSS();
-        bindBlacklistActions();
-        bindGlobalClose();
+    /* ── 从页面内联 script 提取 securityUrl ──────────────────────────────── */
+    function getSecurityUrl() {
+        var scripts = document.querySelectorAll('script:not([src])');
+        for (var i = 0; i < scripts.length; i++) {
+            var txt = scripts[i].textContent || '';
+            var m = txt.match(/['"]((?:https?:)?\/\/[^'"]*\/action\/FuckAdComment[^'"]*)['"]/);
+            if (m) return m[1];
+        }
+        return '';
     }
 
-    /* ── 首次加载 + AJAX 导航支持 ──────────────────────────────────────────── */
+    /* ── 向 .fuckAdAction 按钮注入 Material Icon ─────────────────────────── */
+    function injectBtnIcons() {
+        var btns = document.querySelectorAll('.fuckAdAction');
+        for (var i = 0; i < btns.length; i++) {
+            if (btns[i].querySelector('.material-icons-round')) continue;
+            var ico = document.createElement('span');
+            ico.className   = 'material-icons-round';
+            ico.textContent = 'person_off';
+            btns[i].insertBefore(ico, btns[i].firstChild);
+        }
+    }
+
+    /* ── 捕获阶段事件委托（在 jQuery 冒泡处理器之前拦截）───────────────────── */
+    var _captureAttached = false;
+
+    function attachCapture() {
+        if (_captureAttached) return;
+        _captureAttached = true;
+
+        document.addEventListener('click', function (e) {
+            if (window.location.href.indexOf('manage-comments.php') === -1) return;
+
+            /* 向上查找 .fuckAdAction（最多 4 层） */
+            var el = e.target, btn = null;
+            for (var i = 0; i < 4 && el && el !== document; i++) {
+                if (el.classList && el.classList.contains('fuckAdAction')) {
+                    btn = el;
+                    break;
+                }
+                el = el.parentElement;
+            }
+
+            if (btn) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); /* 彻底阻止 jQuery 同元素处理器 */
+                var tr = btn.closest ? btn.closest('tr') : (function () {
+                    var p = btn;
+                    while (p && p.tagName !== 'TR') p = p.parentNode;
+                    return p;
+                })();
+                if (tr) openFloatMenu(btn, tr);
+                return;
+            }
+
+            /* 点击浮层以外 → 关闭 */
+            if (_floatMenu && _floatMenu.classList.contains('fad-visible') &&
+                !_floatMenu.contains(e.target)) {
+                closeFloatMenu();
+            }
+        }, true); /* capture = true */
+
+        /* Escape 关闭 */
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeFloatMenu();
+        });
+    }
+
+    /* ── 初始化 ──────────────────────────────────────────────────────────── */
+    function init() {
+        if (window.location.href.indexOf('manage-comments.php') === -1) return;
+        injectCSS();
+        injectBtnIcons();
+        attachCapture();
+    }
+
+    /* ── 首次加载 + AJAX 导航 ────────────────────────────────────────────── */
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
         init();
     }
 
-    /* AdminBeautify AJAX 导航：每次页面切换后重新初始化 */
     document.addEventListener('ab:pageload', function () {
-        /* 清理残留菜单状态 */
-        _openMenu = null;
-        _openBtn  = null;
-        _scrollHandler = null;
-        _resizeHandler = null;
+        _activeBtn = null;
+        if (_floatMenu) {
+            _floatMenu.classList.remove('fad-visible');
+            _floatMenu.innerHTML = '';
+        }
         init();
     });
-
 })();
