@@ -1,18 +1,21 @@
 /**
  * @name        FuckAdComment 兼容
  * @description 修复 FuckAdComment 插件「评论管理」页面在 AdminBeautify 下的兼容问题：
- *              ① 桌面端「拉黑」下拉菜单被 .comment-action { overflow: hidden } 裁剪，
- *                 修复：对 .fuckAdRow > .dropdown-menu 使用 fixed 定位动态跟随触发元素。
- *              ② 移动端 ≤768px 时，AdminBeautify 将 .comment-action a 强制设为
- *                 32px 圆形 chip，导致「拉黑」按钮变形且无法展开下拉菜单，
- *                 修复：排除 .fuckAdAction 及其下拉菜单不受 chip 约束。
+ *              ① .typecho-list-table { overflow:hidden } 裁剪了原先 position:absolute 的
+ *                 下拉菜单，导致单击「拉黑」按钮看不到菜单项；
+ *                 修复：将下拉菜单替换为单一 position:fixed 的全局浮层（#ab-fad-menu），
+ *                 在点击时动态填充当前行数据并通过 getBoundingClientRect() 定位。
+ *              ② 原始 .dropdown-menu 在 AdminBeautify 下没有 display:none，会持续暴露；
+ *                 修复：CSS 隐藏原始菜单，完全使用全局浮层。
  *              ③ AdminBeautify 将 window.prompt 改为异步（同步返回 null），导致
- *                 FuckAdComment 的拉黑操作永远无法执行（content 永远是 null）；
- *                 修复：拦截 .fuckAdRow a[action] 的点击事件，改用 AdminBeautify.prompt()
- *                 Promise API 完成输入 → 提交流程。
+ *                 FuckAdComment 的拉黑操作永远无法执行；
+ *                 修复：浮层菜单项直接调用 AdminBeautify.prompt() Promise API。
+ *              ④ 移动端 ≤768px AdminBeautify 将 .comment-action a 强制设为 32px 圆形，
+ *                 导致「拉黑」按钮变形；修复：排除 .fuckAdAction 不受圆形 chip 约束。
+ *              ⑤ 为「拉黑」按钮添加 Material Icon，与其他操作按钮风格一致。
  *              已支持 AdminBeautify AJAX 导航（ab:pageload）。
  * @plugins     FuckAdComment
- * @version     1.0.0
+ * @version     1.1.0
  * @author      LHL
  */
 (function () {
@@ -20,11 +23,14 @@
 
     var STYLE_ID = 'ab-compat-fuckadcomment';
 
-    /* ── CSS 修复 ──────────────────────────────────────────────────────────────
-     * 1. 让 .fuckAdRow 本身不受 comment-action a 的 chip 样式约束
-     * 2. 移动端排除 .fuckAdAction 的圆形 chip 强制尺寸
-     * 3. 下拉菜单定位改由 JS 动态控制（fixed 跟随），此处只重置默认 position
-     */
+    /* ── 图标映射（与 Model.php ACTION_MAP 一致）─────────────────────────── */
+    var ICON_MAP = {
+        author : 'person_off',
+        ip     : 'block',
+        text   : 'short_text',
+        url    : 'link_off',
+        mail   : 'mail_lock'
+    };
     var CSS = [
         /* 排除 .fuckAdAction 不受 MD3 chip 通用样式约束 */
         '.comment-action .fuckAdRow { overflow: visible !important; }',
