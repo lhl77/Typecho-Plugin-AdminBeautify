@@ -102,7 +102,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             <div class="ab-about-support-tip" style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:#fdf6ff;border:1px solid <?php echo $abC1; ?>22;border-radius:16px">
                 <div style="flex:1;min-width:0">
                     <div class="ab-about-support-title" style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:6px">如果插件对你有帮助，欢迎请作者喝杯咖啡 ☕</div>
-                    <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">请在备注中填写：您的昵称 + GitHub 或 个人博客，作者会定期把您加入鸣谢列表。</span></div>
+                    <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">请在备注中填写：[捐赠AdminBeautify] + [您的昵称] + [GitHub 或 个人博客]，作者会定期把您加入鸣谢列表。</span></div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap">
                         <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" class="ab-star-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:<?php echo $abC1; ?>;color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
                             <span class="material-icons-round">star</span> 给个 Star
@@ -167,7 +167,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         <button id="ab-donate-modal-close" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:#666;padding:0">✕</button>
         <div style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:14px">☕ 请作者喝杯咖啡</div>
         <img src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:220px;height:220px;border-radius:16px;object-fit:cover;border:1px solid rgba(0,0,0,.08);display:block;margin:0 auto">
-        <div style="font-size:11px;color:#79747e;margin-top:8px"><b>微信赞赏码</b><br/>请在备注中填写：您的昵称 + GitHub 或 个人博客，作者会定期把您加入鸣谢列表。</div>
+        <div style="font-size:11px;color:#79747e;margin-top:8px"><b>微信赞赏码</b><br/>请在备注中填写：[捐赠AdminBeautify] + [您的昵称] + [GitHub 或 个人博客]，作者会定期把您加入鸣谢列表。</div>
         <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:9px 20px;background:linear-gradient(90deg,<?php echo $abC1; ?>,<?php echo $abC2; ?>);color:#fff;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.18)">
             <span class="material-icons-round" style="font-size:15px">payments</span> 其他支付方式
         </a>
