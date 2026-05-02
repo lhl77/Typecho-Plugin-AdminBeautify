@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.38
+ * @version 2.1.39
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -48,6 +48,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pink'   => array('#74565F', '#9E7A85'),
             'red'    => array('#775654', '#A27A78'),
         );
+        $abOpt = null;
         try {
             $abOpt = Typecho_Widget::widget('Widget_Options')->plugin('AdminBeautify');
             $abScheme = isset($abOpt->primaryColor) ? (string) $abOpt->primaryColor : 'purple';
@@ -57,11 +58,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.38';
+        $abVer = '2.1.39';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
-        abCard('admin', $abC1, '⚙️', '管理后台设置', '主题色、暗色模式、圆角、动画、布局');
+        abCard('admin', $abC1, 'settings', '管理后台设置', '统一管理外观、概要页、统计、导航与插件页行为');
         $primaryColor = new Typecho_Widget_Helper_Form_Element_Select(
             'primaryColor',
             array(
@@ -75,7 +76,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             ),
             'purple',
             _t('主题色'),
-            _t('选择管理后台的主题色方案')
+            _t('设置后台主色调（按钮、选中态与强调元素会同步变化）')
         );
         $form->addInput($primaryColor);
         $darkMode = new Typecho_Widget_Helper_Form_Element_Select(
@@ -113,6 +114,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('是否开启界面元素的过渡动画效果')
         );
         $form->addInput($enableAnimation);
+        $loadingAnimation = new Typecho_Widget_Helper_Form_Element_Select(
+            'loadingAnimation',
+            array(
+                'spinner' => 'MD3 风格转圈（默认）',
+                'topbar'  => '顶部进度条',
+            ),
+            'spinner',
+            _t('加载动画'),
+            _t('选择页面进入与 AJAX 切换时的加载反馈样式')
+        );
+        $form->addInput($loadingAnimation);
         $navPosition = new Typecho_Widget_Helper_Form_Element_Select(
             'navPosition',
             array(
@@ -165,7 +177,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             ),
             '1',
             _t('快捷按钮 - "自定义"'),
-            _t('是否在概要页中显示添加"自定义"快捷按钮')
+            _t('控制概要页快捷操作区是否显示“自定义”入口按钮')
         );
         $form->addInput($dashboardQuickHint);
         $dashboardHideDonate = new Typecho_Widget_Helper_Form_Element_Select(
@@ -184,7 +196,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             null,
             '',
             _t('概要页自定义快捷按钮'),
-            _t('每行一个按钮，格式：<code>名称:地址:图标</code> 或 <code>名称:地址:图标:highlight</code>（加 <code>:highlight</code> 为强调样式）。<br>图标名称来自 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a>。<br>⚠️ 外链地址必须以 <code>http://</code> 或 <code>https://</code> 开头，站内路径无需协议头。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:https://example.com:public:highlight</code><br><code>管理评论:manage-comments.php:comment</code>')
+            _t('每行一个按钮，格式：<code>名称:地址:图标</code> 或 <code>名称:地址:图标:highlight</code>。<br><code>:highlight</code> 为强调样式。图标名称可在 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a> 查询。<br>⚠️ 外链地址需以 <code>http://</code> 或 <code>https://</code> 开头，站内路径可直接填写。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:https://example.com:public:highlight</code><br><code>管理评论:manage-comments.php:comment</code>')
         );
         $form->addInput($dashboardCustomButtons);
         $dashboardRecentStyle = new Typecho_Widget_Helper_Form_Element_Select(
@@ -198,6 +210,29 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('MD卡片：Material Design 3 列表风格，时间居右，文章单行、评论双行；原版：Typecho 原有样式。同时会隐藏"官方最新日志"卡片。')
         );
         $form->addInput($dashboardRecentStyle);
+        $themeBtnModeDefault = 'standalone';
+        if (isset($abOpt->dashboardThemeButtonShow)) {
+            $themeBtnModeDefault = (string) $abOpt->dashboardThemeButtonShow;
+            if ($themeBtnModeDefault === '1') {
+                $themeBtnModeDefault = 'standalone';
+            } elseif ($themeBtnModeDefault === '0') {
+                $themeBtnModeDefault = 'hide';
+            } elseif ($themeBtnModeDefault !== 'standalone' && $themeBtnModeDefault !== 'merge' && $themeBtnModeDefault !== 'hide') {
+                $themeBtnModeDefault = 'standalone';
+            }
+        }
+        $dashboardThemeButtonShow = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardThemeButtonShow',
+            array(
+                'standalone' => '右上角单独显示（默认）',
+                'merge'      => '合并到概要页自定义快捷按钮',
+                'hide'       => '不显示',
+            ),
+            $themeBtnModeDefault,
+            _t('主题设置按钮'),
+            _t('设置「主题设置」入口显示方式。可右上角单独显示、合并到概要页快捷操作，或不显示。')
+        );
+        $form->addInput($dashboardThemeButtonShow);
         $overviewChartEnabled = new Typecho_Widget_Helper_Form_Element_Select(
             'overviewChartEnabled',
             array(
@@ -229,15 +264,26 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             ),
             '0',
             _t('Umami 访问统计'),
-            _t('开启后在概要页显示 Umami 访问统计卡片（今日访问量、总访问量、热门文章、跳出率）。需同时填写下方 API 配置。')
+            _t('开启后在概要页显示 Umami 统计卡片（今日访问、总访问、访客数量、平均时长、跳出率）。需同时填写下方 API 配置。')
         );
         $form->addInput($umamiEnabled);
+        $umamiProvider = new Typecho_Widget_Helper_Form_Element_Select(
+            'umamiProvider',
+            array(
+                'self'  => '自建（默认）',
+                'cloud' => 'Umami Cloud',
+            ),
+            'self',
+            _t('Umami 平台类型'),
+            _t('自建：使用你自己的 Umami 服务地址；Umami Cloud：使用官方云服务 API。')
+        );
+        $form->addInput($umamiProvider);
         $umamiApiBase = new Typecho_Widget_Helper_Form_Element_Text(
             'umamiApiBase',
             null,
             '',
-            _t('Umami API 地址'),
-            _t('Umami 实例地址，不含末尾斜线，例如：<code>https://umami.example.com</code>')
+            _t('Umami API 地址（自建）'),
+            _t('仅「自建」模式生效。填写 Umami 实例地址（不含末尾斜线），例如：<code>https://umami.example.com</code>')
         );
         $form->addInput($umamiApiBase);
         $umamiWebsiteId = new Typecho_Widget_Helper_Form_Element_Text(
@@ -253,7 +299,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             null,
             '',
             _t('Umami API Token'),
-            _t('Token 需要手动 Post 获取，详情见<a href="https://docs.umami.is/docs/api/authentication" href="_blank">官方文档</a>')
+            _t('自建模式：填写 Bearer Token（可按官方认证流程获取）。Cloud 模式：可直接填写 Umami Cloud 后台创建的 API Key。')
         );
         $form->addInput($umamiApiToken);
         $umamiTimeRange = new Typecho_Widget_Helper_Form_Element_Select(
@@ -268,7 +314,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('访客数量、平均访问时长、跳出率 这三项的统计时间范围（今日访问量 / 总访问量 始终固定为今日 / 全部时间）')
         );
         $form->addInput($umamiTimeRange);
-        abCard('editor', $abC1, '✏️', '编辑器设置', 'Vditor Markdown 编辑器，所见即所得 / 实时预览 / 分屏编辑',
+        abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
             abCardTip('✏️', '开启 Vditor 后，文章 / 页面编辑界面将使用 Vditor 替代原版 PageDown 编辑器。原工具栏将被 Vditor 内置工具栏接管，原"撰写/预览"切换将变为 <strong>所见即所得 / 实时预览 / 分屏编辑</strong> 三种模式切换按钮。')
         );
         $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
@@ -306,7 +352,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('仅在"兼容其他编辑器"模式下生效。开启后将强制隐藏 Typecho 原有编辑工具栏（#wmd-button-bar），以避免与第三方编辑器的工具栏叠加显示。')
         );
         $form->addInput($editorHideToolbar);
-        abCard('login', $abC2, '🔐', '登录页设置', '配色方案、背景图片、虚化效果、自定义样式',
+        abCard('login', $abC2, 'lock', '登录页设置', '自定义登录页主题、背景、虚化与扩展样式脚本',
             abCardTip('💡', '以下设置控制登录页面的样式，支持自定义配色、背景图片、虚化效果等。')
         );
         $loginIsEnabled = new Typecho_Widget_Helper_Form_Element_Radio(
@@ -418,7 +464,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($loginCustomJs);
         self::renderLoginPreview();
-        abCard('pwa', $abC1, '📱', 'PWA 应用设置', '将管理后台安装为渐进式 Web 应用，自定义名称和图标');
+        abCard('pwa', $abC1, 'phone_android', 'PWA 应用设置', '配置后台 PWA 应用名称、图标与安装辅助工具');
         $pwaAppName = new Typecho_Widget_Helper_Form_Element_Text(
             'pwa_appName',
             null,
@@ -435,7 +481,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('安装为 PWA 后显示的应用图标，建议使用 512×512 的正方形图片。')
         );
         $form->addInput($pwaAppIcon);
-        abCard('perf', $abC1, '⚡', '速度优化', '字体与图标静态资源来源，支持 Google CDN、国内镜像或自定义');
+        abCard('perf', $abC1, 'speed', '速度优化', '切换静态资源源、头像源与后台 AJAX 导航策略');
         $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
             'staticResource',
             array(
@@ -503,7 +549,18 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选「自定义域名」后生效。填入完整头像服务地址，如 https://example.com/avatar，末尾不加斜线，格式需与 Gravatar 兼容（路径后接 MD5 邮箱哈希）。')
         );
         $form->addInput($customAvatarUrl);
-        abCard('compat', $abC2, '🧩', '兼容脚本管理', '手动启用兼容脚本，修复其他插件/旧版 Typecho 的页面排版',
+        $ajaxEnabled = new Typecho_Widget_Helper_Form_Element_Select(
+            'ajaxEnabled',
+            array(
+                '1' => '开启（默认）',
+                '0' => '关闭',
+            ),
+            '1',
+            _t('AJAX 导航'),
+            _t('开启后后台页面在兼容场景下无刷新切换；若与浏览器或插件冲突，可关闭回退为整页加载。')
+        );
+        $form->addInput($ajaxEnabled);
+        abCard('compat', $abC2, 'extension', '兼容脚本管理', '按需启用兼容脚本，修复插件页面样式与交互冲突',
             abCardTip('📦',
                 '兼容脚本默认不加载，请根据需要手动开启。脚本位于 <code>assets/compat/</code> 目录。<br>'
                 . '开发者可参考 <code>assets/compat/README.md</code> 编写兼容脚本（需包含 <code>@name</code> / <code>@plugins</code> / <code>@description</code> 元数据）。<br>'
@@ -570,7 +627,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.38 %c",'
+            .   '"%c AB-Admin %c v2.1.39 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -600,6 +657,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $navPosition = $pluginOptions->navPosition ?: 'left';
+        $loadingAnimation = isset($pluginOptions->loadingAnimation) ? (string)$pluginOptions->loadingAnimation : 'spinner';
+        if ($loadingAnimation !== 'spinner' && $loadingAnimation !== 'topbar') {
+            $loadingAnimation = 'spinner';
+        }
     $colors = self::getColorScheme($primaryColor);
     $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
     $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
@@ -624,6 +685,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $earlyScript .= '})();';
         if ($navPosition === 'left') {
             $earlyScript .= 'document.documentElement.setAttribute("data-nav","left");if(localStorage.getItem("adminBeautifySidebarCollapsed")==="1"){document.documentElement.setAttribute("data-nav-collapsed","");}';
+        }
+        if ($loadingAnimation === 'topbar') {
+            $earlyScript .= 'document.documentElement.setAttribute("data-ab-loader","topbar");';
         }
         if ($enableAnimation === '0') {
             $earlyScript .= 'document.documentElement.setAttribute("data-no-animation","");';
@@ -663,14 +727,22 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '}';
         $injectHead .= '[data-ab-loading] body{visibility:hidden!important;}';
-        $injectHead .= '#ab-page-loader{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:var(--md-surface,#FFFBFE);align-items:center;justify-content:center;}';
-        $injectHead .= '[data-theme="dark"] #ab-page-loader{background:var(--md-dark-surface,#1C1B1F)!important;}';
-        $injectHead .= '[data-ab-loading] #ab-page-loader{display:flex!important;visibility:visible!important;}';
-        $injectHead .= '#ab-loader-spinner{width:44px;height:44px;border-radius:50%;border:3.5px solid rgba(0,0,0,0.1);border-top-color:var(--md-primary,#1976D2);animation:ab-spin 0.72s linear infinite;}';
-        $injectHead .= '[data-theme="dark"] #ab-loader-spinner{border-color:rgba(255,255,255,0.1);border-top-color:var(--md-primary,#90CAF9);}';
+        if ($loadingAnimation === 'topbar') {
+            $injectHead .= '#ab-page-loader{display:none;position:fixed;top:0;left:0;right:0;height:4px;z-index:999999;background:rgba(103,80,164,.18);pointer-events:none;overflow:hidden;}';
+            $injectHead .= '[data-theme="dark"] #ab-page-loader{background:rgba(208,188,255,.2)!important;}';
+            $injectHead .= '#ab-loader-spinner{position:absolute;left:0;top:0;height:100%;width:34%;background:linear-gradient(90deg,var(--md-primary,#6750a4),rgba(103,80,164,.68));border-radius:0 3px 3px 0;box-shadow:0 0 14px rgba(103,80,164,.45);animation:ab-topbar-loading 1.25s ease-in-out infinite;}';
+            $injectHead .= '[data-ab-loading] #ab-page-loader{display:block!important;visibility:visible!important;}';
+            $injectHead .= '@keyframes ab-topbar-loading{0%{left:-36%;width:36%}55%{left:40%;width:46%}100%{left:100%;width:32%}}';
+        } else {
+            $injectHead .= '#ab-page-loader{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:var(--md-surface,#FFFBFE);align-items:center;justify-content:center;}';
+            $injectHead .= '[data-theme="dark"] #ab-page-loader{background:var(--md-dark-surface,#1C1B1F)!important;}';
+            $injectHead .= '[data-ab-loading] #ab-page-loader{display:flex!important;visibility:visible!important;}';
+            $injectHead .= '#ab-loader-spinner{width:44px;height:44px;border-radius:50%;border:3.5px solid rgba(0,0,0,0.1);border-top-color:var(--md-primary,#1976D2);animation:ab-spin 0.72s linear infinite;}';
+            $injectHead .= '[data-theme="dark"] #ab-loader-spinner{border-color:rgba(255,255,255,0.1);border-top-color:var(--md-primary,#90CAF9);}';
+        }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.38' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.39' . '.css">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -714,7 +786,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if ($resIconUrl !== '') {
             $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resIconUrl) . '">';
         }
-        $injectTail .= '<script>document.addEventListener("DOMContentLoaded",function(){document.documentElement.removeAttribute("data-ab-loading");},false);</script>';
+        $injectTail .= '<script>document.addEventListener("DOMContentLoaded",function(){var h=document.documentElement;if(h.getAttribute("data-ab-loader")==="topbar"){setTimeout(function(){h.removeAttribute("data-ab-loading");},260);}else{h.removeAttribute("data-ab-loading");}},false);</script>';
         $themeColorMap = array(
             'purple' => '#7D5260', 'blue' => '#556270', 'teal' => '#4A6363',
             'green'  => '#55624C', 'orange' => '#725A42', 'pink' => '#74565F', 'red' => '#775654',
@@ -759,13 +831,24 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardHideDonate = isset($pluginOptions->dashboardHideDonate) ? (string)$pluginOptions->dashboardHideDonate : '0';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
+        $dashboardThemeButtonShow = isset($pluginOptions->dashboardThemeButtonShow) ? (string)$pluginOptions->dashboardThemeButtonShow : 'standalone';
+        if ($dashboardThemeButtonShow === '1') {
+            $dashboardThemeButtonShow = 'standalone';
+        } elseif ($dashboardThemeButtonShow === '0') {
+            $dashboardThemeButtonShow = 'hide';
+        } elseif ($dashboardThemeButtonShow !== 'standalone' && $dashboardThemeButtonShow !== 'merge' && $dashboardThemeButtonShow !== 'hide') {
+            $dashboardThemeButtonShow = 'standalone';
+        }
         $overviewChartEnabled = isset($pluginOptions->overviewChartEnabled) ? (string)$pluginOptions->overviewChartEnabled : '1';
         $overviewTimeRange    = isset($pluginOptions->overviewTimeRange)    ? (string)$pluginOptions->overviewTimeRange    : '30';
         $umamiEnabled         = isset($pluginOptions->umamiEnabled)         ? (string)$pluginOptions->umamiEnabled         : '0';
+        $umamiProvider        = isset($pluginOptions->umamiProvider)        ? (string)$pluginOptions->umamiProvider        : 'self';
         $umamiApiBase         = isset($pluginOptions->umamiApiBase)         ? (string)$pluginOptions->umamiApiBase         : '';
         $umamiWebsiteId       = isset($pluginOptions->umamiWebsiteId)       ? (string)$pluginOptions->umamiWebsiteId       : '';
         $umamiApiToken        = isset($pluginOptions->umamiApiToken)        ? (string)$pluginOptions->umamiApiToken        : '';
         $umamiTimeRange       = isset($pluginOptions->umamiTimeRange)       ? (string)$pluginOptions->umamiTimeRange       : '30';
+        $ajaxEnabled          = isset($pluginOptions->ajaxEnabled)          ? (string)$pluginOptions->ajaxEnabled          : '1';
+        $loadingAnimation     = isset($pluginOptions->loadingAnimation)     ? (string)$pluginOptions->loadingAnimation     : 'spinner';
         $primaryColorScheme = $pluginOptions->primaryColor ?: 'purple';
         $colorSchemeData = self::getColorScheme($primaryColorScheme);
         $primaryColorHex     = $colorSchemeData['--md-primary'];
@@ -895,7 +978,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.38',
+            'pluginVersion'          => '2.1.39',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -903,9 +986,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'dashboardHideDonate'    => $dashboardHideDonate,
             'dashboardCustomButtons' => $customBtnsParsed,
             'dashboardRecentStyle'   => $dashboardRecentStyle,
+            'dashboardThemeButtonShow' => $dashboardThemeButtonShow,
             'overviewChartEnabled'   => $overviewChartEnabled,
             'overviewTimeRange'      => $overviewTimeRange,
+            'ajaxEnabled'            => $ajaxEnabled,
+            'loadingAnimation'       => $loadingAnimation,
             'umamiEnabled'           => $umamiEnabled,
+            'umamiProvider'          => $umamiProvider,
             'umamiApiBase'           => $umamiApiBase,
             'umamiWebsiteId'         => $umamiWebsiteId,
             'umamiApiToken'          => $umamiApiToken,
@@ -918,7 +1005,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.38.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.39.js"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if ($editorVditor === '2' && $isWritePageForEditor) {
@@ -929,7 +1016,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.38"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.39"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1113,7 +1200,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.38";';
+        echo 'var __AB_VER__="2.1.39";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）

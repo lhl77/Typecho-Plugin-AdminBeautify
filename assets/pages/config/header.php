@@ -7,7 +7,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 ?>
 <div id="ab-header-banner" style="margin:16px 0 24px;padding:24px 28px;background:linear-gradient(135deg,<?php echo $abC1; ?>,<?php echo $abC2; ?>);color:#fff;border-radius:28px;box-shadow:0 4px 16px rgba(0,0,0,.18);text-shadow:0 1px 3px rgba(0,0,0,.25)">
     <div style="display:flex;align-items:center;gap:20px;margin-bottom:16px">
-        <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:32px;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none">🎨</div>
+        <div style="width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:20px;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px);flex-shrink:0;text-shadow:none"><span class="material-icons-round" style="font-size:34px">palette</span></div>
         <div style="flex:1">
             <h2 style="margin:0 0 6px;font-size:22px;font-weight:600;letter-spacing:-0.02em">AB-Admin <span style="font-size:13px;font-weight:400;opacity:.8;margin-left:4px">v<?php echo $abVer; ?></span></h2>
             <p style="margin:0;font-size:14px;opacity:0.9;line-height:1.6">原 Admin Beautify - 最美 Typecho 后台美化增强插件 · Material Design 3 风格</p>

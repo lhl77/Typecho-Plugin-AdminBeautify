@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.38
+ * @version 2.1.39
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -164,7 +164,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.38';
+        $pluginVer  = '2.1.39';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -1140,27 +1140,38 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $this->checkAuth();
         $opts   = $this->pluginOptions;
-        $base   = rtrim($opts->umamiApiBase ?? '', '/');
+        $provider = isset($opts->umamiProvider) ? (string)$opts->umamiProvider : 'self';
+        $isCloud = ($provider === 'cloud');
+        $base   = $isCloud
+            ? 'https://api.umami.is'
+            : rtrim($opts->umamiApiBase ?? '', '/');
         $token  = $opts->umamiApiToken ?? '';
         if (!$base || !$token) {
             $this->jsonError('Umami 未配置', 400);
             return;
         }
         $path = $this->request->get('path', '');
-        if (!$path || strpos($path, '/api/') !== 0) {
+        if (!$path || (strpos($path, '/api/') !== 0 && strpos($path, '/v1/') !== 0)) {
             $this->jsonError('非法路径', 400);
             return;
         }
+        if ($isCloud && strpos($path, '/v1/') !== 0) {
+            $this->jsonError('Cloud 模式路径必须以 /v1/ 开头', 400);
+            return;
+        }
         $url = $base . $path;
+        $authHeaders = array('Accept: application/json');
+        if ($isCloud) {
+            $authHeaders[] = 'x-umami-api-key: ' . $token;
+        } else {
+            $authHeaders[] = 'Authorization: Bearer ' . $token;
+        }
         $body = false;
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Authorization: Bearer ' . $token,
-                'Accept: application/json',
-            ]);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $authHeaders);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             $body   = curl_exec($ch);
             $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1174,7 +1185,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $ctx = stream_context_create([
                 'http' => [
                     'method'  => 'GET',
-                    'header'  => "Authorization: Bearer {$token}\r\nAccept: application/json\r\n",
+                    'header'  => implode("\r\n", $authHeaders) . "\r\n",
                     'timeout' => 10,
                 ],
                 'ssl' => ['verify_peer' => true],

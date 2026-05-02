@@ -31,10 +31,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 <div id="ab-card-about" class="ab-card" style="margin:0 0 16px;border-radius:20px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04);border:1px solid rgba(0,0,0,.06);overflow:hidden">
     <div id="ab-card-about-hdr" class="ab-card-hdr" style="display:flex;align-items:center;gap:12px;padding:18px 22px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:background .15s" onmouseover="this.style.background='rgba(0,0,0,.025)'" onmouseout="this.style.background=''">
         <div id="ab-card-about-strip" style="width:3px;height:36px;background:<?php echo $abC1; ?>;border-radius:2px;flex-shrink:0;transition:background .3s"></div>
-        <div style="width:40px;height:40px;background:<?php echo $abC1; ?>1a;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">💡</div>
+        <div style="width:40px;height:40px;background:<?php echo $abC1; ?>1a;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><span class="material-icons-round" style="font-size:22px;line-height:1">info</span></div>
         <div style="flex:1;min-width:0">
             <div class="ab-card-title" style="font-size:15px;font-weight:600;color:#1c1b1f;line-height:1.3">关于插件</div>
-            <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">作者信息 · 更新日志 · 支持作者</div>
+            <div class="ab-card-subtitle" style="font-size:12px;color:#79747e;margin-top:2px">插件信息、更新动态、反馈渠道与鸣谢支持</div>
         </div>
         <svg id="ab-card-about-chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="<?php echo $abC1; ?>" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;transition:transform .35s"><polyline points="6 9 12 15 18 9"/></svg>
     </div>
@@ -73,24 +73,24 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
         <!-- ── 作者的其他插件 ── -->
         <div style="margin-top:20px">
-            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🧩 作者的其他插件</div>
+            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">extension</span>作者的其他插件</div>
             <div id="ab-about-more-plugins" style="margin-top:8px"><!-- GitHub API 动态加载 --></div>
         </div>
 
         <!-- ── 作者的其他项目 ── -->
         <div style="margin-top:20px">
-            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚀 作者的服务</div>
+            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">apps</span>作者的服务</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">
                 <a href="https://img.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🖼️ LHL's Images 聚合图床</div>
+                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">image</span>LHL's Images 聚合图床</div>
                     <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">个人博客可申请免费使用•Telegram Bot上传•中国优化储存•S.EE•R2•OSS•Edge One</div>
                 </a>
                 <a href="https://shop.lhl.one" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">🛒 LHL's Shop 小店</div>
+                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">storefront</span>LHL's Shop 小店</div>
                     <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">可领取免费虚拟主机，并售卖作者的一些付费服务、虚拟主机、源码等</div>
                 </a>
                 <a href="https://blog.lhl.one/friends.html" target="_blank" rel="noopener" class="ab-about-plugin-card" style="display:block;padding:12px 14px;background:#f8f8f8;border:1px solid rgba(0,0,0,.07);border-radius:14px;text-decoration:none;transition:box-shadow .15s" onmouseover="this.style.boxShadow='0 2px 12px rgba(0,0,0,.1)'" onmouseout="this.style.boxShadow='none'">
-                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px">♥️ 欢迎与作者博客交换友链</div>
+                    <div class="ab-about-plugin-name" style="font-size:13px;font-weight:600;color:#1c1b1f;margin-bottom:4px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">favorite</span>欢迎与作者博客交换友链</div>
                     <div class="ab-about-plugin-desc" style="font-size:11px;color:#79747e;line-height:1.5">您的网站需要被至少一个搜索引擎引用，且类型需要为博客。</div>
                 </a>
             </div>
@@ -98,10 +98,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
         <!-- ── 支持作者 ── -->
         <div style="margin-top:20px">
-            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">❤️ 支持作者</div>
+            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">favorite</span>支持作者</div>
             <div class="ab-about-support-tip" style="display:flex;align-items:flex-start;gap:16px;padding:16px;background:#fdf6ff;border:1px solid <?php echo $abC1; ?>22;border-radius:16px">
                 <div style="flex:1;min-width:0">
-                    <div class="ab-about-support-title" style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:6px">如果插件对你有帮助，欢迎请作者喝杯咖啡 ☕</div>
+                    <div class="ab-about-support-title" style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:6px"><span class="material-icons-round" style="font-size:16px;vertical-align:-3px;margin-right:4px">coffee</span>如果插件对你有帮助，欢迎请作者喝杯咖啡</div>
                     <div class="ab-about-support-desc" style="font-size:12px;color:#79747e;line-height:1.6;margin-bottom:12px">你的支持是作者持续维护和更新插件的动力。感谢每一位使用者！<br><span style="display:block;margin-top:8px;font-size:12px;color:#59555a">请在备注中填写：[捐赠AdminBeautify] + [您的昵称] + [GitHub 或 个人博客]，作者会定期把您加入鸣谢列表。</span></div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap">
                         <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener" class="ab-star-btn" style="display:inline-flex;align-items:center;gap:6px;padding:7px 14px;background:<?php echo $abC1; ?>;color:#fff;border-radius:20px;font-size:12px;font-weight:500;text-decoration:none">
@@ -121,7 +121,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
         <!-- ── 鸣谢（支持者） ── -->
         <div style="margin-top:18px">
-            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">👏 鸣谢</div>
+            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">celebration</span>鸣谢</div>
             <div id="ab-about-thanks" style="border-radius:12px;padding:12px;background:var(--md-surface-container-low);border:1px solid var(--md-outline-variant);">
                 <div style="font-size:13px;color:var(--md-on-surface-variant);margin-bottom:8px">特别鸣谢：</div>
                 <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
@@ -140,7 +140,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
         <!-- ── 更新日志 ── -->
         <div style="margin-top:20px">
-            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📋 更新日志</div>
+            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">assignment</span>更新日志</div>
             <div id="ab-about-changelog" style="border-radius:12px;overflow:hidden;border:1px solid rgba(0,0,0,.07)">
                 <div style="padding:20px;text-align:center;color:#79747e;font-size:13px">
                     <div style="animation:ab-spin 1s linear infinite;display:inline-block;width:20px;height:20px;border:2px solid rgba(0,0,0,.1);border-top-color:#79747e;border-radius:50%;margin-bottom:8px"></div>
@@ -154,7 +154,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
         <!-- ── 数据与隐私 ── -->
         <div style="margin-top:20px">
-            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🔒 数据与隐私</div>
+            <div class="ab-about-section-title" style="font-size:12px;font-weight:600;color:#79747e;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px"><span class="material-icons-round" style="font-size:14px;vertical-align:-2px;margin-right:4px">lock</span>数据与隐私</div>
             <div id="ab-telemetry-field-container"></div>
         </div>
 
@@ -165,7 +165,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 <div id="ab-donate-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:2147483647;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);box-sizing:border-box;align-items:center;justify-content:center">
     <div id="ab-donate-modal-inner" style="position:relative;text-align:center;padding:28px 24px 24px;background:#fff;border-radius:24px;box-shadow:0 8px 40px rgba(0,0,0,.35);width:280px;max-width:calc(100vw - 40px);max-height:calc(100vh - 40px);overflow-y:auto;box-sizing:border-box">
         <button id="ab-donate-modal-close" style="position:absolute;top:12px;right:12px;width:28px;height:28px;border-radius:50%;border:none;background:rgba(0,0,0,.08);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:1;color:#666;padding:0">✕</button>
-        <div style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:14px">☕ 请作者喝杯咖啡</div>
+        <div style="font-size:14px;font-weight:600;color:#1c1b1f;margin-bottom:14px"><span class="material-icons-round" style="font-size:16px;vertical-align:-3px;margin-right:4px">coffee</span>请作者喝杯咖啡</div>
         <img src="https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg" alt="赞赏码" style="width:220px;height:220px;border-radius:16px;object-fit:cover;border:1px solid rgba(0,0,0,.08);display:block;margin:0 auto">
         <div style="font-size:11px;color:#79747e;margin-top:8px"><b>微信赞赏码</b><br/>请在备注中填写：[捐赠AdminBeautify] + [您的昵称] + [GitHub 或 个人博客]，作者会定期把您加入鸣谢列表。</div>
         <a class="ab-star-btn" href="https://pay.lhl.one/paypage/?merchant=3b8dnSzIL2EXvvz2x7WwVEsYHZ6%2BokmCo5jAUlP0klNU" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:9px 20px;background:linear-gradient(90deg,<?php echo $abC1; ?>,<?php echo $abC2; ?>);color:#fff;border-radius:20px;font-size:13px;font-weight:500;text-decoration:none;box-shadow:0 2px 8px rgba(0,0,0,.18)">

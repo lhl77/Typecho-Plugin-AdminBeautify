@@ -2,10 +2,10 @@
 /**
  * 配置面板 - MD3 折叠卡片构建函数
  *
- * abCard($id, $color, $emoji, $title, $subtitle, $bodyHtml = '')
+ * abCard($id, $color, $icon, $title, $subtitle, $bodyHtml = '')
  *   $id       — 卡片 id 后缀，如 'admin'、'editor'，会生成 id="ab-card-{id}" 等
  *   $color    — 强调色 hex，如 $abC1 / $abC2
- *   $emoji    — 图标 emoji
+ *   $icon     — Material Icons Round 图标名
  *   $title    — 卡片标题
  *   $subtitle — 卡片副标题
  *   $bodyHtml — 卡片展开体内的初始 HTML（可含提示框；默认为空）
@@ -17,16 +17,17 @@
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 if (!function_exists('abCard')):
-function abCard($id, $color, $emoji, $title, $subtitle, $bodyHtml = '') {
+function abCard($id, $color, $icon, $title, $subtitle, $bodyHtml = '') {
     $id    = htmlspecialchars($id,    ENT_QUOTES);
     $color = htmlspecialchars($color, ENT_QUOTES);
+    $icon  = htmlspecialchars($icon,  ENT_QUOTES | ENT_HTML5);
     $title    = htmlspecialchars($title,    ENT_QUOTES | ENT_HTML5);
     $subtitle = htmlspecialchars($subtitle, ENT_QUOTES | ENT_HTML5);
     echo <<<HTML
 <div id="ab-card-{$id}" class="ab-card">
     <div id="ab-card-{$id}-hdr" class="ab-card-hdr">
         <div id="ab-card-{$id}-strip" class="ab-card-strip" style="background:{$color}"></div>
-        <div id="ab-card-{$id}-icon"  class="ab-card-icon"  style="background:{$color}1a">{$emoji}</div>
+        <div id="ab-card-{$id}-icon"  class="ab-card-icon"  style="background:{$color}1a"><span class="material-icons-round">{$icon}</span></div>
         <div class="ab-card-meta">
             <div class="ab-card-title">{$title}</div>
             <div class="ab-card-subtitle">{$subtitle}</div>
