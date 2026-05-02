@@ -8,7 +8,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 function abInitModal(){
     var CFG=window.__AB_CONFIG__||{};
     if((CFG.notifyOptOut||"0")==="1") return;
-    // 通过本站  action 代理请求，规避浏览器 CORS 及国内 GitHub 访问问题
+    // 通过本站 PHP action 代理请求，规避浏览器 CORS 及国内 GitHub 访问问题
     var ajax=window.__AB_AJAX__||{};
     if(!ajax.url) return;
     fetch(ajax.url+"?do=get-notice",{cache:"no-cache",credentials:"include"})
@@ -114,4 +114,3 @@ if(document.readyState==="loading"){
     abInitModal();
 }
 })();</script>
-

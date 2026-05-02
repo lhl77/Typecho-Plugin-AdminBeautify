@@ -10,7 +10,7 @@ class AdminBeautify_Updater
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.39';
+    const CURRENT_VERSION = '2.1.40';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
@@ -195,11 +195,7 @@ class AdminBeautify_Updater
             json_encode(array('ts' => time(), 'data' => $postUpdateData), JSON_UNESCAPED_UNICODE)
         );
         @unlink($this->tmpDir . '/.update_lock');
-        if (function_exists('opcache_invalidate')) {
-            @opcache_invalidate($this->pluginDir . '/Updater.php', true);
-            @opcache_invalidate($this->pluginDir . '/Plugin.php',  true);
-            @opcache_invalidate($this->pluginDir . '/Action.php',  true);
-        }
+        $this->invalidateOpcacheInDir($this->pluginDir, array('tmp_update'));
         call_user_func($emit, 'done',
             '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。',
             100
@@ -354,11 +350,7 @@ class AdminBeautify_Updater
             json_encode(array('ts' => time(), 'data' => $postUpdateData), JSON_UNESCAPED_UNICODE)
         );
         @unlink($this->tmpDir . '/.update_lock');
-        if (function_exists('opcache_invalidate')) {
-            @opcache_invalidate($this->pluginDir . '/Updater.php', true);
-            @opcache_invalidate($this->pluginDir . '/Plugin.php',  true);
-            @opcache_invalidate($this->pluginDir . '/Action.php',  true);
-        }
+        $this->invalidateOpcacheInDir($this->pluginDir, array('tmp_update'));
         return array('ok' => true, 'msg' => '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。', 'details' => $details);
     }
     private function findPluginRoot($dir)
@@ -482,6 +474,24 @@ class AdminBeautify_Updater
         @unlink($this->tmpDir . '/update.zip');
         $extractDir = $this->tmpDir . '/extracted';
         if (is_dir($extractDir)) $this->removeDir($extractDir);
+    }
+    private function invalidateOpcacheInDir($dir, $skipDirs = array())
+    {
+        if (!function_exists('opcache_invalidate') || !is_dir($dir)) return;
+        $items = @scandir($dir);
+        if (!$items) return;
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            if (in_array($item, $skipDirs, true)) continue;
+            $path = $dir . '/' . $item;
+            if (is_dir($path)) {
+                $this->invalidateOpcacheInDir($path, $skipDirs);
+                continue;
+            }
+            if (substr($path, -4) === '.php') {
+                @opcache_invalidate($path, true);
+            }
+        }
     }
     private function httpGet($url, $timeout = 30)
     {

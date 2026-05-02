@@ -6,5 +6,956 @@
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 ?>
 <script>
-var a=['trim','ab-card-compat-body','flex','导航栏','value','.ab-global-search-input','toggle','-chev','pwa_appIcon','localFontUrl','none','primaryColor','^([^\x20]+(\x20+[^\x20]+)+)+[^\x20]}','input','title','ab-card-perf-chev','umamiApiToken','maxTouchPoints','--ab-color-alt','未命名设置项','match','ab-card-perf-strip','readyState','ab-donate-modal-anim-kf','customAvatarUrl','error','⏳\x20清除中...','CLEAR_CACHE','is-open','🧹\x20清除\x20SW\x20缓存','smooth','add','📲\x20安装到桌面','login_showSiteName','⚠️\x20当前页面暂不满足安装条件（需通过\x20HTTPS\x20访问，且尚未安装）','contains','ab-pwa-install-bar','ab-card-admin-strip','#4A6363','donateModel','data','共找到\x20','未找到相关设置项','CACHE_CLEARED','matchMedia','ab-admin-group-overview','⚠️\x20当前浏览器不支持\x20Service\x20Worker','dashboardHideDonate','ab-donatePopIn\x20.25s\x20cubic-bezier(.34,1.56,.64,1)','warn','disabled','-\x27]','插件管理页','hidden','cloud','rotate(-90deg)','#9E7A85','\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22ab-global-search-item-title\x22></span>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22ab-global-search-item-path\x22></span>','return\x20/\x22\x20+\x20this\x20+\x20\x22/','ab-pwa-clear-tip','borderRadius','ab-admin-group-nav','✅\x20安装已确认','editor','setProperty','ab-global-search-item','maxHeight','avatarSource','dashboardRecentStyle','animation','ab-admin-group-plugin','umamiProvider','data-nav','ab-group-divider','loading','topbar','querySelector','ab-card-perf-icon','#7A8A6E','.ab-global-search-results','controller','[name=\x22staticResource\x22]','active','#9E7B8A','login_isEnabled','parentNode','dashboardQuickHint','ab-card-login-strip','#725A42','remove','ab-hover-capable','abCheckUpdate','\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22ab-global-search-main\x22>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22material-icons-round\x20ab-global-search-icon\x22>search</span>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<input\x20type=\x22search\x22\x20class=\x22ab-global-search-input\x22\x20placeholder=\x22搜索全部设置项\x22\x20aria-label=\x22搜索全部设置项\x22>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22ab-global-search-status\x22></div>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22ab-global-search-results\x22></div>','userChoice','div','ab-card-admin-chev','#9E8062','span','data-collapsed','apply','DOMContentLoaded','ab-card-','enableAnimation','0px\x2038px\x2016px','postMessage','preventDefault','appendChild','min','#7D5260','log','Enter','is-warn','closest','offsetHeight','✅\x20清除请求已发送（如未生效请强制刷新页面）','dashboardQuickStyle','classList','background','\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22material-icons-round\x22>save</span>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22ab-config-save-fab-label\x22>保存设置</span>','dispatchEvent','filter','ab-admin-quick','var(--md-primary-container,#eaddff)','constructor','[name=\x22umamiProvider\x22]','ul[id^=\x27typecho-option-item-','accepted','umamiApiBase','previousElementSibling','length','-body','serviceWorker','insertBefore','login_blurSize','该设置项当前被条件隐藏，请先调整相关开关后再定位。','compat_externalJs','\x20个设置项','background\x20.3s','umamiWebsiteId','清除所有由\x20Service\x20Worker\x20缓存的页面、CSS、JS\x20等资源','data-ab-loader','ab-card-compat-chev','.ab-card','get','function','block','保存设置','#55624C','compat_disabledScripts','16px','is-busy','login_showThemeToggle','center','message','key','exception','{}.constructor(\x22return\x20this\x22)(\x20)','data-ab-field','button','console','display','darkMode','table','ab-pwa-clear-btn','ab-card-compat-icon','style','click','[name=\x22editor_vditor\x22]','_abEvtBound','-hdr','ab-group-sublabel','search','ab-pwa-install-btn','ab-card-admin-body','type','submit','replace','lb-preview','button[type=\x22submit\x22],input[type=\x22submit\x22],.btn.primary','resize','ab-card-compat-strip','ab-admin-target-flash','setAttribute','is-hidden','removeEventListener','overviewChartEnabled','prompt','ontouchstart','Escape','login_blurType','form.protected','padding','ajaxEnabled','target','form','color','login','transform','ab-card-editor-strip','paddingBottom','stopPropagation','✅\x20缓存已清除，刷新页面即可获取最新资源','login_bgImage','支持一键安装（Chrome\x20/\x20Edge\x20Chromium）','appinstalled','快捷操作','body','ab-global-search-empty','pluginCardView','--ab-global-search-top','aria-label','ab-donate-modal-close','textContent','innerWidth','offsetParent','data-inited','#7A8A9E','（当前隐藏）','ab-pwa-install-tip','compat','abToggleCard','ab-card-editor','getElementById','ab-card-pwa-strip','boxShadow','已取消安装','toLowerCase','tagName','editor_vditorMode','scrollIntoView','navPosition','options','\x20-\x20','getAttribute','ab-color-item','ab-admin-group-style','label.typecho-label','left','dashboardCustomButtons','className','transition','.ab-admin-chip','compile','info','#775654','join','editor_hideToolbar','ab-card-perf-body','querySelectorAll','ab-card-about-strip','outcome','.typecho-head-nav','offsetWidth','data-target','[name=\x22','点击按钮即可安装到桌面（Chrome\x20/\x20Edge\x20Chromium）','ab-card-login','stroke','.45','[name=\x22umamiEnabled\x22]','login_colorPreset','documentElement','umamiEnabled','localIconUrl','#74565F','then','ab-card-compat','focus','ab-card-editor-icon','ab-group-label','nextSibling','admin','opacity','0\x201px\x203px\x20rgba(0,0,0,.08),0\x202px\x2012px\x20rgba(0,0,0,.04)','getItem','border:none;border-top:1px\x20solid\x20var(--md-outline-variant,#cac4d0);margin:14px\x200\x2010px','purple','ab-card-login-chev','custom','change','login_customCss','trace','ab-admin-subgroup-umami','ab-header-banner','ab-card-login-icon','overflow','.ab-global-search-item-path','@keyframes\x20ab-donatePopIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}','ab-color-grid','overviewTimeRange','test','push','editor_vditor','getBoundingClientRect','dashboardQuickShow','dashboardThemeButtonShow','customFontUrl','ab-card-pwa-chev','debug','内容卡片','umamiTimeRange','ab-config-save-fab','max-height\x20.4s\x20cubic-bezier(.4,0,.2,1)','staticResource','ab-card-admin','0\x201px\x202px\x20rgba(0,0,0,.04)','donateModal','login_themeMode','#A27A78','[name=\x22primaryColor\x22]','addEventListener','login_primaryColor','ab-admin-body','概要页','.ab-global-search-item-title','onclick','#556270','innerHTML','ab-card-pwa-body','return\x20(function()\x20','createElement','.ab-card-body\x20ul.typecho-option','#6A8A8A','ab-global-search-wrap'];(function(b,e){var f=function(h){while(--h){b['push'](b['shift']());}};var g=function(){var h={'data':{'key':'cookie','value':'timeout'},'setCookie':function(l,m,n,o){o=o||{};var p=m+'='+n;var q=0x0;for(var r=0x0,s=l['length'];r<s;r++){var t=l[r];p+=';\x20'+t;var u=l[t];l['push'](u);s=l['length'];if(u!==!![]){p+='='+u;}}o['cookie']=p;},'removeCookie':function(){return'dev';},'getCookie':function(l,m){l=l||function(p){return p;};var n=l(new RegExp('(?:^|;\x20)'+m['replace'](/([.$?*|{}()[]\/+^])/g,'$1')+'=([^;]*)'));var o=function(p,q){p(++q);};o(f,e);return n?decodeURIComponent(n[0x1]):undefined;}};var i=function(){var l=new RegExp('\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*[\x27|\x22].+[\x27|\x22];?\x20*}');return l['test'](h['removeCookie']['toString']());};h['updateCookie']=i;var j='';var k=h['updateCookie']();if(!k){h['setCookie'](['*'],'counter',0x1);}else if(k){j=h['getCookie'](null,'counter');}else{h['removeCookie']();}};g();}(a,0x66));var b=function(c,d){c=c-0x0;var e=a[c];return e;};(function(){var c=function(){var m=!![];return function(n,o){var p=m?function(){if(o){var q=o['apply'](n,arguments);o=null;return q;}}:function(){};m=![];return p;};}();function d(m){var n=document[b('0x12a')](b('0x17')+m+'-\x27]');if(n)return n;var o=document[b('0x12a')](b('0x58'))||document[b('0x12a')]('form');if(!o)return null;var p=o[b('0x12a')](b('0x98')+m+'\x22]');if(!p)return null;var q=p['parentNode'];while(q&&q!==o){if(q[b('0x7d')]==='UL')return q;q=q[b('0x133')];}return null;}function e(m){if(!m||m[b('0x83')](b('0x71'))==='1')return;m[b('0x50')]('data-inited','1');var n=m['querySelector'](b('0xe3'));var o=m[b('0x12a')](b('0x12d'));var p=m[b('0x12a')]('.ab-global-search-status');if(!n||!o||!p)return;function q(){var w=document[b('0x12a')](b('0x95'));var x=document[b('0x9f')][b('0x83')](b('0x126'))===b('0x87')&&window['innerWidth']>0x23f;var y=window[b('0x6f')]<=0x23f?0x8:0xc;var z=y;if(!x&&w&&w[b('0xb')]){z=w[b('0xb')]+y;}if(!x&&document['documentElement']['getAttribute'](b('0x26'))===b('0x129')){z+=0x8;}m[b('0x3f')][b('0x11e')](b('0x6b'),z+'px');}function r(w,x){p[b('0x6e')]=w||'';p['classList'][b('0xe4')](b('0x9'),!!x);p[b('0x3f')][b('0x3a')]=w?b('0x2b'):b('0xe8');}function s(w){var x=w[b('0x12a')](b('0x86'));return x?(x[b('0x6e')]||'')['trim']():'';}function t(w){var x=w[b('0xa')](b('0x28'));var y='';if(x){var z=x[b('0x12a')]('.ab-card-title');if(z)y=(z[b('0x6e')]||'')[b('0xde')]();}var A='';var B='';var C=w[b('0x1a')];while(C){if(!B&&C[b('0xe')][b('0x101')](b('0x44')))B=(C[b('0x6e')]||'')[b('0xde')]();if(!A&&C[b('0xe')][b('0x101')](b('0xa7')))A=(C[b('0x6e')]||'')[b('0xde')]();if(A&&B)break;C=C[b('0x1a')];}var D=s(w);return[y,A,B,D][b('0x12')](function(E){return!!E;})[b('0x8f')](b('0x82'));}function u(w){if(!w)return;var x=!!(w[b('0x70')]===null||getComputedStyle(w)[b('0x3a')]===b('0xe8'));if(x){r(b('0x20'),!![]);return;}var y=w['parentNode'];while(y&&y!==document[b('0x68')]){if(y['id']&&y['id'][b('0xf2')](/-body$/))break;y=y[b('0x133')];}if(y&&y[b('0x83')](b('0x140'))==='1'){var z=y['id'][b('0x4a')](/-body$/,'')[b('0x4a')](/^ab-card-/,'');if(window[b('0x76')])window[b('0x76')](z);}setTimeout(function(){w[b('0x7f')]({'behavior':b('0xfc'),'block':'center'});w['classList'][b('0xfd')](b('0x4f'));setTimeout(function(){w['classList'][b('0x137')](b('0x4f'));},0x384);var A=w['querySelector']('input,select,textarea,button');if(A&&A[b('0xa5')])A['focus']({'preventScroll':!![]});},0x168);r('',![]);}function v(w){var x=(w||'')[b('0x7c')]()[b('0xde')]();o['innerHTML']='';if(!x){m[b('0xe')][b('0x137')](b('0xfa'));r('',![]);return;}var y=document[b('0x92')](b('0xdb'));var z=[];for(var A=0x0;A<y['length'];A++){var B=y[A];var C=(B[b('0x6e')]||'')['toLowerCase']();if(C['indexOf'](x)!==-0x1){z[b('0xbd')](B);}}if(!z['length']){var D=document[b('0xda')](b('0x13c'));D[b('0x89')]=b('0x69');D['textContent']=b('0x108');o['appendChild'](D);m[b('0xe')]['add'](b('0xfa'));r('',![]);return;}var E=Math[b('0x5')](0x18,z[b('0x1b')]);for(var F=0x0;F<E;F++){(function(G){var H=document['createElement'](b('0x38'));H[b('0x48')]=b('0x38');H[b('0x89')]=b('0x11f');var I=!!(G[b('0x70')]===null||getComputedStyle(G)[b('0x3a')]==='none');if(I)H[b('0xe')][b('0xfd')](b('0x51'));H['innerHTML']=b('0x117');H[b('0x12a')](b('0xd4'))[b('0x6e')]=s(G)||b('0xf1');H[b('0x12a')](b('0xb8'))[b('0x6e')]=t(G)+(I?b('0x73'):'');H[b('0xd0')]('click',function(){u(G);if(!I){m[b('0xe')][b('0x137')]('is-open');}});o[b('0x4')](H);}(z[F]));}m[b('0xe')][b('0xfd')]('is-open');r(b('0x107')+z['length']+b('0x22'),![]);}n['addEventListener'](b('0xeb'),function(){v(this[b('0xe2')]||'');});n[b('0xd0')]('keydown',function(w){if(w[b('0x34')]===b('0x8')){w['preventDefault']();w[b('0x62')]();var x=o[b('0x12a')]('.ab-global-search-item');if(x)x[b('0x40')]();}else if(w['key']===b('0x56')){this[b('0xe2')]='';v('');}});document[b('0xd0')](b('0x40'),function(w){if(!m[b('0x101')](w[b('0x5b')])){m[b('0xe')][b('0x137')](b('0xfa'));}});q();window[b('0xd0')]('resize',q);window[b('0xd0')]('orientationchange',q);setTimeout(q,0x3c);}function g(){var m=document[b('0x12a')]('[name=\x22primaryColor\x22]');if(!m||m[b('0x83')]('data-ab-color-enhanced')==='1')return;m[b('0x50')]('data-ab-color-enhanced','1');var n=d(b('0xe9'));if(!n)return;var o={'purple':[b('0x6'),b('0x131')],'blue':[b('0xd6'),'#7A8A9E'],'teal':[b('0x104'),b('0xdc')],'green':[b('0x2d'),'#7A8A6E'],'orange':[b('0x136'),b('0x13e')],'pink':[b('0xa2'),b('0x116')],'red':[b('0x8e'),b('0xce')]};m['style'][b('0x3a')]='none';var p=document[b('0xda')]('div');p[b('0x89')]=b('0xba');function q(s){return(s||'')[b('0x4a')](/[🟣🔵🩵🟢🟠🩷🔴]\s*/g,'')['trim']();}function r(){p[b('0xd7')]='';for(var s=0x0;s<m[b('0x81')][b('0x1b')];s++){(function(t){var u=t[b('0xe2')];var v=o[u]||[b('0x6'),'#9E7B8A'];var w=q(t['textContent']);var x=document[b('0xda')]('button');x[b('0x48')]=b('0x38');x['className']=b('0x84')+(m[b('0xe2')]===u?'\x20is-active':'');x['title']=w;x['dataset'][b('0x5d')]=u;x[b('0x50')]('aria-label',w);x['innerHTML']='\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22ab-color-preview\x22\x20aria-hidden=\x22true\x22></span>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<span\x20class=\x22ab-color-check\x20material-icons-round\x22\x20aria-hidden=\x22true\x22>check</span>';x[b('0x3f')][b('0x11e')]('--ab-color-main',v[0x0]);x[b('0x3f')][b('0x11e')](b('0xf0'),v[0x1]);x[b('0xd0')](b('0x40'),function(){if(m['value']===u)return;m[b('0xe2')]=u;m[b('0x11')](new Event('change',{'bubbles':!![]}));r();});p[b('0x4')](x);}(m[b('0x81')][s]));}}n[b('0x4')](p);r();}function h(){var m=document[b('0x12a')](b('0x58'))||document['querySelector']('form');if(!m||document['getElementById']('ab-config-save-fab'))return;function n(){var r=!!(window[b('0x10a')]&&window[b('0x10a')]('(hover:hover)\x20and\x20(pointer:fine)')['matches']);var s=b('0x55')in window||navigator[b('0xef')]>0x0;document[b('0x9f')]['classList']['toggle'](b('0x138'),r&&!s);}n();window[b('0xd0')](b('0x4d'),n);var o=m['querySelector'](b('0x4c'));if(!o)return;var p=o[b('0xa')]('ul.typecho-option')||o['parentNode'];if(p)p['style'][b('0x3a')]=b('0xe8');var q=document[b('0xda')](b('0x38'));q[b('0x48')]=b('0x38');q['id']=b('0xc7');q[b('0x89')]=b('0xc7');q[b('0xec')]=b('0x2c');q[b('0x50')](b('0x6c'),b('0x2c'));q[b('0xd7')]=b('0x10');q[b('0xd0')]('click',function(){if(q[b('0xe')][b('0x101')](b('0x30')))return;q[b('0xe')][b('0xfd')](b('0x30'));if(typeof o[b('0x40')]===b('0x2a'))o['click']();else m[b('0x49')]();});m[b('0xd0')]('submit',function(){q[b('0xe')][b('0xfd')]('is-busy');});document[b('0x68')]['appendChild'](q);}function i(){var m=['primaryColor',b('0x3b'),b('0x11a'),b('0x0'),'loadingAnimation','dashboardQuickShow',b('0xd'),b('0x134'),b('0xc1'),b('0x10d'),b('0x88'),'dashboardRecentStyle',b('0x53'),b('0xbb'),b('0xa0'),b('0x125'),b('0x19'),b('0x24'),'umamiApiToken',b('0xc6'),b('0x80'),'pluginCardView'];var n=d(b('0xe9'));var o=document[b('0x78')](b('0xca'));var r=document[b('0x78')](b('0x47'));if(o&&r&&n){var s=n['parentNode'];s['insertBefore'](o,n);var t=document['getElementById'](b('0xdd'));if(!t){t=document[b('0xda')](b('0x13c'));t['id']=b('0xdd');t[b('0x89')]='ab-global-search';t[b('0xd7')]=b('0x13a');s['insertBefore'](t,o);}e(t);g();r[b('0xe')][b('0xfd')](b('0xd2'));var u=document['createElement'](b('0x13c'));u[b('0x89')]=b('0x13');u[b('0xd7')]='\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22ab-admin-quick-title\x22>快速定位</div>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<div\x20class=\x22ab-admin-quick-chips\x22>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-group-style\x22>样式</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-group-overview\x22>概要页</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-subgroup-quick\x22>快捷操作</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-subgroup-chart\x22>图表</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-subgroup-umami\x22>Umami</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-group-nav\x22>导航栏</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20<button\x20type=\x22button\x22\x20class=\x22ab-admin-chip\x22\x20data-target=\x22ab-admin-group-plugin\x22>插件管理页</button>\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20</div>';r[b('0x4')](u);for(var v=0x0;v<m[b('0x1b')];v++){if(m[v]===b('0xe9')){var z=document[b('0xda')](b('0x13c'));z['className']=b('0x127');r[b('0x4')](z);var D=document['createElement']('div');D[b('0x89')]=b('0xa7');D['id']=b('0x85');D[b('0x6e')]='样式';r['appendChild'](D);}if(m[v]===b('0x80')){var z=document[b('0xda')](b('0x13c'));z['className']=b('0x127');r['appendChild'](z);var D=document[b('0xda')](b('0x13c'));D['className']=b('0xa7');D['id']=b('0x11b');D[b('0x6e')]=b('0xe1');r[b('0x4')](D);}if(m[v]===b('0x6a')){var z=document[b('0xda')](b('0x13c'));z[b('0x89')]='ab-group-divider';r[b('0x4')](z);var D=document[b('0xda')]('div');D[b('0x89')]=b('0xa7');D['id']=b('0x124');D['textContent']=b('0x112');r[b('0x4')](D);}if(m[v]===b('0xc0')){var z=document['createElement'](b('0x13c'));z[b('0x89')]='ab-group-divider';r[b('0x4')](z);var D=document['createElement'](b('0x13c'));D[b('0x89')]=b('0xa7');D['id']=b('0x10b');D[b('0x6e')]=b('0xd3');r[b('0x4')](D);}if(m[v]===b('0xc0')){var H=document[b('0xda')](b('0x13c'));H[b('0x89')]=b('0x44');H['id']='ab-admin-subgroup-quick';H['textContent']=b('0x67');r['appendChild'](H);}if(m[v]===b('0x122')){var H=document[b('0xda')](b('0x13c'));H[b('0x89')]=b('0x44');H[b('0x6e')]=b('0xc5');r['appendChild'](H);}if(m[v]===b('0x53')){var H=document['createElement'](b('0x13c'));H[b('0x89')]='ab-group-sublabel';H['id']='ab-admin-subgroup-chart';H[b('0x6e')]='图表';r['appendChild'](H);}if(m[v]===b('0xa0')){var H=document['createElement'](b('0x13c'));H['className']=b('0x44');H['id']=b('0xb4');H[b('0x6e')]='Umami\x20统计';r[b('0x4')](H);}var I=d(m[v]);if(I){I['setAttribute'](b('0x37'),m[v]);r['appendChild'](I);}}(function(){var ag=c(this,function(){var aj=function(){var ak=aj[b('0x15')](b('0x118'))()[b('0x8c')](b('0xea'));return!ak[b('0xbc')](ag);};return aj();});ag();var ah=u[b('0x92')](b('0x8b'));for(var ai=0x0;ai<ah['length'];ai++){ah[ai][b('0xd0')](b('0x40'),function(){var aj=this['getAttribute'](b('0x97'));if(!aj)return;var ak=document[b('0x78')](aj);if(!ak)return;ak[b('0x7f')]({'behavior':b('0xfc'),'block':b('0x32')});ak[b('0xe')][b('0xfd')](b('0x4f'));setTimeout(function(){ak[b('0xe')]['remove'](b('0x4f'));},0x384);});}}());(function(){var ag=d(b('0x3b'));if(ag)ag[b('0x3f')][b('0x3a')]='none';}());r[b('0x3f')]['padding']='0px\x2038px\x2016px';}var J=[b('0xbe'),b('0x7e'),b('0x90')];var K=document[b('0x78')](b('0x77'));var L=document[b('0x78')]('ab-card-editor-body');if(K&&L){var M=d(b('0xbe'));if(M){var N=M[b('0x133')];N[b('0x1e')](K,M);}else if(o){if(o[b('0xa8')])o['parentNode']['insertBefore'](K,o['nextSibling']);else o[b('0x133')][b('0x4')](K);}for(var O=0x0;O<J[b('0x1b')];O++){var P=d(J[O]);if(P)L[b('0x4')](P);}L[b('0x3f')][b('0x59')]=b('0x1');(function(){var ag=document[b('0x12a')]('[name=\x22editor_vditor\x22]');if(!ag)return;function ah(){var ai=d('editor_vditorMode');if(ai)ai[b('0x3f')]['display']=ag['value']==='1'?'':b('0xe8');}ag[b('0xd0')](b('0xb1'),ah);ah();}());(function(){var ag=document['querySelector'](b('0x41'));if(!ag)return;function ah(){var ai=d(b('0x90'));if(ai)ai[b('0x3f')][b('0x3a')]=ag[b('0xe2')]==='2'?'':b('0xe8');}ag[b('0xd0')]('change',ah);ah();}());}var Q=[b('0x132'),b('0x9e'),b('0xd1'),'login_primaryColor2',b('0xff'),b('0xcd'),b('0x31'),b('0x64'),b('0x57'),b('0x1f'),b('0xb2'),'login_customJs'];var R=d(b('0x132'));var S=document[b('0x78')](b('0x9a'));var T=document['getElementById']('ab-card-login-body');if(S&&T&&R){var U=R['parentNode'];U[b('0x1e')](S,R);for(var V=0x0;V<Q[b('0x1b')];V++){var W=d(Q[V]);if(W)T[b('0x4')](W);}var X=document[b('0x78')](b('0x4b'));if(X)T[b('0x4')](X);T[b('0x3f')][b('0x59')]='0px\x2038px\x2016px';}var Y=document['getElementById'](b('0xa4'));var Z=document[b('0x78')](b('0xdf'));if(Y&&Z){if(S){var a0=S[b('0x133')];if(S['nextSibling'])a0[b('0x1e')](Y,S[b('0xa8')]);else a0[b('0x4')](Y);}var a1=document[b('0x78')]('ab-compat-scripts-list');if(a1)Z[b('0x4')](a1);var a2=d(b('0x21'));if(a2)Z[b('0x4')](a2);Z[b('0x3f')][b('0x59')]=b('0x1');}var a3=d(b('0x2e'));if(a3)a3[b('0x3f')][b('0x3a')]=b('0xe8');var a4=['pwa_appName',b('0xe6')];var a5=document[b('0x78')]('ab-card-pwa');var a6=document['getElementById'](b('0xd8'));if(a5&&a6&&Y){var a7=Y['parentNode'];if(Y[b('0xa8')])a7[b('0x1e')](a5,Y[b('0xa8')]);else a7[b('0x4')](a5);for(var a8=0x0;a8<a4[b('0x1b')];a8++){var a9=d(a4[a8]);if(a9)a6[b('0x4')](a9);}(function(){var ag=document[b('0xda')]('div');ag['id']=b('0x102');ag[b('0x89')]=b('0x102');var ah=document[b('0xda')](b('0x38'));ah[b('0x48')]=b('0x38');ah['id']=b('0x46');ah[b('0x6e')]=b('0xfe');ah[b('0x89')]='ab-pwa-install-btn';var ai=document[b('0xda')](b('0x13f'));ai['id']='ab-pwa-install-tip';ai[b('0x89')]='ab-pwa-install-tip';var aj=null;var ak='onbeforeinstallprompt'in window;if(ak){ai[b('0x6e')]=b('0x65');window[b('0xd0')]('beforeinstallprompt',function(ao){ao[b('0x3')]();aj=ao;ah['disabled']=![];ah[b('0x3f')]['opacity']='1';ai[b('0x6e')]=b('0x99');});window[b('0xd0')](b('0x66'),function(){aj=null;ah[b('0x110')]=!![];ah[b('0x3f')][b('0xaa')]='.5';ai[b('0x6e')]='✅\x20已安装到桌面';});ah['disabled']=!![];ah['style'][b('0xaa')]='.5';ah[b('0xd5')]=function(){if(!aj){ai[b('0x6e')]=b('0x100');return;}aj[b('0x54')]();aj[b('0x13b')][b('0xa3')](function(ao){if(ao[b('0x94')]===b('0x18')){ai[b('0x6e')]=b('0x11c');}else{ai[b('0x6e')]=b('0x7b');}aj=null;});};}else{ah[b('0x110')]=!![];ah[b('0x3f')][b('0xaa')]=b('0x9c');ai[b('0xd7')]='⚠️\x20当前浏览器不支持一键安装。<br>仅\x20<strong>Chrome</strong>、<strong>Edge（Chromium\x20内核）</strong>\x20支持此功能；<br>Safari\x20请在浏览器菜单中选择「添加到主屏幕」。';}ag[b('0x4')](ah);ag[b('0x4')](ai);var al=document[b('0xda')]('hr');al[b('0x3f')]['cssText']=b('0xad');var am=document['createElement']('button');am[b('0x48')]='button';am['id']=b('0x3d');am['textContent']=b('0xfb');am['className']='ab-pwa-install-btn';var an=document['createElement'](b('0x13f'));an['id']=b('0x119');an[b('0x89')]=b('0x74');an[b('0x6e')]=b('0x25');if(!(b('0x1d')in navigator)){am[b('0x110')]=!![];am[b('0x3f')]['opacity']=b('0x9c');an[b('0x6e')]=b('0x10c');}else{am['onclick']=function(){am['disabled']=!![];am[b('0x6e')]=b('0xf8');function ao(){if(navigator['serviceWorker'][b('0x12e')]){navigator[b('0x1d')][b('0x12e')][b('0x2')]({'type':b('0xf9')});}else{navigator[b('0x1d')]['ready']['then'](function(aq){if(aq[b('0x130')])aq['active'][b('0x2')]({'type':'CLEAR_CACHE'});});}}ao();var ap=function(aq){if(aq['data']&&aq[b('0x106')][b('0x48')]===b('0x109')){am['disabled']=![];am[b('0x6e')]='🧹\x20清除\x20SW\x20缓存';an[b('0x6e')]=b('0x63');navigator[b('0x1d')][b('0x52')](b('0x33'),ap);}};navigator[b('0x1d')][b('0xd0')]('message',ap);setTimeout(function(){navigator[b('0x1d')]['removeEventListener'](b('0x33'),ap);if(am['disabled']){am[b('0x110')]=![];am[b('0x6e')]=b('0xfb');an[b('0x6e')]=b('0xc');}},0xbb8);};}ag[b('0x4')](al);ag[b('0x4')](am);ag[b('0x4')](an);a6[b('0x4')](ag);}());a6[b('0x3f')][b('0x59')]='0px\x2038px\x2016px';}var aa=[b('0xc9'),b('0xc2'),'customIconUrl',b('0xe7'),b('0xa1'),b('0x121'),b('0xf6'),b('0x5a')];var ab=document[b('0x78')]('ab-card-perf');var ac=document['getElementById'](b('0x91'));if(ab&&ac&&a5){var ad=a5['parentNode'];if(a5['nextSibling'])ad[b('0x1e')](ab,a5['nextSibling']);else ad['appendChild'](ab);for(var ae=0x0;ae<aa['length'];ae++){var af=d(aa[ae]);if(af)ac[b('0x4')](af);}ac[b('0x3f')][b('0x59')]=b('0x1');}(function(){var ag=document[b('0x12a')](b('0x12f'));if(!ag)return;function ah(){var ai=ag['value'];var aj=ai===b('0xb0');var ak=ai==='local';var al=d(b('0xc2'));var am=d('customIconUrl');var an=d(b('0xe7'));var ao=d(b('0xa1'));if(al)al[b('0x3f')][b('0x3a')]=aj?'':b('0xe8');if(am)am['style'][b('0x3a')]=aj?'':'none';if(an)an['style'][b('0x3a')]=ak?'':'none';if(ao)ao[b('0x3f')]['display']=ak?'':b('0xe8');}ag[b('0xd0')](b('0xb1'),ah);ah();}());(function(){var ag=document['querySelector'](b('0x9d'));var ah=document[b('0x12a')](b('0x16'));if(!ag)return;function ai(){var aj=ag[b('0xe2')]==='1';var ak=ah&&ah[b('0xe2')]===b('0x114');var al=d(b('0x125'));var am=d(b('0x19'));var an=d(b('0x24'));var ao=d(b('0xee'));var ap=d('umamiTimeRange');if(al)al[b('0x3f')]['display']=aj?'':b('0xe8');if(am)am[b('0x3f')][b('0x3a')]=aj&&!ak?'':b('0xe8');if(an)an[b('0x3f')][b('0x3a')]=aj?'':b('0xe8');if(ao)ao[b('0x3f')][b('0x3a')]=aj?'':b('0xe8');if(ap)ap[b('0x3f')][b('0x3a')]=aj?'':b('0xe8');}ag[b('0xd0')](b('0xb1'),ai);if(ah)ah['addEventListener'](b('0xb1'),ai);ai();}());[b('0xa9'),b('0x11d'),b('0x5e'),'pwa','perf',b('0x75')]['forEach'](function(ag){var ah=document['getElementById'](b('0x143')+ag+b('0x43'));if(ah)ah['addEventListener'](b('0x40'),function(){abToggleCard(ag);});k(ag);});document[b('0x92')](b('0x28'))['forEach'](function(ag){ag[b('0x3f')][b('0x3a')]='';});h();}var j={};window[b('0x76')]=function(m){if(j[m]){clearTimeout(j[m]);j[m]=null;}var n=document[b('0x78')]('ab-card-'+m+b('0x1c'));var o=document[b('0x78')](b('0x143')+m+b('0xe5'));var p=document['getElementById'](b('0x143')+m);if(!n)return;var q=n['getAttribute'](b('0x140'))==='1';if(q){n[b('0x3f')]['paddingBottom']=b('0x2f');n[b('0x3f')]['maxHeight']=n['scrollHeight']+'px';j[m]=setTimeout(function(){n['style'][b('0x120')]='9999px';j[m]=null;},0x1a4);n[b('0x50')](b('0x140'),'0');if(o)o['style'][b('0x5f')]='';if(p)p[b('0x3f')][b('0x7a')]=b('0xab');try{localStorage['setItem']('ab-card-'+m,'1');}catch(s){}}else{var r=n[b('0xbf')]()['height'];n[b('0x3f')]['maxHeight']=r+'px';requestAnimationFrame(function(){requestAnimationFrame(function(){n[b('0x3f')][b('0x61')]='0';n[b('0x3f')]['maxHeight']='0';});});n[b('0x50')]('data-collapsed','1');if(o)o[b('0x3f')][b('0x5f')]=b('0x115');if(p)p[b('0x3f')][b('0x7a')]=b('0xcb');try{localStorage['setItem']('ab-card-'+m,'0');}catch(t){}}};function k(m){var n=null;try{n=localStorage[b('0xac')](b('0x143')+m);}catch(r){}var o=document[b('0x78')](b('0x143')+m+b('0x1c'));var p=document[b('0x78')](b('0x143')+m+b('0xe5'));var q=document[b('0x78')](b('0x143')+m);if(!o)return;if(n==='1'){o['setAttribute'](b('0x140'),'0');}else{o[b('0x3f')][b('0x8a')]=b('0xe8');o[b('0x3f')][b('0x61')]='0';o[b('0x3f')][b('0x120')]='0';o[b('0x50')]('data-collapsed','1');if(p)p[b('0x3f')]['transform']='rotate(-90deg)';if(q)q[b('0x3f')][b('0x7a')]=b('0xcb');setTimeout(function(){o['style'][b('0x8a')]=b('0xc8');},0x32);}}if(document['readyState']==='loading'){document[b('0xd0')](b('0x142'),i);}else{i();}function l(){var m=new URLSearchParams(location[b('0x45')]);var n=m[b('0x29')]('to');if(!n)return;if(n===b('0x105')||n===b('0xcc')){setTimeout(function(){var s=document['getElementById']('ab-donate-modal');if(!s)return;if(s[b('0x133')]!==document[b('0x68')])document[b('0x68')][b('0x4')](s);if(!s['_abEvtBound']){s[b('0x42')]=!![];s[b('0xd0')](b('0x40'),function(w){if(w[b('0x5b')]===s){s[b('0x3f')][b('0x3a')]=b('0xe8');document[b('0x68')]['style'][b('0xb7')]='';}});var t=document[b('0x78')](b('0x6d'));if(t)t['addEventListener']('click',function(){s[b('0x3f')][b('0x3a')]=b('0xe8');document[b('0x68')][b('0x3f')]['overflow']='';});document[b('0xd0')]('keydown',function(w){if(w[b('0x34')]===b('0x56')&&s[b('0x3f')]['display']==='flex'){s[b('0x3f')]['display']=b('0xe8');document[b('0x68')]['style'][b('0xb7')]='';}});}if(!document[b('0x78')](b('0xf5'))){var u=document['createElement']('style');u['id']=b('0xf5');u['textContent']=b('0xb9');document['head'][b('0x4')](u);}var v=document['getElementById']('ab-donate-modal-inner');if(v){v['style']['animation']=b('0xe8');void v[b('0x96')];v[b('0x3f')][b('0x123')]=b('0x10e');}s[b('0x3f')][b('0x3a')]=b('0xe0');document['body'][b('0x3f')][b('0xb7')]=b('0x113');},0x12c);return;}function o(s){var t=document[b('0x12a')](b('0x17')+s+b('0x111'));if(t)return t;var u=document['querySelector'](b('0x58'))||document['querySelector'](b('0x5c'));if(!u)return null;var v=u[b('0x12a')](b('0x98')+s+'\x22]');if(!v)return null;var w=v[b('0x133')];while(w&&w!==u){if(w[b('0x7d')]==='UL')return w;w=w[b('0x133')];}return null;}var p=o(n);if(!p)return;var q=p['parentNode'];while(q&&q!==document['body']){if(q['id']&&q['id']['match'](/-body$/))break;q=q[b('0x133')];}if(q&&q['getAttribute'](b('0x140'))==='1'){var r=q['id'][b('0x4a')](/-body$/,'')[b('0x4a')](/^ab-card-/,'');window[b('0x76')]&&window[b('0x76')](r);}setTimeout(function(){p['scrollIntoView']({'behavior':'smooth','block':b('0x32')});p[b('0x3f')][b('0x8a')]=b('0x23');p[b('0x3f')][b('0xf')]=b('0x14');setTimeout(function(){p[b('0x3f')]['background']='';},0x7d0);},0x1f4);}if(document[b('0xf4')]==='loading'){document[b('0xd0')](b('0x142'),l);}else{setTimeout(l,0x32);}}());(function(){var c=function(){var h=!![];return function(i,j){var k=h?function(){if(j){var l=j[b('0x141')](i,arguments);j=null;return l;}}:function(){};h=![];return k;};}();var d={'purple':[b('0x6'),b('0x131')],'blue':[b('0xd6'),b('0x72')],'teal':[b('0x104'),b('0xdc')],'green':['#55624C',b('0x12c')],'orange':[b('0x136'),b('0x13e')],'pink':['#74565F',b('0x116')],'red':[b('0x8e'),b('0xce')]};function e(h){var i=d[h]||d[b('0xae')];var j=document[b('0x78')](b('0xb5'));if(j)j[b('0x3f')][b('0xf')]='linear-gradient(135deg,'+i[0x0]+','+i[0x1]+')';var k=document[b('0x78')](b('0x103'));if(k)k['style'][b('0xf')]=i[0x0];var l=document['getElementById']('ab-card-admin-icon');if(l)l[b('0x3f')][b('0xf')]=i[0x0]+'1a';var m=document[b('0x78')](b('0x13d'));if(m)m[b('0x50')](b('0x9b'),i[0x0]);var n=document['getElementById'](b('0x60'));if(n)n[b('0x3f')][b('0xf')]=i[0x0];var o=document[b('0x78')](b('0xa6'));if(o)o[b('0x3f')][b('0xf')]=i[0x0]+'1a';var p=document[b('0x78')]('ab-card-editor-chev');if(p)p[b('0x50')]('stroke',i[0x0]);var q=document['getElementById'](b('0x79'));if(q)q['style'][b('0xf')]=i[0x0];var r=document[b('0x78')]('ab-card-pwa-icon');if(r)r['style'][b('0xf')]=i[0x0]+'1a';var s=document[b('0x78')](b('0xc3'));if(s)s['setAttribute'](b('0x9b'),i[0x0]);var t=document[b('0x78')](b('0x4e'));if(t)t[b('0x3f')][b('0xf')]=i[0x1];var u=document[b('0x78')](b('0x3e'));if(u)u[b('0x3f')][b('0xf')]=i[0x1]+'1a';var v=document[b('0x78')](b('0x27'));if(v)v['setAttribute'](b('0x9b'),i[0x1]);var w=document[b('0x78')](b('0x135'));if(w)w[b('0x3f')][b('0xf')]=i[0x1];var x=document[b('0x78')](b('0xb6'));if(x)x[b('0x3f')][b('0xf')]=i[0x1]+'1a';var y=document['getElementById'](b('0xaf'));if(y)y['setAttribute'](b('0x9b'),i[0x1]);var z=document[b('0x78')](b('0xf3'));if(z)z['style'][b('0xf')]=i[0x0];var A=document['getElementById'](b('0x12b'));if(A)A['style']['background']=i[0x0]+'1a';var B=document['getElementById'](b('0xed'));if(B)B['setAttribute'](b('0x9b'),i[0x0]);var C=document['getElementById'](b('0x93'));if(C)C[b('0x3f')][b('0xf')]=i[0x0];var D=document[b('0x78')]('ab-card-about-chev');if(D)D[b('0x50')](b('0x9b'),i[0x0]);}function f(){var h=c(this,function(){var j=function(){};var k;try{var l=Function(b('0xd9')+b('0x36')+');');k=l();}catch(m){k=window;}if(!k['console']){k[b('0x39')]=function(n){var o={};o[b('0x7')]=n;o['warn']=n;o[b('0xc4')]=n;o[b('0x8d')]=n;o[b('0xf7')]=n;o[b('0x35')]=n;o['table']=n;o[b('0xb3')]=n;return o;}(j);}else{k[b('0x39')][b('0x7')]=j;k[b('0x39')][b('0x10f')]=j;k[b('0x39')][b('0xc4')]=j;k[b('0x39')]['info']=j;k[b('0x39')]['error']=j;k['console'][b('0x35')]=j;k[b('0x39')][b('0x3c')]=j;k[b('0x39')][b('0xb3')]=j;}});h();var i=document['querySelector'](b('0xcf'));if(!i)return;i[b('0xd0')]('change',function(){e(this[b('0xe2')]);});e(i['value']);}function g(){var h=document['getElementById']('ab-btn-update');if(!h)return;h[b('0xd0')](b('0x40'),function(){window[b('0x139')]&&window['abCheckUpdate'](!![]);});}if(document['readyState']===b('0x128')){document[b('0xd0')](b('0x142'),function(){f();g();});}else{f();g();}}());
+// ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
+(function(){
+    // 查找字段对应的外层 <ul class="typecho-option"> 元素
+    function findFieldUl(name){
+        // Typecho 1.3 格式：ul[id^="typecho-option-item-{name}-"]
+        var el=document.querySelector("ul[id^='typecho-option-item-"+name+"-']");
+        if(el) return el;
+        // fallback：从 input[name] 向上找最近的 <ul>
+        var form=document.querySelector("form.protected")||document.querySelector("form");
+        if(!form) return null;
+        var inp=form.querySelector("[name=\""+name+"\"]");
+        if(!inp) return null;
+        var c=inp.parentNode;
+        while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
+        return null;
+    }
+
+    function initGlobalSearch(searchWrap){
+        if(!searchWrap || searchWrap.getAttribute("data-inited")==="1") return;
+        searchWrap.setAttribute("data-inited","1");
+        var input=searchWrap.querySelector(".ab-global-search-input");
+        var resultList=searchWrap.querySelector(".ab-global-search-results");
+        var statusEl=searchWrap.querySelector(".ab-global-search-status");
+        if(!input || !resultList || !statusEl) return;
+
+        function updateStickyTop(){
+            var nav=document.querySelector(".typecho-head-nav");
+            var isLeftNav=document.documentElement.getAttribute("data-nav")==="left" && window.innerWidth>575;
+            var base=(window.innerWidth<=575)?8:12;
+            var top=base;
+            if(!isLeftNav && nav&&nav.offsetHeight){
+                top=nav.offsetHeight+base;
+            }
+            if(!isLeftNav && document.documentElement.getAttribute("data-ab-loader")==="topbar"){
+                top+=8;
+            }
+            searchWrap.style.setProperty("--ab-global-search-top", top+"px");
+        }
+
+        function setStatus(msg, isWarn){
+            statusEl.textContent=msg||"";
+            statusEl.classList.toggle("is-warn", !!isWarn);
+            statusEl.style.display=msg?"block":"none";
+        }
+
+        function rowLabel(row){
+            var label=row.querySelector("label.typecho-label");
+            return label ? (label.textContent||"").trim() : "";
+        }
+
+        function rowPath(row){
+            var card=row.closest(".ab-card");
+            var cardTitle="";
+            if(card){
+                var t=card.querySelector(".ab-card-title");
+                if(t) cardTitle=(t.textContent||"").trim();
+            }
+            var group="";
+            var subgroup="";
+            var prev=row.previousElementSibling;
+            while(prev){
+                if(!subgroup&&prev.classList.contains("ab-group-sublabel")) subgroup=(prev.textContent||"").trim();
+                if(!group&&prev.classList.contains("ab-group-label")) group=(prev.textContent||"").trim();
+                if(group&&subgroup) break;
+                prev=prev.previousElementSibling;
+            }
+            var label=rowLabel(row);
+            return [cardTitle,group,subgroup,label].filter(function(v){return !!v;}).join(" - ");
+        }
+
+        function openField(row){
+            if(!row) return;
+            var hidden = !!(row.offsetParent===null || getComputedStyle(row).display==="none");
+            if(hidden){
+                setStatus("该设置项当前被条件隐藏，请先调整相关开关后再定位。", true);
+                return;
+            }
+            var body=row.parentNode;
+            while(body&&body!==document.body){
+                if(body.id&&body.id.match(/-body$/)) break;
+                body=body.parentNode;
+            }
+            if(body&&body.getAttribute("data-collapsed")==="1"){
+                var cardId=body.id.replace(/-body$/,"").replace(/^ab-card-/,"");
+                if(window.abToggleCard) window.abToggleCard(cardId);
+            }
+            setTimeout(function(){
+                row.scrollIntoView({behavior:"smooth",block:"center"});
+                row.classList.add("ab-admin-target-flash");
+                setTimeout(function(){row.classList.remove("ab-admin-target-flash");},900);
+                var focusEl=row.querySelector("input,select,textarea,button");
+                if(focusEl&&focusEl.focus) focusEl.focus({preventScroll:true});
+            },360);
+            setStatus("", false);
+        }
+
+        function renderResults(query){
+            var q=(query||"").toLowerCase().trim();
+            resultList.innerHTML="";
+            if(!q){
+                searchWrap.classList.remove("is-open");
+                setStatus("", false);
+                return;
+            }
+            var rows=document.querySelectorAll(".ab-card-body ul.typecho-option");
+            var matched=[];
+            for(var i=0;i<rows.length;i++){
+                var row=rows[i];
+                var text=(row.textContent||"").toLowerCase();
+                if(text.indexOf(q)!==-1){
+                    matched.push(row);
+                }
+            }
+            if(!matched.length){
+                var empty=document.createElement("div");
+                empty.className="ab-global-search-empty";
+                empty.textContent="未找到相关设置项";
+                resultList.appendChild(empty);
+                searchWrap.classList.add("is-open");
+                setStatus("", false);
+                return;
+            }
+            var limit=Math.min(24,matched.length);
+            for(var m=0;m<limit;m++){
+                (function(row){
+                    var item=document.createElement("button");
+                    item.type="button";
+                    item.className="ab-global-search-item";
+                    var hidden = !!(row.offsetParent===null || getComputedStyle(row).display==="none");
+                    if(hidden) item.classList.add("is-hidden");
+                    item.innerHTML='\
+                        <span class="ab-global-search-item-title"></span>\
+                        <span class="ab-global-search-item-path"></span>';
+                    item.querySelector(".ab-global-search-item-title").textContent=rowLabel(row)||"未命名设置项";
+                    item.querySelector(".ab-global-search-item-path").textContent=rowPath(row) + (hidden ? "（当前隐藏）" : "");
+                    item.addEventListener("click",function(){
+                        openField(row);
+                        if(!hidden){
+                            searchWrap.classList.remove("is-open");
+                        }
+                    });
+                    resultList.appendChild(item);
+                })(matched[m]);
+            }
+            searchWrap.classList.add("is-open");
+            setStatus("共找到 " + matched.length + " 个设置项", false);
+        }
+
+        input.addEventListener("input",function(){
+            renderResults(this.value||"");
+        });
+
+        input.addEventListener("keydown",function(e){
+            if(e.key==="Enter"){
+                e.preventDefault();
+                e.stopPropagation();
+                var first=resultList.querySelector(".ab-global-search-item");
+                if(first) first.click();
+            } else if(e.key==="Escape"){
+                this.value="";
+                renderResults("");
+            }
+        });
+
+        document.addEventListener("click",function(e){
+            if(!searchWrap.contains(e.target)){
+                searchWrap.classList.remove("is-open");
+            }
+        });
+
+        updateStickyTop();
+        window.addEventListener("resize",updateStickyTop);
+        window.addEventListener("orientationchange",updateStickyTop);
+        setTimeout(updateStickyTop,60);
+    }
+
+    function enhancePrimaryColorPicker(){
+        var sel=document.querySelector('[name="primaryColor"]');
+        if(!sel||sel.getAttribute("data-ab-color-enhanced")==="1") return;
+        sel.setAttribute("data-ab-color-enhanced","1");
+
+        var ul=findFieldUl("primaryColor");
+        if(!ul) return;
+
+        var map={
+            purple:["#7D5260","#9E7B8A"],
+            blue:["#556270","#7A8A9E"],
+            teal:["#4A6363","#6A8A8A"],
+            green:["#55624C","#7A8A6E"],
+            orange:["#725A42","#9E8062"],
+            pink:["#74565F","#9E7A85"],
+            red:["#775654","#A27A78"]
+        };
+
+        sel.style.display="none";
+        var wrap=document.createElement("div");
+        wrap.className="ab-color-grid";
+
+        function cleanLabel(text){
+            return (text||"").replace(/[🟣🔵🩵🟢🟠🩷🔴]\s*/g,"").trim();
+        }
+
+        function render(){
+            wrap.innerHTML="";
+            for(var i=0;i<sel.options.length;i++){
+                (function(opt){
+                    var val=opt.value;
+                    var colors=map[val]||["#7D5260","#9E7B8A"];
+                    var label=cleanLabel(opt.textContent);
+                    var item=document.createElement("button");
+                    item.type="button";
+                    item.className="ab-color-item" + (sel.value===val?" is-active":"");
+                    item.title=label;
+                    item.dataset.color=val;
+                    item.setAttribute("aria-label", label);
+                    item.innerHTML='\
+                        <span class="ab-color-preview" aria-hidden="true"></span>\
+                        <span class="ab-color-check material-icons-round" aria-hidden="true">check</span>';
+                    item.style.setProperty("--ab-color-main", colors[0]);
+                    item.style.setProperty("--ab-color-alt", colors[1]);
+                    item.addEventListener("click",function(){
+                        if(sel.value===val) return;
+                        sel.value=val;
+                        sel.dispatchEvent(new Event("change",{bubbles:true}));
+                        render();
+                    });
+                    wrap.appendChild(item);
+                })(sel.options[i]);
+            }
+        }
+
+        ul.appendChild(wrap);
+        render();
+    }
+
+    function enhanceSaveFab(){
+        var form=document.querySelector("form.protected")||document.querySelector("form");
+        if(!form||document.getElementById("ab-config-save-fab")) return;
+
+        function syncHoverCapability(){
+            var canHover = !!(window.matchMedia && window.matchMedia("(hover:hover) and (pointer:fine)").matches);
+            var hasTouch = ("ontouchstart" in window) || (navigator.maxTouchPoints > 0);
+            document.documentElement.classList.toggle("ab-hover-capable", canHover && !hasTouch);
+        }
+        syncHoverCapability();
+        window.addEventListener("resize", syncHoverCapability);
+
+        var submitBtn=form.querySelector('button[type="submit"],input[type="submit"],.btn.primary');
+        if(!submitBtn) return;
+
+        var submitWrap=submitBtn.closest("ul.typecho-option")||submitBtn.parentNode;
+        if(submitWrap) submitWrap.style.display="none";
+
+        var fab=document.createElement("button");
+        fab.type="button";
+        fab.id="ab-config-save-fab";
+        fab.className="ab-config-save-fab";
+        fab.title="保存设置";
+        fab.setAttribute("aria-label","保存设置");
+        fab.innerHTML='\
+            <span class="material-icons-round">save</span>\
+            <span class="ab-config-save-fab-label">保存设置</span>';
+
+        fab.addEventListener("click",function(){
+            if(fab.classList.contains("is-busy")) return;
+            fab.classList.add("is-busy");
+            if(typeof submitBtn.click==="function") submitBtn.click();
+            else form.submit();
+        });
+
+        form.addEventListener("submit",function(){
+            fab.classList.add("is-busy");
+        });
+
+        document.body.appendChild(fab);
+    }
+
+    function buildCards(){
+        // ---- 管理后台卡片 ----
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","navPosition","pluginCardView"];
+        var firstAdminUl=findFieldUl("primaryColor");
+        var adminCard=document.getElementById("ab-card-admin");
+        var adminBody=document.getElementById("ab-card-admin-body");
+
+        if(adminCard&&adminBody&&firstAdminUl){
+            var form=firstAdminUl.parentNode;
+            form.insertBefore(adminCard,firstAdminUl);
+
+            var globalSearch=document.getElementById("ab-global-search-wrap");
+            if(!globalSearch){
+                globalSearch=document.createElement("div");
+                globalSearch.id="ab-global-search-wrap";
+                globalSearch.className="ab-global-search";
+                globalSearch.innerHTML='\
+                    <div class="ab-global-search-main">\
+                        <span class="material-icons-round ab-global-search-icon">search</span>\
+                        <input type="search" class="ab-global-search-input" placeholder="搜索全部设置项" aria-label="搜索全部设置项">\
+                    </div>\
+                    <div class="ab-global-search-status"></div>\
+                    <div class="ab-global-search-results"></div>';
+                form.insertBefore(globalSearch, adminCard);
+            }
+            initGlobalSearch(globalSearch);
+            enhancePrimaryColorPicker();
+
+            adminBody.classList.add("ab-admin-body");
+
+            var quickNav=document.createElement("div");
+            quickNav.className="ab-admin-quick";
+            quickNav.innerHTML='\
+                <div class="ab-admin-quick-title">快速定位</div>\
+                <div class="ab-admin-quick-chips">\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-style">样式</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-overview">概要页</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-quick">快捷操作</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-chart">图表</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-umami">Umami</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-nav">导航栏</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-plugin">插件管理页</button>\
+                </div>';
+            adminBody.appendChild(quickNav);
+
+            for(var i=0;i<adminFields.length;i++){
+                // 在"样式"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="primaryColor"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-style";
+                    abGroupLabel.textContent="样式";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"导航栏"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="navPosition"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-nav";
+                    abGroupLabel.textContent="导航栏";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"插件管理页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="pluginCardView"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-plugin";
+                    abGroupLabel.textContent="插件管理页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"概要页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="dashboardQuickShow"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-overview";
+                    abGroupLabel.textContent="概要页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 概要页 - 快捷操作子分组
+                if(adminFields[i]==="dashboardQuickShow"){
+                    var abSubLabel=document.createElement("div");
+                    abSubLabel.className="ab-group-sublabel";
+                    abSubLabel.id="ab-admin-subgroup-quick";
+                    abSubLabel.textContent="快捷操作";
+                    adminBody.appendChild(abSubLabel);
+                }
+                // 概要页 - 内容卡片子分组
+                if(adminFields[i]==="dashboardRecentStyle"){
+                    var abSubLabel=document.createElement("div");
+                    abSubLabel.className="ab-group-sublabel";
+                    abSubLabel.textContent="内容卡片";
+                    adminBody.appendChild(abSubLabel);
+                }
+                // 概要页 - 图表子分组
+                if(adminFields[i]==="overviewChartEnabled"){
+                    var abSubLabel=document.createElement("div");
+                    abSubLabel.className="ab-group-sublabel";
+                    abSubLabel.id="ab-admin-subgroup-chart";
+                    abSubLabel.textContent="图表";
+                    adminBody.appendChild(abSubLabel);
+                }
+                // 概要页 - Umami 统计子分组
+                if(adminFields[i]==="umamiEnabled"){
+                    var abSubLabel=document.createElement("div");
+                    abSubLabel.className="ab-group-sublabel";
+                    abSubLabel.id="ab-admin-subgroup-umami";
+                    abSubLabel.textContent="Umami 统计";
+                    adminBody.appendChild(abSubLabel);
+                }
+                var ul=findFieldUl(adminFields[i]);
+                if(ul){
+                    ul.setAttribute("data-ab-field",adminFields[i]);
+                    adminBody.appendChild(ul);
+                }
+            }
+
+            (function(){
+                var chips=quickNav.querySelectorAll(".ab-admin-chip");
+                for(var c=0;c<chips.length;c++){
+                    chips[c].addEventListener("click",function(){
+                        var targetId=this.getAttribute("data-target");
+                        if(!targetId) return;
+                        var target=document.getElementById(targetId);
+                        if(!target) return;
+                        target.scrollIntoView({behavior:"smooth",block:"center"});
+                        target.classList.add("ab-admin-target-flash");
+                        setTimeout(function(){target.classList.remove("ab-admin-target-flash");},900);
+                    });
+                }
+            })();
+
+            // 隐藏“颜色模式”设置项（仅配置页前端隐藏，不改后端配置定义）
+            (function(){
+                var darkUl=findFieldUl("darkMode");
+                if(darkUl) darkUl.style.display="none";
+            })();
+
+            adminBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- 编辑器设置卡片（插在管理后台卡片之后）----
+        var editorFields=["editor_vditor","editor_vditorMode","editor_hideToolbar"];
+        var editorCard=document.getElementById("ab-card-editor");
+        var editorBody=document.getElementById("ab-card-editor-body");
+        if(editorCard&&editorBody){
+            var firstEditorUl=findFieldUl("editor_vditor");
+            if(firstEditorUl){
+                var formE=firstEditorUl.parentNode;
+                formE.insertBefore(editorCard,firstEditorUl);
+            } else if(adminCard){
+                if(adminCard.nextSibling) adminCard.parentNode.insertBefore(editorCard,adminCard.nextSibling);
+                else adminCard.parentNode.appendChild(editorCard);
+            }
+            for(var e=0;e<editorFields.length;e++){
+                var eu=findFieldUl(editorFields[e]);
+                if(eu) editorBody.appendChild(eu);
+            }
+            editorBody.style.padding="0px 38px 16px";
+
+            // editor_hideToolbar 仅在 editor_vditor==="1" 时显示
+            (function(){
+                var vditorSel=document.querySelector("[name=\"editor_vditor\"]");
+                if(!vditorSel) return;
+                function toggleVditorMode(){
+                    var hideToolbarUl=findFieldUl("editor_vditorMode");
+                    if(hideToolbarUl) hideToolbarUl.style.display=(vditorSel.value==="1")?"":"none";
+                }
+                vditorSel.addEventListener("change",toggleVditorMode);
+                toggleVditorMode();
+            })();
+
+            // editor_hideToolbar 仅在 editor_vditor==="2" 时显示
+            (function(){
+                var vditorSel=document.querySelector("[name=\"editor_vditor\"]");
+                if(!vditorSel) return;
+                function toggleHideToolbar(){
+                    var hideToolbarUl=findFieldUl("editor_hideToolbar");
+                    if(hideToolbarUl) hideToolbarUl.style.display=(vditorSel.value==="2")?"":"none";
+                }
+                vditorSel.addEventListener("change",toggleHideToolbar);
+                toggleHideToolbar();
+            })();
+        }
+
+        // ---- 登录页卡片 ----
+        var loginFields=["login_isEnabled","login_colorPreset","login_primaryColor","login_primaryColor2",
+            "login_showSiteName","login_themeMode","login_showThemeToggle",
+            "login_bgImage","login_blurType","login_blurSize","login_customCss","login_customJs"];
+        var firstLoginUl=findFieldUl("login_isEnabled");
+        var loginCard=document.getElementById("ab-card-login");
+        var loginBody=document.getElementById("ab-card-login-body");
+
+        if(loginCard&&loginBody&&firstLoginUl){
+            var form2=firstLoginUl.parentNode;
+            form2.insertBefore(loginCard,firstLoginUl);
+            for(var j=0;j<loginFields.length;j++){
+                var lu=findFieldUl(loginFields[j]);
+                if(lu) loginBody.appendChild(lu);
+            }
+            var preview=document.getElementById("lb-preview");
+            if(preview) loginBody.appendChild(preview);
+            loginBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- 兼容脚本卡片（插在登录页卡片之后）----
+        var compatCard=document.getElementById("ab-card-compat");
+        var compatBody=document.getElementById("ab-card-compat-body");
+        if(compatCard&&compatBody){
+            // 重新定位到登录页卡片之后
+            if(loginCard){
+                var formC=loginCard.parentNode;
+                if(loginCard.nextSibling) formC.insertBefore(compatCard,loginCard.nextSibling);
+                else formC.appendChild(compatCard);
+            }
+            // 兼容脚本列表
+            var csList=document.getElementById("ab-compat-scripts-list");
+            if(csList) compatBody.appendChild(csList);
+            // 外部兼容 JS 字段
+            var extUl=findFieldUl("compat_externalJs");
+            if(extUl) compatBody.appendChild(extUl);
+            compatBody.style.padding="0px 38px 16px";
+        }
+        // 隐藏 hidden 字段
+        var hiddenUl=findFieldUl("compat_disabledScripts");
+        if(hiddenUl) hiddenUl.style.display="none";
+
+        // ---- PWA 应用卡片（插在兼容脚本卡片之后）----
+        var pwaFields=["pwa_appName","pwa_appIcon"];
+        var pwaCard=document.getElementById("ab-card-pwa");
+        var pwaBody=document.getElementById("ab-card-pwa-body");
+        if(pwaCard&&pwaBody&&compatCard){
+            var form3=compatCard.parentNode;
+            if(compatCard.nextSibling) form3.insertBefore(pwaCard,compatCard.nextSibling);
+            else form3.appendChild(pwaCard);
+            for(var p=0;p<pwaFields.length;p++){
+                var pu=findFieldUl(pwaFields[p]);
+                if(pu) pwaBody.appendChild(pu);
+            }
+            // ---- 一键安装 PWA 按钮区 ----
+            (function(){
+                var installBar=document.createElement("div");
+                installBar.id="ab-pwa-install-bar";
+                installBar.className="ab-pwa-install-bar";
+                // 安装按钮
+                var installBtn=document.createElement("button");
+                installBtn.type="button";
+                installBtn.id="ab-pwa-install-btn";
+                installBtn.textContent="📲 安装到桌面";
+                installBtn.className="ab-pwa-install-btn";
+                
+                // 提示文字
+                var tipSpan=document.createElement("span");
+                tipSpan.id="ab-pwa-install-tip";
+                tipSpan.className="ab-pwa-install-tip";
+                // 检测 beforeinstallprompt 支持
+                var deferredPrompt=null;
+                var supported="onbeforeinstallprompt" in window;
+                if(supported){
+                    tipSpan.textContent="支持一键安装（Chrome / Edge Chromium）";
+                    window.addEventListener("beforeinstallprompt",function(e){
+                        e.preventDefault();
+                        deferredPrompt=e;
+                        installBtn.disabled=false;
+                        installBtn.style.opacity="1";
+                        tipSpan.textContent="点击按钮即可安装到桌面（Chrome / Edge Chromium）";
+                    });
+                    window.addEventListener("appinstalled",function(){
+                        deferredPrompt=null;
+                        installBtn.disabled=true;
+                        installBtn.style.opacity=".5";
+                        tipSpan.textContent="✅ 已安装到桌面";
+                    });
+                    installBtn.disabled=true;
+                    installBtn.style.opacity=".5";
+                    installBtn.onclick=function(){
+                        if(!deferredPrompt){
+                            tipSpan.textContent="⚠️ 当前页面暂不满足安装条件（需通过 HTTPS 访问，且尚未安装）";
+                            return;
+                        }
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(function(r){
+                            if(r.outcome==="accepted"){
+                                tipSpan.textContent="✅ 安装已确认";
+                            } else {
+                                tipSpan.textContent="已取消安装";
+                            }
+                            deferredPrompt=null;
+                        });
+                    };
+                } else {
+                    // 不支持 beforeinstallprompt（Safari / Firefox 等）
+                    installBtn.disabled=true;
+                    installBtn.style.opacity=".45";
+                    tipSpan.innerHTML="⚠️ 当前浏览器不支持一键安装。<br>仅 <strong>Chrome</strong>、<strong>Edge（Chromium 内核）</strong> 支持此功能；<br>Safari 请在浏览器菜单中选择「添加到主屏幕」。";
+                }
+                installBar.appendChild(installBtn);
+                installBar.appendChild(tipSpan);
+
+                // ---- 清除 SW 缓存按钮 ----
+                var sep=document.createElement("hr");
+                sep.style.cssText="border:none;border-top:1px solid var(--md-outline-variant,#cac4d0);margin:14px 0 10px";
+                var clearBtn=document.createElement("button");
+                clearBtn.type="button";
+                clearBtn.id="ab-pwa-clear-btn";
+                clearBtn.textContent="🧹 清除 SW 缓存";
+                clearBtn.className="ab-pwa-install-btn";
+                var clearTip=document.createElement("span");
+                clearTip.id="ab-pwa-clear-tip";
+                clearTip.className="ab-pwa-install-tip";
+                clearTip.textContent="清除所有由 Service Worker 缓存的页面、CSS、JS 等资源";
+                if(!("serviceWorker" in navigator)){
+                    clearBtn.disabled=true;
+                    clearBtn.style.opacity=".45";
+                    clearTip.textContent="⚠️ 当前浏览器不支持 Service Worker";
+                } else {
+                    clearBtn.onclick=function(){
+                        clearBtn.disabled=true;
+                        clearBtn.textContent="⏳ 清除中...";
+                        function sendClear(){
+                            if(navigator.serviceWorker.controller){
+                                navigator.serviceWorker.controller.postMessage({type:"CLEAR_CACHE"});
+                            } else {
+                                navigator.serviceWorker.ready.then(function(reg){
+                                    if(reg.active) reg.active.postMessage({type:"CLEAR_CACHE"});
+                                });
+                            }
+                        }
+                        sendClear();
+                        var msgHandler=function(ev){
+                            if(ev.data&&ev.data.type==="CACHE_CLEARED"){
+                                clearBtn.disabled=false;
+                                clearBtn.textContent="🧹 清除 SW 缓存";
+                                clearTip.textContent="✅ 缓存已清除，刷新页面即可获取最新资源";
+                                navigator.serviceWorker.removeEventListener("message",msgHandler);
+                            }
+                        };
+                        navigator.serviceWorker.addEventListener("message",msgHandler);
+                        // 3 秒超时兜底
+                        setTimeout(function(){
+                            navigator.serviceWorker.removeEventListener("message",msgHandler);
+                            if(clearBtn.disabled){
+                                clearBtn.disabled=false;
+                                clearBtn.textContent="🧹 清除 SW 缓存";
+                                clearTip.textContent="✅ 清除请求已发送（如未生效请强制刷新页面）";
+                            }
+                        },3000);
+                    };
+                }
+                installBar.appendChild(sep);
+                installBar.appendChild(clearBtn);
+                installBar.appendChild(clearTip);
+
+                pwaBody.appendChild(installBar);
+            })();
+            pwaBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- 性能优化卡片（插在 PWA 卡片之后） ----
+        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl","avatarSource","customAvatarUrl","ajaxEnabled"];
+        var perfCard=document.getElementById("ab-card-perf");
+        var perfBody=document.getElementById("ab-card-perf-body");
+        if(perfCard&&perfBody&&pwaCard){
+            var form4=pwaCard.parentNode;
+            if(pwaCard.nextSibling) form4.insertBefore(perfCard,pwaCard.nextSibling);
+            else form4.appendChild(perfCard);
+            for(var q=0;q<perfFields.length;q++){
+                var qu=findFieldUl(perfFields[q]);
+                if(qu) perfBody.appendChild(qu);
+            }
+            perfBody.style.padding="0px 38px 16px";
+        }
+        // 自定义/本地 URL 字段的显示/隐藏
+        (function(){
+            var sel=document.querySelector("[name=\"staticResource\"]");
+            if(!sel) return;
+            function toggleCustom(){
+                var v=sel.value;
+                var isCustom=(v==="custom");
+                var isLocal=(v==="local");
+                var fontUl=findFieldUl("customFontUrl");
+                var iconUl=findFieldUl("customIconUrl");
+                var localFontUl=findFieldUl("localFontUrl");
+                var localIconUl=findFieldUl("localIconUrl");
+                if(fontUl)      fontUl.style.display=isCustom?"":"none";
+                if(iconUl)      iconUl.style.display=isCustom?"":"none";
+                if(localFontUl) localFontUl.style.display=isLocal?"":"none";
+                if(localIconUl) localIconUl.style.display=isLocal?"":"none";
+            }
+            sel.addEventListener("change",toggleCustom);
+            toggleCustom();
+        })();
+
+        // Umami 字段显示逻辑：仅在开启 Umami 时显示；Cloud 模式隐藏自建 API 地址
+        (function(){
+            var enabledSel=document.querySelector("[name=\"umamiEnabled\"]");
+            var providerSel=document.querySelector("[name=\"umamiProvider\"]");
+            if(!enabledSel) return;
+
+            function updateUmamiFields(){
+                var enabled = enabledSel.value === "1";
+                var isCloud = providerSel && providerSel.value === "cloud";
+                var providerUl = findFieldUl("umamiProvider");
+                var apiBaseUl = findFieldUl("umamiApiBase");
+                var websiteUl = findFieldUl("umamiWebsiteId");
+                var tokenUl = findFieldUl("umamiApiToken");
+                var rangeUl = findFieldUl("umamiTimeRange");
+
+                if(providerUl) providerUl.style.display = enabled ? "" : "none";
+                if(apiBaseUl) apiBaseUl.style.display = (enabled && !isCloud) ? "" : "none";
+                if(websiteUl) websiteUl.style.display = enabled ? "" : "none";
+                if(tokenUl) tokenUl.style.display = enabled ? "" : "none";
+                if(rangeUl) rangeUl.style.display = enabled ? "" : "none";
+            }
+
+            enabledSel.addEventListener("change", updateUmamiFields);
+            if(providerSel) providerSel.addEventListener("change", updateUmamiFields);
+            updateUmamiFields();
+        })();
+
+        // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
+        ["admin","editor","login","pwa","perf","compat"].forEach(function(id){
+            var hdr=document.getElementById("ab-card-"+id+"-hdr");
+            if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
+            restoreCard(id);
+        });
+
+        // ---- 重排完成后统一显示卡片（防 FOUC）----
+        document.querySelectorAll(".ab-card").forEach(function(c){ c.style.display=""; });
+
+        // ---- 设置页保存按钮：改为右下角 FAB ----
+        enhanceSaveFab();
+    }
+
+    var _abCardTimers={};
+    window.abToggleCard=function(id){
+        // 取消该卡片挂起的展开定时器（防止快速双击时定时器覆盖折叠动画）
+        if(_abCardTimers[id]){ clearTimeout(_abCardTimers[id]); _abCardTimers[id]=null; }
+        var body=document.getElementById("ab-card-"+id+"-body");
+        var chev=document.getElementById("ab-card-"+id+"-chev");
+        var card=document.getElementById("ab-card-"+id);
+        if(!body) return;
+        var collapsed=body.getAttribute("data-collapsed")==="1";
+        if(collapsed){
+            // 展开：先恢复 paddingBottom，再展开高度
+            body.style.paddingBottom="16px";
+            body.style.maxHeight=body.scrollHeight+"px";
+            _abCardTimers[id]=setTimeout(function(){ body.style.maxHeight="9999px"; _abCardTimers[id]=null; },420);
+            body.setAttribute("data-collapsed","0");
+            if(chev) chev.style.transform="";
+            if(card) card.style.boxShadow="0 1px 3px rgba(0,0,0,.08),0 2px 12px rgba(0,0,0,.04)";
+            try{ localStorage.setItem("ab-card-"+id,"1"); }catch(e){}
+        } else {
+            // 折叠：用当前实际渲染高度锁定（避免动画途中 scrollHeight 不准），再折叠到 0
+            var currentPx=body.getBoundingClientRect().height;
+            body.style.maxHeight=currentPx+"px";
+            requestAnimationFrame(function(){ requestAnimationFrame(function(){
+                body.style.paddingBottom="0";
+                body.style.maxHeight="0";
+            }); });
+            body.setAttribute("data-collapsed","1");
+            if(chev) chev.style.transform="rotate(-90deg)";
+            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
+            try{ localStorage.setItem("ab-card-"+id,"0"); }catch(e){}
+        }
+    };
+
+    // 默认折叠；仅当 localStorage 明确为 "1" 时才展开
+    function restoreCard(id){
+        var saved=null;
+        try{ saved=localStorage.getItem("ab-card-"+id); }catch(e){}
+        var body=document.getElementById("ab-card-"+id+"-body");
+        var chev=document.getElementById("ab-card-"+id+"-chev");
+        var card=document.getElementById("ab-card-"+id);
+        if(!body) return;
+        if(saved==="1"){
+            // 用户曾手动展开，保持展开
+            body.setAttribute("data-collapsed","0");
+        } else {
+            // 默认折叠（首次访问或曾手动折叠）
+            body.style.transition="none";
+            body.style.paddingBottom="0";
+            body.style.maxHeight="0";
+            body.setAttribute("data-collapsed","1");
+            if(chev) chev.style.transform="rotate(-90deg)";
+            if(card) card.style.boxShadow="0 1px 2px rgba(0,0,0,.04)";
+            setTimeout(function(){ body.style.transition="max-height .4s cubic-bezier(.4,0,.2,1)"; },50);
+        }
+    }
+
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",buildCards);
+    } else {
+        buildCards();
+    }
+
+    // ---- URL ?to= 参数：展开对应卡片并定位到字段 / 弹出特定弹窗 ----
+    function handleToParam(){
+        var params=new URLSearchParams(location.search);
+        var to=params.get("to");
+        if(!to) return;
+
+        // 特殊值：donateModal → 弹出捐赠弹窗（完整实现，不依赖 about.php 的 openDonateModal 函数）
+        if(to==="donateModel"||to==="donateModal"){
+            setTimeout(function(){
+                var m=document.getElementById("ab-donate-modal");
+                if(!m) return;
+                if(m.parentNode!==document.body) document.body.appendChild(m);
+                if(!m._abEvtBound){
+                    m._abEvtBound=true;
+                    m.addEventListener("click",function(e){
+                        if(e.target===m){ m.style.display="none"; document.body.style.overflow=""; }
+                    });
+                    var closeBtn=document.getElementById("ab-donate-modal-close");
+                    if(closeBtn) closeBtn.addEventListener("click",function(){
+                        m.style.display="none"; document.body.style.overflow="";
+                    });
+                    document.addEventListener("keydown",function(e){
+                        if(e.key==="Escape"&&m.style.display==="flex"){ m.style.display="none"; document.body.style.overflow=""; }
+                    });
+                }
+                if(!document.getElementById("ab-donate-modal-anim-kf")){
+                    var st=document.createElement("style");
+                    st.id="ab-donate-modal-anim-kf";
+                    st.textContent="@keyframes ab-donatePopIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}";
+                    document.head.appendChild(st);
+                }
+                var inner=document.getElementById("ab-donate-modal-inner");
+                if(inner){ inner.style.animation="none"; void inner.offsetWidth; inner.style.animation="ab-donatePopIn .25s cubic-bezier(.34,1.56,.64,1)"; }
+                m.style.display="flex";
+                document.body.style.overflow="hidden";
+            }, 300);
+            return;
+        }
+
+        // 字段定位：找到字段所属的卡片，展开后滚动 + 高亮
+        // 先找对应的 <ul> 元素
+        function findFieldUl(name){
+            var el=document.querySelector("ul[id^='typecho-option-item-"+name+"-']");
+            if(el) return el;
+            var form=document.querySelector("form.protected")||document.querySelector("form");
+            if(!form) return null;
+            var inp=form.querySelector("[name=\""+name+"\"]");
+            if(!inp) return null;
+            var c=inp.parentNode;
+            while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
+            return null;
+        }
+        var targetUl=findFieldUl(to);
+        if(!targetUl) return;
+
+        // 找其所在卡片的 body（向上查找 [id$="-body"]）
+        var bodyEl=targetUl.parentNode;
+        while(bodyEl&&bodyEl!==document.body){
+            if(bodyEl.id&&bodyEl.id.match(/-body$/)) break;
+            bodyEl=bodyEl.parentNode;
+        }
+        if(bodyEl&&bodyEl.getAttribute("data-collapsed")==="1"){
+            // 提取 cardId 然后展开
+            var cardId=bodyEl.id.replace(/-body$/,"").replace(/^ab-card-/,"");
+            window.abToggleCard&&window.abToggleCard(cardId);
+        }
+
+        // 滚动到字段并短暂高亮
+        setTimeout(function(){
+            targetUl.scrollIntoView({behavior:"smooth",block:"center"});
+            targetUl.style.transition="background .3s";
+            targetUl.style.background="var(--md-primary-container,#eaddff)";
+            setTimeout(function(){ targetUl.style.background=""; },2000);
+        },500);
+    }
+
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",handleToParam);
+    } else {
+        // buildCards 已经同步执行，延迟一帧确保卡片 DOM 已重排
+        setTimeout(handleToParam,50);
+    }
+})();
+
+// ---- 卡片颜色跟随主题色 & 检查更新 ----
+(function(){
+    var abColorMap={
+        purple:["#7D5260","#9E7B8A"],
+        blue:  ["#556270","#7A8A9E"],
+        teal:  ["#4A6363","#6A8A8A"],
+        green: ["#55624C","#7A8A6E"],
+        orange:["#725A42","#9E8062"],
+        pink:  ["#74565F","#9E7A85"],
+        red:   ["#775654","#A27A78"]
+    };
+    function applyConfigColors(scheme){
+        var c=abColorMap[scheme]||abColorMap.purple;
+        // Banner
+        var banner=document.getElementById("ab-header-banner");
+        if(banner) banner.style.background="linear-gradient(135deg,"+c[0]+","+c[1]+")";
+        // 管理后台卡片
+        var s1=document.getElementById("ab-card-admin-strip");
+        if(s1) s1.style.background=c[0];
+        var i1=document.getElementById("ab-card-admin-icon");
+        if(i1) i1.style.background=c[0]+"1a";
+        var v1=document.getElementById("ab-card-admin-chev");
+        if(v1) v1.setAttribute("stroke",c[0]);
+        // 编辑器设置卡片
+        var se=document.getElementById("ab-card-editor-strip");
+        if(se) se.style.background=c[0];
+        var ie=document.getElementById("ab-card-editor-icon");
+        if(ie) ie.style.background=c[0]+"1a";
+        var ve=document.getElementById("ab-card-editor-chev");
+        if(ve) ve.setAttribute("stroke",c[0]);
+        // PWA 卡片
+        var s3=document.getElementById("ab-card-pwa-strip");
+        if(s3) s3.style.background=c[0];
+        var i3=document.getElementById("ab-card-pwa-icon");
+        if(i3) i3.style.background=c[0]+"1a";
+        var v3=document.getElementById("ab-card-pwa-chev");
+        if(v3) v3.setAttribute("stroke",c[0]);
+        // 兼容脚本卡片
+        var s4=document.getElementById("ab-card-compat-strip");
+        if(s4) s4.style.background=c[1];
+        var i4=document.getElementById("ab-card-compat-icon");
+        if(i4) i4.style.background=c[1]+"1a";
+        var v4=document.getElementById("ab-card-compat-chev");
+        if(v4) v4.setAttribute("stroke",c[1]);
+        // 登录页卡片
+        var s2=document.getElementById("ab-card-login-strip");
+        if(s2) s2.style.background=c[1];
+        var i2=document.getElementById("ab-card-login-icon");
+        if(i2) i2.style.background=c[1]+"1a";
+        var v2=document.getElementById("ab-card-login-chev");
+        if(v2) v2.setAttribute("stroke",c[1]);
+        // 性能优化卡片
+        var s5=document.getElementById("ab-card-perf-strip");
+        if(s5) s5.style.background=c[0];
+        var i5=document.getElementById("ab-card-perf-icon");
+        if(i5) i5.style.background=c[0]+"1a";
+        var v5=document.getElementById("ab-card-perf-chev");
+        if(v5) v5.setAttribute("stroke",c[0]);
+        // 关于插件卡片
+        var s6=document.getElementById("ab-card-about-strip");
+        if(s6) s6.style.background=c[0];
+        var v6=document.getElementById("ab-card-about-chev");
+        if(v6) v6.setAttribute("stroke",c[0]);
+    }
+    function initColorFollow(){
+        var sel=document.querySelector("[name=\"primaryColor\"]");
+        if(!sel) return;
+        sel.addEventListener("change",function(){ applyConfigColors(this.value); });
+        applyConfigColors(sel.value);
+    }
+
+    // 检查更新（调用全局 abCheckUpdate，定义于 renderFooter 注入的脚本）
+    function initUpdateCheck(){
+        var btn=document.getElementById("ab-btn-update");
+        if(!btn) return;
+        btn.addEventListener("click",function(){ window.abCheckUpdate&&window.abCheckUpdate(true); });
+    }
+
+    if(document.readyState==="loading"){
+        document.addEventListener("DOMContentLoaded",function(){ initColorFollow(); initUpdateCheck(); });
+    } else {
+        initColorFollow(); initUpdateCheck();
+    }
+})();
 </script>
