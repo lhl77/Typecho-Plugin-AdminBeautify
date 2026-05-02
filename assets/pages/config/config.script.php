@@ -8,6 +8,25 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 <script>
 // ---- 卡片构建：将各表单字段移入 MD3 折叠卡片 ----
 (function(){
+    function cleanupSaveFab(){
+        var fab=document.getElementById("ab-config-save-fab");
+        if(fab&&fab.parentNode) fab.parentNode.removeChild(fab);
+        document.documentElement.classList.remove("ab-hover-capable");
+    }
+
+    function isConfigPage(){
+        var q=location.search||"";
+        return q.indexOf("options-plugin.php")!==-1 || q.indexOf("config=AdminBeautify")!==-1;
+    }
+
+    document.addEventListener("ab:pageload",function(){
+        if(!isConfigPage()) cleanupSaveFab();
+    });
+
+    window.addEventListener("popstate",function(){
+        if(!isConfigPage()) cleanupSaveFab();
+    });
+
     // 查找字段对应的外层 <ul class="typecho-option"> 元素
     function findFieldUl(name){
         // Typecho 1.3 格式：ul[id^="typecho-option-item-{name}-"]
@@ -242,6 +261,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     }
 
     function enhanceSaveFab(){
+        if(!isConfigPage()){
+            cleanupSaveFab();
+            return;
+        }
         var form=document.querySelector("form.protected")||document.querySelector("form");
         if(!form||document.getElementById("ab-config-save-fab")) return;
 
