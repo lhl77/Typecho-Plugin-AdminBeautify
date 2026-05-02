@@ -10,6 +10,14 @@
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
 }
+class AdminBeautify_SafeHidden extends Typecho_Widget_Helper_Form_Element_Hidden {
+    protected function inputValue($value) {
+        if (is_array($value)) {
+            $value = json_encode($value);
+        }
+        $this->input->setAttribute('value', htmlspecialchars((string)$value));
+    }
+}
 class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 {
     private static function isLoginPage()
@@ -580,7 +588,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $enabledList = ($enabledRaw !== '') ? (array) json_decode($enabledRaw, true) : array();
         if (!is_array($enabledList)) $enabledList = array();
         self::renderCompatScriptsList($compatScripts, $enabledList, $abC1);
-        $compatEnabledScripts = new Typecho_Widget_Helper_Form_Element_Hidden(
+        $compatEnabledScripts = new AdminBeautify_SafeHidden(
             'compat_disabledScripts',
             null,
             $enabledRaw
@@ -616,6 +624,14 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('关闭后，将不再显示插件更新横幅通知和公告弹窗。')
         );
         $form->addInput($notifyOptOut);
+        if ($abOpt) {
+            $existingInputs = $form->getInputs();
+            foreach ($abOpt as $key => $val) {
+                if (!isset($existingInputs[$key])) {
+                    $form->addInput(new AdminBeautify_SafeHidden($key, null, null));
+                }
+            }
+        }
         include dirname(__FILE__) . '/assets/pages/config/config.script.php';
         include dirname(__FILE__) . '/assets/pages/config/about.php';
         include dirname(__FILE__) . '/assets/pages/config/notice.script.php';
