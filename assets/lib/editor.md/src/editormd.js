@@ -1241,9 +1241,8 @@
                 var name                = icon.attr("name");
                 var cursor              = cm.getCursor();
                 var selection           = cm.getSelection();
-                var preserveTop         = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
-                if (!name) {
+                if (name === "") {
                     return ;
                 }
                 
@@ -1259,19 +1258,6 @@
                     {
                         $.proxy(settings.toolbarHandlers[name], _this)(cm, icon, cursor, selection);
                     }
-                }
-
-                if (name === "code-block" || name === "preformatted-text") {
-                    setTimeout(function() {
-                        if (typeof window.scrollTo === "function") {
-                            window.scrollTo(0, preserveTop);
-                        }
-                    }, 0);
-                    setTimeout(function() {
-                        if (typeof window.scrollTo === "function") {
-                            window.scrollTo(0, preserveTop);
-                        }
-                    }, 80);
                 }
                 
                 if (name !== "link" && name !== "reference-link" && name !== "image" && name !== "code-block" && 
@@ -3898,7 +3884,11 @@
             {
                 html = html.replace(htmlTagRegex, function($1, $2, $3, $4, $5) {
                     var el = $("<" + $2 + ">" + $4 + "</" + $5 + ">");
-                    var _attrs = $($1)[0].attributes;
+                    var sourceNode = $($1)[0];
+                    if (!sourceNode || !sourceNode.attributes) {
+                        return el[0].outerHTML;
+                    }
+                    var _attrs = sourceNode.attributes;
                     var $attrs = {};
                     
                     $.each(_attrs, function(i, e) {
@@ -3923,6 +3913,9 @@
                 html = html.replace(htmlTagRegex, function($1, $2, $3, $4) {
                     var filterAttrs = attrs.split(",");
                     var el = $($1);
+                    if (!el.length) {
+                        return "";
+                    }
                     el.html($4);
 
                     $.each(filterAttrs, function(i) {
