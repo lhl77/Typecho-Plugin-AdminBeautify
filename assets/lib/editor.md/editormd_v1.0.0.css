@@ -35,7 +35,6 @@ body.ab-editormd-active #wmd-editarea,
 #ab-editormd-wrap .editormd {
     border: none !important;
     border-radius: 0 !important;
-    margin-bottom: 0 !important;
 }
 
 /* === 加载动画（仿 Vditor ab-vditor-loading） === */
