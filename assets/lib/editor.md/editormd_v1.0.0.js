@@ -449,6 +449,32 @@
         window.__abEditorMdMarkedPatched = true;
     }
 
+    function patchFilterHTMLTagsSafe() {
+        if (window.__abEditorMdFilterPatched) return;
+        if (!window.editormd || typeof window.editormd.filterHTMLTags !== 'function') return;
+
+        var originalFilterHTMLTags = window.editormd.filterHTMLTags;
+
+        window.editormd.filterHTMLTags = function (html, filters) {
+            var safeFilters = filters;
+            if (typeof safeFilters === 'string') {
+                safeFilters = safeFilters.replace(/\|on\*/ig, '');
+            }
+
+            try {
+                return originalFilterHTMLTags.call(this, html, safeFilters);
+            } catch (err) {
+                try {
+                    return originalFilterHTMLTags.call(this, html, 'style,script,iframe');
+                } catch (_) {
+                    return String(html || '');
+                }
+            }
+        };
+
+        window.__abEditorMdFilterPatched = true;
+    }
+
     // ─── Emoji 预览后处理：镜像优先，字符回退 ──────────────────────────────
     function fixEmojiImgs(container) {
         if (!container) return;
@@ -805,6 +831,7 @@
 
         window.__abEditorMdInited = true;
         patchMarkedEmojiRenderer();
+        patchFilterHTMLTagsSafe();
         hideLegacyBars();
 
         var mount = createMount(textEl);
@@ -834,7 +861,7 @@
             tex: true,
             flowChart: true,
             sequenceDiagram: true,
-            htmlDecode: "style,script,iframe|on*",
+            htmlDecode:"style,script,iframe",
             saveHTMLToTextarea: false,
             toolbarIcons: function () {
                 var full = (window.editormd && window.editormd.toolbarModes && window.editormd.toolbarModes.full)
