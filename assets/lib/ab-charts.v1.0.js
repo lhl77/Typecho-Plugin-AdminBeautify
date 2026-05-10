@@ -1,1 +1,630 @@
-var _0x61b0=['relative','\x200\x20','pointer-events:none;','#e9c46a','offsetWidth','rect','xData','top','min','warn','mousemove','viewBox','random','cos','0.28','colorDark','0.65','log','svg','console','#ffffff','0.3','0.6','value','primary','observe','style','rgba(73,69,79,0.08)','0.85','text','table','createSVGPoint','stop','\x201\x20','700','getScreenCTM','0\x200\x20','mouseenter','line','暂无数据','info','test','#49454f','name','val','compile','circle','position','mouseleave','yData','color','atan2','addEventListener','#6750a4','end','textContent','#457b9d','return\x20(function()\x20','appendChild','grid','trace','sqrt','opacity','\x20条（','none','#2b2930','subtitle','2.5','left','^([^\x20]+(\x20+[^\x20]+)+)+[^\x20]}','linearGradient','error','max','position:absolute;display:none;pointer-events:none;z-index:20;','box-shadow:0\x202px\x2012px\x20rgba(0,0,0,.18);','debug','background:','#d0bcff','0.5','display','inverse','#a8dadc','3\x202','#2a9d8f','overflow:visible;display:block;','exception','#b5838d','createElementNS','toString','clientY','middle','push','matrixTransform','sin','height','cssText','url(#','length','path','width','#cac4d0','apply','offsetHeight','color:','baseVal','#f4a261','ceil','block','round','getBoundingClientRect','return\x20/\x22\x20+\x20this\x20+\x20\x22/','innerHTML','label','slice','border-radius:8px;padding:5px\x2010px;font-size:12px;line-height:1.6;','rgba(202,196,208,0.1)',';white-space:nowrap;','dark','data-theme','setAttribute','clientX','getAttribute','filter','defs','100%'];(function(_0x323a25,_0x61b0ff){var _0x40325d=function(_0x2aca95){while(--_0x2aca95){_0x323a25['push'](_0x323a25['shift']());}};var _0x2d663e=function(){var _0x369ef8={'data':{'key':'cookie','value':'timeout'},'setCookie':function(_0x568de1,_0x3a5bb2,_0x4cf8b2,_0x1318ad){_0x1318ad=_0x1318ad||{};var _0x9304ff=_0x3a5bb2+'='+_0x4cf8b2;var _0x34ab47=0x0;for(var _0x329f09=0x0,_0x4329f4=_0x568de1['length'];_0x329f09<_0x4329f4;_0x329f09++){var _0x53d415=_0x568de1[_0x329f09];_0x9304ff+=';\x20'+_0x53d415;var _0x27a00f=_0x568de1[_0x53d415];_0x568de1['push'](_0x27a00f);_0x4329f4=_0x568de1['length'];if(_0x27a00f!==!![]){_0x9304ff+='='+_0x27a00f;}}_0x1318ad['cookie']=_0x9304ff;},'removeCookie':function(){return'dev';},'getCookie':function(_0x5a43f1,_0x352f44){_0x5a43f1=_0x5a43f1||function(_0x3d353a){return _0x3d353a;};var _0x4691c5=_0x5a43f1(new RegExp('(?:^|;\x20)'+_0x352f44['replace'](/([.$?*|{}()[]\/+^])/g,'$1')+'=([^;]*)'));var _0x332ca9=function(_0x37e585,_0xdce46){_0x37e585(++_0xdce46);};_0x332ca9(_0x40325d,_0x61b0ff);return _0x4691c5?decodeURIComponent(_0x4691c5[0x1]):undefined;}};var _0x16341a=function(){var _0x50090d=new RegExp('\x5cw+\x20*\x5c(\x5c)\x20*{\x5cw+\x20*[\x27|\x22].+[\x27|\x22];?\x20*}');return _0x50090d['test'](_0x369ef8['removeCookie']['toString']());};_0x369ef8['updateCookie']=_0x16341a;var _0x1363a0='';var _0x228ff3=_0x369ef8['updateCookie']();if(!_0x228ff3){_0x369ef8['setCookie'](['*'],'counter',0x1);}else if(_0x228ff3){_0x1363a0=_0x369ef8['getCookie'](null,'counter');}else{_0x369ef8['removeCookie']();}};_0x2d663e();}(_0x61b0,0x137));var _0x4032=function(_0x323a25,_0x61b0ff){_0x323a25=_0x323a25-0x0;var _0x40325d=_0x61b0[_0x323a25];return _0x40325d;};(function(_0x297d95){var _0xd7bc89=function(){var _0x3d42ce=!![];return function(_0xdee333,_0x31a6d4){var _0x1a0e09=_0x3d42ce?function(){if(_0x31a6d4){var _0x39055c=_0x31a6d4[_0x4032('0x28')](_0xdee333,arguments);_0x31a6d4=null;return _0x39055c;}}:function(){};_0x3d42ce=![];return _0x1a0e09;};}();var _0x4e4d56=_0xd7bc89(this,function(){var _0x369e4b=function(){var _0x7d65a5=_0x369e4b['constructor'](_0x4032('0x31'))()[_0x4032('0x6d')](_0x4032('0x8'));return!_0x7d65a5[_0x4032('0x69')](_0x4e4d56);};return _0x369e4b();});_0x4e4d56();var _0x903dbd=function(){var _0xccf5f2=!![];return function(_0x569242,_0x244793){var _0x42fb7f=_0xccf5f2?function(){if(_0x244793){var _0x1c32b2=_0x244793[_0x4032('0x28')](_0x569242,arguments);_0x244793=null;return _0x1c32b2;}}:function(){};_0xccf5f2=![];return _0x42fb7f;};}();var _0x4e5509=_0x903dbd(this,function(){var _0x3d7c0f=function(){};var _0x9948c5=function(){var _0x47797a;try{_0x47797a=Function(_0x4032('0x79')+'{}.constructor(\x22return\x20this\x22)(\x20)'+');')();}catch(_0x96013d){_0x47797a=window;}return _0x47797a;};var _0x9ab7c2=_0x9948c5();if(!_0x9ab7c2[_0x4032('0x53')]){_0x9ab7c2[_0x4032('0x53')]=function(_0x28181d){var _0x1fd2be={};_0x1fd2be['log']=_0x28181d;_0x1fd2be['warn']=_0x28181d;_0x1fd2be[_0x4032('0xe')]=_0x28181d;_0x1fd2be[_0x4032('0x68')]=_0x28181d;_0x1fd2be[_0x4032('0xa')]=_0x28181d;_0x1fd2be[_0x4032('0x18')]=_0x28181d;_0x1fd2be['table']=_0x28181d;_0x1fd2be[_0x4032('0x7c')]=_0x28181d;return _0x1fd2be;}(_0x3d7c0f);}else{_0x9ab7c2[_0x4032('0x53')][_0x4032('0x51')]=_0x3d7c0f;_0x9ab7c2[_0x4032('0x53')][_0x4032('0x49')]=_0x3d7c0f;_0x9ab7c2['console']['debug']=_0x3d7c0f;_0x9ab7c2['console'][_0x4032('0x68')]=_0x3d7c0f;_0x9ab7c2['console']['error']=_0x3d7c0f;_0x9ab7c2[_0x4032('0x53')][_0x4032('0x18')]=_0x3d7c0f;_0x9ab7c2['console'][_0x4032('0x5e')]=_0x3d7c0f;_0x9ab7c2[_0x4032('0x53')][_0x4032('0x7c')]=_0x3d7c0f;}});_0x4e5509();'use strict';function _0x446572(_0x3df863,_0x308b53){var _0x147d6f=document[_0x4032('0x1a')]('http://www.w3.org/2000/svg',_0x3df863);if(_0x308b53){for(var _0x26f0cd in _0x308b53){if(_0x308b53[_0x26f0cd]!==null&&_0x308b53[_0x26f0cd]!==undefined){_0x147d6f[_0x4032('0x3a')](_0x26f0cd,_0x308b53[_0x26f0cd]);}}}return _0x147d6f;}function _0x8fc929(_0x3ff4ae,_0xaefef5){var _0x5e8c42=document['createElement'](_0x3ff4ae);if(_0xaefef5)_0x5e8c42[_0x4032('0x5a')][_0x4032('0x22')]=_0xaefef5;return _0x5e8c42;}var _0x54c0f7=[_0x4032('0x75'),_0x4032('0x43'),_0x4032('0x16'),'#e76f51',_0x4032('0x19'),_0x4032('0x78'),_0x4032('0x14'),_0x4032('0x2c')];function _0x1d213f(){var _0x3a6e23=document['documentElement'][_0x4032('0x3c')](_0x4032('0x39'))===_0x4032('0x38');return{'dark':_0x3a6e23,'text':_0x3a6e23?_0x4032('0x27'):_0x4032('0x6a'),'grid':_0x3a6e23?_0x4032('0x36'):_0x4032('0x5b'),'primary':_0x3a6e23?_0x4032('0x10'):_0x4032('0x75'),'bg':_0x3a6e23?_0x4032('0x4'):_0x4032('0x54'),'border':_0x3a6e23?_0x4032('0x6a'):'#e7e0ec'};}var _0x1538d7=null;var _0x597e2d=[];function _0xb548c1(_0x213185,_0x58173b){for(var _0xecb45f=0x0;_0xecb45f<_0x597e2d[_0x4032('0x24')];_0xecb45f++){if(_0x597e2d[_0xecb45f]['el']===_0x213185){_0x597e2d[_0xecb45f]['fn']=_0x58173b;return;}}_0x597e2d[_0x4032('0x1e')]({'el':_0x213185,'fn':_0x58173b});if(!_0x1538d7){_0x1538d7=new MutationObserver(function(){_0x597e2d=_0x597e2d[_0x4032('0x3d')](function(_0x182794){return document['contains'](_0x182794['el']);});_0x597e2d['forEach'](function(_0x5c0f0f){_0x5c0f0f['fn']();});});_0x1538d7[_0x4032('0x59')](document['documentElement'],{'attributes':!![],'attributeFilter':['data-theme']});}}function _0x175911(_0x119f46,_0x196034,_0xaece35){try{var _0x1b2ee5=_0x119f46[_0x4032('0x5f')]();_0x1b2ee5['x']=_0x196034;_0x1b2ee5['y']=_0xaece35;return _0x1b2ee5[_0x4032('0x1f')](_0x119f46[_0x4032('0x63')]()[_0x4032('0x13')]());}catch(_0x37491a){var _0x39c623=_0x119f46[_0x4032('0x30')]();var _0x34b050=_0x119f46[_0x4032('0x4b')][_0x4032('0x2b')];return{'x':(_0x196034-_0x39c623['left'])/_0x39c623[_0x4032('0x26')]*_0x34b050[_0x4032('0x26')],'y':(_0xaece35-_0x39c623[_0x4032('0x47')])/_0x39c623[_0x4032('0x21')]*_0x34b050[_0x4032('0x21')]};}}function _0x4a4986(_0x6b30ca,_0x285bc6){var _0x403f84=_0x8fc929('div',_0x4032('0xc')+_0x4032('0xf')+_0x285bc6['bg']+';border:1px\x20solid\x20'+_0x285bc6['border']+';'+_0x4032('0x35')+_0x4032('0x2a')+_0x285bc6[_0x4032('0x5d')]+_0x4032('0x37')+_0x4032('0xd'));_0x6b30ca['appendChild'](_0x403f84);return _0x403f84;}function _0x44777e(_0x126155,_0xb8bc8a,_0x28fc21,_0x5f1fcb){_0x126155[_0x4032('0x5a')][_0x4032('0x12')]=_0x4032('0x2e');var _0x251c2b=_0x126155[_0x4032('0x44')];var _0x31b27b=_0x126155[_0x4032('0x29')];var _0x2cd249=_0xb8bc8a[_0x4032('0x44')];var _0x33062f=_0xb8bc8a[_0x4032('0x29')];var _0x2df951=_0x28fc21+0xe;var _0xeaf874=_0x5f1fcb-0x24;if(_0x2df951+_0x251c2b>_0x2cd249-0x4)_0x2df951=_0x28fc21-_0x251c2b-0xe;if(_0x2df951<0x4)_0x2df951=0x4;if(_0xeaf874<0x4)_0xeaf874=_0x5f1fcb+0xc;if(_0xeaf874+_0x31b27b>_0x33062f-0x4)_0xeaf874=_0x5f1fcb-_0x31b27b-0x4;_0x126155[_0x4032('0x5a')][_0x4032('0x7')]=_0x2df951+'px';_0x126155['style'][_0x4032('0x47')]=_0xeaf874+'px';}function _0x10b556(_0x127512,_0x510fa6){_0x127512[_0x4032('0x32')]='';_0x127512[_0x4032('0x5a')][_0x4032('0x6f')]=_0x4032('0x40');var _0x5121cc=_0x510fa6['xData']||[];var _0x2c0521=_0x510fa6[_0x4032('0x71')]||[];var _0x36c25e=_0x510fa6[_0x4032('0x5')]||'';var _0xd0259f=_0x1d213f();var _0x447740=_0xd0259f['dark']?_0x510fa6[_0x4032('0x4f')]||_0x510fa6[_0x4032('0x72')]||_0xd0259f[_0x4032('0x58')]:_0x510fa6['color']||_0xd0259f[_0x4032('0x58')];var _0x4c4b0e=0x190,_0x1be4ea=0xb4;var _0x27f06e={'t':0xe,'r':0xe,'b':_0x36c25e?0x30:0x22,'l':0x24};var _0x441132=_0x4c4b0e-_0x27f06e['l']-_0x27f06e['r'];var _0x578205=_0x1be4ea-_0x27f06e['t']-_0x27f06e['b'];var _0x2aa60b=_0x446572(_0x4032('0x52'),{'viewBox':_0x4032('0x64')+_0x4c4b0e+'\x20'+_0x1be4ea,'width':'100%','height':_0x4032('0x3f'),'style':_0x4032('0x17')});if(!_0x5121cc[_0x4032('0x24')]||!_0x2c0521[_0x4032('0x24')]){var _0x5c6dc7=_0x446572('text',{'x':_0x4c4b0e/0x2,'y':_0x1be4ea/0x2,'text-anchor':'middle','fill':_0xd0259f[_0x4032('0x5d')],'font-size':'13','opacity':_0x4032('0x56')});_0x5c6dc7[_0x4032('0x77')]='暂无数据';_0x2aa60b['appendChild'](_0x5c6dc7);_0x127512[_0x4032('0x7a')](_0x2aa60b);_0xb548c1(_0x127512,function(){_0x10b556(_0x127512,_0x510fa6);});return;}var _0x11412b=Math[_0x4032('0xb')]['apply'](null,_0x2c0521)||0x1;function _0x469c8d(_0x1dfaee){return _0x27f06e['l']+(_0x5121cc[_0x4032('0x24')]<=0x1?_0x441132/0x2:_0x1dfaee/(_0x5121cc['length']-0x1)*_0x441132);}function _0x5a84a6(_0x4680df){return _0x27f06e['t']+_0x578205-_0x4680df/_0x11412b*_0x578205;}var _0x9a2cea=_0x446572(_0x4032('0x3e'));var _0x2200ba='abcl-'+Math[_0x4032('0x4c')]()[_0x4032('0x1b')](0x24)[_0x4032('0x34')](0x2,0x7);var _0x5a9012=_0x446572(_0x4032('0x9'),{'id':_0x2200ba,'x1':'0','y1':'0','x2':'0','y2':'1'});var _0x8c633f=_0x446572(_0x4032('0x60'),{'offset':'0%','stop-color':_0x447740,'stop-opacity':_0x4032('0x4e')});var _0x50ef50=_0x446572('stop',{'offset':_0x4032('0x3f'),'stop-color':_0x447740,'stop-opacity':'0'});_0x5a9012[_0x4032('0x7a')](_0x8c633f);_0x5a9012[_0x4032('0x7a')](_0x50ef50);_0x9a2cea[_0x4032('0x7a')](_0x5a9012);_0x2aa60b[_0x4032('0x7a')](_0x9a2cea);for(var _0x359fea=0x0;_0x359fea<=0x3;_0x359fea++){var _0x25c720=Math['round'](_0x11412b*_0x359fea/0x3);var _0x541492=_0x5a84a6(_0x25c720);_0x2aa60b['appendChild'](_0x446572(_0x4032('0x66'),{'x1':_0x27f06e['l'],'y1':_0x541492,'x2':_0x27f06e['l']+_0x441132,'y2':_0x541492,'stroke':_0xd0259f['grid'],'stroke-width':'1'}));var _0x14711d=_0x446572(_0x4032('0x5d'),{'x':_0x27f06e['l']-0x5,'y':_0x541492+0x4,'text-anchor':_0x4032('0x76'),'fill':_0xd0259f['text'],'font-size':'10'});_0x14711d[_0x4032('0x77')]=_0x25c720;_0x2aa60b[_0x4032('0x7a')](_0x14711d);}var _0x59996d=_0x2c0521['map'](function(_0x3940d5,_0x24f9d4){return[_0x469c8d(_0x24f9d4),_0x5a84a6(_0x3940d5)];});var _0x29cf75='M'+_0x27f06e['l']+','+(_0x27f06e['t']+_0x578205)+'\x20L'+_0x59996d[0x0][0x0]+','+_0x59996d[0x0][0x1];var _0x40d54b='M'+_0x59996d[0x0][0x0]+','+_0x59996d[0x0][0x1];for(var _0x29e46b=0x1;_0x29e46b<_0x59996d[_0x4032('0x24')];_0x29e46b++){var _0x26104e=_0x59996d[_0x29e46b-0x1][0x0]+(_0x59996d[_0x29e46b][0x0]-_0x59996d[_0x29e46b-0x1][0x0])*0.45;var _0x22492a=_0x59996d[_0x29e46b][0x0]-(_0x59996d[_0x29e46b][0x0]-_0x59996d[_0x29e46b-0x1][0x0])*0.45;var _0x5eb2f5='\x20C'+_0x26104e+','+_0x59996d[_0x29e46b-0x1][0x1]+'\x20'+_0x22492a+','+_0x59996d[_0x29e46b][0x1]+'\x20'+_0x59996d[_0x29e46b][0x0]+','+_0x59996d[_0x29e46b][0x1];_0x29cf75+=_0x5eb2f5;_0x40d54b+=_0x5eb2f5;}_0x29cf75+='\x20L'+_0x59996d[_0x59996d[_0x4032('0x24')]-0x1][0x0]+','+(_0x27f06e['t']+_0x578205)+'\x20Z';_0x2aa60b[_0x4032('0x7a')](_0x446572(_0x4032('0x25'),{'d':_0x29cf75,'fill':_0x4032('0x23')+_0x2200ba+')'}));_0x2aa60b['appendChild'](_0x446572(_0x4032('0x25'),{'d':_0x40d54b,'fill':_0x4032('0x3'),'stroke':_0x447740,'stroke-width':_0x4032('0x6'),'stroke-linecap':'round','stroke-linejoin':'round'}));_0x59996d['forEach'](function(_0x59e887){_0x2aa60b['appendChild'](_0x446572(_0x4032('0x6e'),{'cx':_0x59e887[0x0],'cy':_0x59e887[0x1],'r':'4','fill':_0xd0259f['bg'],'stroke':_0x447740,'stroke-width':_0x4032('0x6')}));});var _0x4b73fc=_0x5121cc[_0x4032('0x24')]<=0x7?0x1:_0x5121cc[_0x4032('0x24')]<=0xa?0x2:Math[_0x4032('0xb')](0x1,Math[_0x4032('0x2d')](_0x5121cc[_0x4032('0x24')]/0x8));for(var _0x1f5bf1=0x0;_0x1f5bf1<_0x5121cc[_0x4032('0x24')];_0x1f5bf1+=_0x4b73fc){var _0x334287=_0x446572(_0x4032('0x5d'),{'x':_0x469c8d(_0x1f5bf1),'y':_0x1be4ea-_0x27f06e['b']+0xe,'text-anchor':'middle','fill':_0xd0259f['text'],'font-size':'10'});_0x334287[_0x4032('0x77')]=String(_0x5121cc[_0x1f5bf1]);_0x2aa60b[_0x4032('0x7a')](_0x334287);}var _0x467612=_0x446572(_0x4032('0x66'),{'x1':_0x27f06e['l'],'y1':_0x27f06e['t'],'x2':_0x27f06e['l'],'y2':_0x27f06e['t']+_0x578205,'stroke':_0xd0259f[_0x4032('0x7b')],'stroke-width':'1','stroke-dasharray':_0x4032('0x15'),'display':'none'});_0x2aa60b[_0x4032('0x7a')](_0x467612);_0x127512[_0x4032('0x7a')](_0x2aa60b);var _0x1ef100=_0x4a4986(_0x127512,_0xd0259f);var _0x4207dc=_0x5121cc[_0x4032('0x24')]<=0x1?_0x441132:_0x441132/(_0x5121cc[_0x4032('0x24')]-0x1);_0x2aa60b[_0x4032('0x74')](_0x4032('0x4a'),function(_0x186404){var _0x50705e=_0x175911(_0x2aa60b,_0x186404[_0x4032('0x3b')],_0x186404[_0x4032('0x1c')]);var _0x28730f=_0x50705e['x']-_0x27f06e['l'];var _0x419e8e=Math[_0x4032('0xb')](0x0,Math[_0x4032('0x48')](_0x5121cc[_0x4032('0x24')]-0x1,Math['round'](_0x28730f/_0x4207dc)));var _0x3796f7=_0x127512[_0x4032('0x30')]();_0x1ef100['textContent']=_0x5121cc[_0x419e8e]+':\x20'+_0x2c0521[_0x419e8e]+'\x20篇';_0x44777e(_0x1ef100,_0x127512,_0x186404[_0x4032('0x3b')]-_0x3796f7[_0x4032('0x7')],_0x186404[_0x4032('0x1c')]-_0x3796f7[_0x4032('0x47')]);_0x467612[_0x4032('0x3a')]('x1',_0x469c8d(_0x419e8e));_0x467612[_0x4032('0x3a')]('x2',_0x469c8d(_0x419e8e));_0x467612[_0x4032('0x3a')](_0x4032('0x12'),'');});_0x2aa60b[_0x4032('0x74')]('mouseleave',function(){_0x1ef100[_0x4032('0x5a')][_0x4032('0x12')]=_0x4032('0x3');_0x467612[_0x4032('0x3a')](_0x4032('0x12'),_0x4032('0x3'));});if(_0x36c25e){var _0xf08e64=_0x446572(_0x4032('0x5d'),{'x':_0x4c4b0e/0x2,'y':_0x1be4ea-0x4,'text-anchor':_0x4032('0x1d'),'fill':_0xd0259f[_0x4032('0x5d')],'font-size':'10','opacity':_0x4032('0x11')});_0xf08e64['textContent']=_0x36c25e;_0x2aa60b[_0x4032('0x7a')](_0xf08e64);}_0xb548c1(_0x127512,function(){_0x10b556(_0x127512,_0x510fa6);});}function _0x120709(_0x215177,_0x90197){_0x215177[_0x4032('0x32')]='';_0x215177['style'][_0x4032('0x6f')]=_0x4032('0x40');var _0x53bbf0=_0x90197[_0x4032('0x46')]||[];var _0x8915b5=_0x90197[_0x4032('0x71')]||[];var _0x4bb5ff=_0x90197[_0x4032('0x5')]||'';var _0x3dbbee=_0x1d213f();var _0x8eab63=_0x3dbbee['dark']?_0x90197['colorDark']||_0x90197[_0x4032('0x72')]||_0x3dbbee[_0x4032('0x58')]:_0x90197[_0x4032('0x72')]||_0x3dbbee[_0x4032('0x58')];var _0x1cb881=0x190,_0x51c8d6=0xb4;var _0x30c66a={'t':0xe,'r':0xe,'b':_0x4bb5ff?0x30:0x22,'l':0x24};var _0x294844=_0x1cb881-_0x30c66a['l']-_0x30c66a['r'];var _0x3c4c9c=_0x51c8d6-_0x30c66a['t']-_0x30c66a['b'];var _0x23002c=_0x446572(_0x4032('0x52'),{'viewBox':_0x4032('0x64')+_0x1cb881+'\x20'+_0x51c8d6,'width':'100%','height':_0x4032('0x3f'),'style':_0x4032('0x17')});if(!_0x53bbf0[_0x4032('0x24')]||!_0x8915b5['length']){var _0x232520=_0x446572('text',{'x':_0x1cb881/0x2,'y':_0x51c8d6/0x2,'text-anchor':_0x4032('0x1d'),'fill':_0x3dbbee[_0x4032('0x5d')],'font-size':'13','opacity':_0x4032('0x56')});_0x232520['textContent']=_0x4032('0x67');_0x23002c[_0x4032('0x7a')](_0x232520);_0x215177[_0x4032('0x7a')](_0x23002c);_0xb548c1(_0x215177,function(){_0x120709(_0x215177,_0x90197);});return;}var _0x52e27a=_0x53bbf0[_0x4032('0x24')];var _0x1f4e4d=Math[_0x4032('0xb')][_0x4032('0x28')](null,_0x8915b5)||0x1;function _0x4d3727(_0x5357ba){return _0x30c66a['l']+_0x5357ba/_0x52e27a*_0x294844;}function _0x3d8110(_0x563615){return _0x30c66a['t']+_0x3c4c9c-_0x563615/_0x1f4e4d*_0x3c4c9c;}for(var _0x48a65d=0x0;_0x48a65d<=0x3;_0x48a65d++){var _0x127c98=Math[_0x4032('0x2f')](_0x1f4e4d*_0x48a65d/0x3);var _0x3b9f00=_0x3d8110(_0x127c98);_0x23002c[_0x4032('0x7a')](_0x446572(_0x4032('0x66'),{'x1':_0x30c66a['l'],'y1':_0x3b9f00,'x2':_0x30c66a['l']+_0x294844,'y2':_0x3b9f00,'stroke':_0x3dbbee[_0x4032('0x7b')],'stroke-width':'1'}));var _0x4733fe=_0x446572(_0x4032('0x5d'),{'x':_0x30c66a['l']-0x5,'y':_0x3b9f00+0x4,'text-anchor':_0x4032('0x76'),'fill':_0x3dbbee[_0x4032('0x5d')],'font-size':'10'});_0x4733fe[_0x4032('0x77')]=_0x127c98;_0x23002c[_0x4032('0x7a')](_0x4733fe);}_0x23002c[_0x4032('0x7a')](_0x446572('line',{'x1':_0x30c66a['l'],'y1':_0x30c66a['t']+_0x3c4c9c,'x2':_0x30c66a['l']+_0x294844,'y2':_0x30c66a['t']+_0x3c4c9c,'stroke':_0x3dbbee[_0x4032('0x7b')],'stroke-width':'1'}));var _0x227789=_0x294844/_0x52e27a;var _0x1c396a=Math[_0x4032('0x48')](_0x227789*0.65,0x18);var _0xe733a9=[];for(var _0x308759=0x0;_0x308759<_0x52e27a;_0x308759++){var _0x210592=_0x30c66a['l']+_0x308759*_0x227789+(_0x227789-_0x1c396a)/0x2;var _0x834933=_0x8915b5[_0x308759]/_0x1f4e4d*_0x3c4c9c;var _0x585a34=_0x30c66a['t']+_0x3c4c9c-_0x834933;var _0x4e48c6=_0x8915b5[_0x308759]>0x0?_0x8eab63:_0x3dbbee[_0x4032('0x7b')];var _0x58ae94=Math[_0x4032('0x48')](0x4,_0x1c396a/0x2);var _0x1519d3=_0x834933>0x0?'M'+_0x210592+','+(_0x585a34+_0x58ae94)+'\x20Q'+_0x210592+','+_0x585a34+'\x20'+(_0x210592+_0x58ae94)+','+_0x585a34+'\x20L'+(_0x210592+_0x1c396a-_0x58ae94)+','+_0x585a34+'\x20Q'+(_0x210592+_0x1c396a)+','+_0x585a34+'\x20'+(_0x210592+_0x1c396a)+','+(_0x585a34+_0x58ae94)+'\x20L'+(_0x210592+_0x1c396a)+','+(_0x30c66a['t']+_0x3c4c9c)+'\x20L'+_0x210592+','+(_0x30c66a['t']+_0x3c4c9c)+'\x20Z':'';if(_0x1519d3){_0x23002c[_0x4032('0x7a')](_0x446572(_0x4032('0x25'),{'d':_0x1519d3,'fill':_0x4e48c6,'opacity':_0x8915b5[_0x308759]>0x0?_0x4032('0x5c'):_0x4032('0x55')}));}_0xe733a9[_0x4032('0x1e')]({'x':_0x210592,'w':_0x1c396a,'top':_0x585a34,'h':_0x834933,'val':_0x8915b5[_0x308759],'label':_0x53bbf0[_0x308759]});}var _0x397f2d=Math['max'](0x1,Math['ceil'](_0x52e27a/0x8));for(var _0x20d821=0x0;_0x20d821<_0x52e27a;_0x20d821+=_0x397f2d){var _0x87fbb8=_0x446572(_0x4032('0x5d'),{'x':_0x30c66a['l']+_0x20d821*_0x227789+_0x227789/0x2,'y':_0x30c66a['t']+_0x3c4c9c+0xe,'text-anchor':_0x4032('0x1d'),'fill':_0x3dbbee['text'],'font-size':'10'});_0x87fbb8[_0x4032('0x77')]=String(_0x53bbf0[_0x20d821]);_0x23002c[_0x4032('0x7a')](_0x87fbb8);}if(_0x4bb5ff){var _0x19e7ae=_0x446572(_0x4032('0x5d'),{'x':_0x1cb881/0x2,'y':_0x51c8d6-0x4,'text-anchor':_0x4032('0x1d'),'fill':_0x3dbbee[_0x4032('0x5d')],'font-size':'10','opacity':_0x4032('0x11')});_0x19e7ae[_0x4032('0x77')]=_0x4bb5ff;_0x23002c['appendChild'](_0x19e7ae);}_0x215177[_0x4032('0x7a')](_0x23002c);var _0x5238a9=_0x4a4986(_0x215177,_0x3dbbee);var _0x3e2d76=-0x1;var _0x1359c8=_0x446572(_0x4032('0x25'),{'fill':_0x3dbbee[_0x4032('0x5d')],'opacity':'0','style':_0x4032('0x42')});_0x23002c[_0x4032('0x7a')](_0x1359c8);for(var _0x23b490=0x0;_0x23b490<_0x52e27a;_0x23b490++){(function(_0x4f3d52){var _0x3798b1=_0x446572(_0x4032('0x45'),{'x':_0x30c66a['l']+_0x4f3d52*_0x227789,'y':_0x30c66a['t'],'width':_0x227789,'height':_0x3c4c9c,'fill':'transparent'});_0x3798b1[_0x4032('0x74')](_0x4032('0x65'),function(_0x381942){if(_0x3e2d76!==_0x4f3d52){_0x3e2d76=_0x4f3d52;var _0x37bebb=_0xe733a9[_0x4f3d52];if(_0x37bebb['h']>0x0){var _0x423d6d=Math[_0x4032('0x48')](0x4,_0x37bebb['w']/0x2);_0x1359c8[_0x4032('0x3a')]('d','M'+_0x37bebb['x']+','+(_0x37bebb['top']+_0x423d6d)+'\x20Q'+_0x37bebb['x']+','+_0x37bebb[_0x4032('0x47')]+'\x20'+(_0x37bebb['x']+_0x423d6d)+','+_0x37bebb[_0x4032('0x47')]+'\x20L'+(_0x37bebb['x']+_0x37bebb['w']-_0x423d6d)+','+_0x37bebb[_0x4032('0x47')]+'\x20Q'+(_0x37bebb['x']+_0x37bebb['w'])+','+_0x37bebb['top']+'\x20'+(_0x37bebb['x']+_0x37bebb['w'])+','+(_0x37bebb[_0x4032('0x47')]+_0x423d6d)+'\x20L'+(_0x37bebb['x']+_0x37bebb['w'])+','+(_0x30c66a['t']+_0x3c4c9c)+'\x20L'+_0x37bebb['x']+','+(_0x30c66a['t']+_0x3c4c9c)+'\x20Z');_0x1359c8['setAttribute']('opacity','0.12');}else{_0x1359c8['setAttribute'](_0x4032('0x1'),'0');}}var _0x4e478f=_0x215177['getBoundingClientRect']();var _0x4cdef0=_0xe733a9[_0x4f3d52];_0x5238a9[_0x4032('0x77')]=_0x4cdef0[_0x4032('0x33')]+'：'+_0x4cdef0[_0x4032('0x6c')]+'\x20篇';_0x44777e(_0x5238a9,_0x215177,_0x381942['clientX']-_0x4e478f['left'],_0x381942[_0x4032('0x1c')]-_0x4e478f['top']);});_0x3798b1[_0x4032('0x74')](_0x4032('0x70'),function(){_0x5238a9[_0x4032('0x5a')]['display']=_0x4032('0x3');_0x1359c8[_0x4032('0x3a')]('opacity','0');_0x3e2d76=-0x1;});_0x23002c['appendChild'](_0x3798b1);}(_0x23b490));}_0xb548c1(_0x215177,function(){_0x120709(_0x215177,_0x90197);});}function _0x5b72cd(_0x11e879,_0x14f95a){_0x11e879[_0x4032('0x32')]='';_0x11e879[_0x4032('0x5a')]['position']=_0x4032('0x40');var _0x37d1d0=_0x14f95a['data']||[];var _0x2023df=_0x1d213f();var _0x305f63=0x12c,_0x12a586=0xc8;var _0xd7d746=0xa2;var _0x4e8eb9=0x4c,_0x1ba691=0x64;var _0x41b29b=0x3e,_0xbe43c7=0x1e;var _0x9ba6e0=_0x446572(_0x4032('0x52'),{'viewBox':_0x4032('0x64')+_0x305f63+'\x20'+_0x12a586,'width':_0x4032('0x3f'),'height':_0x4032('0x3f'),'style':'overflow:visible;display:block;'});if(!_0x37d1d0[_0x4032('0x24')]){var _0x15a6b6=_0x446572(_0x4032('0x5d'),{'x':_0x305f63/0x2,'y':_0x12a586/0x2,'text-anchor':_0x4032('0x1d'),'fill':_0x2023df[_0x4032('0x5d')],'font-size':'13','opacity':_0x4032('0x56')});_0x15a6b6[_0x4032('0x77')]=_0x4032('0x67');_0x9ba6e0['appendChild'](_0x15a6b6);_0x11e879['appendChild'](_0x9ba6e0);_0xb548c1(_0x11e879,function(){_0x5b72cd(_0x11e879,_0x14f95a);});return;}var _0x4596ec=_0x37d1d0['reduce'](function(_0x82887c,_0x354f3e){return _0x82887c+_0x354f3e['value'];},0x0)||0x1;var _0x6021ce=_0x37d1d0[_0x4032('0x24')];function _0x372a44(_0x2896d0,_0x4c3001){return[_0x4e8eb9+_0x2896d0*Math[_0x4032('0x4d')](_0x4c3001-Math['PI']/0x2),_0x1ba691+_0x2896d0*Math[_0x4032('0x20')](_0x4c3001-Math['PI']/0x2)];}function _0x1903ec(_0x420db3,_0x1d6cbb,_0x4193ce,_0x107750){var _0x16329b=_0x372a44(_0x1d6cbb,_0x4193ce),_0x56cbfc=_0x372a44(_0x1d6cbb,_0x107750);var _0x7203e=_0x372a44(_0x420db3,_0x107750),_0x5b1baf=_0x372a44(_0x420db3,_0x4193ce);var _0x2bfe40=_0x107750-_0x4193ce>Math['PI']?0x1:0x0;return'M'+_0x16329b[0x0]+'\x20'+_0x16329b[0x1]+'\x20A'+_0x1d6cbb+'\x20'+_0x1d6cbb+'\x200\x20'+_0x2bfe40+_0x4032('0x61')+_0x56cbfc[0x0]+'\x20'+_0x56cbfc[0x1]+'\x20L'+_0x7203e[0x0]+'\x20'+_0x7203e[0x1]+'\x20A'+_0x420db3+'\x20'+_0x420db3+_0x4032('0x41')+_0x2bfe40+_0x4032('0x41')+_0x5b1baf[0x0]+'\x20'+_0x5b1baf[0x1]+'\x20Z';}var _0x19511d=_0x6021ce>0x1?0.04:0x0;var _0x35935d=[];var _0x5b4e7c=0x0;for(var _0x17b3f3=0x0;_0x17b3f3<_0x6021ce;_0x17b3f3++){var _0xb5198f=_0x37d1d0[_0x17b3f3][_0x4032('0x57')]/_0x4596ec*Math['PI']*0x2;var _0x555559=_0x5b4e7c+_0x19511d/0x2;var _0x590e65=_0x5b4e7c+_0xb5198f-_0x19511d/0x2;var _0x15857b=_0x37d1d0[_0x17b3f3][_0x4032('0x72')]||_0x54c0f7[_0x17b3f3%_0x54c0f7['length']];if(_0x590e65>_0x555559){var _0x21ba9e=_0x446572('path',{'d':_0x1903ec(_0xbe43c7,_0x41b29b,_0x555559,_0x590e65),'fill':_0x15857b,'style':'cursor:default;'});_0x9ba6e0[_0x4032('0x7a')](_0x21ba9e);}_0x35935d[_0x4032('0x1e')]({'a1':_0x5b4e7c,'a2':_0x5b4e7c+_0xb5198f,'d':_0x37d1d0[_0x17b3f3],'color':_0x15857b});_0x5b4e7c+=_0xb5198f;}var _0x3402b4=_0x446572(_0x4032('0x5d'),{'x':_0x4e8eb9,'y':_0x1ba691+0x6,'text-anchor':_0x4032('0x1d'),'fill':_0x2023df[_0x4032('0x5d')],'font-size':'20','font-weight':_0x4032('0x62')});_0x3402b4[_0x4032('0x77')]=_0x4596ec;_0x9ba6e0['appendChild'](_0x3402b4);var _0x59f5ab=Math[_0x4032('0xb')](0x6,_0x12a586/0x2-_0x6021ce*0x14/0x2);for(var _0x59fc0b=0x0;_0x59fc0b<_0x6021ce;_0x59fc0b++){var _0x188505=_0x37d1d0[_0x59fc0b][_0x4032('0x72')]||_0x54c0f7[_0x59fc0b%_0x54c0f7['length']];var _0x2a86be=Math['round'](_0x37d1d0[_0x59fc0b]['value']/_0x4596ec*0x64);var _0x48d805=_0x59f5ab+_0x59fc0b*0x14;_0x9ba6e0['appendChild'](_0x446572(_0x4032('0x45'),{'x':_0xd7d746,'y':_0x48d805,'width':'8','height':'8','rx':'4','fill':_0x188505}));var _0x5bd02c=_0x446572(_0x4032('0x5d'),{'x':_0xd7d746+0xc,'y':_0x48d805+0x7,'fill':_0x2023df[_0x4032('0x5d')],'font-size':'11'});_0x5bd02c['textContent']=_0x37d1d0[_0x59fc0b]['name'][_0x4032('0x24')]>0x7?_0x37d1d0[_0x59fc0b]['name'][_0x4032('0x34')](0x0,0x7)+'…':_0x37d1d0[_0x59fc0b]['name'];_0x9ba6e0[_0x4032('0x7a')](_0x5bd02c);var _0x30a777=_0x446572(_0x4032('0x5d'),{'x':_0x305f63-0x4,'y':_0x48d805+0x7,'text-anchor':_0x4032('0x76'),'fill':_0x2023df[_0x4032('0x5d')],'font-size':'10','opacity':_0x4032('0x50')});_0x30a777[_0x4032('0x77')]=_0x2a86be+'%';_0x9ba6e0['appendChild'](_0x30a777);}_0x11e879['appendChild'](_0x9ba6e0);var _0x4c34d2=_0x4a4986(_0x11e879,_0x2023df);_0x9ba6e0[_0x4032('0x74')](_0x4032('0x4a'),function(_0x59bb72){var _0x1a7c40=_0x175911(_0x9ba6e0,_0x59bb72[_0x4032('0x3b')],_0x59bb72[_0x4032('0x1c')]);var _0x4896eb=_0x1a7c40['x']-_0x4e8eb9;var _0x5b903b=_0x1a7c40['y']-_0x1ba691;var _0xb05ebf=Math[_0x4032('0x0')](_0x4896eb*_0x4896eb+_0x5b903b*_0x5b903b);var _0x33b30e=_0x11e879[_0x4032('0x30')]();if(_0xb05ebf<_0xbe43c7||_0xb05ebf>_0x41b29b){_0x4c34d2[_0x4032('0x5a')][_0x4032('0x12')]=_0x4032('0x3');return;}var _0x7c3915=Math[_0x4032('0x73')](_0x5b903b,_0x4896eb)+Math['PI']/0x2;if(_0x7c3915<0x0)_0x7c3915+=Math['PI']*0x2;if(_0x7c3915>=Math['PI']*0x2)_0x7c3915-=Math['PI']*0x2;for(var _0xb88a7f=0x0;_0xb88a7f<_0x35935d['length'];_0xb88a7f++){if(_0x7c3915>=_0x35935d[_0xb88a7f]['a1']&&_0x7c3915<_0x35935d[_0xb88a7f]['a2']){var _0x72a591=Math['round'](_0x35935d[_0xb88a7f]['d'][_0x4032('0x57')]/_0x4596ec*0x64);_0x4c34d2[_0x4032('0x77')]=_0x35935d[_0xb88a7f]['d'][_0x4032('0x6b')]+'：'+_0x35935d[_0xb88a7f]['d'][_0x4032('0x57')]+_0x4032('0x2')+_0x72a591+'%）';_0x44777e(_0x4c34d2,_0x11e879,_0x59bb72['clientX']-_0x33b30e['left'],_0x59bb72[_0x4032('0x1c')]-_0x33b30e[_0x4032('0x47')]);return;}}_0x4c34d2[_0x4032('0x5a')]['display']=_0x4032('0x3');});_0x9ba6e0[_0x4032('0x74')](_0x4032('0x70'),function(){_0x4c34d2['style'][_0x4032('0x12')]=_0x4032('0x3');});_0xb548c1(_0x11e879,function(){_0x5b72cd(_0x11e879,_0x14f95a);});}_0x297d95['ABCharts']={'line':function(_0x55a8a1,_0x51e980){_0x10b556(_0x55a8a1,_0x51e980);},'bar':function(_0x5c2b51,_0x2d5e5e){_0x120709(_0x5c2b51,_0x2d5e5e);},'polar':function(_0x7a7da6,_0x3b01bc){_0x5b72cd(_0x7a7da6,_0x3b01bc);}};}(window));
+/*!
+ * ABCharts v1.0 – 轻量级纯 SVG 图表库
+ * 供 AdminBeautify 插件概要页使用
+ * 支持：折线图 (line)、极坐标柱状图 (polar)
+ */
+(function (g) {
+    'use strict';
+
+    /* ── 工具函数 ── */
+    function svgEl(tag, attrs) {
+        var el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+        if (attrs) {
+            for (var k in attrs) {
+                if (attrs[k] !== null && attrs[k] !== undefined) {
+                    el.setAttribute(k, attrs[k]);
+                }
+            }
+        }
+        return el;
+    }
+
+    function domEl(tag, css) {
+        var el = document.createElement(tag);
+        if (css) el.style.cssText = css;
+        return el;
+    }
+
+    var PALETTE = [
+        '#6750a4', '#e9c46a', '#2a9d8f', '#e76f51',
+        '#b5838d', '#457b9d', '#a8dadc', '#f4a261'
+    ];
+
+    function getTheme() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+            dark:    dark,
+            text:    dark ? '#cac4d0' : '#49454f',
+            grid:    dark ? 'rgba(202,196,208,0.1)' : 'rgba(73,69,79,0.08)',
+            primary: dark ? '#d0bcff' : '#6750a4',
+            bg:      dark ? '#2b2930' : '#ffffff',
+            border:  dark ? '#49454f' : '#e7e0ec'
+        };
+    }
+
+    /* ── 主题切换监听（MutationObserver）──
+     * 每个图表注册后，主题切换时自动重绘 */
+    var _themeObs = null;
+    var _themeRegs = [];   // [{el, fn}, ...]
+    function registerTheme(container, fn) {
+        // 同一容器只保留最新的重绘函数
+        for (var i = 0; i < _themeRegs.length; i++) {
+            if (_themeRegs[i].el === container) {
+                _themeRegs[i].fn = fn;
+                return;
+            }
+        }
+        _themeRegs.push({ el: container, fn: fn });
+        if (!_themeObs) {
+            _themeObs = new MutationObserver(function () {
+                // 移除已离开 DOM 的容器，重绘剩余的
+                _themeRegs = _themeRegs.filter(function (r) { return document.contains(r.el); });
+                _themeRegs.forEach(function (r) { r.fn(); });
+            });
+            _themeObs.observe(document.documentElement, {
+                attributes: true, attributeFilter: ['data-theme']
+            });
+        }
+    }
+
+    /* ── 精确坐标转换：client → SVG 内部坐标 ── */
+    function clientToSVG(svg, clientX, clientY) {
+        try {
+            var pt = svg.createSVGPoint();
+            pt.x = clientX;
+            pt.y = clientY;
+            return pt.matrixTransform(svg.getScreenCTM().inverse());
+        } catch (ex) {
+            // fallback: 简单线性映射
+            var r = svg.getBoundingClientRect();
+            var vb = svg.viewBox.baseVal;
+            return { x: (clientX - r.left) / r.width * vb.width, y: (clientY - r.top) / r.height * vb.height };
+        }
+    }
+
+    /* ── Tooltip 创建 ── */
+    function makeTip(parent, t) {
+        var tip = domEl('div',
+            'position:absolute;display:none;pointer-events:none;z-index:20;' +
+            'background:' + t.bg + ';border:1px solid ' + t.border + ';' +
+            'border-radius:8px;padding:5px 10px;font-size:12px;line-height:1.6;' +
+            'color:' + t.text + ';white-space:nowrap;' +
+            'box-shadow:0 2px 12px rgba(0,0,0,.18);'
+        );
+        parent.appendChild(tip);
+        return tip;
+    }
+
+    /* ── Tooltip 定位（防止溢出容器边界）── */
+    function placeTip(tip, container, mouseX, mouseY) {
+        tip.style.display = 'block';
+        var tw = tip.offsetWidth;
+        var th = tip.offsetHeight;
+        var cw = container.offsetWidth;
+        var ch = container.offsetHeight;
+        var lx = mouseX + 14;
+        var ty = mouseY - 36;
+        if (lx + tw > cw - 4) lx = mouseX - tw - 14;
+        if (lx < 4) lx = 4;
+        if (ty < 4) ty = mouseY + 12;
+        if (ty + th > ch - 4) ty = mouseY - th - 4;
+        tip.style.left = lx + 'px';
+        tip.style.top  = ty + 'px';
+    }
+
+    /* ═══════════════════════════════════════
+     * 折线图
+     * opts: { xData:string[], yData:number[], color?:string, colorDark?:string }
+     * ═══════════════════════════════════════ */
+    function renderLine(container, opts) {
+        container.innerHTML = '';
+        container.style.position = 'relative';
+
+        var xData    = opts.xData    || [];
+        var yData    = opts.yData    || [];
+        var subtitle = opts.subtitle || '';
+        var t        = getTheme();
+        // 亮/暗各一色，主题切换时自动选择
+        var color = t.dark
+            ? (opts.colorDark || opts.color || t.primary)
+            : (opts.color     || t.primary);
+
+        /* 内部坐标系（固定 400×180，通过 viewBox 自动缩放） */
+        var IW = 400, IH = 180;
+        var P  = { t: 14, r: 14, b: subtitle ? 48 : 34, l: 36 };
+        var pw = IW - P.l - P.r;
+        var ph = IH - P.t - P.b;
+
+        var svg = svgEl('svg', {
+            viewBox: '0 0 ' + IW + ' ' + IH,
+            width: '100%',
+            height: '100%',
+            style: 'overflow:visible;display:block;'
+        });
+
+        /* 空数据 */
+        if (!xData.length || !yData.length) {
+            var nt = svgEl('text', {
+                x: IW / 2, y: IH / 2,
+                'text-anchor': 'middle',
+                fill: t.text, 'font-size': '13', opacity: '0.6'
+            });
+            nt.textContent = '暂无数据';
+            svg.appendChild(nt);
+            container.appendChild(svg);
+            registerTheme(container, function () { renderLine(container, opts); });
+            return;
+        }
+
+        var yMax = Math.max.apply(null, yData) || 1;
+
+        function px(i) {
+            return P.l + (xData.length <= 1 ? pw / 2 : i / (xData.length - 1) * pw);
+        }
+        function py(v) {
+            return P.t + ph - (v / yMax) * ph;
+        }
+
+        /* 渐变定义 */
+        var defs = svgEl('defs');
+        var gid  = 'abcl-' + Math.random().toString(36).slice(2, 7);
+        var grad = svgEl('linearGradient', { id: gid, x1: '0', y1: '0', x2: '0', y2: '1' });
+        var s1   = svgEl('stop', { offset: '0%',   'stop-color': color, 'stop-opacity': '0.28' });
+        var s2   = svgEl('stop', { offset: '100%', 'stop-color': color, 'stop-opacity': '0' });
+        grad.appendChild(s1);
+        grad.appendChild(s2);
+        defs.appendChild(grad);
+        svg.appendChild(defs);
+
+        /* 网格线 + Y 轴标签 */
+        for (var gi = 0; gi <= 3; gi++) {
+            var gv = Math.round(yMax * gi / 3);
+            var gy = py(gv);
+            svg.appendChild(svgEl('line', {
+                x1: P.l, y1: gy, x2: P.l + pw, y2: gy,
+                stroke: t.grid, 'stroke-width': '1'
+            }));
+            var gt = svgEl('text', {
+                x: P.l - 5, y: gy + 4,
+                'text-anchor': 'end',
+                fill: t.text, 'font-size': '10'
+            });
+            gt.textContent = gv;
+            svg.appendChild(gt);
+        }
+
+        /* 路径数据 */
+        var pts = yData.map(function (v, i) { return [px(i), py(v)]; });
+
+        var aD = 'M' + P.l + ',' + (P.t + ph) + ' L' + pts[0][0] + ',' + pts[0][1];
+        var lD = 'M' + pts[0][0] + ',' + pts[0][1];
+
+        for (var pi = 1; pi < pts.length; pi++) {
+            var cpx1 = pts[pi - 1][0] + (pts[pi][0] - pts[pi - 1][0]) * 0.45;
+            var cpx2 = pts[pi][0]     - (pts[pi][0] - pts[pi - 1][0]) * 0.45;
+            var seg  = ' C' + cpx1 + ',' + pts[pi - 1][1] +
+                       ' '  + cpx2 + ',' + pts[pi][1] +
+                       ' '  + pts[pi][0] + ',' + pts[pi][1];
+            aD += seg;
+            lD += seg;
+        }
+        aD += ' L' + pts[pts.length - 1][0] + ',' + (P.t + ph) + ' Z';
+
+        svg.appendChild(svgEl('path', { d: aD, fill: 'url(#' + gid + ')' }));
+        svg.appendChild(svgEl('path', {
+            d: lD, fill: 'none',
+            stroke: color, 'stroke-width': '2.5',
+            'stroke-linecap': 'round', 'stroke-linejoin': 'round'
+        }));
+
+        /* 数据点 */
+        pts.forEach(function (p) {
+            svg.appendChild(svgEl('circle', {
+                cx: p[0], cy: p[1], r: '4',
+                fill: t.bg, stroke: color, 'stroke-width': '2.5'
+            }));
+        });
+
+        /* X 轴标签：≤7点逐一，≤10点每2个，否则最多8个 */
+        var xStep = xData.length <= 7 ? 1 : (xData.length <= 10 ? 2 : Math.max(1, Math.ceil(xData.length / 8)));
+        for (var xi = 0; xi < xData.length; xi += xStep) {
+            var xt = svgEl('text', {
+                x: px(xi), y: IH - P.b + 14,
+                'text-anchor': 'middle',
+                fill: t.text, 'font-size': '10'
+            });
+            xt.textContent = String(xData[xi]); // 调用方已预格式化标签
+            svg.appendChild(xt);
+        }
+
+        /* 悬停竖线 */
+        var hLine = svgEl('line', {
+            x1: P.l, y1: P.t, x2: P.l, y2: P.t + ph,
+            stroke: t.grid, 'stroke-width': '1', 'stroke-dasharray': '3 2',
+            display: 'none'
+        });
+        svg.appendChild(hLine);
+
+        container.appendChild(svg);
+
+        /* Tooltip */
+        var tip  = makeTip(container, t);
+        var stepSVG = xData.length <= 1 ? pw : pw / (xData.length - 1);
+
+        svg.addEventListener('mousemove', function (e) {
+            var sp  = clientToSVG(svg, e.clientX, e.clientY);
+            var mx  = sp.x - P.l;
+            var idx = Math.max(0, Math.min(xData.length - 1, Math.round(mx / stepSVG)));
+            var rect = container.getBoundingClientRect();
+            tip.textContent = xData[idx] + ': ' + yData[idx] + ' 篇';
+            placeTip(tip, container, e.clientX - rect.left, e.clientY - rect.top);
+            hLine.setAttribute('x1', px(idx));
+            hLine.setAttribute('x2', px(idx));
+            hLine.setAttribute('display', '');
+        });
+        svg.addEventListener('mouseleave', function () {
+            tip.style.display = 'none';
+            hLine.setAttribute('display', 'none');
+        });
+
+        /* 副标题 */
+        if (subtitle) {
+            var st = svgEl('text', {
+                x: IW / 2, y: IH - 4,
+                'text-anchor': 'middle',
+                fill: t.text, 'font-size': '10', opacity: '0.5'
+            });
+            st.textContent = subtitle;
+            svg.appendChild(st);
+        }
+
+        /* 主题切换时重绘 */
+        registerTheme(container, function () { renderLine(container, opts); });
+    }
+
+    /* ═══════════════════════════════════════
+     * 柱状图
+     * opts: { xData:string[], yData:number[], color?:string, colorDark?:string, subtitle?:string }
+     * ═══════════════════════════════════════ */
+    function renderBar(container, opts) {
+        container.innerHTML = '';
+        container.style.position = 'relative';
+
+        var xData    = opts.xData    || [];
+        var yData    = opts.yData    || [];
+        var subtitle = opts.subtitle || '';
+        var t        = getTheme();
+        var color    = t.dark
+            ? (opts.colorDark || opts.color || t.primary)
+            : (opts.color     || t.primary);
+
+        /* 内部坐标系：底部为 subtitle 留额外空间 */
+        var IW = 400, IH = 180;
+        var P  = { t: 14, r: 14, b: subtitle ? 48 : 34, l: 36 };
+        var pw = IW - P.l - P.r;
+        var ph = IH - P.t - P.b;
+
+        var svg = svgEl('svg', {
+            viewBox: '0 0 ' + IW + ' ' + IH,
+            width: '100%', height: '100%',
+            style: 'overflow:visible;display:block;'
+        });
+
+        /* 空数据 */
+        if (!xData.length || !yData.length) {
+            var nt = svgEl('text', {
+                x: IW / 2, y: IH / 2, 'text-anchor': 'middle',
+                fill: t.text, 'font-size': '13', opacity: '0.6'
+            });
+            nt.textContent = '暂无数据';
+            svg.appendChild(nt);
+            container.appendChild(svg);
+            registerTheme(container, function () { renderBar(container, opts); });
+            return;
+        }
+
+        var n    = xData.length;
+        var yMax = Math.max.apply(null, yData) || 1;
+
+        function bx(i) { return P.l + i / n * pw; }
+        function py(v)  { return P.t + ph - (v / yMax) * ph; }
+
+        /* 网格线 + Y 轴标签 */
+        for (var gi = 0; gi <= 3; gi++) {
+            var gv = Math.round(yMax * gi / 3);
+            var gy = py(gv);
+            svg.appendChild(svgEl('line', {
+                x1: P.l, y1: gy, x2: P.l + pw, y2: gy,
+                stroke: t.grid, 'stroke-width': '1'
+            }));
+            var gt = svgEl('text', {
+                x: P.l - 5, y: gy + 4, 'text-anchor': 'end',
+                fill: t.text, 'font-size': '10'
+            });
+            gt.textContent = gv;
+            svg.appendChild(gt);
+        }
+
+        /* 底部基准线 */
+        svg.appendChild(svgEl('line', {
+            x1: P.l, y1: P.t + ph, x2: P.l + pw, y2: P.t + ph,
+            stroke: t.grid, 'stroke-width': '1'
+        }));
+
+        /* 柱子 */
+        var slotW = pw / n;
+        var barW  = Math.min(slotW * 0.65, 24);
+        var bars  = [];
+
+        for (var bi = 0; bi < n; bi++) {
+            var bLeft  = P.l + bi * slotW + (slotW - barW) / 2;
+            var bH     = (yData[bi] / yMax) * ph;
+            var bTop   = P.t + ph - bH;
+            var barClr = yData[bi] > 0 ? color : t.grid;
+            var r4     = Math.min(4, barW / 2);
+
+            /* 圆角矩形（顶部两角圆角）*/
+            var d = bH > 0
+                ? 'M' + bLeft + ',' + (bTop + r4) +
+                  ' Q' + bLeft + ',' + bTop + ' ' + (bLeft + r4) + ',' + bTop +
+                  ' L' + (bLeft + barW - r4) + ',' + bTop +
+                  ' Q' + (bLeft + barW) + ',' + bTop + ' ' + (bLeft + barW) + ',' + (bTop + r4) +
+                  ' L' + (bLeft + barW) + ',' + (P.t + ph) +
+                  ' L' + bLeft + ',' + (P.t + ph) + ' Z'
+                : '';
+
+            if (d) {
+                svg.appendChild(svgEl('path', {
+                    d: d, fill: barClr, opacity: yData[bi] > 0 ? '0.85' : '0.3'
+                }));
+            }
+            bars.push({ x: bLeft, w: barW, top: bTop, h: bH, val: yData[bi], label: xData[bi] });
+        }
+
+        /* X 轴标签（自动步长，最多 8 个） */
+        var xStep = Math.max(1, Math.ceil(n / 8));
+        for (var xi = 0; xi < n; xi += xStep) {
+            var xt = svgEl('text', {
+                x: P.l + xi * slotW + slotW / 2,
+                y: P.t + ph + 14,
+                'text-anchor': 'middle',
+                fill: t.text, 'font-size': '10'
+            });
+            xt.textContent = String(xData[xi]);
+            svg.appendChild(xt);
+        }
+
+        /* 副标题（底部居中） */
+        if (subtitle) {
+            var st = svgEl('text', {
+                x: IW / 2, y: IH - 4,
+                'text-anchor': 'middle',
+                fill: t.text, 'font-size': '10', opacity: '0.5'
+            });
+            st.textContent = subtitle;
+            svg.appendChild(st);
+        }
+
+        container.appendChild(svg);
+
+        /* Tooltip：透明 hit 区 + 悬停高亮 */
+        var tip = makeTip(container, t);
+        var highlighted = -1;
+
+        /* 悬停高亮用一个共享 path 覆盖 */
+        var hlPath = svgEl('path', { fill: t.text, opacity: '0', style: 'pointer-events:none;' });
+        svg.appendChild(hlPath);
+
+        /* 透明 hit 矩形（列宽区域，提高命中率） */
+        for (var hi = 0; hi < n; hi++) {
+            (function (idx) {
+                var hitRect = svgEl('rect', {
+                    x: P.l + idx * slotW, y: P.t,
+                    width: slotW, height: ph,
+                    fill: 'transparent'
+                });
+                hitRect.addEventListener('mouseenter', function (e) {
+                    if (highlighted !== idx) {
+                        highlighted = idx;
+                        /* 高亮当前柱 */
+                        var b = bars[idx];
+                        if (b.h > 0) {
+                            var r4h = Math.min(4, b.w / 2);
+                            hlPath.setAttribute('d',
+                                'M' + b.x + ',' + (b.top + r4h) +
+                                ' Q' + b.x + ',' + b.top + ' ' + (b.x + r4h) + ',' + b.top +
+                                ' L' + (b.x + b.w - r4h) + ',' + b.top +
+                                ' Q' + (b.x + b.w) + ',' + b.top + ' ' + (b.x + b.w) + ',' + (b.top + r4h) +
+                                ' L' + (b.x + b.w) + ',' + (P.t + ph) +
+                                ' L' + b.x + ',' + (P.t + ph) + ' Z'
+                            );
+                            hlPath.setAttribute('opacity', '0.12');
+                        } else {
+                            hlPath.setAttribute('opacity', '0');
+                        }
+                    }
+                    var rect = container.getBoundingClientRect();
+                    var b2 = bars[idx];
+                    tip.textContent = b2.label + '：' + b2.val + ' 篇';
+                    placeTip(tip, container, e.clientX - rect.left, e.clientY - rect.top);
+                });
+                hitRect.addEventListener('mouseleave', function () {
+                    tip.style.display = 'none';
+                    hlPath.setAttribute('opacity', '0');
+                    highlighted = -1;
+                });
+                svg.appendChild(hitRect);
+            })(hi);
+        }
+
+        /* 主题切换时重绘 */
+        registerTheme(container, function () { renderBar(container, opts); });
+    }
+
+    /* ═══════════════════════════════════════
+     * 极坐标柱状图（圆环分段）
+     * opts: { data:[{name,value,color?},...] }
+     * ═══════════════════════════════════════ */
+    function renderPolar(container, opts) {
+        container.innerHTML = '';
+        container.style.position = 'relative';
+
+        var data = opts.data || [];
+        var t    = getTheme();
+
+        /* 内部坐标系（固定 300×200） */
+        var IW = 300, IH = 200;
+        var LX = 162;          /* 图例起始 X */
+        var CX = 76, CY = 100; /* 圆心 */
+        var R_OUT = 62, R_IN = 30;
+
+        var svg = svgEl('svg', {
+            viewBox: '0 0 ' + IW + ' ' + IH,
+            width: '100%',
+            height: '100%',
+            style: 'overflow:visible;display:block;'
+        });
+
+        /* 空数据 */
+        if (!data.length) {
+            var nt = svgEl('text', {
+                x: IW / 2, y: IH / 2,
+                'text-anchor': 'middle',
+                fill: t.text, 'font-size': '13', opacity: '0.6'
+            });
+            nt.textContent = '暂无数据';
+            svg.appendChild(nt);
+            container.appendChild(svg);
+            registerTheme(container, function () { renderPolar(container, opts); });
+            return;
+        }
+
+        var total = data.reduce(function (s, d) { return s + d.value; }, 0) || 1;
+        var N     = data.length;
+
+        function toXY(r, a) {
+            return [
+                CX + r * Math.cos(a - Math.PI / 2),
+                CY + r * Math.sin(a - Math.PI / 2)
+            ];
+        }
+
+        function arcPath(r1, r2, a1, a2) {
+            var p1 = toXY(r2, a1), p2 = toXY(r2, a2);
+            var p3 = toXY(r1, a2), p4 = toXY(r1, a1);
+            var lg = (a2 - a1 > Math.PI) ? 1 : 0;
+            return 'M' + p1[0] + ' ' + p1[1] +
+                   ' A' + r2 + ' ' + r2 + ' 0 ' + lg + ' 1 ' + p2[0] + ' ' + p2[1] +
+                   ' L' + p3[0] + ' ' + p3[1] +
+                   ' A' + r1 + ' ' + r1 + ' 0 ' + lg + ' 0 ' + p4[0] + ' ' + p4[1] + ' Z';
+        }
+
+        /* 按比例计算各段角度（真实饼图） */
+        var GAP      = N > 1 ? 0.04 : 0;
+        var segs     = [];
+        var runAngle = 0;
+
+        for (var i = 0; i < N; i++) {
+            var spanAngle = (data[i].value / total) * Math.PI * 2;
+            var a1  = runAngle + GAP / 2;
+            var a2  = runAngle + spanAngle - GAP / 2;
+            var clr = data[i].color || PALETTE[i % PALETTE.length];
+            if (a2 > a1) {
+                var path = svgEl('path', {
+                    d: arcPath(R_IN, R_OUT, a1, a2),
+                    fill: clr,
+                    style: 'cursor:default;'
+                });
+                svg.appendChild(path);
+            }
+            segs.push({ a1: runAngle, a2: runAngle + spanAngle, d: data[i], color: clr });
+            runAngle += spanAngle;
+        }
+
+        /* 中心只显示总数（纯数字） */
+        var ctv = svgEl('text', {
+            x: CX, y: CY + 6,
+            'text-anchor': 'middle',
+            fill: t.text, 'font-size': '20', 'font-weight': '700'
+        });
+        ctv.textContent = total;
+        svg.appendChild(ctv);
+
+        /* 图例（SVG 内右侧） */
+        var lyStart = Math.max(6, IH / 2 - N * 20 / 2);
+        for (var li = 0; li < N; li++) {
+            var lColor = data[li].color || PALETTE[li % PALETTE.length];
+            var lPct   = Math.round(data[li].value / total * 100);
+            var ly     = lyStart + li * 20;
+
+            svg.appendChild(svgEl('rect', {
+                x: LX, y: ly, width: '8', height: '8',
+                rx: '4', fill: lColor
+            }));
+
+            var lName = svgEl('text', {
+                x: LX + 12, y: ly + 7,
+                fill: t.text, 'font-size': '11'
+            });
+            lName.textContent = data[li].name.length > 7
+                ? data[li].name.slice(0, 7) + '…'
+                : data[li].name;
+            svg.appendChild(lName);
+
+            var lVal = svgEl('text', {
+                x: IW - 4, y: ly + 7,
+                'text-anchor': 'end',
+                fill: t.text, 'font-size': '10', opacity: '0.65'
+            });
+            lVal.textContent = lPct + '%';
+            svg.appendChild(lVal);
+        }
+
+        container.appendChild(svg);
+
+        /* Tooltip */
+        var tip = makeTip(container, t);
+
+        svg.addEventListener('mousemove', function (e) {
+            var sp   = clientToSVG(svg, e.clientX, e.clientY);
+            var mx   = sp.x - CX;
+            var my   = sp.y - CY;
+            var dist = Math.sqrt(mx * mx + my * my);
+            var rect = container.getBoundingClientRect();
+
+            if (dist < R_IN || dist > R_OUT) {
+                tip.style.display = 'none';
+                return;
+            }
+
+            /* 计算鼠标角度（0 = 12点，顺时针） */
+            var angle = Math.atan2(my, mx) + Math.PI / 2;
+            if (angle < 0) angle += Math.PI * 2;
+            if (angle >= Math.PI * 2) angle -= Math.PI * 2;
+
+            for (var si = 0; si < segs.length; si++) {
+                if (angle >= segs[si].a1 && angle < segs[si].a2) {
+                    var pct2 = Math.round(segs[si].d.value / total * 100);
+                    tip.textContent = segs[si].d.name + '：' + segs[si].d.value + ' 条（' + pct2 + '%）';
+                    placeTip(tip, container, e.clientX - rect.left, e.clientY - rect.top);
+                    return;
+                }
+            }
+            tip.style.display = 'none';
+        });
+        svg.addEventListener('mouseleave', function () {
+            tip.style.display = 'none';
+        });
+
+        /* 主题切换时重绘 */
+        registerTheme(container, function () { renderPolar(container, opts); });
+    }
+
+    /* ── 公开 API ── */
+    g.ABCharts = {
+        line:  function (container, opts) { renderLine(container, opts); },
+        bar:   function (container, opts) { renderBar(container, opts); },
+        polar: function (container, opts) { renderPolar(container, opts); }
+    };
+
+})(window);

@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.40
+ * @version 2.1.41
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -31,6 +31,47 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     private static function jsString($s)
     {
         return json_encode((string) $s, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    private static function iniSizeToBytes($size)
+    {
+        $size = trim((string)$size);
+        if ($size === '') {
+            return 0;
+        }
+        if (!preg_match('/^([0-9]+)([a-zA-Z]{0,2})$/', $size, $matches)) {
+            return (int)$size;
+        }
+        $value = (int)$matches[1];
+        $unit = isset($matches[2]) ? strtolower($matches[2]) : '';
+        if ($unit === '' || $unit === 'b') {
+            return $value;
+        }
+        $map = array(
+            'k' => 1,
+            'm' => 2,
+            'g' => 3,
+            't' => 4,
+            'p' => 5,
+        );
+        $first = substr($unit, 0, 1);
+        if (!isset($map[$first])) {
+            return $value;
+        }
+        return (int)($value * pow(1024, $map[$first]));
+    }
+    private static function minPositiveBytes(array $values)
+    {
+        $filtered = array();
+        foreach ($values as $v) {
+            $v = (int)$v;
+            if ($v > 0) {
+                $filtered[] = $v;
+            }
+        }
+        if (empty($filtered)) {
+            return 0;
+        }
+        return (int)min($filtered);
     }
     public static function activate()
     {
@@ -66,7 +107,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.40';
+        $abVer = '2.1.41';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -323,18 +364,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($umamiTimeRange);
         abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
-            abCardTip('✏️', '开启 Vditor 后，文章 / 页面编辑界面将使用 Vditor 替代原版 PageDown 编辑器。原工具栏将被 Vditor 内置工具栏接管，原"撰写/预览"切换将变为 <strong>所见即所得 / 实时预览 / 分屏编辑</strong> 三种模式切换按钮。')
+            abCardTip('✏️', '可在 AB Typecho 原版优化 / AB Vditor / AB Editor.md / 兼容其他编辑器 之间切换。启用 Vditor 或 Editor.md 后，会替代原版 PageDown 编辑体验，并套用 AB 的 MD3 风格。')
         );
         $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
             'editor_vditor',
             array(
-                '0' => 'AB Typecho 优化',
+                '0' => 'AB Typecho 原版优化',
                 '1' => 'AB Vditor',
+                '3' => 'AB Editor.md (Beta)',
                 '2' => '兼容其他编辑器',
             ),
-            '0',
+            '1',
             _t('编辑器'),
-            _t('AB Typecho 优化：使用 AB-Admin 优化后的原版编辑器（含 AB 工具栏）；AB Vditor：替换为 Vditor Markdown 编辑器；兼容其他编辑器：不注入任何编辑器相关 CSS / JS，适合已安装第三方编辑器插件时使用。')
+            _t('AB Typecho 优化：使用 AB-Admin 优化后的原版编辑器（含 工具栏）；AB Vditor：替换为 Vditor Markdown 编辑器；AB Editor.md：替换为 Editor.md 编辑器；兼容其他编辑器：不注入任何编辑器相关 CSS / JS，适合已安装第三方编辑器插件时使用。')
         );
         $form->addInput($editorVditor);
         $editorVditorMode = new Typecho_Widget_Helper_Form_Element_Select(
@@ -645,7 +687,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.40 %c",'
+            .   '"%c AB-Admin %c v2.1.41 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -760,7 +802,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.40' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.41' . '.css">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -768,9 +810,18 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $vditorIndexCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.css', $options->pluginUrl);
             echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorIndexCssUrl) . '">';
         }
+        if ($editorVditor === '3' && $isWritePage) {
+            $editorMdBaseCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/editor.md/css/editormd.min.css', $options->pluginUrl);
+            $editorMdMd3CssUrl  = Typecho_Common::url('AdminBeautify/assets/lib/editor.md/editormd_v1.0.0.css', $options->pluginUrl);
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($editorMdBaseCssUrl) . '">';
+            echo '<link rel="stylesheet" href="' . htmlspecialchars($editorMdMd3CssUrl) . '">';
+        }
         $editorHideToolbar = isset($pluginOptions->editor_hideToolbar) ? (string)$pluginOptions->editor_hideToolbar : '0';
         if ($editorVditor === '2' && $editorHideToolbar === '1' && $isWritePage) {
             $injectTail .= '<style>body #wmd-button-bar,body .wmd-button-bar{display:none!important;}</style>';
+        }
+        if ($editorVditor === '3' && $isWritePage) {
+            $injectTail .= '<style>body #wmd-button-bar,body #wmd-button-row,body #wmd-preview,body #wmd-editarea{display:none!important;}</style>';
         }
         $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
         $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
@@ -989,14 +1040,53 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $panelParts = explode('/', trim((string)$_GET['panel']));
             $currentPageCompatKey = strtolower($panelParts[0]);
         }
+        $vditorAssetBaseUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor', $options->pluginUrl);
+        $vditorLocalJsUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.min.js', $options->pluginUrl);
+        $vditorUploadUrl = Typecho_Common::url('/action/admin-beautify?do=upload-media', $options->index);
+        $editorMdAssetBaseUrl = Typecho_Common::url('AdminBeautify/assets/lib/editor.md', $options->pluginUrl);
+        $editorMdLibPath = Typecho_Common::url('AdminBeautify/assets/lib/editor.md/lib/', $options->pluginUrl);
+        $editorMdUploadUrl = Typecho_Common::url('/action/admin-beautify?do=upload-media', $options->index);
+        $rawAllowedAttachmentTypes = isset($options->allowedAttachmentTypes)
+            ? $options->allowedAttachmentTypes
+            : array();
+        if (is_string($rawAllowedAttachmentTypes)) {
+            $rawAllowedAttachmentTypes = explode(',', $rawAllowedAttachmentTypes);
+        } elseif (!is_array($rawAllowedAttachmentTypes)) {
+            $rawAllowedAttachmentTypes = array();
+        }
+        $uploadAcceptExt = array();
+        foreach ($rawAllowedAttachmentTypes as $ext) {
+            $ext = strtolower(ltrim(trim((string)$ext), '.'));
+            if ($ext !== '') {
+                $uploadAcceptExt[] = '.' . $ext;
+            }
+        }
+        $uploadAcceptExt = array_values(array_unique($uploadAcceptExt));
+        $uploadAccept = implode(',', $uploadAcceptExt);
+        $uploadMaxBytes = self::minPositiveBytes(array(
+            self::iniSizeToBytes(function_exists('ini_get') ? ini_get('upload_max_filesize') : '0'),
+            self::iniSizeToBytes(function_exists('ini_get') ? ini_get('post_max_size') : '0'),
+        ));
         echo 'window.__AB_CONFIG__=' . json_encode(array(
             'darkMode'               => $darkMode,
             'enableAnimation'        => $enableAnimation,
             'pluginCardView'         => $pluginCardView,
             'siteName'               => $options->title,
+            'pluginUrl'              => (string)$options->pluginUrl,
+            'ajaxUrl'                => $ajaxUrl,
+            'ajaxToken'              => $token,
             'editorVditor'           => $editorVditor,
             'editorVditorMode'       => $editorVditorMode,
-            'pluginVersion'          => '2.1.40',
+            'vditorAssetBaseUrl'     => $vditorAssetBaseUrl,
+            'vditorLocalJsUrl'       => $vditorLocalJsUrl,
+            'vditorCdnBaseUrl'       => $vditorAssetBaseUrl,
+            'vditorUploadUrl'        => $vditorUploadUrl,
+            'editorMdAssetBaseUrl'   => $editorMdAssetBaseUrl,
+            'editorMdLibPath'        => $editorMdLibPath,
+            'editorMdUploadUrl'      => $editorMdUploadUrl,
+            'uploadAccept'           => $uploadAccept,
+            'uploadMaxBytes'         => $uploadMaxBytes,
+            'pluginVersion'          => '2.1.41',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1023,10 +1113,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.40.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.41.js"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
-        if ($editorVditor === '2' && $isWritePageForEditor) {
+        if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
             echo '<script>if(window.AdminBeautify){AdminBeautify.initEditorToolbar=function(){};}</script>';
         }
         if ($darkMode === 'auto') {
@@ -1034,7 +1124,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.40"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.41"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1125,10 +1215,16 @@ function mkBanner(release){
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePageFooter) {
-            $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v1.0.1.css', $options->pluginUrl);
-            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v1.0.3.js', $options->pluginUrl);
+            $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v2.0.0.css', $options->pluginUrl);
+            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v2.0.0.js', $options->pluginUrl);
             echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorCssUrl) . '">';
             echo '<script src="' . htmlspecialchars($vditorJsUrl) . '"></script>';
+        }
+        if ($editorVditor === '3' && $isWritePageFooter) {
+            $editorMdBaseJsUrl = Typecho_Common::url('AdminBeautify/assets/lib/editor.md/editormd.js', $options->pluginUrl);
+            $editorMdAdapterJsUrl = Typecho_Common::url('AdminBeautify/assets/lib/editor.md/editormd_v1.0.0.js', $options->pluginUrl);
+            echo '<script src="' . htmlspecialchars($editorMdBaseJsUrl) . '"></script>';
+            echo '<script src="' . htmlspecialchars($editorMdAdapterJsUrl) . '"></script>';
         }
         $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
         echo '<script>(function(){'
@@ -1218,7 +1314,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.40";';
+        echo 'var __AB_VER__="2.1.41";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
