@@ -3913,11 +3913,7 @@
             {
                 html = html.replace(htmlTagRegex, function($1, $2, $3, $4, $5) {
                     var el = $("<" + $2 + ">" + $4 + "</" + $5 + ">");
-                    var sourceNode = $($1)[0];
-                    if (!sourceNode || !sourceNode.attributes) {
-                        return el[0].outerHTML;
-                    }
-                    var _attrs = sourceNode.attributes;
+                    var _attrs = $($1)[0].attributes;
                     var $attrs = {};
                     
                     $.each(_attrs, function(i, e) {
@@ -3942,9 +3938,6 @@
                 html = html.replace(htmlTagRegex, function($1, $2, $3, $4) {
                     var filterAttrs = attrs.split(",");
                     var el = $($1);
-                    if (!el.length) {
-                        return "";
-                    }
                     el.html($4);
 
                     $.each(filterAttrs, function(i) {
