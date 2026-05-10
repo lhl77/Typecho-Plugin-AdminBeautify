@@ -1253,9 +1253,8 @@
                 var name                = icon.attr("name");
                 var cursor              = cm.getCursor();
                 var selection           = cm.getSelection();
-                var preserveTop         = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
 
-                if (!name) {
+                if (name === "") {
                     return ;
                 }
                 
@@ -1271,19 +1270,6 @@
                     {
                         $.proxy(settings.toolbarHandlers[name], _this)(cm, icon, cursor, selection);
                     }
-                }
-
-                if (name === "code-block" || name === "preformatted-text") {
-                    setTimeout(function() {
-                        if (typeof window.scrollTo === "function") {
-                            window.scrollTo(0, preserveTop);
-                        }
-                    }, 0);
-                    setTimeout(function() {
-                        if (typeof window.scrollTo === "function") {
-                            window.scrollTo(0, preserveTop);
-                        }
-                    }, 80);
                 }
                 
                 if (name !== "link" && name !== "reference-link" && name !== "image" && name !== "code-block" && 
