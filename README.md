@@ -20,12 +20,19 @@
   <a href="https://blog.lhl.one/artical/977.html">文档</a> | 
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">问题反馈</a>
 </p>
-<p align="center">
-  必备项目：<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore">AB Store 插件仓库</a>，可在仓库中下载下面的配套插件。<br>
-  <b>配套插件</b><br/>
-  <a href="https://blog.lhl.one/artical/977.html">AB Avatar</a>: 头像管理插件，支持Gravatar本地代理、修改镜像、自定义头像管理。<br/>
-  <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">AB OAuth</a>: 第三方登录，支持多种平台。
-</p>
+
+---
+
+### 必备项目
+[AB Store 插件仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore): 可在仓库中下载和管理下面的配套插件、以及其他被收录的插件。
+
+### 配套插件
+
+|插件名|介绍|
+|---|---|
+|[PicUp](https://github.com/lhl77/Typecho-Plugin-PicUp)|多存储后端图片上传&处理插件，支持多种远程存储服务|
+|[AB Avatar](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyAvatar)|头像管理插件，支持 Gravatar 本地代理、镜像修改、自定义头像管理|
+|[AB OAuth](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyOAuth)|第三方登录插件，支持多种平台|
 
 ---
 
