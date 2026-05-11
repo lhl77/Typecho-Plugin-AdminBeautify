@@ -26,7 +26,7 @@
 ### 必备项目
 [AB Store 插件仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore): 可在仓库中下载和管理下面的配套插件、以及其他被收录的插件。
 
-### 配套插件
+### 配套插件 (可使用 [AB Store](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore) 一键安装)
 
 |插件名|介绍|
 |---|---|
