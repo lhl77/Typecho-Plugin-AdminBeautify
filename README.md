@@ -1,9 +1,9 @@
 ![](https://i.see.you/2026/03/28/9Jdq/9b3028ef0009824db65eafa8acdd30a6.jpg)
 
-<h1 align="center">Admin Beautify</h1>
+<h1 align="center">AB Admin</h1>
 
 <p align="center">
-  <strong align="center">Typecho 后台管理界面美化插件 · Material Design 3 风格</strong>
+  <strong align="center">Typecho 后台管理界面美化插件 (Admin Beautify) · Material Design 3 风格</strong>
 </p>
 
 
@@ -20,6 +20,19 @@
   <a href="https://blog.lhl.one/artical/977.html">文档</a> | 
   <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues">问题反馈</a>
 </p>
+
+---
+
+### 必备项目
+[AB Store 插件仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore): 可在仓库中下载和管理下面的配套插件、以及其他被收录的插件。
+
+### 配套插件 (可使用 [AB Store](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore) 一键安装)
+
+|插件名|介绍|
+|---|---|
+|[PicUp](https://github.com/lhl77/Typecho-Plugin-PicUp)|多存储后端图片上传&处理插件，支持多种远程存储服务|
+|[AB Avatar](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyAvatar)|头像管理插件，支持 Gravatar 本地代理、镜像修改、自定义头像管理|
+|[AB OAuth](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyOAuth)|第三方登录插件，支持多种平台|
 
 ---
 
