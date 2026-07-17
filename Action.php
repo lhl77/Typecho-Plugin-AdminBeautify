@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.42
+ * @version 2.1.43
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -164,7 +164,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.42';
+        $pluginVer  = '2.1.43';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -744,6 +744,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     public function ping()
     {
+        $this->checkAuth();
         $this->jsonSuccess(array(
             'time'   => time(),
             'plugin' => 'AdminBeautify',
@@ -1093,8 +1094,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                            . "Accept: application/vnd.github.v3+json\r\n",
             ),
             'ssl' => array(
-                'verify_peer'      => false,
-                'verify_peer_name' => false,
+                'verify_peer'      => true,
+                'verify_peer_name' => true,
             ),
         );
         $context = stream_context_create($opts);
@@ -1106,8 +1107,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => $timeout,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_USERAGENT      => 'AdminBeautify-Typecho-Plugin/2.1.0',
             CURLOPT_HTTPHEADER     => array('Accept: application/vnd.github.v3+json'),
         ));
@@ -1227,7 +1228,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $ctx = stream_context_create(array(
                 'http' => array('method' => 'GET', 'timeout' => 15, 'follow_location' => 1,
                     'max_redirects' => 5, 'user_agent' => 'AdminBeautify-Typecho-Plugin/2.0'),
-                'ssl'  => array('verify_peer' => false, 'verify_peer_name' => false),
+                'ssl'  => array('verify_peer' => true, 'verify_peer_name' => true),
             ));
             $content = @file_get_contents($url, false, $ctx);
             if ($content !== false && strlen($content) > 5) break;
@@ -1235,8 +1236,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             if (function_exists('curl_init')) {
                 $ch = curl_init($url);
                 curl_setopt_array($ch, array(CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 15,
-                    CURLOPT_FOLLOWLOCATION => true, CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => false, CURLOPT_USERAGENT => 'AdminBeautify-Typecho-Plugin/2.0'));
+                    CURLOPT_FOLLOWLOCATION => true, CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2, CURLOPT_USERAGENT => 'AdminBeautify-Typecho-Plugin/2.0'));
                 $content  = curl_exec($ch);
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
@@ -1287,7 +1288,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $ctx = stream_context_create(array(
                 'http' => array('method' => 'GET', 'timeout' => 90, 'follow_location' => 1,
                     'max_redirects' => 5, 'user_agent' => 'AdminBeautify-Typecho-Plugin/2.0'),
-                'ssl'  => array('verify_peer' => false, 'verify_peer_name' => false),
+                'ssl'  => array('verify_peer' => true, 'verify_peer_name' => true),
             ));
             $zipContent = @file_get_contents($tryUrl, false, $ctx);
             if ($zipContent !== false && strlen($zipContent) >= 100) break;
@@ -1295,8 +1296,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             if (function_exists('curl_init')) {
                 $ch = curl_init($tryUrl);
                 curl_setopt_array($ch, array(CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 90,
-                    CURLOPT_FOLLOWLOCATION => true, CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => false, CURLOPT_USERAGENT => 'AdminBeautify-Typecho-Plugin/2.0'));
+                    CURLOPT_FOLLOWLOCATION => true, CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2, CURLOPT_USERAGENT => 'AdminBeautify-Typecho-Plugin/2.0'));
                 $zipContent = curl_exec($ch);
                 $httpCode   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
@@ -1379,8 +1380,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'header'          => "Accept: application/zip\r\n",
                 ),
                 'ssl' => array(
-                    'verify_peer'      => false,
-                    'verify_peer_name' => false,
+                    'verify_peer'      => true,
+                    'verify_peer_name' => true,
                 ),
             ));
             $zipContent = @file_get_contents($tryUrl, false, $ctx);
@@ -1392,8 +1393,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_TIMEOUT        => 60,
                     CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => false,
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
                     CURLOPT_USERAGENT      => 'AdminBeautify-Typecho-Plugin/2.0',
                 ));
                 $zipContent = curl_exec($ch);

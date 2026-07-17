@@ -10,7 +10,7 @@ class AdminBeautify_Updater
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.42';
+    const CURRENT_VERSION = '2.1.43';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
@@ -106,6 +106,12 @@ class AdminBeautify_Updater
             return false;
         }
         unset($zipContent);
+        $integrity = $this->verifyZipIntegrity($zipFile);
+        if (!$integrity['ok']) {
+            call_user_func($emit, 'error', '安装包完整性校验失败：' . $integrity['reason'], -1);
+            @unlink($zipFile);
+            return false;
+        }
         call_user_func($emit, 'extract_start', '正在解压安装包...', 0);
         $extractDir = $this->tmpDir . '/extracted';
         if (is_dir($extractDir)) $this->removeDir($extractDir);
@@ -122,7 +128,18 @@ class AdminBeautify_Updater
             $step  = max(1, (int) ceil($total / 20));
             for ($i = 0; $i < $total; $i++) {
                 $entryName = $zip->getNameIndex($i);
-                $destPath  = $extractDir . '/' . $entryName;
+                if (strpos($entryName, '..') !== false || strpos($entryName, '/') === 0 || strpos($entryName, '\\') === 0) {
+                    continue;
+                }
+                $destPath = $extractDir . '/' . $entryName;
+                $realBase = realpath($extractDir);
+                $realDest = realpath(dirname($destPath));
+                if ($realBase === false) {
+                    $realBase = $extractDir;
+                }
+                if ($realDest !== false && strpos($realDest, $realBase) !== 0) {
+                    continue;
+                }
                 if (substr($entryName, -1) === '/') {
                     @mkdir($destPath, 0755, true);
                 } else {
@@ -146,7 +163,18 @@ class AdminBeautify_Updater
             $i = 0;
             while ($entry = zip_read($zh)) {
                 $entryName = zip_entry_name($entry);
+                if (strpos($entryName, '..') !== false || strpos($entryName, '/') === 0 || strpos($entryName, '\\') === 0) {
+                    continue;
+                }
                 $destPath  = $extractDir . '/' . $entryName;
+                $realBase = realpath($extractDir);
+                $realDest = realpath(dirname($destPath));
+                if ($realBase === false) {
+                    $realBase = $extractDir;
+                }
+                if ($realDest !== false && strpos($realDest, $realBase) !== 0) {
+                    continue;
+                }
                 if (substr($entryName, -1) === '/') {
                     @mkdir($destPath, 0755, true);
                 } else {
@@ -247,8 +275,8 @@ class AdminBeautify_Updater
             CURLOPT_TIMEOUT          => $timeout,
             CURLOPT_FOLLOWLOCATION   => true,
             CURLOPT_MAXREDIRS        => 5,
-            CURLOPT_SSL_VERIFYPEER   => false,
-            CURLOPT_SSL_VERIFYHOST   => false,
+            CURLOPT_SSL_VERIFYPEER   => true,
+            CURLOPT_SSL_VERIFYHOST   => 2,
             CURLOPT_USERAGENT        => 'AdminBeautify-Updater/' . self::CURRENT_VERSION,
             CURLOPT_NOPROGRESS       => false,
             CURLOPT_PROGRESSFUNCTION => $progressFn,
@@ -286,6 +314,11 @@ class AdminBeautify_Updater
             return array('ok' => false, 'msg' => '无法写入临时文件，请检查目录权限', 'details' => $details);
         }
         $details[] = '已保存临时 ZIP';
+        $integrity = $this->verifyZipIntegrity($zipFile);
+        if (!$integrity['ok']) {
+            @unlink($zipFile);
+            return array('ok' => false, 'msg' => '安装包完整性校验失败：' . $integrity['reason'], 'details' => $details);
+        }
         $extractDir = $this->tmpDir . '/extracted';
         if (is_dir($extractDir)) $this->removeDir($extractDir);
         @mkdir($extractDir, 0755, true);
@@ -306,7 +339,18 @@ class AdminBeautify_Updater
             }
             while ($entry = zip_read($zh)) {
                 $entryName = zip_entry_name($entry);
+                if (strpos($entryName, '..') !== false || strpos($entryName, '/') === 0 || strpos($entryName, '\\') === 0) {
+                    continue;
+                }
                 $destPath  = $extractDir . '/' . $entryName;
+                $realBase = realpath($extractDir);
+                $realDest = realpath(dirname($destPath));
+                if ($realBase === false) {
+                    $realBase = $extractDir;
+                }
+                if ($realDest !== false && strpos($realDest, $realBase) !== 0) {
+                    continue;
+                }
                 if (substr($entryName, -1) === '/') {
                     @mkdir($destPath, 0755, true);
                 } else {
@@ -352,6 +396,41 @@ class AdminBeautify_Updater
         @unlink($this->tmpDir . '/.update_lock');
         $this->invalidateOpcacheInDir($this->pluginDir, array('tmp_update'));
         return array('ok' => true, 'msg' => '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。', 'details' => $details);
+    }
+    private function verifyZipIntegrity($zipFile)
+    {
+        if (!class_exists('ZipArchive')) {
+            return array('ok' => true, 'reason' => 'ZipArchive 不可用，跳过校验');
+        }
+        $zip = new ZipArchive();
+        if ($zip->open($zipFile) !== true) {
+            return array('ok' => false, 'reason' => '无法打开 ZIP 文件');
+        }
+        $hasPluginPhp = false;
+        $suspiciousExtensions = array('exe', 'bat', 'cmd', 'com', 'sh', 'bash', 'elf', 'bin', 'so', 'dll', 'dylib');
+        $total = $zip->numFiles;
+        for ($i = 0; $i < $total; $i++) {
+            $entryName = $zip->getNameIndex($i);
+            if ($entryName === false) continue;
+            $normalized = str_replace('\\', '/', $entryName);
+            if (strpos($normalized, '../') !== false || strpos($normalized, '/..') !== false || $normalized[0] === '/') {
+                $zip->close();
+                return array('ok' => false, 'reason' => 'ZIP 包含危险路径: ' . $entryName);
+            }
+            if (basename($normalized) === 'Plugin.php') {
+                $hasPluginPhp = true;
+            }
+            $ext = strtolower(pathinfo($normalized, PATHINFO_EXTENSION));
+            if ($ext !== '' && in_array($ext, $suspiciousExtensions, true)) {
+                $zip->close();
+                return array('ok' => false, 'reason' => 'ZIP 包含可疑文件类型: ' . $entryName);
+            }
+        }
+        $zip->close();
+        if (!$hasPluginPhp) {
+            return array('ok' => false, 'reason' => 'ZIP 中未找到 Plugin.php，不是有效的 AdminBeautify 插件包');
+        }
+        return array('ok' => true, 'reason' => '校验通过');
     }
     private function findPluginRoot($dir)
     {
@@ -504,8 +583,8 @@ class AdminBeautify_Updater
                 'follow_location' => 1,
             ),
             'ssl' => array(
-                'verify_peer'      => false,
-                'verify_peer_name' => false,
+                'verify_peer'      => true,
+                'verify_peer_name' => true,
             ),
         );
         $context = stream_context_create($opts);
@@ -517,8 +596,8 @@ class AdminBeautify_Updater
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT        => $timeout,
             CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
             CURLOPT_USERAGENT      => 'AdminBeautify-Updater/' . self::CURRENT_VERSION,
             CURLOPT_HTTPHEADER     => array('Accept: application/vnd.github.v3+json'),
         ));
