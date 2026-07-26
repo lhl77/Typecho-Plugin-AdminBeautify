@@ -1,4 +1,6 @@
-![](https://i.see.you/2026/03/28/9Jdq/9b3028ef0009824db65eafa8acdd30a6.jpg)
+<p align="center">
+  <img src="https://i.see.you/2026/07/26/2cGr/8894a6d697ad01f8f24f0124099e915b.jpg" width="40%">
+</p>
 
 <h1 align="center">AB Admin</h1>
 
@@ -22,7 +24,6 @@
 </p>
 
 ---
-
 ### 必备项目
 [AB Store 插件仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore): 可在仓库中下载和管理下面的配套插件、以及其他被收录的插件。
 
@@ -81,6 +82,9 @@ your-site/
     └── plugins/
         └── AdminBeautify/
 ```
+
+### 截图
+![](https://i.see.you/2026/03/28/9Jdq/9b3028ef0009824db65eafa8acdd30a6.jpg)
 
 
 ## 捐助
