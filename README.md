@@ -27,7 +27,7 @@
 ### 必备项目
 [AB Store 插件仓库](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore): 可在仓库中下载和管理下面的配套插件、以及其他被收录的插件。
 
-### 配套插件 (可使用 [AB Store](https://github.com/lhl77/Typecho-Plugin-AdminBeautifyStore) 一键安装)
+### 配套插件
 
 |插件名|介绍|
 |---|---|
@@ -61,7 +61,7 @@
 
 ### 方式一：下载压缩包
 
-1. 前往 [GitHub Releases](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases) 下载最新版本的压缩包
+1. 前往 [GitHub Releases](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases) / [AB Store Web](https://ab-store.lhl.one/plugin/c3238849) 下载最新版本的压缩包
 2. 解压后将文件夹重命名为 `AdminBeautify`
 3. 上传至 Typecho 安装目录下的 `/usr/plugins/` 文件夹
 4. 登录 Typecho 后台，进入 **控制台** → **插件** 页面
