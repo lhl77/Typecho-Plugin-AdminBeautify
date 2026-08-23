@@ -96,9 +96,13 @@ your-site/
 
 ## Stars
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/chart?repos=lhl77/Typecho-Plugin-AdminBeautify&type=date&legend=top-left&sealed_token=qpJPcqy2Npx0eELDGlYDnFzd8b-XimmOLteOKWyo6VeQj0S8U68aQQ-OUgKHIokUEpEuq6xI)](https://www.star-history.com/?repos=lhl77%2FTypecho-Plugin-AdminBeautify&type=date&legend=top-left)
+<a href="https://www.star-history.com/?repos=lhl77%2FTypecho-Plugin-AdminBeautify&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=lhl77/Typecho-Plugin-AdminBeautify&type=date&theme=dark&legend=top-left&sealed_token=qpJPcqy2Npx0eELDGlYDnFzd8b-XimmOLteOKWyo6VeQj0S8U68aQQ-OUgKHIokUEpEuq6xI" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=lhl77/Typecho-Plugin-AdminBeautify&type=date&legend=top-left&sealed_token=qpJPcqy2Npx0eELDGlYDnFzd8b-XimmOLteOKWyo6VeQj0S8U68aQQ-OUgKHIokUEpEuq6xI" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=lhl77/Typecho-Plugin-AdminBeautify&type=date&legend=top-left&sealed_token=qpJPcqy2Npx0eELDGlYDnFzd8b-XimmOLteOKWyo6VeQj0S8U68aQQ-OUgKHIokUEpEuq6xI" />
+ </picture>
+</a>
 
 ---
 
