@@ -29,21 +29,27 @@
 #lb-preview .lbpv-bg{position:absolute;inset:0;background-size:cover;background-position:center;z-index:0;transform:scale(1.03);transition:all .3s}
 #lb-preview .lbpv-bg-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.2),rgba(0,0,0,.4));z-index:1;transition:background .3s}
 #lb-preview[data-theme="light"] .lbpv-bg-overlay{background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.4))}
-#lb-preview .lbpv-card{position:relative;z-index:2;max-width:380px;width:100%;border-radius:20px;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.8);padding:32px 28px;box-shadow:0 20px 40px -10px rgba(0,0,0,.15), 0 0 0 1px rgba(255,255,255,.4) inset;transition:all .3s;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);}
-#lb-preview[data-theme="dark"] .lbpv-card{background:rgba(20,20,20,.75);border-color:rgba(255,255,255,.08);box-shadow:0 25px 50px -12px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.05) inset;}
+#lb-preview .lbpv-card{position:relative;z-index:2;max-width:380px;width:100%;border-radius:24px;border:1px solid transparent;background:linear-gradient(rgba(255,255,255,.72),rgba(255,255,255,.72)) padding-box,linear-gradient(152deg,rgba(255,255,255,.92) 0%,rgba(255,255,255,.22) 42%,rgba(255,255,255,.52) 100%) border-box;padding:32px 28px;box-shadow:none;transition:background .3s,backdrop-filter .3s;backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);}
+#lb-preview[data-theme="dark"] .lbpv-card{background:linear-gradient(rgba(30,28,36,.74),rgba(30,28,36,.74)) padding-box,linear-gradient(152deg,rgba(255,255,255,.26) 0%,rgba(255,255,255,.04) 42%,rgba(255,255,255,.12) 100%) border-box;}
 #lb-preview[data-theme="dark"] .lbpv-body{background:#111827}
 #lb-preview .lbpv-title{font-size:16px;font-weight:500;text-align:center;margin-bottom:6px;color:#4b5563;transition:color .3s}
 #lb-preview[data-theme="dark"] .lbpv-title{color:#9ca3af}
 #lb-preview .lbpv-sub{font-size:24px;font-weight:800;color:#111827;text-align:center;margin-bottom:28px;transition:color .3s;letter-spacing:-0.025em}
 #lb-preview[data-theme="dark"] .lbpv-sub{color:#f9fafb}
-#lb-preview .lbpv-field{margin-bottom:16px}
-#lb-preview .lbpv-label{display:block;font-size:12px;color:#6b7280;margin-bottom:6px;font-weight:500}
+#lb-preview .lbpv-field{margin-bottom:20px;position:relative}
+/* MD3 四角大圆角文本域：预览中的输入框始终有内容，标签保持上浮状态 */
+#lb-preview .lbpv-label{position:absolute;left:18px;right:18px;top:13px;transform:translateY(-50%) scale(.74);transform-origin:left center;font-size:15px;font-weight:400;line-height:20px;color:#6b7280;margin:0;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:2}
 #lb-preview[data-theme="dark"] .lbpv-label{color:#9ca3af}
-#lb-preview .lbpv-input{width:100%;box-sizing:border-box;padding:12px 14px;border-radius:10px;border:1px solid #e5e7eb;background:rgba(255,255,255,.8);font-size:14px;outline:none;transition:all .2s;color:#1f2937}
-#lb-preview[data-theme="dark"] .lbpv-input{background:rgba(0,0,0,.2);border-color:rgba(255,255,255,.1);color:#e5e7eb}
-#lb-preview .lbpv-btn{width:100%;padding:12px;border:0;border-radius:12px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:all .2s;margin-top:8px;box-shadow:0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06)}
-#lb-preview .lbpv-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 10px 15px -3px rgba(0,0,0,.15)}
-#lb-preview .lbpv-btn:active{transform:translateY(0);filter:brightness(0.95)}
+#lb-preview .lbpv-input{width:100%;box-sizing:border-box;height:58px;padding:24px 18px 10px;border-radius:18px;border:1px solid rgba(17,24,39,.10);background-color:rgba(255,255,255,.55);font-size:15px;line-height:20px;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.70);transition:border-color .45s cubic-bezier(.2,0,0,1),background-color .45s cubic-bezier(.2,0,0,1),box-shadow .6s cubic-bezier(.2,0,0,1);color:#1f2937}
+#lb-preview[data-theme="dark"] .lbpv-input{background-color:rgba(255,255,255,.07);border-color:rgba(255,255,255,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.16);color:#e5e7eb}
+#lb-preview .lbpv-input:focus{border-color:var(--lbpv-c1,#7d5260);background-color:rgba(255,255,255,.82);box-shadow:inset 0 1px 0 rgba(255,255,255,.70),0 0 0 3px rgba(125,82,96,.14)}
+#lb-preview[data-theme="dark"] .lbpv-input:focus{background-color:rgba(255,255,255,.14)}
+#lb-preview .lbpv-btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;width:100%;height:54px;padding:0 24px;border:0;border-radius:100px;color:#fff;font-weight:600;font-size:15px;line-height:1;letter-spacing:.03em;cursor:pointer;margin-top:24px;box-shadow:0 10px 24px -12px rgba(125,82,96,.95),0 3px 8px -3px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.28);transition:box-shadow .28s cubic-bezier(.2,0,0,1),transform .2s cubic-bezier(.22,1.12,.36,1)}
+#lb-preview .lbpv-btn::after{content:'';position:absolute;inset:0;z-index:2;background:#fff;opacity:0;pointer-events:none;border-radius:inherit;transition:opacity .15s cubic-bezier(.2,0,0,1)}
+#lb-preview .lbpv-btn:hover::after{opacity:.08}
+#lb-preview .lbpv-btn:hover{transform:translateY(-1px);box-shadow:0 16px 32px -14px rgba(125,82,96,1),0 4px 10px -3px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.32)}
+#lb-preview .lbpv-btn:active{transform:scale(.972);box-shadow:0 4px 12px -8px rgba(125,82,96,.9),0 1px 3px rgba(0,0,0,.2)}
+#lb-preview .lbpv-btn > span{position:relative;z-index:1}
 </style>
 
 <div id="lb-preview" data-theme="light">
@@ -76,7 +82,7 @@
         <label class="lbpv-label">密码</label>
         <input type="password" class="lbpv-input" value="password" readonly>
       </div>
-      <button class="lbpv-btn" id="lbpv-btn" type="button">登录</button>
+      <button class="lbpv-btn" id="lbpv-btn" type="button"><span>登录</span></button>
     </div>
   </div>
 </div>
@@ -138,6 +144,8 @@
     var colors = getCurrentColors();
     var gradient = "linear-gradient(135deg," + colors.c1 + "," + colors.c2 + ")";
     btn.style.background = gradient;
+    /* 供输入框聚焦描边使用 */
+    preview.style.setProperty("--lbpv-c1", colors.c1);
     var inputs = preview.querySelectorAll(".lbpv-input");
     inputs.forEach(function(inp){ inp.style.caretColor = colors.c1; });
     themeButtons.forEach(function(b){
@@ -190,15 +198,15 @@
 
     bg.style.filter = "";
     var card = preview.querySelector(".lbpv-card");
-    card.style.backdropFilter = "blur(20px)";
-    card.style.webkitBackdropFilter = "blur(20px)";
+    card.style.backdropFilter = "blur(20px) saturate(160%)";
+    card.style.webkitBackdropFilter = "blur(20px) saturate(160%)";
 
     if (bgUrl && blurType === "filter") {
       bg.style.filter = "blur(" + blurSize + "px)";
     } else if (bgUrl && blurType === "backdrop") {
-      var size = Math.max(20, blurSize);
-      card.style.backdropFilter = "blur(" + size + "px)";
-      card.style.webkitBackdropFilter = "blur(" + size + "px)";
+      var size = Math.max(10, blurSize);
+      card.style.backdropFilter = "blur(" + size + "px) saturate(160%)";
+      card.style.webkitBackdropFilter = "blur(" + size + "px) saturate(160%)";
     }
   }
 

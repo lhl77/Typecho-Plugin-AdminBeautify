@@ -458,6 +458,481 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             adminBody.style.padding="0px 38px 16px";
         }
 
+        // ---- 概要页卡片设置（位置：管理后台设置 与 编辑器设置 之间）----
+        // 卡片 DOM 由 Plugin.php 的 abCard('dashboardcards', ...) 输出。
+        // 注意：Typecho 把表单字段的 <ul> 统一在卡片 div 之后渲染，
+        // 所以每张卡片都必须自己用 JS 插到目标位置（缺了会堆到页面顶部）。
+        (function(){
+            var card=document.getElementById("ab-card-dashboardcards");
+            var body=document.getElementById("ab-card-dashboardcards-body");
+            if(!card||!body) return;
+
+            // 定位：插到「编辑器设置」首个字段之前 = 「管理后台设置」字段之后
+            (function placeCard(){
+                var anchorUl=findFieldUl("editor_vditor")||findFieldUl("login_isEnabled");
+                if(anchorUl&&anchorUl.parentNode){
+                    anchorUl.parentNode.insertBefore(card,anchorUl);
+                    return;
+                }
+                var editorCardEl=document.getElementById("ab-card-editor");
+                if(editorCardEl&&editorCardEl.parentNode){
+                    editorCardEl.parentNode.insertBefore(card,editorCardEl);
+                    return;
+                }
+                var adminCardEl=document.getElementById("ab-card-admin");
+                if(adminCardEl&&adminCardEl.parentNode){
+                    adminCardEl.parentNode.insertBefore(card,adminCardEl.nextSibling);
+                }
+            })();
+
+            // 排序值由下方排序列表写入该隐藏字段，随表单一起保存
+            var orderUl=findFieldUl("dashboardCardOrder");
+            if(orderUl) orderUl.style.display="none";
+            var orderInput=document.querySelector("[name=\"dashboardCardOrder\"]");
+
+            // 概要页五张卡片：key 必须与 assets/AdminBeautify.min.*.js 里的 data-ab-card 一致
+            var DASH_CARDS=[
+                {key:"umami",   icon:"insights",    title:"访问统计",       desc:"今日访问 / 总访问量 / 访客数量 / 平均时长 / 跳出率", gate:"umamiEnabled",         gateOn:"1"},
+                {key:"freq",    icon:"trending_up", title:"更新频率",       desc:"按时间统计文章发布数量（折线图）",                   gate:"overviewChartEnabled", gateOn:"1"},
+                {key:"cat",     icon:"comment",     title:"近期评论",       desc:"评论所属文章分布（极坐标图）",                       gate:"overviewChartEnabled", gateOn:"1"},
+                {key:"posts",   icon:"article",     title:"最近发布的文章", desc:"最新文章标题与发布时间，底部带「查看全部文章」入口", gate:null},
+                {key:"replies", icon:"forum",       title:"最近得到的回复", desc:"最新评论的作者、时间与摘要，底部带「查看全部评论」入口", gate:null}
+            ];
+            var DEFAULT_ORDER=DASH_CARDS.map(function(c){return c.key;});
+            var META={};
+            for(var mi=0;mi<DASH_CARDS.length;mi++) META[DASH_CARDS[mi].key]=DASH_CARDS[mi];
+
+            /* ---- 自定义卡片（方案 C：自由 HTML / JS） ---- */
+            var customInput=document.querySelector("[name=\"dashboardCustomCards\"]");
+            var customDataUl=findFieldUl("dashboardCustomCards");
+            if(customDataUl) customDataUl.style.display="none";
+            var customEnableUl=findFieldUl("dashboardCustomCardsEnabled");
+            var customEnableSel=document.querySelector("[name=\"dashboardCustomCardsEnabled\"]");
+            var customCards=[];
+            function loadCustomCards(){
+                customCards=[];
+                if(!customInput) return;
+                try{
+                    var arr=JSON.parse(customInput.value||"[]");
+                    if(Object.prototype.toString.call(arr)==="[object Array]"){
+                        for(var i=0;i<arr.length;i++){
+                            if(arr[i]&&typeof arr[i]==="object"){
+                                customCards.push({
+                                    id:String(arr[i].id||("c"+(i+1))),
+                                    icon:String(arr[i].icon||"widgets"),
+                                    title:String(arr[i].title||""),
+                                    html:String(arr[i].html||""),
+                                    js:String(arr[i].js||"")
+                                });
+                            }
+                        }
+                    }
+                }catch(e){ customCards=[]; }
+            }
+            function saveCustomCards(){
+                if(customInput) customInput.value=JSON.stringify(customCards);
+            }
+            function customKeyOf(id){ return "custom:"+id; }
+            function customById(id){
+                for(var i=0;i<customCards.length;i++) if(customCards[i].id===id) return customCards[i];
+                return null;
+            }
+            function metaOf(key){
+                if(key&&key.indexOf("custom:")===0){
+                    var def=customById(key.slice(7));
+                    if(!def) return null;
+                    return {
+                        key:key,
+                        icon:def.icon||"widgets",
+                        title:def.title||"未命名卡片",
+                        desc:"自定义卡片（HTML / JS）",
+                        gate:null,
+                        isCustom:true
+                    };
+                }
+                return META[key]||null;
+            }
+            function defaultOrder(){
+                var out=DEFAULT_ORDER.slice();
+                for(var i=0;i<customCards.length;i++) out.push(customKeyOf(customCards[i].id));
+                return out;
+            }
+            function customEnabled(){
+                return !customEnableSel || customEnableSel.value==="1";
+            }
+
+            function normOrder(raw){
+                var parts=String(raw||"").split(","),out=[];
+                for(var i=0;i<parts.length;i++){
+                    var k=parts[i].replace(/^\s+|\s+$/g,"");
+                    if(k&&metaOf(k)&&out.indexOf(k)===-1) out.push(k);
+                }
+                var def=defaultOrder();
+                for(var j=0;j<def.length;j++){
+                    if(out.indexOf(def[j])===-1) out.push(def[j]);
+                }
+                return out;
+            }
+
+            var wrap=document.createElement("div");
+            wrap.className="ab-dash-cards-ui";
+            wrap.innerHTML='\
+                <div class="ab-dash-cards-tip">\
+                    <span class="material-icons-round">info</span>\
+                    <span>拖动卡片或使用右侧 ↑ ↓ 调整概要页卡片顺序，保存设置后生效；标记为「未启用」的卡片当前不会在概要页出现。</span>\
+                </div>\
+                <div class="ab-dash-cards-list" id="ab-dash-cards-list" role="list"></div>\
+                <div class="ab-dash-cards-actions">\
+                    <button type="button" class="ab-dash-cards-reset" id="ab-dash-cards-reset">\
+                        <span class="material-icons-round">restart_alt</span><span>恢复默认顺序</span>\
+                    </button>\
+                    <span class="ab-dash-cards-status" id="ab-dash-cards-status"></span>\
+                </div>';
+            body.appendChild(wrap);
+
+            var list=wrap.querySelector("#ab-dash-cards-list");
+            loadCustomCards();
+            var order=normOrder(orderInput?orderInput.value:"");
+            var flashTimer=null;
+
+            function flash(msg){
+                var el=wrap.querySelector("#ab-dash-cards-status");
+                if(!el) return;
+                el.textContent=msg;
+                el.classList.add("is-on");
+                if(flashTimer) clearTimeout(flashTimer);
+                flashTimer=setTimeout(function(){ el.classList.remove("is-on"); },3000);
+            }
+
+            function render(){
+                list.innerHTML="";
+                for(var i=0;i<order.length;i++){
+                    var def=metaOf(order[i]);
+                    if(!def) continue;
+                    var row=document.createElement("div");
+                    row.className="ab-dash-card-row";
+                    row.setAttribute("draggable","true");
+                    row.setAttribute("role","listitem");
+                    row.setAttribute("data-key",def.key);
+
+                    var drag=document.createElement("span");
+                    drag.className="material-icons-round ab-dash-card-drag";
+                    drag.textContent="drag_indicator";
+                    drag.title="拖动排序";
+
+                    var idx=document.createElement("span");
+                    idx.className="ab-dash-card-idx";
+                    idx.textContent=String(i+1);
+
+                    var icon=document.createElement("span");
+                    icon.className="ab-dash-card-icon";
+                    var iconInner=document.createElement("span");
+                    iconInner.className="material-icons-round";
+                    iconInner.textContent=def.icon;
+                    icon.appendChild(iconInner);
+
+                    var meta=document.createElement("span");
+                    meta.className="ab-dash-card-meta";
+                    var name=document.createElement("span");
+                    name.className="ab-dash-card-name";
+                    name.textContent=def.title;
+                    var desc=document.createElement("span");
+                    desc.className="ab-dash-card-desc";
+                    desc.textContent=def.desc;
+                    meta.appendChild(name);
+                    meta.appendChild(desc);
+
+                    var state=document.createElement("span");
+                    state.className="ab-dash-card-state";
+
+                    var btns=document.createElement("span");
+                    btns.className="ab-dash-card-btns";
+                    ["up","down"].forEach(function(dir){
+                        var b=document.createElement("button");
+                        b.type="button";
+                        b.className="ab-dash-card-btn";
+                        b.setAttribute("data-move",dir);
+                        b.title=(dir==="up"?"上移":"下移");
+                        var bi=document.createElement("span");
+                        bi.className="material-icons-round";
+                        bi.textContent=(dir==="up"?"arrow_upward":"arrow_downward");
+                        b.appendChild(bi);
+                        btns.appendChild(b);
+                    });
+
+                    row.appendChild(drag);
+                    row.appendChild(idx);
+                    row.appendChild(icon);
+                    row.appendChild(meta);
+                    row.appendChild(state);
+                    row.appendChild(btns);
+                    list.appendChild(row);
+                }
+                updateStates();
+            }
+
+            /* 卡片启用状态：直接跟随页面上的开关，避免和「已开启但实际没显示」不一致 */
+            function updateStates(){
+                var rows=list.querySelectorAll(".ab-dash-card-row");
+                for(var i=0;i<rows.length;i++){
+                    var def=metaOf(rows[i].getAttribute("data-key"));
+                    var st=rows[i].querySelector(".ab-dash-card-state");
+                    if(!def||!st) continue;
+                    if(def.isCustom){
+                        st.textContent=customEnabled()?"自定义":"已关闭";
+                        st.className="ab-dash-card-state "+(customEnabled()?"is-on":"is-off");
+                        continue;
+                    }
+                    if(!def.gate){
+                        st.textContent="始终显示";
+                        st.className="ab-dash-card-state is-on";
+                        continue;
+                    }
+                    var sel=document.querySelector("[name=\""+def.gate+"\"]");
+                    var on=!!sel&&sel.value===def.gateOn;
+                    st.textContent=on?"已启用":"未启用";
+                    st.className="ab-dash-card-state "+(on?"is-on":"is-off");
+                }
+            }
+
+            /* 把当前 DOM 顺序写回隐藏字段 */
+            function sync(msg){
+                var rows=list.querySelectorAll(".ab-dash-card-row"),keys=[];
+                for(var i=0;i<rows.length;i++){
+                    keys.push(rows[i].getAttribute("data-key"));
+                    var idxEl=rows[i].querySelector(".ab-dash-card-idx");
+                    if(idxEl) idxEl.textContent=String(i+1);
+                }
+                order=normOrder(keys.join(","));
+                if(orderInput) orderInput.value=order.join(",");
+                if(msg) flash(msg);
+            }
+
+            list.addEventListener("click",function(e){
+                var btn=e.target&&e.target.closest?e.target.closest(".ab-dash-card-btn"):null;
+                if(!btn) return;
+                var li=btn.closest(".ab-dash-card-row");
+                if(!li) return;
+                var dir=btn.getAttribute("data-move");
+                var sib=(dir==="up")?li.previousElementSibling:li.nextElementSibling;
+                if(!sib) return;
+                if(dir==="up") list.insertBefore(li,sib);
+                else list.insertBefore(sib,li);
+                sync("顺序已更新，记得点击右下角保存设置");
+            });
+
+            var dragKey=null;
+            list.addEventListener("dragstart",function(e){
+                var li=e.target&&e.target.closest?e.target.closest(".ab-dash-card-row"):null;
+                if(!li) return;
+                dragKey=li.getAttribute("data-key");
+                li.classList.add("is-dragging");
+                try{
+                    e.dataTransfer.setData("text/plain",dragKey);
+                    e.dataTransfer.effectAllowed="move";
+                }catch(err){}
+            });
+            list.addEventListener("dragover",function(e){
+                if(!dragKey) return;
+                e.preventDefault();
+                var li=e.target&&e.target.closest?e.target.closest(".ab-dash-card-row"):null;
+                if(!li||li.getAttribute("data-key")===dragKey) return;
+                var dragging=list.querySelector(".ab-dash-card-row[data-key=\""+dragKey+"\"]");
+                if(!dragging) return;
+                var rect=li.getBoundingClientRect();
+                var after=(e.clientY-rect.top)>rect.height/2;
+                list.insertBefore(dragging,after?li.nextSibling:li);
+            });
+            list.addEventListener("drop",function(e){ e.preventDefault(); });
+            list.addEventListener("dragend",function(e){
+                var li=e.target&&e.target.closest?e.target.closest(".ab-dash-card-row"):null;
+                if(li) li.classList.remove("is-dragging");
+                dragKey=null;
+                sync("顺序已更新，记得点击右下角保存设置");
+            });
+
+            var resetBtn=wrap.querySelector("#ab-dash-cards-reset");
+            if(resetBtn){
+                resetBtn.addEventListener("click",function(){
+                    order=defaultOrder();
+                    render();
+                    sync("已恢复默认顺序，记得点击右下角保存设置");
+                });
+            }
+
+            ["umamiEnabled","overviewChartEnabled"].forEach(function(n){
+                var sel=document.querySelector("[name=\""+n+"\"]");
+                if(sel) sel.addEventListener("change",updateStates);
+            });
+
+            render();
+            if(orderInput&&!orderInput.value) orderInput.value=order.join(",");
+            body.style.padding="0px 38px 16px";
+
+            /* ============================================================
+               自定义卡片编辑区（方案 C：自由 HTML / JS）
+               - 数据存隐藏字段 dashboardCustomCards（JSON）
+               - 开关 dashboardCustomCardsEnabled 未开启时不会在概要页渲染
+               ============================================================ */
+            var customBox=document.createElement("div");
+            customBox.className="ab-dash-custom";
+            customBox.innerHTML='\
+                <div class="ab-dash-custom-title">\
+                    <span class="material-icons-round">code</span><span>自定义卡片</span>\
+                </div>\
+                <div class="ab-dash-custom-warn">\
+                    <span class="material-icons-round">warning</span>\
+                    <span>卡片内容支持任意 HTML 与 JavaScript，会在后台页面里执行。请只填自己信任的代码，不确定时保持关闭。</span>\
+                </div>\
+                <div class="ab-dash-custom-help">\
+                    <a href="https://blog.lhl.one/artical/977.html" target="_blank" rel="noopener noreferrer">\
+                        <span class="material-icons-round">menu_book</span>\
+                        <span>自定义卡片开发说明（含可直接粘贴的示例）</span>\
+                        <span class="material-icons-round ab-dash-custom-help-arrow">open_in_new</span>\
+                    </a>\
+                    <div class="ab-dash-custom-help-note">\
+                        <span class="material-icons-round">forum</span>\
+                        <span>想分享自己的卡片配置，或直接拿别人写好的配置？到 \
+                            <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues/11" target="_blank" rel="noopener noreferrer">Issues #11 投稿 / 获取自定义卡片配置</a>\
+                            看看。</span>\
+                    </div>\
+                </div>\
+                <div class="ab-dash-custom-enable"></div>\
+                <div class="ab-dash-custom-list" id="ab-dash-custom-list"></div>\
+                <button type="button" class="ab-dash-custom-add" id="ab-dash-custom-add">\
+                    <span class="material-icons-round">add</span><span>添加卡片</span>\
+                </button>';
+            body.appendChild(customBox);
+
+            var customEnableHost=customBox.querySelector(".ab-dash-custom-enable");
+            if(customEnableUl) customEnableHost.appendChild(customEnableUl);
+            var customListEl=customBox.querySelector("#ab-dash-custom-list");
+
+            function newCardId(){
+                return "c"+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);
+            }
+
+            function renderCustom(){
+                if(!customListEl) return;
+                customListEl.innerHTML="";
+                if(!customCards.length){
+                    var emptyEl=document.createElement("div");
+                    emptyEl.className="ab-dash-custom-empty";
+                    emptyEl.textContent="还没有自定义卡片，点击下方「添加卡片」创建。";
+                    customListEl.appendChild(emptyEl);
+                    return;
+                }
+                for(var i=0;i<customCards.length;i++){
+                    (function(def){
+                        var item=document.createElement("div");
+                        item.className="ab-dash-custom-item";
+                        item.setAttribute("data-id",def.id);
+                        item.innerHTML='\
+                            <div class="ab-dash-custom-row">\
+                                <span class="ab-dash-custom-icon-wrap"><span class="material-icons-round" data-icon-preview>widgets</span></span>\
+                                <input type="text" class="ab-dash-custom-icon" placeholder="图标（如 widgets）">\
+                                <input type="text" class="ab-dash-custom-name" placeholder="卡片标题">\
+                                <span class="ab-dash-custom-btns">\
+                                    <button type="button" data-act="up" title="上移"><span class="material-icons-round">arrow_upward</span></button>\
+                                    <button type="button" data-act="down" title="下移"><span class="material-icons-round">arrow_downward</span></button>\
+                                    <button type="button" data-act="del" title="删除"><span class="material-icons-round">delete</span></button>\
+                                </span>\
+                            </div>\
+                            <div class="ab-dash-custom-label">HTML 内容（可留空）</div>\
+                            <textarea class="ab-dash-custom-html" rows="3" placeholder="任意 HTML，如：&lt;a href=&quot;/&quot;&gt;查看前台&lt;/a&gt;"></textarea>\
+                            <div class="ab-dash-custom-label">JavaScript（可留空，在卡片内执行）</div>\
+                            <textarea class="ab-dash-custom-js" rows="3" placeholder="card 为卡片元素；可用 ab.ajax(do, params, opts) / ab.esc(text) / ab.config"></textarea>';
+                        item.querySelector(".ab-dash-custom-icon").value=def.icon||"";
+                        item.querySelector(".ab-dash-custom-name").value=def.title||"";
+                        item.querySelector(".ab-dash-custom-html").value=def.html||"";
+                        item.querySelector(".ab-dash-custom-js").value=def.js||"";
+                        item.querySelector("[data-icon-preview]").textContent=def.icon||"widgets";
+                        customListEl.appendChild(item);
+                    })(customCards[i]);
+                }
+            }
+
+            function refreshCustom(msg){
+                saveCustomCards();
+                render();          /* 排序列表同步增删自定义卡片 */
+                sync(msg||"");
+                renderCustom();
+            }
+
+            if(customListEl){
+                customListEl.addEventListener("click",function(e){
+                    var btn=e.target&&e.target.closest?e.target.closest("button[data-act]"):null;
+                    if(!btn) return;
+                    var item=btn.closest(".ab-dash-custom-item");
+                    if(!item) return;
+                    var id=item.getAttribute("data-id");
+                    var act=btn.getAttribute("data-act");
+                    var idx=-1;
+                    for(var i=0;i<customCards.length;i++) if(customCards[i].id===id) idx=i;
+                    if(idx<0) return;
+
+                    if(act==="del"){
+                        if(!window.confirm("确定删除这张自定义卡片？")) return;
+                        customCards.splice(idx,1);
+                        var key=customKeyOf(id);
+                        var next=[];
+                        for(var k=0;k<order.length;k++) if(order[k]!==key) next.push(order[k]);
+                        order=normOrder(next.join(","));
+                        if(orderInput) orderInput.value=order.join(",");
+                        refreshCustom("已删除自定义卡片，记得点击右下角保存设置");
+                        return;
+                    }
+                    var to=(act==="up")?idx-1:idx+1;
+                    if(to<0||to>=customCards.length) return;
+                    var tmp=customCards[idx];customCards[idx]=customCards[to];customCards[to]=tmp;
+                    refreshCustom("已调整自定义卡片顺序，记得点击右下角保存设置");
+                });
+
+                customListEl.addEventListener("input",function(e){
+                    var t=e.target;
+                    if(!t) return;
+                    var item=(t.closest?t.closest(".ab-dash-custom-item"):null);
+                    if(!item) return;
+                    var def=customById(item.getAttribute("data-id"));
+                    if(!def) return;
+                    var cls=String(t.className||"");
+                    if(cls.indexOf("ab-dash-custom-icon")!==-1){
+                        def.icon=t.value;
+                        var pv=item.querySelector("[data-icon-preview]");
+                        if(pv) pv.textContent=t.value||"widgets";
+                    }else if(cls.indexOf("ab-dash-custom-name")!==-1){
+                        def.title=t.value;
+                    }else if(cls.indexOf("ab-dash-custom-html")!==-1){
+                        def.html=t.value;
+                    }else if(cls.indexOf("ab-dash-custom-js")!==-1){
+                        def.js=t.value;
+                    }else{
+                        return;
+                    }
+                    saveCustomCards();
+                    /* 图标/标题变化时同步刷新排序列表显示 */
+                    if(cls.indexOf("ab-dash-custom-icon")!==-1||cls.indexOf("ab-dash-custom-name")!==-1) render();
+                });
+            }
+
+            var customAddBtn=customBox.querySelector("#ab-dash-custom-add");
+            if(customAddBtn){
+                customAddBtn.addEventListener("click",function(){
+                    var def={id:newCardId(),icon:"widgets",title:"自定义卡片",html:"",js:""};
+                    customCards.push(def);
+                    var next=order.slice();
+                    next.push(customKeyOf(def.id));
+                    order=normOrder(next.join(","));
+                    refreshCustom("已添加自定义卡片，记得点击右下角保存设置");
+                    var nameInput=customListEl.querySelector('[data-id="'+def.id+'"] .ab-dash-custom-name');
+                    if(nameInput) nameInput.focus();
+                });
+            }
+
+            if(customEnableSel) customEnableSel.addEventListener("change",updateStates);
+            renderCustom();
+        })();
+
         // ---- 编辑器设置卡片（插在管理后台卡片之后）----
         var editorFields=["editor_vditor","editor_vditorMode","editor_hideToolbar"];
         var editorCard=document.getElementById("ab-card-editor");
@@ -738,7 +1213,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         })();
 
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","editor","login","pwa","perf","compat"].forEach(function(id){
+        ["admin","dashboardcards","editor","login","pwa","perf","compat"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
@@ -852,6 +1327,24 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             return;
         }
 
+        // 卡片定位：to=<卡片 id>（如 to=dashboardcards）→ 展开该卡片并滚到卡片位置
+        // 概要页「自定义卡片」引导卡就是靠这个参数直达「概要页卡片设置」的
+        var cardEl=document.getElementById("ab-card-"+to);
+        if(cardEl){
+            var cardBody=document.getElementById("ab-card-"+to+"-body");
+            if(cardBody&&cardBody.getAttribute("data-collapsed")==="1"){
+                window.abToggleCard&&window.abToggleCard(to);
+            }
+            setTimeout(function(){
+                cardEl.scrollIntoView({behavior:"smooth",block:"start"});
+                cardEl.style.transition="box-shadow .3s, background .3s";
+                var oldShadow=cardEl.style.boxShadow;
+                cardEl.style.boxShadow="0 0 0 2px "+((getComputedStyle(cardEl).getPropertyValue("--md-primary")||"").trim()||"#7D5260");
+                setTimeout(function(){ cardEl.style.boxShadow=oldShadow; },1800);
+            },420);
+            return;
+        }
+
         // 字段定位：找到字段所属的卡片，展开后滚动 + 高亮
         // 先找对应的 <ul> 元素
         function findFieldUl(name){
@@ -927,6 +1420,13 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         if(ie) ie.style.background=c[0]+"1a";
         var ve=document.getElementById("ab-card-editor-chev");
         if(ve) ve.setAttribute("stroke",c[0]);
+        // 概要页卡片设置卡片
+        var s7=document.getElementById("ab-card-dashboardcards-strip");
+        if(s7) s7.style.background=c[0];
+        var i7=document.getElementById("ab-card-dashboardcards-icon");
+        if(i7) i7.style.background=c[0]+"1a";
+        var v7=document.getElementById("ab-card-dashboardcards-chev");
+        if(v7) v7.setAttribute("stroke",c[0]);
         // PWA 卡片
         var s3=document.getElementById("ab-card-pwa-strip");
         if(s3) s3.style.background=c[0];

@@ -632,4 +632,564 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     border-color: rgba(250,204,21,.2) !important;
     color: #fde68a !important;
 }
+
+/* ============================================================
+   概要页卡片设置（卡片清单 / 拖拽排序）
+   注意：AdminBeautify.v2.1.47.css 里的
+     .ab-card ul            { padding:4px 12px 12px !important }
+     .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
+     .ab-card ul li span:first-child { 日期徽章样式 }
+   会污染这里的自定义列表，所有属性均需更高特异性 + !important 反制。
+   ============================================================ */
+.ab-card .ab-dash-cards-ui { margin: 0 0 4px; }
+
+.ab-card .ab-dash-cards-tip {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 12px 14px !important;
+    margin: 0 0 14px !important;
+    border-radius: 14px !important;
+    font-size: 12.5px !important;
+    line-height: 1.6 !important;
+    background: rgba(125,82,96,.08) !important;
+    color: #6b5b62 !important;
+}
+.ab-card .ab-dash-cards-tip .material-icons-round {
+    font-size: 18px !important;
+    line-height: 1.3 !important;
+    flex: none !important;
+    opacity: .7;
+}
+
+.ab-card .ab-dash-cards-list {
+    list-style: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+}
+
+/* 卡片内所有图标：防止任何残留的 span 规则（如主样式表的 .ab-card ul li span:first-child
+   日期徽章）把图标渲染成药丸 —— 排序行现在是 div，结构上已隔离，这里做二次兜底。 */
+.ab-card .ab-dash-cards-list .ab-dash-card-row .material-icons-round {
+    width: auto !important;
+    height: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    font-variant-numeric: normal !important;
+    font-weight: normal !important;
+    line-height: 1 !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-card-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 10px 12px !important;
+    margin: 0 !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    border: 1px solid rgba(0,0,0,.07) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04) !important;
+    font-size: 13px !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+    transition: box-shadow .18s, border-color .18s !important;
+    cursor: default !important;
+    overflow: visible !important;
+    min-width: 0 !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row:hover {
+    border-color: rgba(125,82,96,.32) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.08) !important;
+    background: #fff !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row.is-dragging {
+    opacity: .55 !important;
+    border-style: dashed !important;
+}
+
+/* 拖拽手柄（本行第一个 span，需反制日期徽章规则） */
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-drag {
+    flex: none !important;
+    width: auto !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #9a9aa2 !important;
+    font-size: 20px !important;
+    font-weight: normal !important;
+    font-variant-numeric: normal !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: grab !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-idx {
+    flex: none !important;
+    min-width: 22px !important;
+    text-align: center !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums !important;
+    color: #7d5260 !important;
+    background: rgba(125,82,96,.1) !important;
+    border-radius: 999px !important;
+    padding: 2px 0 !important;
+    margin: 0 !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-icon {
+    flex: none !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(125,82,96,.1) !important;
+    color: #7d5260 !important;
+    font-size: 19px !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-icon .material-icons-round {
+    font-size: 19px !important;
+    color: inherit !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    align-items: flex-start !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-name {
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+    line-height: 1.4 !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-desc {
+    font-size: 11.5px !important;
+    color: var(--md-on-surface-variant, #79747e) !important;
+    line-height: 1.45 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    max-width: 100% !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state {
+    flex: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 2px 9px !important;
+    margin: 0 !important;
+    border-radius: 999px !important;
+    background: rgba(0,0,0,.06) !important;
+    color: #79747e !important;
+    white-space: nowrap !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state.is-on {
+    background: rgba(46,125,50,.12) !important;
+    color: #2e7d32 !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-btns {
+    flex: none !important;
+    display: inline-flex !important;
+    gap: 4px !important;
+}
+.ab-dash-card-btn {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 9px !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    background: #f7f2fa !important;
+    color: #4a4458 !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: background .15s, border-color .15s !important;
+}
+.ab-dash-card-btn .material-icons-round { font-size: 16px !important; }
+.ab-dash-card-btn:hover {
+    background: rgba(125,82,96,.12) !important;
+    border-color: rgba(125,82,96,.3) !important;
+}
+
+.ab-card .ab-dash-cards-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin-top: 14px !important;
+}
+.ab-dash-cards-reset {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    cursor: pointer !important;
+    border: 1px solid rgba(0,0,0,.1) !important;
+    background: #fff !important;
+    color: #4a4458 !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    transition: background .15s !important;
+}
+.ab-dash-cards-reset .material-icons-round { font-size: 16px !important; }
+.ab-dash-cards-reset:hover { background: rgba(125,82,96,.1) !important; }
+.ab-dash-cards-status {
+    font-size: 12px !important;
+    color: #2e7d32 !important;
+    opacity: 0;
+    transition: opacity .2s;
+}
+.ab-dash-cards-status.is-on { opacity: 1; }
+
+/* 概要页卡片设置（暗色） */
+[data-theme="dark"] .ab-card .ab-dash-cards-tip {
+    background: rgba(208,188,255,.1) !important;
+    color: #cac4d0 !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row {
+    background: var(--md-surface-container, #211f26) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row:hover {
+    background: var(--md-surface-container-high, #2b2930) !important;
+    border-color: rgba(208,188,255,.35) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-drag {
+    color: rgba(255,255,255,.45) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-idx {
+    color: #d0bcff !important;
+    background: rgba(208,188,255,.16) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-icon {
+    background: rgba(208,188,255,.16) !important;
+    color: #d0bcff !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-name {
+    color: var(--md-on-surface, #e6e1e5) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-desc {
+    color: var(--md-on-surface-variant, #cac4d0) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state {
+    background: rgba(255,255,255,.1) !important;
+    color: #cac4d0 !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state.is-on {
+    background: rgba(129,199,132,.18) !important;
+    color: #81c784 !important;
+}
+[data-theme="dark"] .ab-dash-card-btn {
+    background: rgba(255,255,255,.07) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    color: #d0bcff !important;
+}
+[data-theme="dark"] .ab-dash-card-btn:hover {
+    background: rgba(208,188,255,.2) !important;
+    border-color: rgba(208,188,255,.35) !important;
+}
+[data-theme="dark"] .ab-dash-cards-reset {
+    background: rgba(255,255,255,.07) !important;
+    border-color: rgba(255,255,255,.12) !important;
+    color: #e6e1e5 !important;
+}
+[data-theme="dark"] .ab-dash-cards-reset:hover { background: rgba(208,188,255,.18) !important; }
+[data-theme="dark"] .ab-dash-cards-status { color: #81c784 !important; }
+
+/* 概要页卡片设置（窄屏） */
+@media (max-width: 575px) {
+    .ab-card .ab-dash-cards-list .ab-dash-card-row {
+        flex-wrap: wrap !important;
+        row-gap: 8px !important;
+    }
+    .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-desc {
+        white-space: normal !important;
+    }
+    .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-meta {
+        flex: 1 1 100% !important;
+        order: 4;
+    }
+    .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-btns { order: 5; }
+}
+
+/* ============================================================
+   概要页卡片设置 —— 自定义卡片编辑区（方案 C：自由 HTML / JS）
+   ============================================================ */
+.ab-card .ab-dash-custom {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px dashed rgba(0, 0, 0, .12);
+}
+.ab-card .ab-dash-custom-title {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+    margin-bottom: 10px !important;
+}
+.ab-card .ab-dash-custom-title .material-icons-round { font-size: 20px !important; color: var(--md-primary, #7d5260) !important; }
+
+.ab-card .ab-dash-custom-warn {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 10px 14px !important;
+    margin-bottom: 14px !important;
+    border-radius: 12px !important;
+    background: rgba(217, 119, 6, .1) !important;
+    border: 1px solid rgba(217, 119, 6, .28) !important;
+    color: #92400e !important;
+    font-size: 12.5px !important;
+    line-height: 1.6 !important;
+}
+.ab-card .ab-dash-custom-warn .material-icons-round { font-size: 18px !important; flex: none !important; line-height: 1.3 !important; }
+
+/* 帮助文档 / 投稿入口 */
+.ab-card .ab-dash-custom-help {
+    margin: -4px 0 14px !important;
+}
+.ab-card .ab-dash-custom-help > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 9px 14px !important;
+    margin-bottom: 8px !important;
+    border-radius: 12px !important;
+    background: rgba(125, 82, 96, .08) !important;
+    border: 1px solid rgba(125, 82, 96, .2) !important;
+    color: var(--md-primary, #7d5260) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    line-height: 1.5 !important;
+    text-decoration: none !important;
+    transition: background-color .2s !important;
+}
+.ab-card .ab-dash-custom-help > a:hover {
+    background: rgba(125, 82, 96, .16) !important;
+}
+.ab-card .ab-dash-custom-help > a .material-icons-round {
+    font-size: 18px !important;
+    color: inherit !important;
+    flex: none !important;
+}
+.ab-card .ab-dash-custom-help > a .ab-dash-custom-help-arrow {
+    margin-left: auto !important;
+    opacity: .7 !important;
+}
+.ab-card .ab-dash-custom-help-note {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 0 2px !important;
+    color: var(--md-on-surface-variant, #49454f) !important;
+    font-size: 12px !important;
+    line-height: 1.7 !important;
+}
+.ab-card .ab-dash-custom-help-note .material-icons-round {
+    font-size: 16px !important;
+    flex: none !important;
+    margin-top: 2px !important;
+    color: var(--md-on-surface-variant, #49454f) !important;
+}
+.ab-card .ab-dash-custom-help-note a {
+    color: var(--md-primary, #7d5260) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    border-bottom: 1px dashed currentColor !important;
+}
+.ab-card .ab-dash-custom-help-note a:hover { opacity: .85 !important; }
+
+.ab-card .ab-dash-custom-enable {
+    margin-bottom: 12px !important;
+}
+.ab-card .ab-dash-custom-enable .typecho-option { margin: 0 !important; }
+
+.ab-card .ab-dash-custom-empty {
+    padding: 14px !important;
+    margin-bottom: 10px !important;
+    border-radius: 12px !important;
+    border: 1px dashed rgba(0, 0, 0, .14) !important;
+    color: var(--md-on-surface-variant, #49454f) !important;
+    font-size: 12.5px !important;
+    text-align: center !important;
+}
+
+.ab-card .ab-dash-custom-item {
+    padding: 12px 14px 14px !important;
+    margin-bottom: 10px !important;
+    border-radius: 14px !important;
+    background: #fff !important;
+    border: 1px solid rgba(0, 0, 0, .08) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04) !important;
+}
+.ab-card .ab-dash-custom-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-bottom: 10px !important;
+    flex-wrap: wrap !important;
+}
+.ab-card .ab-dash-custom-icon-wrap {
+    flex: none !important;
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(125, 82, 96, .1) !important;
+    color: var(--md-primary, #7d5260) !important;
+}
+.ab-card .ab-dash-custom-icon-wrap .material-icons-round { font-size: 19px !important; color: inherit !important; }
+
+.ab-card .ab-dash-custom-row input.ab-dash-custom-icon,
+.ab-card .ab-dash-custom-row input.ab-dash-custom-name {
+    height: 34px !important;
+    padding: 0 12px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(0, 0, 0, .14) !important;
+    background: #fff !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+    box-sizing: border-box !important;
+}
+.ab-card .ab-dash-custom-row input.ab-dash-custom-icon { width: 150px !important; flex: none !important; }
+.ab-card .ab-dash-custom-row input.ab-dash-custom-name { flex: 1 1 140px !important; min-width: 0 !important; }
+.ab-card .ab-dash-custom-row input:focus {
+    border-color: var(--md-primary, #7d5260) !important;
+    outline: none !important;
+}
+
+.ab-card .ab-dash-custom-btns { flex: none !important; display: inline-flex !important; gap: 4px !important; margin-left: auto !important; }
+.ab-card .ab-dash-custom-btns button {
+    width: 30px !important;
+    height: 30px !important;
+    padding: 0 !important;
+    border-radius: 9px !important;
+    border: 1px solid rgba(0, 0, 0, .1) !important;
+    background: #f7f2fa !important;
+    color: #4a4458 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.ab-card .ab-dash-custom-btns button .material-icons-round { font-size: 17px !important; }
+.ab-card .ab-dash-custom-btns button:hover { background: rgba(125, 82, 96, .14) !important; }
+.ab-card .ab-dash-custom-btns button[data-act="del"]:hover { background: rgba(220, 38, 38, .14) !important; color: #dc2626 !important; }
+
+.ab-card .ab-dash-custom-label {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--md-on-surface-variant, #49454f) !important;
+    margin: 8px 0 4px !important;
+}
+.ab-card .ab-dash-custom-item textarea {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 12px !important;
+    border-radius: 10px !important;
+    border: 1px solid rgba(0, 0, 0, .14) !important;
+    background: #fff !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+    font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+    resize: vertical !important;
+    box-shadow: none !important;
+}
+.ab-card .ab-dash-custom-item textarea:focus {
+    border-color: var(--md-primary, #7d5260) !important;
+    outline: none !important;
+}
+
+.ab-card .ab-dash-custom-add {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 9px 16px !important;
+    border-radius: 999px !important;
+    border: 1px dashed rgba(125, 82, 96, .5) !important;
+    background: rgba(125, 82, 96, .08) !important;
+    color: var(--md-primary, #7d5260) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+.ab-card .ab-dash-custom-add:hover { background: rgba(125, 82, 96, .16) !important; }
+.ab-card .ab-dash-custom-add .material-icons-round { font-size: 17px !important; }
+
+/* 自定义卡片编辑区（暗色） */
+[data-theme="dark"] .ab-card .ab-dash-custom { border-top-color: rgba(255, 255, 255, .14); }
+[data-theme="dark"] .ab-card .ab-dash-custom-title { color: var(--md-dark-on-surface, #e6e1e5) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-title .material-icons-round { color: var(--md-dark-primary, #d0bcff) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-warn {
+    background: rgba(250, 204, 21, .1) !important;
+    border-color: rgba(250, 204, 21, .28) !important;
+    color: #fde68a !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-custom-item {
+    background: var(--md-dark-surface-container, #2b2930) !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+    box-shadow: none !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-custom-item input,
+[data-theme="dark"] .ab-card .ab-dash-custom-item textarea {
+    background: rgba(255, 255, 255, .06) !important;
+    border-color: rgba(255, 255, 255, .16) !important;
+    color: var(--md-dark-on-surface, #e6e1e5) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-custom-icon-wrap { background: rgba(208, 188, 255, .16) !important; color: var(--md-dark-primary, #d0bcff) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-btns button {
+    background: rgba(255, 255, 255, .07) !important;
+    border-color: rgba(255, 255, 255, .14) !important;
+    color: var(--md-dark-primary, #d0bcff) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-custom-btns button:hover { background: rgba(208, 188, 255, .2) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-label { color: var(--md-dark-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-empty { border-color: rgba(255, 255, 255, .16) !important; color: var(--md-dark-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-help > a {
+    background: rgba(208, 188, 255, .12) !important;
+    border-color: rgba(208, 188, 255, .26) !important;
+    color: var(--md-dark-primary, #d0bcff) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-custom-help > a:hover { background: rgba(208, 188, 255, .2) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-help-note { color: var(--md-dark-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-help-note .material-icons-round { color: var(--md-dark-on-surface-variant, #cac4d0) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-help-note a { color: var(--md-dark-primary, #d0bcff) !important; }
+[data-theme="dark"] .ab-card .ab-dash-custom-add {
+    background: rgba(208, 188, 255, .12) !important;
+    border-color: rgba(208, 188, 255, .45) !important;
+    color: var(--md-dark-primary, #d0bcff) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-custom-add:hover { background: rgba(208, 188, 255, .22) !important; }
+
+@media (max-width: 575px) {
+    .ab-card .ab-dash-custom-row input.ab-dash-custom-icon { width: 110px !important; }
+    .ab-card .ab-dash-custom-title { font-size: 13px !important; }
+}
 </style>
