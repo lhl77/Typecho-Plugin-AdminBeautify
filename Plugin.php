@@ -1652,6 +1652,11 @@ window.abDoUpdate=function(){
         +"&download_url="+encodeURIComponent(dlUrl)
         +"&new_version="+encodeURIComponent(newVer)
         +"&_="+encodeURIComponent(ajax.token||"");
+    // ---- 校验 URL 协议，防止配置被篡改后注入 javascript: 等非法协议 ----
+    if(!/^(https?:)?\/\//i.test(sseUrl)&&sseUrl.charAt(0)!=="/"){
+        onError("非法的请求地址");
+        return;
+    }
     // ---- 优先使用 fetch + ReadableStream（兼容性更好，可读取错误内容）----
     // 不支持时降级到非流式 AJAX（do-update）
     var useStream=!!(window.fetch&&window.ReadableStream&&window.TextDecoder);
