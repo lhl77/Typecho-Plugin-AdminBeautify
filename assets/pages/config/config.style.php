@@ -635,7 +635,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.47.css 里的
+   注意：AdminBeautify.v2.1.50.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }

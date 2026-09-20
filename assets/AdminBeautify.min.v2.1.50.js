@@ -350,7 +350,7 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.47';
+            var ver = cfg.pluginVersion || '2.1.50';
 
             var themeInfo = document.createElement('div');
             themeInfo.className = 'ab-footer-theme';
@@ -3443,21 +3443,16 @@
                     dashboard.appendChild(catCard);
                 }
 
-                // 动态加载本地 ab-charts.js（仅加载一次）
+                // 懒加载本地 ab-charts.js：统一走 AdminBeautify.charts.load()（只加载一次）
                 function loadABCharts(cb) {
-                    if (window.ABCharts) { cb(); return; }
-                    var abScript = document.querySelector('script[src*="AdminBeautify.min"]');
-                    var abBase   = abScript ? abScript.src.replace(/assets\/AdminBeautify\.min[^/]*\.js(\?.*)?$/, '') : '';
-                    var s = document.createElement('script');
-                    s.src = abBase + 'assets/lib/ab-charts.v1.0.js';
-                    s.onload = cb;
-                    s.onerror = function () {
+                    AdminBeautify.charts.load().then(function () {
+                        cb();
+                    }, function () {
                         var freqEl = document.getElementById('ab-chart-freq');
                         var catEl  = document.getElementById('ab-chart-cat');
                         if (freqEl) freqEl.innerHTML = '<div class="ab-chart-err">图表库加载失败</div>';
                         if (catEl)  catEl.innerHTML  = '<div class="ab-chart-err">图表库加载失败</div>';
-                    };
-                    document.head.appendChild(s);
+                    });
                 }
 
                 // 请求图表数据
@@ -3739,19 +3734,62 @@
                         '<div class="ab-custom-body"></div>';
                     var bodyEl = card.querySelector('.ab-custom-body');
                     bodyEl.innerHTML = def.html || '';
+                    /* HTML 字段里的 <style> 提到 card 上（不留在 .ab-custom-body 里）：
+                     * 卡片脚本通常紧接着调用 ab.ui.mount(body, …)，那会清空 body，
+                     * 样式若不搬走会被连根删掉 → 「写了 CSS 却不生效」（2.1.49 修复） */
+                    var htmlStyles = bodyEl.querySelectorAll('style');
+                    for (var hsIdx = 0; hsIdx < htmlStyles.length; hsIdx++) {
+                        card.insertBefore(htmlStyles[hsIdx], bodyEl);
+                    }
                     host.appendChild(card);
-                    // 脚本：以 card 为 this，并注入迷你 API（ab.ui / ab.ajax / ab.esc / ab.config）
+                    // 脚本：以 card 为 this，并注入迷你 API
+                    // （ab.ui / ab.data / ab.db / ab.ajax / ab.request / ab.esc / ab.config
+                    //   + 工具集：notify / copy / format / chart / onCleanup / interval / timeout）
                     if (def.js) {
+                        var abApi = {
+                            esc: esc,
+                            ajax: function (doName, params, opts) { return AdminBeautify.ajax(doName, params, opts); },
+                            config: ccfg,
+                            ui: abUi,
+                            data: abData,
+                            db: abDb,
+                            request: abRequest,
+                            version: ccfg.pluginVersion || '',
+                            /* ---- 工具集 ---- */
+                            notify: abNotify,
+                            copy: abCopy,
+                            copyText: abCopyText,
+                            format: abFormat,
+                            chart: abChart,
+                            /* 卡片被销毁（AJAX 切页 / 重渲染）时自动执行，用来收尾定时器与监听 */
+                            onCleanup: function (fn) { addCardCleanup(card, fn); return card; },
+                            interval: function (fn, ms) {
+                                var id = window.setInterval(fn, ms);
+                                addCardCleanup(card, function () { window.clearInterval(id); });
+                                return id;
+                            },
+                            timeout: function (fn, ms) {
+                                var id = window.setTimeout(fn, ms);
+                                addCardCleanup(card, function () { window.clearTimeout(id); });
+                                return id;
+                            },
+                            cleanup: function () { return runCardCleanups(card); }
+                        };
                         try {
-                            var abApi = {
-                                esc: esc,
-                                ajax: function (doName, params, opts) { return AdminBeautify.ajax(doName, params, opts); },
-                                config: ccfg,
-                                ui: abUi
-                            };
                             (new Function('card', 'ab', def.js)).call(card, card, abApi);
                         } catch (err) {
                             if (window.console && console.warn) console.warn('[AB] 自定义卡片脚本出错：' + key, err);
+                            /* 卡片里也给一条看得见的提示，而不是只留一片空白 */
+                            try {
+                                if (!bodyEl.querySelector('.ab-custom-error')) {
+                                    var errBox = document.createElement('div');
+                                    errBox.className = 'ab-custom-error';
+                                    errBox.innerHTML = '<span class="material-icons-round">error_outline</span>' +
+                                        '<span>卡片脚本执行出错：' + esc(String((err && err.message) || err || '未知错误')) +
+                                        '（详情见浏览器控制台）</span>';
+                                    bodyEl.insertBefore(errBox, bodyEl.firstChild);
+                                }
+                            } catch (e2) {}
                         }
                     }
                 }
@@ -6604,6 +6642,10 @@
          * 解析并应用新页面内容
          */
         _applyPage: function (html, url, isPopState) {
+            /* 页面即将被整个替换：先跑自定义卡片的清理函数（定时器 / 监听器），避免泄漏 */
+            if (typeof AdminBeautify.cleanupCustomCards === 'function') {
+                AdminBeautify.cleanupCustomCards();
+            }
             var parser = new DOMParser();
             var doc = parser.parseFromString(html, 'text/html');
 
@@ -7318,7 +7360,60 @@
         /* ---- 卡片底部入口：ab.ui.footer(card, {...}) ----
          * 复用主样式表的 .ab-card-footer；这里只补按钮版重置与吸底兜底 */
         'button.ab-card-footer{width:100% !important;border:0 !important;background:transparent !important;cursor:pointer;font-family:inherit;}',
-        '.ab-card-footer.ab-ui-footer{flex:none !important;margin-top:auto !important;}'
+        '.ab-card-footer.ab-ui-footer{flex:none !important;margin-top:auto !important;}',
+        /* ---- 对话框：ab.ui.dialog / ab.ui.confirm ---- */
+        '.ab-ui-scrim{position:fixed !important;inset:0;z-index:9998;display:flex !important;align-items:center !important;justify-content:center !important;',
+        '  padding:24px;box-sizing:border-box;background:rgba(0,0,0,.32);',
+        '  opacity:0;transition:opacity var(--md-transition-duration,.2s) var(--md-transition-easing,cubic-bezier(.2,0,0,1));}',
+        '.ab-ui-scrim.ab-ui-scrim-in{opacity:1;}',
+        '.ab-ui-dialog{width:100% !important;max-width:min(440px,100%);box-sizing:border-box;padding:24px;border-radius:28px;',
+        '  background:var(--md-surface-container-high,#ece6f0) !important;color:var(--md-on-surface,#1c1b1f) !important;',
+        '  box-shadow:var(--md-elevation-3);transform:translateY(8px) scale(.98);',
+        '  transition:transform var(--md-transition-duration,.2s) var(--md-transition-easing,cubic-bezier(.2,0,0,1));}',
+        '.ab-ui-scrim-in .ab-ui-dialog{transform:none;}',
+        '.ab-ui-dialog-icon{display:inline-flex !important;align-items:center !important;font-size:22px !important;line-height:1 !important;color:var(--md-primary,#6750a4) !important;flex:none !important;}',
+        '.ab-ui-dialog-title{margin:0 0 8px;display:flex !important;align-items:center !important;gap:8px;font-size:16px;font-weight:600;line-height:1.5;}',
+        '.ab-ui-dialog-text{margin:0;font-size:13.5px;line-height:1.7;color:var(--md-on-surface-variant,#49454f) !important;}',
+        '.ab-ui-dialog-body{margin-top:12px;}',
+        '.ab-ui-dialog-actions{display:flex !important;flex-wrap:wrap;justify-content:flex-end !important;gap:8px;margin-top:22px;}',
+        /* ---- 开关：ab.ui.switch({label, checked, onChange}) ---- */
+        '.ab-ui-switch{display:flex !important;align-items:center;gap:10px;padding:8px 0;cursor:pointer;font-size:13px;user-select:none;}',
+        '.ab-ui-switch-track{flex:none !important;position:relative;width:44px;height:24px;border-radius:999px;',
+        '  background:var(--md-surface-container-highest,#e6e0e9) !important;transition:background-color var(--md-transition-duration,.2s);}',
+        '.ab-ui-switch-track::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;',
+        '  background:var(--md-outline,#79747e) !important;transition:transform var(--md-transition-duration,.2s),background-color var(--md-transition-duration,.2s);}',
+        '.ab-ui-switch.is-on .ab-ui-switch-track{background:var(--md-primary,#6750a4) !important;}',
+        '.ab-ui-switch.is-on .ab-ui-switch-track::after{transform:translateX(20px);background:var(--md-on-primary,#fff) !important;}',
+        '.ab-ui-switch-label{flex:1 1 auto;min-width:0;}',
+        /* ---- 分段标签页：ab.ui.tabs([...]) ---- */
+        '.ab-ui-tabs{display:flex !important;gap:4px;border-bottom:1px solid var(--md-outline-variant,#cac4d0);margin-bottom:10px;}',
+        '.ab-ui-tab{flex:1 1 0;display:inline-flex !important;align-items:center !important;justify-content:center !important;gap:5px;',
+        '  padding:9px 6px;border:0 !important;background:transparent !important;cursor:pointer;font-family:inherit;',
+        '  font-size:12.5px !important;font-weight:600 !important;color:var(--md-on-surface-variant,#49454f) !important;',
+        '  border-bottom:2px solid transparent !important;transition:color var(--md-transition-duration,.2s),border-color var(--md-transition-duration,.2s);}',
+        '.ab-ui-tab.is-active{color:var(--md-primary,#6750a4) !important;border-bottom-color:var(--md-primary,#6750a4) !important;}',
+        '.ab-ui-tab .material-icons-round{font-size:16px !important;line-height:1 !important;color:inherit !important;}',
+        /* ---- 进度条：ab.ui.progress({value, max, label}) ---- */
+        '.ab-ui-progress{display:flex !important;flex-direction:column !important;gap:6px;margin-top:12px;}',
+        '.ab-ui-progress-head{display:flex !important;justify-content:space-between !important;gap:8px;font-size:12px;',
+        '  color:var(--md-on-surface-variant,#49454f) !important;}',
+        '.ab-ui-progress-track{height:6px;border-radius:999px;background:var(--md-surface-container-highest,#e6e0e9) !important;overflow:hidden;}',
+        '.ab-ui-progress-bar{height:100%;width:0;border-radius:999px;background:var(--ab-ui-bg,var(--md-primary,#6750a4)) !important;',
+        '  transition:width var(--md-transition-duration,.2s) var(--md-transition-easing,cubic-bezier(.2,0,0,1));}',
+        /* ---- 文本字段 / 下拉：ab.ui.field / input / select ---- */
+        '.ab-ui-field{display:flex !important;flex-direction:column !important;gap:5px;margin-top:12px;}',
+        '.ab-ui-field-label{font-size:11.5px;font-weight:600;color:var(--md-on-surface-variant,#49454f) !important;}',
+        '.ab-ui-field-input{box-sizing:border-box;width:100% !important;padding:10px 14px;border-radius:12px;font-family:inherit;',
+        '  border:1px solid var(--md-outline,#79747e) !important;background:var(--md-surface-container-lowest,#fff) !important;',
+        '  color:var(--md-on-surface,#1c1b1f) !important;font-size:13px !important;line-height:1.5;outline:none;}',
+        'textarea.ab-ui-field-input{min-height:76px;resize:vertical;}',
+        '.ab-ui-field-input:focus{border-color:var(--md-primary,#6750a4) !important;box-shadow:0 0 0 3px var(--md-primary-container,#eaddff);}',
+        '.ab-ui-field-hint{font-size:11.5px;color:var(--md-on-surface-variant,#49454f) !important;opacity:.85;}',
+        /* ---- 卡片脚本出错时的内联错误块（插件注入）---- */
+        '.ab-custom-error{display:flex !important;align-items:flex-start;gap:8px;box-sizing:border-box;padding:10px 14px;border-radius:12px;',
+        '  font-size:12.5px !important;line-height:1.6 !important;background:var(--md-error-container,#f9dedc) !important;',
+        '  color:var(--md-on-error-container,#410e0b) !important;}',
+        '.ab-custom-error .material-icons-round{flex:none !important;font-size:18px !important;line-height:1.35 !important;color:inherit !important;}'
     ].join('');
     document.head.appendChild(abUiStyle);
 
@@ -7599,8 +7694,254 @@
             });
         }
 
+        /* ---------- 对话框：ab.ui.dialog({...}) ---------- */
+        function dialog(opts) {
+            opts = (typeof opts === 'string') ? { text: opts } : (opts || {});
+            var scrim = el('div', 'ab-ui-scrim', null);
+            var box = el('div', 'ab-ui-dialog', null);
+            box.setAttribute('role', 'dialog');
+            box.setAttribute('aria-modal', 'true');
+            if (opts.id) box.id = opts.id;
+            scrim.appendChild(box);
+
+            if (opts.title) {
+                var head = el('div', 'ab-ui-dialog-title', null);
+                if (opts.icon) head.appendChild(icon(opts.icon, 'ab-ui-dialog-icon'));
+                head.appendChild(el('span', null, opts.title));
+                box.appendChild(head);
+            }
+            if (opts.text) box.appendChild(el('p', 'ab-ui-dialog-text', opts.text));
+            if (opts.body) {
+                var bodyBox = el('div', 'ab-ui-dialog-body', null);
+                append(bodyBox, opts.body);
+                box.appendChild(bodyBox);
+            }
+            var actionRow = el('div', 'ab-ui-dialog-actions', null);
+            box.appendChild(actionRow);
+
+            var closed = false;
+            function close(value) {
+                if (closed) return;
+                closed = true;
+                document.removeEventListener('keydown', onKey);
+                scrim.classList.remove('ab-ui-scrim-in');
+                var kill = function () { if (scrim.parentNode) scrim.parentNode.removeChild(scrim); };
+                if (window.setTimeout) window.setTimeout(kill, 220); else kill();
+                if (typeof opts.onClose === 'function') opts.onClose(value);
+            }
+            function onKey(e) {
+                if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); close(null); }
+            }
+
+            var actionList = (opts.actions || []).slice();
+            if (!actionList.length) actionList.push({ text: '知道了' });
+            for (var ai = 0; ai < actionList.length; ai++) {
+                (function (a) {
+                    actionRow.appendChild(button({
+                        text: a.text || '操作',
+                        icon: a.icon,
+                        tone: a.tone || (a.primary ? 'primary' : 'info'),
+                        onClick: function () {
+                            var v = (a.value === undefined) ? true : a.value;
+                            close(v);
+                            if (typeof a.onClick === 'function') a.onClick(v);
+                        }
+                    }));
+                })(actionList[ai]);
+            }
+
+            if (opts.dismissible !== false) {
+                scrim.addEventListener('click', function (e) { if (e.target === scrim) close(null); });
+            }
+            document.addEventListener('keydown', onKey);
+            document.body.appendChild(scrim);
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(function () { scrim.classList.add('ab-ui-scrim-in'); });
+            } else {
+                scrim.classList.add('ab-ui-scrim-in');
+            }
+            return { el: box, scrim: scrim, close: close };
+        }
+
+        /** 确认框：返回 Promise<boolean>（确定 true / 取消 false） */
+        function confirmDialog(opts) {
+            opts = (typeof opts === 'string') ? { text: opts } : (opts || {});
+            return new Promise(function (resolve) {
+                dialog({
+                    title: opts.title || '确认操作',
+                    icon: opts.icon || 'help_outline',
+                    text: opts.text || '',
+                    body: opts.body,
+                    actions: [
+                        { text: opts.cancelText || '取消', tone: 'info', value: false },
+                        { text: opts.okText || '确定', tone: opts.tone || 'danger', value: true }
+                    ],
+                    onClose: function (v) { resolve(v === true); }
+                });
+            });
+        }
+
+        /* ---------- 开关：ab.ui.switch({label, checked, onChange}) ---------- */
+        function switchControl(opts) {
+            opts = (typeof opts === 'string') ? { label: opts } : (opts || {});
+            var node = el('div', 'ab-ui-switch', null);
+            if (opts.id) node.id = opts.id;
+            node.setAttribute('role', 'switch');
+            node.setAttribute('tabindex', '0');
+            node.appendChild(el('span', 'ab-ui-switch-track', null));
+            node.appendChild(el('span', 'ab-ui-switch-label', opts.label || ''));
+            var state = !!opts.checked;
+            function apply(next, silent) {
+                state = !!next;
+                node.classList.toggle('is-on', state);
+                node.setAttribute('aria-checked', state ? 'true' : 'false');
+                if (!silent && typeof opts.onChange === 'function') opts.onChange(state);
+            }
+            function toggle() { apply(!state); }
+            apply(state, true);
+            node.addEventListener('click', toggle);
+            node.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') { e.preventDefault(); toggle(); }
+            });
+            node.setValue = function (next) { apply(next, true); return node; };
+            node.getValue = function () { return state; };
+            node.update = function (patch) {
+                patch = patch || {};
+                if ('checked' in patch) apply(patch.checked, true);
+                if ('label' in patch) node.lastChild.textContent = String(patch.label || '');
+                return node;
+            };
+            return node;
+        }
+
+        /* ---------- 分段标签页：ab.ui.tabs([{id,label,icon}], {active, onChange}) ---------- */
+        function tabs(items, opts) {
+            opts = opts || {};
+            var wrap = el('div', 'ab-ui-tabs', null);
+            if (opts.id) wrap.id = opts.id;
+            var nodes = [];
+            items = items || [];
+            function keyOf(it, i) { return (it && it.id != null) ? String(it.id) : String(i); }
+            for (var i = 0; i < items.length; i++) {
+                var it = (typeof items[i] === 'string') ? { label: items[i] } : (items[i] || {});
+                var btn = el('button', 'ab-ui-tab', null);
+                btn.type = 'button';
+                if (it.icon) btn.appendChild(icon(it.icon, null));
+                btn.appendChild(el('span', null, it.label || ('选项 ' + (i + 1))));
+                nodes.push({ node: btn, key: keyOf(it, i) });
+                (function (key) {
+                    btn.addEventListener('click', function () { wrap.setActive(key, true); });
+                })(nodes[i].key);
+                wrap.appendChild(btn);
+            }
+            wrap.setActive = function (id, fire) {
+                var hit = null;
+                for (var j = 0; j < nodes.length; j++) {
+                    var on = String(nodes[j].key) === String(id);
+                    nodes[j].node.classList.toggle('is-active', on);
+                    if (on) hit = nodes[j].key;
+                }
+                if (fire && typeof opts.onChange === 'function') opts.onChange(hit, wrap);
+                return hit;
+            };
+            wrap.getActive = function () {
+                for (var j = 0; j < nodes.length; j++) {
+                    if (nodes[j].node.classList.contains('is-active')) return nodes[j].key;
+                }
+                return null;
+            };
+            wrap.setActive(opts.active != null ? opts.active : (nodes[0] ? nodes[0].key : null), false);
+            return wrap;
+        }
+
+        /* ---------- 进度条：ab.ui.progress({value, max, label, tone}) ---------- */
+        function progress(opts) {
+            opts = (typeof opts === 'number') ? { value: opts } : (opts || {});
+            var node = el('div', 'ab-ui-progress ab-ui-tone-' + normalizeTone(opts.tone || 'primary'), null);
+            if (opts.id) node.id = opts.id;
+            var head = el('div', 'ab-ui-progress-head', null);
+            var labelEl = el('span', 'ab-ui-progress-label', opts.label || '');
+            var valueEl = el('span', 'ab-ui-progress-value', '');
+            head.appendChild(labelEl);
+            head.appendChild(valueEl);
+            var track = el('div', 'ab-ui-progress-track', null);
+            var bar = el('div', 'ab-ui-progress-bar', null);
+            track.appendChild(bar);
+            node.appendChild(head);
+            node.appendChild(track);
+
+            var max = (opts.max || 100);
+            var val = (opts.value == null ? 0 : opts.value);
+            function paint() {
+                var pct = (max > 0) ? Math.max(0, Math.min(100, val / max * 100)) : 0;
+                bar.style.width = pct + '%';
+                valueEl.textContent = opts.hideValue ? '' : (Math.round(pct) + '%');
+            }
+            paint();
+            node.setValue = function (next) { val = (next == null ? 0 : next); paint(); return node; };
+            node.getValue = function () { return val; };
+            node.update = function (patch) {
+                patch = patch || {};
+                if ('value' in patch) val = (patch.value == null ? 0 : patch.value);
+                if ('max' in patch) max = (patch.max || 100);
+                if ('label' in patch) labelEl.textContent = String(patch.label || '');
+                if ('tone' in patch) {
+                    for (var t = 0; t < TONES.length; t++) node.classList.remove('ab-ui-tone-' + TONES[t]);
+                    node.classList.add('ab-ui-tone-' + normalizeTone(patch.tone));
+                }
+                paint();
+                return node;
+            };
+            return node;
+        }
+
+        /* ---------- 文本字段 / 下拉：ab.ui.field / input / select ---------- */
+        function field(opts) {
+            opts = (typeof opts === 'string') ? { label: opts } : (opts || {});
+            var node = el('div', 'ab-ui-field', null);
+            if (opts.id) node.id = opts.id;
+            if (opts.label) node.appendChild(el('span', 'ab-ui-field-label', opts.label));
+
+            var input;
+            if (opts.options) {
+                input = el('select', 'ab-ui-field-input', null);
+                var list = opts.options || [];
+                for (var i = 0; i < list.length; i++) {
+                    var o = (typeof list[i] === 'string') ? { value: list[i], label: list[i] } : (list[i] || {});
+                    var opt = el('option', null, (o.label == null ? o.value : o.label));
+                    opt.value = (o.value == null ? '' : String(o.value));
+                    input.appendChild(opt);
+                }
+                if (opts.value != null) input.value = String(opts.value);
+            } else if (opts.type === 'textarea') {
+                input = el('textarea', 'ab-ui-field-input', null);
+                input.value = (opts.value == null ? '' : String(opts.value));
+                if (opts.placeholder) input.placeholder = opts.placeholder;
+            } else {
+                input = el('input', 'ab-ui-field-input', null);
+                input.type = opts.type || 'text';
+                input.value = (opts.value == null ? '' : String(opts.value));
+                if (opts.placeholder) input.placeholder = opts.placeholder;
+            }
+            node.appendChild(input);
+            if (opts.hint) node.appendChild(el('span', 'ab-ui-field-hint', opts.hint));
+
+            input.addEventListener('change', function () {
+                if (typeof opts.onChange === 'function') opts.onChange(input.value, node);
+            });
+            if (!opts.options) {
+                input.addEventListener('input', function () {
+                    if (typeof opts.onInput === 'function') opts.onInput(input.value, node);
+                });
+            }
+            node.input = input;
+            node.getValue = function () { return input.value; };
+            node.setValue = function (v) { input.value = (v == null ? '' : String(v)); return node; };
+            return node;
+        }
+
         abUiApi = {
-            version: '1.0',
+            version: '1.1',
             tones: TONES.slice(),
             el: el,
             icon: icon,
@@ -7629,6 +7970,14 @@
             notice: notice,
             empty: empty,
             footer: footer,
+            dialog: dialog,
+            confirm: confirmDialog,
+            switch: switchControl,
+            tabs: tabs,
+            progress: progress,
+            field: field,
+            input: field,
+            select: field,
             num: num,
             navigate: navigate,
             setValue: setValue,
@@ -7640,6 +7989,343 @@
         return abUiApi;
     })();
     AdminBeautify.ui = abUi;
+
+    /* ============================================================
+       自定义卡片数据存储（ab.data）与只读数据查询（ab.db）
+       ------------------------------------------------------------
+       服务端实现：Plugin.php::cardDataSave / cardDataGet / cardDataList /
+                   cardDataDelete / dbReadTable
+       服务端接口：/action/admin-beautify?do=save-card-data | get-card-data |
+                   list-card-data | delete-card-data | db-read
+       鉴权：必须是已登录管理员 + 有效 CSRF token（本封装自动附带 &_=<token>）
+       数据隔离：按登录用户 uid 隔离，前端无法指定 uid
+       ============================================================ */
+    var abRequest = function (doName, params, method) {
+        method = (method || 'GET').toUpperCase();
+        var cfg = window.__AB_AJAX__ || {};
+        if (!cfg.url) return Promise.reject(new Error('AJAX URL 未注入，请检查插件配置'));
+        var url = cfg.url + '?do=' + encodeURIComponent(doName);
+        if (cfg.token) url += '&_=' + encodeURIComponent(cfg.token);
+        var body = null;
+        if (method === 'POST') {
+            body = new URLSearchParams();
+            Object.keys(params || {}).forEach(function (k) {
+                body.append(k, params[k] == null ? '' : String(params[k]));
+            });
+        } else {
+            Object.keys(params || {}).forEach(function (k) {
+                url += '&' + encodeURIComponent(k) + '=' + encodeURIComponent(params[k] == null ? '' : params[k]);
+            });
+        }
+        return fetch(url, {
+            method: method,
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: body
+        }).then(function (res) {
+            return res.json().catch(function () {
+                throw new Error('服务端返回了非 JSON 响应（HTTP ' + res.status + '）');
+            });
+        }).then(function (json) {
+            if (!json || json.code !== 0) {
+                var err = new Error((json && json.message) || '请求失败');
+                err.code = json && json.code;
+                throw err;
+            }
+            return json.data;
+        });
+    };
+
+    var abData = (function () {
+        var KEY_RE = /^[A-Za-z0-9_-]{1,64}$/;
+        function checkKey(key) {
+            if (typeof key !== 'string' || !KEY_RE.test(key)) {
+                throw new Error('数据键非法：只允许 A-Za-z0-9_- 且长度 1~64（不要带 card- 前缀）');
+            }
+            if (key.toLowerCase().indexOf('card-') === 0) {
+                throw new Error('数据键不要带 card- 前缀，服务端会自动拼接');
+            }
+            return key;
+        }
+        /* scope: 'user'（默认，仅自己）| 'site'（全站共享，所有管理员同一份）*/
+        function scopeOf(opts) {
+            var s = (opts && opts.scope) ? String(opts.scope).toLowerCase() : 'user';
+            if (s !== 'user' && s !== 'site') {
+                throw new Error("scope 只能是 'user'（仅自己）或 'site'（全站共享）");
+            }
+            return s;
+        }
+        function withScope(params, opts) {
+            var p = params || {};
+            if (scopeOf(opts) === 'site') p.scope = 'site';
+            return p;
+        }
+        function save(key, value, opts) {
+            var json = (typeof value === 'string') ? value : JSON.stringify(value === undefined ? null : value);
+            return abRequest('save-card-data', withScope({ key: checkKey(key), content: json }, opts), 'POST');
+        }
+        function getRow(key, opts) {
+            return abRequest('get-card-data', withScope({ key: checkKey(key) }, opts), 'GET');
+        }
+        function get(key, fallback, opts) {
+            return getRow(key, opts).then(function (data) {
+                if (data && data.exists) return data.json;
+                return (fallback === undefined) ? null : fallback;
+            });
+        }
+        function list(opts) {
+            return abRequest('list-card-data', withScope({}, opts), 'GET');
+        }
+        function remove(key, opts) {
+            return abRequest('delete-card-data', withScope({ key: checkKey(key) }, opts), 'POST');
+        }
+
+        /* ---- 站点级（全站共享）简写 ---- */
+        function siteSave(key, value)   { return save(key, value, { scope: 'site' }); }
+        function siteGet(key, fallback) { return get(key, fallback, { scope: 'site' }); }
+        function siteGetRow(key)        { return getRow(key, { scope: 'site' }); }
+        function siteList()             { return list({ scope: 'site' }); }
+        function siteRemove(key)        { return remove(key, { scope: 'site' }); }
+
+        /* ---- 带 TTL 的缓存：ab.data.getCached(key, ttlMs, loader, opts) ----
+         * 缓存命中就不调 loader；loader 可以是函数（返回 Promise 或值）或直接传值。
+         * 例如：ab.data.getCached('gh-stars', 10*60*1000, function () {
+         *          return ab.ui.getJSON('https://api.github.com/repos/lhl77/…');
+         *       }).then(function (d) { … }); */
+        function getCached(key, ttl, loader, opts) {
+            ttl = (typeof ttl === 'number' && ttl > 0) ? ttl : 5 * 60 * 1000;
+            return get(key, null, opts).then(function (cached) {
+                if (cached && cached.t && ('d' in cached) && (Date.now() - cached.t) < ttl) return cached.d;
+                return Promise.resolve(typeof loader === 'function' ? loader() : loader).then(function (data) {
+                    var payload = { t: Date.now(), d: (data === undefined ? null : data) };
+                    return save(key, payload, opts).then(function () { return payload.d; });
+                });
+            });
+        }
+        function clearCached(key, opts) { return remove(key, opts); }
+
+        return {
+            save: save, get: get, getRow: getRow, list: list, remove: remove,
+            siteSave: siteSave, siteGet: siteGet, siteGetRow: siteGetRow,
+            siteList: siteList, siteRemove: siteRemove,
+            getCached: getCached, clearCached: clearCached
+        };
+    })();
+
+    var abDb = {
+        /** 只读查询（表名不带站点前缀；只能读，不能写） */
+        read: function (table, query) {
+            if (typeof table !== 'string' || !/^[A-Za-z0-9_]{1,64}$/.test(table)) {
+                return Promise.reject(new Error('表名非法：只允许字母 / 数字 / 下划线，且不要带站点前缀'));
+            }
+            return abRequest('db-read', {
+                table: table,
+                query: query == null ? '' : (typeof query === 'string' ? query : JSON.stringify(query))
+            }, 'GET');
+        }
+    };
+
+    /* ============================================================
+       开发者工具集：notify / copy / format / chart / 卡片生命周期
+       ============================================================ */
+
+    /* ---- 轻提示：ab.notify(text, tone, ms) ---- */
+    var NOTIFY_TYPE = {
+        default: 'info', primary: 'info', info: 'info',
+        success: 'success', warn: 'warn', warning: 'warn',
+        danger: 'error', error: 'error'
+    };
+    function abNotify(text, tone, ms) {
+        if (text == null || text === '') return null;
+        if (typeof AdminBeautify.showNotice !== 'function') return null;
+        var type = NOTIFY_TYPE[String(tone || 'info').toLowerCase()] || 'info';
+        return AdminBeautify.showNotice(String(text), type, typeof ms === 'number' ? ms : 2600);
+    }
+
+    /* ---- 剪贴板：ab.copy(text) → Promise<boolean> ---- */
+    function legacyCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', 'readonly');
+        ta.style.cssText = 'position:fixed;top:-1000px;left:-1000px;opacity:0;';
+        document.body.appendChild(ta);
+        var ok = false;
+        try {
+            ta.select();
+            ok = document.execCommand('copy');
+        } catch (e) { ok = false; }
+        if (ta.parentNode) ta.parentNode.removeChild(ta);
+        return ok;
+    }
+    function abCopy(text) {
+        text = (text == null) ? '' : String(text);
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text).then(function () { return true; }, function () { return legacyCopy(text); });
+        }
+        return Promise.resolve(legacyCopy(text));
+    }
+    /** 复制并顺带轻提示：ab.copyText(text, tipText) */
+    function abCopyText(text, tip) {
+        return abCopy(text).then(function (ok) {
+            abNotify(ok ? (tip || '已复制到剪贴板') : '复制失败，请手动选择复制', ok ? 'success' : 'error');
+            return ok;
+        });
+    }
+
+    /* ---- 格式化：ab.format.{bytes,date,relative,duration,num} ---- */
+    function toDate(v) {
+        if (v == null || v === '') return null;
+        if (v instanceof Date) return isNaN(v.getTime()) ? null : v;
+        if (typeof v === 'number' || /^\d+$/.test(String(v).trim())) {
+            var n = parseInt(v, 10);
+            if (!isFinite(n) || n <= 0) return null;
+            return new Date(n < 100000000000 ? n * 1000 : n);   // 秒 / 毫秒自动判别
+        }
+        var s = String(v).trim();
+        var m = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+        if (m) return new Date(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0));
+        var d = new Date(s.replace(/-/g, '/'));
+        return isNaN(d.getTime()) ? null : d;
+    }
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+    var abFormat = {
+        /** 1536 → "1.5 KB" */
+        bytes: function (bytes, digits) {
+            var n = Number(bytes);
+            if (!isFinite(n) || n < 0) return '—';
+            var units = ['B', 'KB', 'MB', 'GB', 'TB'];
+            var i = 0;
+            while (n >= 1024 && i < units.length - 1) { n = n / 1024; i++; }
+            var d = (typeof digits === 'number') ? digits : (i === 0 ? 0 : 1);
+            return n.toFixed(d) + ' ' + units[i];
+        },
+        /** 时间戳 / 日期字符串 / Date → 默认 "2026-09-20 15:04" */
+        date: function (value, pattern) {
+            var d = toDate(value);
+            if (!d) return '—';
+            var p = pattern || 'YYYY-MM-DD HH:mm';
+            return p.replace(/YYYY/g, d.getFullYear())
+                    .replace(/MM/g, pad2(d.getMonth() + 1))
+                    .replace(/DD/g, pad2(d.getDate()))
+                    .replace(/HH/g, pad2(d.getHours()))
+                    .replace(/mm/g, pad2(d.getMinutes()))
+                    .replace(/ss/g, pad2(d.getSeconds()));
+        },
+        /** "刚刚" / "3 分钟前" / "昨天 15:04" */
+        relative: function (value, now) {
+            var d = toDate(value);
+            if (!d) return '—';
+            var base = now ? toDate(now) : new Date();
+            var diff = Math.round(((base || new Date()).getTime() - d.getTime()) / 1000);
+            if (diff < 0)     return abFormat.date(d, 'YYYY-MM-DD HH:mm');
+            if (diff < 60)    return '刚刚';
+            if (diff < 3600)  return Math.floor(diff / 60) + ' 分钟前';
+            if (diff < 86400) return Math.floor(diff / 3600) + ' 小时前';
+            if (diff < 172800) return '昨天 ' + abFormat.date(d, 'HH:mm');
+            if (diff < 604800) return Math.floor(diff / 86400) + ' 天前';
+            return abFormat.date(d, 'YYYY-MM-DD');
+        },
+        /** 3725 → "1 小时 2 分" */
+        duration: function (seconds) {
+            var s = Math.max(0, Math.floor(Number(seconds) || 0));
+            if (s < 60)    return s + ' 秒';
+            if (s < 3600)  return Math.floor(s / 60) + ' 分 ' + (s % 60) + ' 秒';
+            if (s < 86400) return Math.floor(s / 3600) + ' 小时 ' + Math.floor((s % 3600) / 60) + ' 分';
+            return Math.floor(s / 86400) + ' 天 ' + Math.floor((s % 86400) / 3600) + ' 小时';
+        },
+        /** 同 ab.ui.num：1234 → "1,234"（compact 时 "1.2w"） */
+        num: function (n, compact) { return abUi.num(n, compact); }
+    };
+
+    /* ---- 图表：懒加载本地 ab-charts.js（只加载一次）---- */
+    function resolveTarget(t) {
+        if (!t) return null;
+        if (typeof t === 'string') return document.querySelector(t);
+        if (t.nodeType === 1) return t;
+        if (t.el && t.el.nodeType === 1) return t.el;
+        return null;
+    }
+    var abChartsPromise = null;
+    function abLoadCharts() {
+        if (window.ABCharts) return Promise.resolve(window.ABCharts);
+        if (abChartsPromise) return abChartsPromise;
+        abChartsPromise = new Promise(function (resolve, reject) {
+            var abScript = document.querySelector('script[src*="AdminBeautify.min"]');
+            var base = abScript ? abScript.src.replace(/assets\/AdminBeautify\.min[^/]*\.js(\?.*)?$/, '') : '';
+            var s = document.createElement('script');
+            s.src = base + 'assets/lib/ab-charts.v1.0.js';
+            s.onload = function () {
+                if (window.ABCharts) { resolve(window.ABCharts); return; }
+                abChartsPromise = null;
+                reject(new Error('图表库已加载但未导出 ABCharts'));
+            };
+            s.onerror = function () {
+                abChartsPromise = null;
+                reject(new Error('图表库加载失败'));
+            };
+            document.head.appendChild(s);
+        });
+        return abChartsPromise;
+    }
+    var abChart = {
+        load: abLoadCharts,
+        /** 折线图：ab.chart.line(el, {xData:[…], yData:[…], color, colorDark}) */
+        line: function (target, opts) {
+            return abLoadCharts().then(function (c) {
+                var node = resolveTarget(target);
+                if (!node) return null;
+                node.innerHTML = '';
+                return c.line(node, opts || {});
+            });
+        },
+        /** 极坐标柱状图：ab.chart.polar(el, {data:[{name,value}]}) */
+        polar: function (target, opts) {
+            return abLoadCharts().then(function (c) {
+                var node = resolveTarget(target);
+                if (!node) return null;
+                node.innerHTML = '';
+                return c.polar(node, opts || {});
+            });
+        }
+    };
+
+    /* ---- 卡片生命周期：销毁时自动清理定时器 / 监听 ---- */
+    function addCardCleanup(card, fn) {
+        if (!card || typeof fn !== 'function') return;
+        if (!card.__abCleanups) card.__abCleanups = [];
+        card.__abCleanups.push(fn);
+    }
+    function runCardCleanups(card) {
+        if (!card || !card.__abCleanups || !card.__abCleanups.length) return 0;
+        var list = card.__abCleanups;
+        card.__abCleanups = [];
+        for (var i = 0; i < list.length; i++) {
+            try { list[i](); } catch (e) {
+                if (window.console && console.warn) console.warn('[AB] 卡片清理函数出错', e);
+            }
+        }
+        return list.length;
+    }
+    /** 跑掉当前文档里所有自定义卡片的清理函数（页面切换前调用）*/
+    function cleanupCustomCards(root) {
+        var scope = root || document;
+        var nodes = scope.querySelectorAll ? scope.querySelectorAll('.ab-custom-card') : [];
+        var total = 0;
+        for (var i = 0; i < nodes.length; i++) total += runCardCleanups(nodes[i]);
+        return total;
+    }
+
+    AdminBeautify.request = abRequest;
+    AdminBeautify.data = abData;
+    AdminBeautify.db = abDb;
+    AdminBeautify.notify = abNotify;
+    AdminBeautify.copy = abCopy;
+    AdminBeautify.copyText = abCopyText;
+    AdminBeautify.format = abFormat;
+    AdminBeautify.charts = abChart;
+    AdminBeautify.chart = abChart;
+    AdminBeautify.cardCleanup = runCardCleanups;
+    AdminBeautify.cleanupCustomCards = cleanupCustomCards;
 
     // DOM Ready
     if (document.readyState === 'loading') {

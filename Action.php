@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.43
+ * @version 2.1.50
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -22,12 +22,19 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     public function execute()
     {
     }
+    private function releaseSessionLock()
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_write_close();
+        }
+    }
     private function checkAuth()
     {
         $user = Typecho_Widget::widget('Widget_User');
         if (!$user->hasLogin()) {
             $this->jsonError('未登录', 401);
         }
+        $this->releaseSessionLock();
     }
     private function checkAdmin()
     {
@@ -35,6 +42,28 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         if (!$user->hasLogin() || !$user->pass('administrator', true)) {
             $this->jsonError('权限不足', 403);
         }
+        $this->releaseSessionLock();
+    }
+    private function requireLoginForPwa()
+    {
+        $user = Typecho_Widget::widget('Widget_User');
+        if (!$user->hasLogin()) {
+            $this->releaseSessionLock();
+            while (ob_get_level() > 0) {
+                @ob_end_clean();
+            }
+            if (!headers_sent()) {
+                if (function_exists('http_response_code')) {
+                    @http_response_code(401);
+                }
+                header('Content-Type: application/json; charset=utf-8');
+                header('Cache-Control: no-store, private, must-revalidate');
+                header('X-Robots-Tag: noindex, nofollow');
+            }
+            echo '{"code":401,"message":"未登录","data":null}';
+            exit;
+        }
+        $this->releaseSessionLock();
     }
     private function sendJsonRaw(array $payload)
     {
@@ -87,6 +116,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     public function manifest()
     {
+        $this->requireLoginForPwa();
         $siteTitle = (string) $this->options->title;
         $adminUrl  = rtrim((string) $this->options->adminUrl, '/') . '/';
         $pluginUrl = rtrim((string) $this->options->pluginUrl, '/');
@@ -156,15 +186,17 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'categories'       => array('productivity', 'utilities'),
         );
         $this->response->setContentType('application/manifest+json');
-        $this->response->setHeader('Cache-Control', 'public, max-age=3600');
+        $this->response->setHeader('Cache-Control', 'private, no-store, must-revalidate');
+        $this->response->setHeader('X-Robots-Tag', 'noindex, nofollow');
         echo json_encode($manifest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
         exit;
     }
     public function sw()
     {
+        $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.43';
+        $pluginVer  = '2.1.50';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -184,6 +216,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     public function info()
     {
         $this->checkAuth();
+        $this->checkApiToken();
         $postsCount = $this->db->fetchObject(
             $this->db->select(array('COUNT(*)' => 'num'))
                 ->from('table.contents')
@@ -210,6 +243,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     public function stats()
     {
         $this->checkAuth();
+        $this->checkApiToken();
         $db  = $this->db;
         $now = time();
         $weekAgo      = $now - 7 * 86400;
@@ -279,6 +313,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     public function chartData()
     {
         $this->checkAuth();
+        $this->checkApiToken();
         $db   = $this->db;
         $days = (int) $this->request->get('days', 30);
         $since = ($days > 0) ? (time() - $days * 86400) : 0;
@@ -566,6 +601,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     public function listMedia()
     {
         $this->checkAuth();
+        $this->checkApiToken();
         $page   = max(1, (int)$this->request->get('page', 1));
         $per    = min(100, max(1, (int)$this->request->get('per', 20)));
         $parent = (int)$this->request->get('parent', -1);
@@ -693,6 +729,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     public function getMediaUrls()
     {
         $this->checkAuth();
+        $this->checkApiToken();
         $cidParam = $this->request->get('cids', '');
         if (empty($cidParam)) {
             $this->jsonSuccess(array());
@@ -1446,6 +1483,86 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $this->jsonSuccess(array('dir' => 'AdminBeautifyStore'), '安装成功！请在插件管理页面启用 AdminBeautifyStore');
     }
+    private function checkApiToken()
+    {
+        $expect  = '';
+        $ajaxUrl = Typecho_Common::url('/action/admin-beautify', $this->options->index);
+        try {
+            $security = Typecho_Widget::widget('Widget_Security');
+            $expect = (string) $security->getToken($ajaxUrl);
+        } catch (Exception $e) {
+            $this->jsonError('安全校验组件不可用', 403);
+        } catch (Throwable $e) {
+            $this->jsonError('安全校验组件不可用', 403);
+        }
+        $token = (string) $this->request->get('_', '');
+        if ($expect === '' || $token === '' || !hash_equals($expect, $token)) {
+            $this->jsonError('安全令牌校验失败，请刷新后台页面后重试', 403);
+        }
+    }
+    private function checkWriteRequest()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        if (!$this->request->isPost()) {
+            $this->jsonError('该操作仅接受 POST 请求', 405);
+        }
+    }
+    private function sendCardResult($result, $successMessage)
+    {
+        if (is_array($result) && isset($result['error'])) {
+            $this->jsonError((string) $result['error'], isset($result['code']) ? (int) $result['code'] : 400);
+        }
+        $this->jsonSuccess($result, $successMessage);
+    }
+    private function cardScopeParam()
+    {
+        return (strtolower(trim((string) $this->request->get('scope', 'user'))) === 'site') ? 'site' : 'user';
+    }
+    public function saveCardData()
+    {
+        $this->checkWriteRequest();
+        $key = (string) $this->request->get('key');
+        $content = (string) $this->request->get('content');
+        $result = AdminBeautify_Plugin::cardDataSave($key, $content, $this->cardScopeParam());
+        $created = (is_array($result) && !empty($result['created']));
+        $this->sendCardResult($result, $created ? '数据已新增' : '数据已更新');
+    }
+    public function getCardData()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $key = (string) $this->request->get('key');
+        $this->sendCardResult(AdminBeautify_Plugin::cardDataGet($key, $this->cardScopeParam()), 'ok');
+    }
+    public function listCardData()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $this->sendCardResult(AdminBeautify_Plugin::cardDataList($this->cardScopeParam()), 'ok');
+    }
+    public function deleteCardData()
+    {
+        $this->checkWriteRequest();
+        $key = (string) $this->request->get('key');
+        $this->sendCardResult(AdminBeautify_Plugin::cardDataDelete($key, $this->cardScopeParam()), '数据已删除');
+    }
+    public function dbRead()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $table = (string) $this->request->get('table');
+        $queryRaw = (string) $this->request->get('query');
+        $query = array();
+        if ($queryRaw !== '') {
+            $decoded = json_decode($queryRaw, true);
+            if (!is_array($decoded)) {
+                $this->jsonError('query 参数必须是 JSON 对象', 400);
+            }
+            $query = $decoded;
+        }
+        $this->sendCardResult(AdminBeautify_Plugin::dbReadTable($table, $query), 'ok');
+    }
     public function action()
     {
         $do = $this->request->get('do', '');
@@ -1516,6 +1633,21 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 break;
             case 'umami-proxy':
                 $this->umamiProxy();
+                break;
+            case 'save-card-data':
+                $this->saveCardData();
+                break;
+            case 'get-card-data':
+                $this->getCardData();
+                break;
+            case 'list-card-data':
+                $this->listCardData();
+                break;
+            case 'delete-card-data':
+                $this->deleteCardData();
+                break;
+            case 'db-read':
+                $this->dbRead();
                 break;
             default:
                 $this->jsonError('未知的操作: ' . $do, 404);

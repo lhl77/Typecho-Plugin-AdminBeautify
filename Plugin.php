@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.43
+ * @version 2.1.50
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -107,7 +107,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.43';
+        $abVer = '2.1.50';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -363,6 +363,33 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('访客数量、平均访问时长、跳出率 这三项的统计时间范围（今日访问量 / 总访问量 始终固定为今日 / 全部时间）')
         );
         $form->addInput($umamiTimeRange);
+        self::ensureCardTable();
+        abCard('dashboardcards', $abC1, 'dashboard_customize', '概要页卡片设置',
+            '查看概要页已有卡片、调整卡片顺序'
+        );
+        $dashboardCardOrder = new AdminBeautify_SafeHidden(
+            'dashboardCardOrder',
+            null,
+            isset($abOpt->dashboardCardOrder) ? (string) $abOpt->dashboardCardOrder : ''
+        );
+        $form->addInput($dashboardCardOrder);
+        $dashboardCustomCardsEnabled = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardCustomCardsEnabled',
+            array(
+                '0' => '关闭（默认）',
+                '1' => '开启（允许执行自定义 HTML / JS）',
+            ),
+            '0',
+            _t('自定义卡片'),
+            _t('开启后，才会在概要页渲染下方配置的自定义卡片。<br>卡片脚本可直接使用内置 MD3 组件库 <code>ab.ui</code>（磁贴指标 / 行列表 / 大号数字 / 清单 / 徽标 / 按钮 / 提示条 / 空状态 / 卡片底部入口 <code>ab-card-footer</code>），无需自己写 CSS，详见「自定义卡片开发说明」。<br>⚠️ 卡片内容支持任意 HTML 与 JavaScript，将在后台页面执行，请仅粘贴自己信任的代码。')
+        );
+        $form->addInput($dashboardCustomCardsEnabled);
+        $dashboardCustomCards = new AdminBeautify_SafeHidden(
+            'dashboardCustomCards',
+            null,
+            isset($abOpt->dashboardCustomCards) ? (string) $abOpt->dashboardCustomCards : ''
+        );
+        $form->addInput($dashboardCustomCards);
         abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
             abCardTip('✏️', '可在 AB Typecho 原版优化 / AB Vditor / AB Editor.md / 兼容其他编辑器 之间切换。启用 Vditor 或 Editor.md 后，会替代原版 PageDown 编辑体验，并套用 AB 的 MD3 风格。')
         );
@@ -687,7 +714,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.43 %c",'
+            .   '"%c AB-Admin %c v2.1.50 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -802,7 +829,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.43' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.50' . '.css">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -876,7 +903,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            $injectTail .= "\n" . '<script defer src="https://umami.lhl.one/script.js" data-website-id="dfabc99f-991e-4f7c-9358-03177fbee0ec"></script>';
+            $injectTail .= "\n" . '<script defer src="https://stats.lhl.one/script.js" data-website-id="dfabc99f-991e-4f7c-9358-03177fbee0ec"></script>';
         }
         return $injectHead . $header . $injectTail;
     }
@@ -900,6 +927,29 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardHideDonate = isset($pluginOptions->dashboardHideDonate) ? (string)$pluginOptions->dashboardHideDonate : '0';
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
+        $dashboardCardOrder   = isset($pluginOptions->dashboardCardOrder)   ? (string)$pluginOptions->dashboardCardOrder   : '';
+        $dashboardCustomCardsEnabled = isset($pluginOptions->dashboardCustomCardsEnabled) ? (string)$pluginOptions->dashboardCustomCardsEnabled : '0';
+        $dashboardCustomCardsRaw = isset($pluginOptions->dashboardCustomCards) ? (string)$pluginOptions->dashboardCustomCards : '';
+        $dashboardCustomCards = array();
+        if ($dashboardCustomCardsEnabled === '1' && $dashboardCustomCardsRaw !== '') {
+            $decodedCards = json_decode($dashboardCustomCardsRaw, true);
+            if (is_array($decodedCards)) {
+                foreach ($decodedCards as $cardItem) {
+                    if (!is_array($cardItem)) continue;
+                    $cardId = isset($cardItem['id']) ? preg_replace('/[^A-Za-z0-9_-]/', '', (string)$cardItem['id']) : '';
+                    if ($cardId === '') $cardId = 'c' . count($dashboardCustomCards);
+                    $cardIcon = isset($cardItem['icon']) && trim((string)$cardItem['icon']) !== ''
+                        ? preg_replace('/[^A-Za-z0-9_-]/', '', (string)$cardItem['icon']) : 'widgets';
+                    $dashboardCustomCards[] = array(
+                        'id'    => $cardId,
+                        'icon'  => $cardIcon,
+                        'title' => isset($cardItem['title']) ? (string)$cardItem['title'] : '',
+                        'html'  => isset($cardItem['html'])  ? (string)$cardItem['html']  : '',
+                        'js'    => isset($cardItem['js'])    ? (string)$cardItem['js']    : '',
+                    );
+                }
+            }
+        }
         $dashboardThemeButtonShow = isset($pluginOptions->dashboardThemeButtonShow) ? (string)$pluginOptions->dashboardThemeButtonShow : 'standalone';
         if ($dashboardThemeButtonShow === '1') {
             $dashboardThemeButtonShow = 'standalone';
@@ -1067,11 +1117,26 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             self::iniSizeToBytes(function_exists('ini_get') ? ini_get('upload_max_filesize') : '0'),
             self::iniSizeToBytes(function_exists('ini_get') ? ini_get('post_max_size') : '0'),
         ));
+        $currentUserInfo = array('uid' => 0, 'name' => '', 'screenName' => '', 'group' => '');
+        try {
+            $abCurUser = Typecho_Widget::widget('Widget_User');
+            if ($abCurUser->hasLogin()) {
+                $currentUserInfo = array(
+                    'uid'        => (int) $abCurUser->uid,
+                    'name'       => (string) $abCurUser->name,
+                    'screenName' => (string) ($abCurUser->screenName !== '' ? $abCurUser->screenName : $abCurUser->name),
+                    'group'      => (string) $abCurUser->group,
+                );
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
         echo 'window.__AB_CONFIG__=' . json_encode(array(
             'darkMode'               => $darkMode,
             'enableAnimation'        => $enableAnimation,
             'pluginCardView'         => $pluginCardView,
             'siteName'               => $options->title,
+            'user'                   => $currentUserInfo,
             'pluginUrl'              => (string)$options->pluginUrl,
             'ajaxUrl'                => $ajaxUrl,
             'ajaxToken'              => $token,
@@ -1086,7 +1151,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.43',
+            'pluginVersion'          => '2.1.50',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1094,6 +1159,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'dashboardHideDonate'    => $dashboardHideDonate,
             'dashboardCustomButtons' => $customBtnsParsed,
             'dashboardRecentStyle'   => $dashboardRecentStyle,
+            'dashboardCardOrder'     => $dashboardCardOrder,
+            'dashboardCustomCardsEnabled' => $dashboardCustomCardsEnabled,
+            'dashboardCustomCards'   => $dashboardCustomCards,
             'dashboardThemeButtonShow' => $dashboardThemeButtonShow,
             'overviewChartEnabled'   => $overviewChartEnabled,
             'overviewTimeRange'      => $overviewTimeRange,
@@ -1113,7 +1181,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.43.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.50.js"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1124,7 +1192,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.43"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.50"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1314,7 +1382,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.43";';
+        echo 'var __AB_VER__="2.1.50";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -1652,6 +1720,11 @@ window.abDoUpdate=function(){
         +"&download_url="+encodeURIComponent(dlUrl)
         +"&new_version="+encodeURIComponent(newVer)
         +"&_="+encodeURIComponent(ajax.token||"");
+    // ---- 校验 URL 协议，防止配置被篡改后注入 javascript: 等非法协议 ----
+    if(!/^(https?:)?\/\//i.test(sseUrl)&&sseUrl.charAt(0)!=="/"){
+        onError("非法的请求地址");
+        return;
+    }
     // ---- 优先使用 fetch + ReadableStream（兼容性更好，可读取错误内容）----
     // 不支持时降级到非流式 AJAX（do-update）
     var useStream=!!(window.fetch&&window.ReadableStream&&window.TextDecoder);
@@ -2360,6 +2433,488 @@ window.abSyncCompat = function(){
             $blurSizeVal = 12;
         }
         include dirname(__FILE__) . '/assets/pages/login/preview.php';
+    }
+    const CARD_TABLE = 'abadmin';
+    const CARD_KEY_PREFIX = 'card-';
+    const CARD_KEY_MAX_LEN = 64;
+    const CARD_CONTENT_MAX_BYTES = 65535;
+    const DB_READ_DEFAULT_LIMIT = 50;
+    const DB_READ_MAX_LIMIT = 200;
+    const DB_READ_MAX_VALUE_BYTES = 8192;
+    private static $dbReadDenyTables = array(
+        'options',
+        'information_schema',
+        'performance_schema',
+        'mysql',
+        'sys',
+        'pg_catalog',
+        'sqlite_master',
+        'sqlite_sequence',
+    );
+    private static $dbReadDenyColumns = array('password', 'passwd', 'authcode', 'salt');
+    private static $dbReadOperators = array('=', '!=', '<>', '>', '>=', '<', '<=', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN');
+    private static function currentUid()
+    {
+        try {
+            $user = Typecho_Widget::widget('Widget_User');
+            if ($user->hasLogin()) {
+                return (int) $user->uid;
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return 0;
+    }
+    private static function getDb()
+    {
+        try {
+            return Typecho_Db::get();
+        } catch (Exception $e) {
+            return null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
+    private static function cardTableName($db)
+    {
+        $prefix = preg_replace('/[^A-Za-z0-9_]/', '', (string) $db->getPrefix());
+        return $prefix . self::CARD_TABLE;
+    }
+    private static function cardTableReady($db, $reset = false)
+    {
+        static $ready = null;
+        if ($reset) $ready = null;
+        if ($ready !== null) return $ready;
+        $ready = false;
+        try {
+            $db->fetchRow($db->select(array('COUNT(*)' => 'num'))->from('table.' . self::CARD_TABLE));
+            $ready = true;
+        } catch (Exception $e) {
+            $ready = false;
+        } catch (Throwable $e) {
+            $ready = false;
+        }
+        return $ready;
+    }
+    private static function cardTableDdl($adapter, $table)
+    {
+        $a = strtolower((string) $adapter);
+        if (strpos($a, 'sqlite') !== false) {
+            return array(
+                'CREATE TABLE IF NOT EXISTS "' . $table . '" ('
+                . '"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, '
+                . '"uid" INTEGER NOT NULL DEFAULT 0, '
+                . '"card_key" VARCHAR(64) NOT NULL DEFAULT \'\', '
+                . '"content" TEXT, '
+                . '"created_at" INTEGER NOT NULL DEFAULT 0, '
+                . '"updated_at" INTEGER NOT NULL DEFAULT 0'
+                . ')',
+                'CREATE UNIQUE INDEX IF NOT EXISTS "' . $table . '_uid_key" ON "' . $table . '" ("uid","card_key")',
+            );
+        }
+        if (strpos($a, 'pgsql') !== false) {
+            return array(
+                'CREATE TABLE IF NOT EXISTS "' . $table . '" ('
+                . '"id" SERIAL NOT NULL, '
+                . '"uid" INTEGER NOT NULL DEFAULT 0, '
+                . '"card_key" VARCHAR(64) NOT NULL DEFAULT \'\', '
+                . '"content" TEXT, '
+                . '"created_at" INTEGER NOT NULL DEFAULT 0, '
+                . '"updated_at" INTEGER NOT NULL DEFAULT 0, '
+                . 'PRIMARY KEY ("id")'
+                . ')',
+                'CREATE UNIQUE INDEX IF NOT EXISTS "' . $table . '_uid_key" ON "' . $table . '" ("uid","card_key")',
+            );
+        }
+        return array(
+            'CREATE TABLE IF NOT EXISTS `' . $table . '` ('
+            . '`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT, '
+            . '`uid` INT(10) UNSIGNED NOT NULL DEFAULT 0, '
+            . '`card_key` VARCHAR(64) NOT NULL DEFAULT \'\', '
+            . '`content` TEXT NULL, '
+            . '`created_at` INT(10) UNSIGNED NOT NULL DEFAULT 0, '
+            . '`updated_at` INT(10) UNSIGNED NOT NULL DEFAULT 0, '
+            . 'PRIMARY KEY (`id`), '
+            . 'UNIQUE KEY `' . $table . '_uid_key` (`uid`,`card_key`)'
+            . ') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4'
+        );
+    }
+    public static function ensureCardTable()
+    {
+        $db = self::getDb();
+        if (!$db) return false;
+        if (self::cardTableReady($db)) return true;
+        $table = self::cardTableName($db);
+        foreach (self::cardTableDdl((string) $db->getAdapterName(), $table) as $sql) {
+            try {
+                $db->query($sql, Typecho_Db::WRITE, Typecho_Db::SELECT);
+            } catch (Exception $e) {
+                return false;
+            } catch (Throwable $e) {
+                return false;
+            }
+        }
+        return self::cardTableReady($db, true);
+    }
+    private static function normalizeCardDataKey($key)
+    {
+        $key = is_string($key) ? trim($key) : '';
+        if ($key === '' || strlen($key) > self::CARD_KEY_MAX_LEN) return '';
+        if (!preg_match('/^[A-Za-z0-9_-]+$/', $key)) return '';
+        if (stripos($key, self::CARD_KEY_PREFIX) === 0) return '';
+        return $key;
+    }
+    private static function validateCardContent($json)
+    {
+        if (!is_string($json)) return '内容必须为字符串';
+        if ($json === '') return '内容不能为空';
+        if (strlen($json) > self::CARD_CONTENT_MAX_BYTES) {
+            return '内容超过上限（' . self::CARD_CONTENT_MAX_BYTES . ' 字节）';
+        }
+        json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return '内容不是合法的 JSON：' . (function_exists('json_last_error_msg') ? json_last_error_msg() : 'parse error');
+        }
+        return '';
+    }
+    public static function cardDataSave($key, $json, $scope = 'user')
+    {
+        $scope = self::normalizeCardScope($scope);
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $storeUid = ($scope === 'site') ? 0 : $uid;
+        $key = self::normalizeCardDataKey($key);
+        if ($key === '') {
+            return array('error' => '数据键非法（只允许 A-Za-z0-9_-，长度 1~64，且不要带 card- 前缀）', 'code' => 400);
+        }
+        $err = self::validateCardContent($json);
+        if ($err !== '') return array('error' => $err, 'code' => 400);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::ensureCardTable()) {
+            return array('error' => '数据表不可用（请检查数据库账号是否具备建表权限）', 'code' => 500);
+        }
+        $fullKey = self::CARD_KEY_PREFIX . $key;
+        $now = time();
+        $created = null;
+        $lastError = '';
+        for ($attempt = 0; $attempt < 2 && $created === null; $attempt++) {
+            try {
+                $created = self::cardUpsertOnce($db, $storeUid, $fullKey, $json, $now);
+            } catch (Exception $e) {
+                $lastError = $e->getMessage();
+            } catch (Throwable $e) {
+                $lastError = $e->getMessage();
+            }
+        }
+        if ($created === null) {
+            return array('error' => '写入失败：' . $lastError, 'code' => 500);
+        }
+        return array(
+            'key'        => $key,
+            'full_key'   => $fullKey,
+            'scope'      => $scope,
+            'created'    => (bool) $created,
+            'bytes'      => strlen($json),
+            'updated_at' => $now,
+        );
+    }
+    private static function cardUpsertOnce($db, $uid, $fullKey, $json, $now)
+    {
+        $row = $db->fetchRow(
+            $db->select('id')
+                ->from('table.' . self::CARD_TABLE)
+                ->where('uid = ?', $uid)
+                ->where('card_key = ?', $fullKey)
+                ->limit(1)
+        );
+        if ($row) {
+            $db->query(
+                $db->update('table.' . self::CARD_TABLE)
+                    ->rows(array('content' => $json, 'updated_at' => $now))
+                    ->where('id = ?', (int) $row['id'])
+            );
+            return false;
+        }
+        $db->query(
+            $db->insert('table.' . self::CARD_TABLE)
+                ->rows(array(
+                    'uid'        => $uid,
+                    'card_key'   => $fullKey,
+                    'content'    => $json,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ))
+        );
+        return true;
+    }
+    public static function cardDataGet($key, $scope = 'user')
+    {
+        $scope = self::normalizeCardScope($scope);
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $storeUid = ($scope === 'site') ? 0 : $uid;
+        $key = self::normalizeCardDataKey($key);
+        if ($key === '') {
+            return array('error' => '数据键非法（只允许 A-Za-z0-9_-，长度 1~64）', 'code' => 400);
+        }
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) {
+            return array('exists' => false, 'key' => $key, 'scope' => $scope, 'content' => null, 'json' => null, 'created_at' => 0, 'updated_at' => 0);
+        }
+        $fullKey = self::CARD_KEY_PREFIX . $key;
+        try {
+            $row = $db->fetchRow(
+                $db->select('content', 'created_at', 'updated_at')
+                    ->from('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $storeUid)
+                    ->where('card_key = ?', $fullKey)
+                    ->limit(1)
+            );
+        } catch (Exception $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        }
+        if (!$row) {
+            return array('exists' => false, 'key' => $key, 'scope' => $scope, 'content' => null, 'json' => null, 'created_at' => 0, 'updated_at' => 0);
+        }
+        $decoded = json_decode((string) $row['content'], true);
+        return array(
+            'exists'     => true,
+            'key'        => $key,
+            'scope'      => $scope,
+            'content'    => (string) $row['content'],
+            'json'       => (json_last_error() === JSON_ERROR_NONE) ? $decoded : null,
+            'created_at' => (int) $row['created_at'],
+            'updated_at' => (int) $row['updated_at'],
+        );
+    }
+    public static function cardDataList($scope = 'user')
+    {
+        $scope = self::normalizeCardScope($scope);
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $storeUid = ($scope === 'site') ? 0 : $uid;
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) {
+            return array('items' => array(), 'count' => 0, 'scope' => $scope);
+        }
+        try {
+            $rows = $db->fetchAll(
+                $db->select('card_key', 'created_at', 'updated_at')
+                    ->from('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $storeUid)
+                    ->where('card_key LIKE ?', self::CARD_KEY_PREFIX . '%')
+                    ->order('updated_at', Typecho_Db::SORT_DESC)
+                    ->order('id', Typecho_Db::SORT_DESC)
+                    ->limit(self::DB_READ_MAX_LIMIT)
+            );
+        } catch (Exception $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        }
+        $items = array();
+        foreach ((array) $rows as $row) {
+            $items[] = array(
+                'key'        => substr((string) $row['card_key'], strlen(self::CARD_KEY_PREFIX)),
+                'created_at' => (int) $row['created_at'],
+                'updated_at' => (int) $row['updated_at'],
+            );
+        }
+        return array('items' => $items, 'count' => count($items), 'scope' => $scope);
+    }
+    public static function cardDataDelete($key, $scope = 'user')
+    {
+        $scope = self::normalizeCardScope($scope);
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $storeUid = ($scope === 'site') ? 0 : $uid;
+        $key = self::normalizeCardDataKey($key);
+        if ($key === '') {
+            return array('error' => '数据键非法（只允许 A-Za-z0-9_-，长度 1~64）', 'code' => 400);
+        }
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) {
+            return array('deleted' => 0, 'key' => $key, 'scope' => $scope);
+        }
+        try {
+            $deleted = (int) $db->query(
+                $db->delete('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $storeUid)
+                    ->where('card_key = ?', self::CARD_KEY_PREFIX . $key)
+            );
+        } catch (Exception $e) {
+            return array('error' => '删除失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '删除失败：' . $e->getMessage(), 'code' => 500);
+        }
+        return array('deleted' => $deleted, 'key' => $key, 'scope' => $scope);
+    }
+    private static function normalizeCardScope($scope)
+    {
+        return (strtolower(trim((string) $scope)) === 'site') ? 'site' : 'user';
+    }
+    private static function isDeniedDbColumn($column)
+    {
+        $normalized = strtolower(preg_replace('/[^A-Za-z0-9]/', '', (string) $column));
+        if ($normalized === '') return true;
+        foreach (self::$dbReadDenyColumns as $deny) {
+            if (strpos($normalized, $deny) !== false) return true;
+        }
+        return false;
+    }
+    private static function sanitizeDbValue($value)
+    {
+        if (!is_string($value) || $value === '') return $value;
+        if (!preg_match('//u', $value)) {
+            return '[binary data: ' . strlen($value) . ' bytes]';
+        }
+        if (strlen($value) > self::DB_READ_MAX_VALUE_BYTES) {
+            return substr($value, 0, self::DB_READ_MAX_VALUE_BYTES) . '…[truncated]';
+        }
+        return $value;
+    }
+    public static function dbReadTable($table, $query)
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        $table = is_string($table) ? strtolower(trim($table)) : '';
+        $prefix = strtolower(preg_replace('/[^A-Za-z0-9_]/', '', (string) $db->getPrefix()));
+        if ($prefix !== '' && strpos($table, $prefix) === 0) {
+            $table = substr($table, strlen($prefix));
+        }
+        if ($table === '' || !preg_match('/^[a-z0-9_]{1,64}$/', $table)) {
+            return array('error' => '表名非法（只允许字母 / 数字 / 下划线，且不要带站点前缀）', 'code' => 400);
+        }
+        if (in_array($table, self::$dbReadDenyTables, true)) {
+            return array('error' => '禁止读取该表：' . $table, 'code' => 403);
+        }
+        $query = is_array($query) ? $query : array();
+        $columns = isset($query['columns']) ? $query['columns'] : array('*');
+        if (is_string($columns)) $columns = array($columns);
+        if (!is_array($columns) || empty($columns)) $columns = array('*');
+        $cleanColumns = array();
+        foreach ($columns as $col) {
+            $col = is_string($col) ? trim($col) : '';
+            if ($col === '*') {
+                $cleanColumns = array('*');
+                break;
+            }
+            if (!preg_match('/^[A-Za-z0-9_]{1,64}$/', $col)) {
+                return array('error' => '列名非法：' . $col, 'code' => 400);
+            }
+            if (self::isDeniedDbColumn($col)) {
+                return array('error' => '禁止读取该列：' . $col, 'code' => 403);
+            }
+            $cleanColumns[] = $col;
+        }
+        if (empty($cleanColumns)) $cleanColumns = array('*');
+        $where = isset($query['where']) ? $query['where'] : array();
+        if (is_array($where) && isset($where['field'])) $where = array($where);
+        if (!is_array($where)) $where = array();
+        $cleanWhere = array();
+        foreach ($where as $cond) {
+            if (!is_array($cond)) {
+                return array('error' => 'where 条件格式错误（应为 {field,op,value}）', 'code' => 400);
+            }
+            $field = isset($cond['field']) ? (string) $cond['field'] : '';
+            if (!preg_match('/^[A-Za-z0-9_]{1,64}$/', $field)) {
+                return array('error' => 'where 字段非法：' . $field, 'code' => 400);
+            }
+            if (self::isDeniedDbColumn($field)) {
+                return array('error' => '禁止按该列查询：' . $field, 'code' => 403);
+            }
+            $op = strtoupper(trim(isset($cond['op']) ? (string) $cond['op'] : '='));
+            $op = preg_replace('/\s+/', ' ', $op);
+            if (!in_array($op, self::$dbReadOperators, true)) {
+                return array('error' => '不支持的查询操作符：' . $op, 'code' => 400);
+            }
+            $value = isset($cond['value']) ? $cond['value'] : null;
+            if ($op === 'IN' || $op === 'NOT IN') {
+                if (!is_array($value) || empty($value)) {
+                    return array('error' => $op . ' 查询需要一个非空数组作为 value', 'code' => 400);
+                }
+                if (count($value) > 100) {
+                    return array('error' => $op . ' 查询条件过多（上限 100）', 'code' => 400);
+                }
+                $vals = array();
+                foreach ($value as $v) {
+                    if (is_array($v) || is_object($v)) {
+                        return array('error' => 'IN 查询的值必须是标量', 'code' => 400);
+                    }
+                    $vals[] = is_bool($v) ? (int) $v : $v;
+                }
+                $value = $vals;
+            } elseif (is_array($value) || is_object($value)) {
+                return array('error' => '查询值必须是标量', 'code' => 400);
+            }
+            $cleanWhere[] = array('field' => $field, 'op' => $op, 'value' => $value);
+        }
+        $orderBy = isset($query['orderBy']) ? $query['orderBy'] : null;
+        $orderField = '';
+        $orderDir = 'ASC';
+        if (is_array($orderBy) && !empty($orderBy)) {
+            $orderField = isset($orderBy['field']) ? (string) $orderBy['field'] : '';
+            $dir = strtoupper(trim(isset($orderBy['dir']) ? (string) $orderBy['dir'] : 'ASC'));
+            $orderDir = ($dir === 'DESC') ? 'DESC' : 'ASC';
+        } elseif (is_string($orderBy) && trim($orderBy) !== '') {
+            $orderField = trim($orderBy);
+        }
+        if ($orderField !== '') {
+            if (!preg_match('/^[A-Za-z0-9_]{1,64}$/', $orderField)) {
+                return array('error' => '排序字段非法：' . $orderField, 'code' => 400);
+            }
+            if (self::isDeniedDbColumn($orderField)) {
+                return array('error' => '禁止按该列排序：' . $orderField, 'code' => 403);
+            }
+        }
+        $limit = isset($query['limit']) ? (int) $query['limit'] : self::DB_READ_DEFAULT_LIMIT;
+        if ($limit <= 0) $limit = self::DB_READ_DEFAULT_LIMIT;
+        if ($limit > self::DB_READ_MAX_LIMIT) $limit = self::DB_READ_MAX_LIMIT;
+        $offset = isset($query['offset']) ? (int) $query['offset'] : 0;
+        if ($offset < 0) $offset = 0;
+        try {
+            $q = call_user_func_array(array($db, 'select'), $cleanColumns)->from('table.' . $table);
+            foreach ($cleanWhere as $c) {
+                $q->where($c['field'] . ' ' . $c['op'] . ' ?', $c['value']);
+            }
+            if ($orderField !== '') {
+                $q->order($orderField, $orderDir === 'DESC' ? Typecho_Db::SORT_DESC : Typecho_Db::SORT_ASC);
+            }
+            $q->limit($limit)->offset($offset);
+            $rows = $db->fetchAll($q);
+        } catch (Exception $e) {
+            return array('error' => '查询失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '查询失败：' . $e->getMessage(), 'code' => 500);
+        }
+        $data = array();
+        $returnedColumns = array();
+        foreach ((array) $rows as $row) {
+            $item = array();
+            foreach ((array) $row as $k => $v) {
+                if (self::isDeniedDbColumn($k)) continue;
+                $item[$k] = self::sanitizeDbValue($v);
+            }
+            if (empty($returnedColumns)) $returnedColumns = array_keys($item);
+            $data[] = $item;
+        }
+        if (empty($returnedColumns)) $returnedColumns = $cleanColumns;
+        return array(
+            'table'   => $table,
+            'columns' => $returnedColumns,
+            'rows'    => $data,
+            'count'   => count($data),
+            'limit'   => $limit,
+            'offset'  => $offset,
+        );
     }
     private static function getColorScheme($scheme)
     {
