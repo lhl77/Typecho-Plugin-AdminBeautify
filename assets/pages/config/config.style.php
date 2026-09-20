@@ -635,7 +635,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.50.css 里的
+   注意：AdminBeautify.v2.1.51.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }
@@ -969,7 +969,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 }
 .ab-card .ab-dash-custom-warn .material-icons-round { font-size: 18px !important; flex: none !important; line-height: 1.3 !important; }
 
-/* 帮助文档 / 投稿入口 */
+/* 帮助文档 / 卡片广场入口 */
 .ab-card .ab-dash-custom-help {
     margin: -4px 0 14px !important;
 }
@@ -1000,6 +1000,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 .ab-card .ab-dash-custom-help > a .ab-dash-custom-help-arrow {
     margin-left: auto !important;
     opacity: .7 !important;
+}
+.ab-card .ab-dash-custom-help > a:last-child {
+    margin-bottom: 0 !important;
 }
 .ab-card .ab-dash-custom-help-note {
     display: flex !important;

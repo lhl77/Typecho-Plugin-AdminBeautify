@@ -350,7 +350,7 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.50';
+            var ver = cfg.pluginVersion || '2.1.51';
 
             var themeInfo = document.createElement('div');
             themeInfo.className = 'ab-footer-theme';

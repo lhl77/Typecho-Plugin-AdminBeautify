@@ -790,12 +790,11 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                         <span>自定义卡片开发说明（含可直接粘贴的示例）</span>\
                         <span class="material-icons-round ab-dash-custom-help-arrow">open_in_new</span>\
                     </a>\
-                    <div class="ab-dash-custom-help-note">\
-                        <span class="material-icons-round">forum</span>\
-                        <span>想分享自己的卡片配置，或直接拿别人写好的配置？到 \
-                            <a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues/11" target="_blank" rel="noopener noreferrer">Issues #11 投稿 / 获取自定义卡片配置</a>\
-                            看看。</span>\
-                    </div>\
+                    <a href="https://ab-admin-cards.lhl.one/" target="_blank" rel="noopener noreferrer">\
+                        <span class="material-icons-round">apps</span>\
+                        <span>AB Cards · 自定义卡片广场（浏览 / 投稿 / 一键复制配置）</span>\
+                        <span class="material-icons-round ab-dash-custom-help-arrow">open_in_new</span>\
+                    </a>\
                 </div>\
                 <div class="ab-dash-custom-enable"></div>\
                 <div class="ab-dash-custom-list" id="ab-dash-custom-list"></div>\
