@@ -635,7 +635,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.52.css 里的
+   注意：AdminBeautify.v2.1.53.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }
@@ -953,6 +953,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     margin-bottom: 10px !important;
 }
 .ab-card .ab-dash-custom-title .material-icons-round { font-size: 20px !important; color: var(--md-primary, #7d5260) !important; }
+
+/* 概要页卡片设置里的子区块（卡片排版模式 / 「更多」卡片）：
+   沿用自定义卡片区的虚线分隔节奏，间距略收紧一点 */
+.ab-card .ab-dash-subsection { margin-top: 18px; padding-top: 14px; }
 
 .ab-card .ab-dash-custom-warn {
     display: flex !important;

@@ -350,7 +350,7 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.52';
+            var ver = cfg.pluginVersion || '2.1.53';
 
             var themeInfo = document.createElement('div');
             themeInfo.className = 'ab-footer-theme';
@@ -3686,39 +3686,10 @@
                 var rawList = ccfg.dashboardCustomCards;
                 var hasCards = !!(rawList && rawList.length);
                 var enabled = ccfg.dashboardCustomCardsEnabled === '1';
-                /* 已有卡片但用户把开关关掉时：什么都不渲染 */
-                if (hasCards && !enabled) return;
-
-                /* 一张自定义卡片都没有 → 放一张「引导卡」：
-                 * 大加号 + 「开始管理你的自定义卡片」，点击进入插件设置的「概要页卡片设置」 */
-                if (!hasCards) {
-                    if (host.querySelector('[data-ab-card="custom:__empty__"]')) return;
-                    var sBase = String(ccfg.pluginSettingsUrl || '');
-                    if (!sBase) return;
-                    var guideUrl = sBase + (sBase.indexOf('?') === -1 ? '?' : '&') + 'to=dashboardcards';
-                    var guide = document.createElement('div');
-                    guide.className = 'ab-card ab-dash-card ab-custom-card ab-custom-guide';
-                    guide.setAttribute('data-ab-card', 'custom:__empty__');
-                    guide.innerHTML =
-                        '<h3><span class="ab-card-header-icon"><span class="material-icons-round">widgets</span></span>' +
-                        '自定义卡片</h3>' +
-                        '<div class="ab-custom-body"></div>';
-                    abUi.mount(guide.querySelector('.ab-custom-body'), abUi.empty({
-                        icon: 'add',
-                        size: 'lg',
-                        text: '开始管理你的自定义卡片',
-                        hint: '点击前往「概要页卡片设置」开启并添加卡片',
-                        href: guideUrl
-                    }));
-                    guide.style.cursor = 'pointer';
-                    guide.title = '前往插件设置 · 概要页卡片设置';
-                    guide.addEventListener('click', function (e) {
-                        if (e.target && e.target.closest && e.target.closest('a[href]')) return;
-                        location.href = guideUrl;
-                    });
-                    host.appendChild(guide);
-                    return;
-                }
+                /* 没有卡片 / 用户把开关关掉：什么都不渲染
+                 * （原来会额外放一张「开始管理你的自定义卡片」引导卡，已按需求删除；
+                 *   入口保留在「更多」卡片的底部） */
+                if (!hasCards || !enabled) return;
 
                 var list = rawList;
                 for (var ci = 0; ci < list.length; ci++) {
@@ -3795,6 +3766,112 @@
                 }
             })();
 
+            // ---- 7.5 「更多」卡片（插件文档 / 插件仓库 / QQ 群 / 捐助作者）----
+            (function () {
+                var ccfg = window.__AB_CONFIG__ || {};
+                var host = document.getElementById('ab-dash-cards');
+                if (!host) return;
+
+                /* 开关关掉时把卡片移除（AJAX 切页会重跑这里，所以两条路都要覆盖） */
+                var flag = (ccfg.dashboardMoreCardEnabled === undefined) ? '1' : String(ccfg.dashboardMoreCardEnabled);
+                if (flag !== '1') {
+                    var oldMore = host.querySelector('[data-ab-card="more"]');
+                    if (oldMore && oldMore.parentNode) oldMore.parentNode.removeChild(oldMore);
+                    return;
+                }
+                if (host.querySelector('[data-ab-card="more"]')) return;
+
+                var QR_IMG    = 'https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg';
+                var DOC_URL   = 'https://blog.lhl.one/artical/977.html';
+                var STORE_URL = 'https://ab-store.lhl.one/';
+                var QQ_URL    = 'https://qm.qq.com/q/OOzG20idi2';
+                var sBase     = String(ccfg.pluginSettingsUrl || '');
+                var cardsUrl  = sBase ? sBase + (sBase.indexOf('?') === -1 ? '?' : '&') + 'to=dashboardcards' : '';
+
+                var card = document.createElement('div');
+                card.className = 'ab-card ab-dash-card ab-custom-card ab-more-card';
+                card.setAttribute('data-ab-card', 'more');
+                card.innerHTML =
+                    '<h3><span class="ab-card-header-icon"><span class="material-icons-round">apps</span></span>' +
+                    '更多</h3>' +
+                    '<div class="ab-more-body"></div>';
+                var body = card.querySelector('.ab-more-body');
+
+                /* ① 捐助作者：鼠标悬停整块变成微信赞赏码，点击弹窗放大
+                 *   二维码图片延到首次悬停/聚焦才加载（不给所有人白拉一张外链图） */
+                var qrLoaded = false;
+                var donate = document.createElement('div');
+                donate.className = 'ab-more-donate';
+                donate.setAttribute('role', 'button');
+                donate.tabIndex = 0;
+                donate.title = '点击查看微信赞赏码';
+                donate.innerHTML =
+                    '<span class="ab-more-donate-inner">' +
+                    '<span class="material-icons-round ab-more-donate-icon">volunteer_activism</span>' +
+                    '<span class="ab-more-donate-text"><b>捐助作者</b><i>你的支持是插件持续更新的动力</i></span>' +
+                    '<span class="ab-more-donate-hint">悬停看赞赏码</span>' +
+                    '</span>' +
+                    '<span class="ab-more-donate-qr"></span>';
+                var qrBox = donate.querySelector('.ab-more-donate-qr');
+                function loadQr() {
+                    if (qrLoaded) return;
+                    qrLoaded = true;
+                    var img = document.createElement('img');
+                    img.src = QR_IMG;
+                    img.alt = '微信赞赏码';
+                    qrBox.appendChild(img);
+                }
+                function openQr() {
+                    loadQr();
+                    var big = document.createElement('img');
+                    big.src = QR_IMG;
+                    big.alt = '微信赞赏码';
+                    big.className = 'ab-more-qr-img';
+                    abUi.dialog({
+                        title: '微信赞赏码',
+                        icon: 'volunteer_activism',
+                        text: '请在备注中填写：[捐赠AdminBeautify] + [您的昵称] + [GitHub 或 个人博客]，作者会定期把您加入鸣谢列表。鸣谢列表在插件页面-关于插件。',
+                        body: big,
+                        actions: [{ text: '知道了', primary: true }]
+                    });
+                }
+                donate.addEventListener('mouseenter', loadQr);
+                donate.addEventListener('focus', loadQr);
+                donate.addEventListener('click', openQr);
+                donate.addEventListener('keydown', function (e) {
+                    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openQr(); }
+                });
+                body.appendChild(donate);
+
+                /* ② 插件文档 / 插件仓库 / QQ 群：三格等宽磁贴（比整行列表紧凑） */
+                var linksBox = document.createElement('div');
+                linksBox.className = 'ab-more-links';
+                var LINK_ITEMS = [
+                    { icon: 'menu_book',  text: '插件文档', href: DOC_URL },
+                    { icon: 'storefront', text: '插件仓库', href: STORE_URL },
+                    { icon: 'forum',      text: 'QQ 群',    href: QQ_URL }
+                ];
+                for (var li = 0; li < LINK_ITEMS.length; li++) {
+                    var a = document.createElement('a');
+                    a.className = 'ab-more-link';
+                    a.href = LINK_ITEMS[li].href;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    a.title = LINK_ITEMS[li].text;
+                    a.innerHTML = '<span class="material-icons-round">' + LINK_ITEMS[li].icon + '</span>' +
+                        '<span class="ab-more-link-text">' + LINK_ITEMS[li].text + '</span>';
+                    linksBox.appendChild(a);
+                }
+                body.appendChild(linksBox);
+
+                host.appendChild(card);
+
+                /* ③ 底部吸底入口：开始管理你的自定义卡片（与引导卡一致） */
+                if (cardsUrl) {
+                    abUi.footer(card, { href: cardsUrl, text: '开始管理你的自定义卡片', icon: 'add' });
+                }
+            })();
+
             // ---- 8. 统一卡片顺序：读取「概要页卡片设置」保存的顺序（含自定义卡片） ----
             (function () {
                 var grid = document.getElementById('ab-dash-cards');
@@ -3846,9 +3923,120 @@
          * - 两卡片同行时：行高由回复卡片决定，文章条目逐条添加直到填满剩余高度
          * - 不同行（窄屏单列）时：文章卡片使用自然高度，最多 10 条
          */
+        /**
+         * 概要页卡片排版：瀑布流（默认）/ 网格流
+         * - 网格流：CSS grid 同一行等高对齐（原版表现）
+         * - 瀑布流：**列优先铺排**（绝对定位）
+         *   · 从左往右填：只要这一列还没有超过「目标高度 + THRESHOLD」就继续往下堆；
+         *     超过了才换下一列 → 即"先排满左边，超过阈值再排右边"，不会像 grid 自动排版那样
+         *     在中间留出空洞（原来用的 grid-row-end: span 方案就会，踩过）；
+         *   · 单列（窄屏）直接走自然堆叠，不做绝对定位；
+         *   · 卡片高度变化（异步数据 / 字体 / 窗口宽度）由 ResizeObserver 重算。
+         */
+        applyDashboardLayout: function () {
+            var grid = document.getElementById('ab-dash-cards');
+            if (!grid) return;
+
+            var mode = String((window.__AB_CONFIG__ || {}).dashboardLayout || 'masonry');
+            if (mode !== 'grid') mode = 'masonry';
+            grid.setAttribute('data-ab-layout', mode);
+
+            var cards = [];
+            for (var i = 0; i < grid.children.length; i++) {
+                var child = grid.children[i];
+                if (child.classList && child.classList.contains('ab-card')) cards.push(child);
+            }
+            if (!cards.length) return;
+
+            function resetFlow(keepWidth) {
+                grid.style.position = '';
+                grid.style.height = '';
+                grid.style.gridAutoRows = '';
+                for (var c = 0; c < cards.length; c++) {
+                    var st = cards[c].style;
+                    st.position = '';
+                    st.left = '';
+                    st.top = '';
+                    st.gridRowEnd = '';
+                    if (!keepWidth) st.width = '';
+                }
+            }
+
+            if (mode !== 'masonry') {
+                resetFlow(false);
+                return;
+            }
+
+            var cs = window.getComputedStyle ? window.getComputedStyle(grid) : null;
+            var gap = cs ? (parseFloat(cs.columnGap || cs.gap) || 16) : 16;
+            var padL = cs ? (parseFloat(cs.paddingLeft) || 0) : 0;
+            var padR = cs ? (parseFloat(cs.paddingRight) || 0) : 0;
+            var avail = grid.clientWidth - padL - padR;
+            var colMin = 340;
+            var colCount = Math.max(1, Math.floor((avail + gap) / (colMin + gap)));
+            if (colCount <= 1) {                        // 窄屏单列：自然堆叠最稳
+                resetFlow(false);
+                return;
+            }
+            var colW = (avail - (colCount - 1) * gap) / colCount;
+
+            /* 先把卡片恢复成静态流并统一宽度 —— 宽度影响换行，必须先定宽再量高度 */
+            resetFlow(true);
+            grid.style.position = 'relative';
+            for (var w = 0; w < cards.length; w++) cards[w].style.width = colW + 'px';
+
+            var heights = [], total = 0;
+            for (var h = 0; h < cards.length; h++) {
+                var hh = Math.ceil(cards[h].getBoundingClientRect().height);
+                heights.push(hh);
+                total += hh + gap;
+            }
+            if (total > 0) total -= gap;
+
+            var target = total / colCount;              // 每列目标高度（大致均衡）
+            var THRESHOLD = 160;                        // 超过目标这么多 px 就不再往这列堆（换右列）
+            var colH = [];
+            for (var k = 0; k < colCount; k++) colH.push(0);
+
+            for (var c2 = 0; c2 < cards.length; c2++) {
+                var pick = -1;
+                for (var t = 0; t < colCount; t++) {
+                    if (colH[t] === 0) { pick = t; break; }                                    // 还有空列 → 优先左边
+                    if (colH[t] + heights[c2] <= target + THRESHOLD) { pick = t; break; }        // 这列还装得下
+                }
+                if (pick === -1) {                                                             // 都满/都超阈值 → 放最矮的列
+                    pick = 0;
+                    for (var m = 1; m < colCount; m++) if (colH[m] < colH[pick]) pick = m;
+                }
+                var card = cards[c2];
+                card.style.position = 'absolute';
+                /* 绝对定位的包含块是容器的 padding box → left 要把 padding 算进去，
+                   否则整块卡片会偏左一个 padding（栅格看起来与上方标题不对齐） */
+                card.style.left = (padL + pick * (colW + gap)) + 'px';
+                card.style.top = colH[pick] + 'px';
+                colH[pick] += heights[c2] + gap;
+            }
+
+            var maxH = 0;
+            for (var q = 0; q < colCount; q++) maxH = Math.max(maxH, colH[q] - gap);
+            grid.style.height = Math.max(0, maxH) + 'px';
+
+            if (window.ResizeObserver) {
+                if (!this._dashRo) {
+                    var self = this;
+                    this._dashRo = new ResizeObserver(function () {
+                        if (self._dashRoTimer) clearTimeout(self._dashRoTimer);
+                        self._dashRoTimer = setTimeout(function () { self.applyDashboardLayout(); }, 90);
+                    });
+                }
+                for (var o = 0; o < cards.length; o++) this._dashRo.observe(cards[o]);
+            }
+        },
+
         fitDashboardCards: function () {
             var grid = document.getElementById('ab-dash-cards');
             if (!grid) return;
+            AdminBeautify.applyDashboardLayout();
             var postCard  = grid.querySelector('[data-ab-card="posts"]');
             var replyCard = grid.querySelector('[data-ab-card="replies"]');
             if (!postCard || !replyCard) return;
@@ -6297,9 +6485,13 @@
         _createProgressBar: function () {
             var el = document.createElement('div');
             el.id = 'ab-ajax-progress';
-            if ((window.__AB_CONFIG__ || {}).loadingAnimation === 'topbar') {
+            var laMode = (window.__AB_CONFIG__ || {}).loadingAnimation;
+            if (laMode === 'topbar') {
                 el.className = 'ab-ajax-progress-topbar';
                 el.innerHTML = '<span class="ab-ajax-progress-bar"></span>';
+            } else if (laMode === 'morph') {
+                /* 新版转圈：M3 变形指示器（样式见主样式表 43b 节） */
+                el.className = 'ab-ajax-progress-morph';
             }
             document.body.appendChild(el);
         },
@@ -7136,7 +7328,41 @@
     abChartStyle.textContent = [
         /* 统一容器：概要页所有卡片（访问统计 / 更新频率 / 近期评论 / 最近文章 / 最近回复 / 自定义）
          * 都放进同一个 grid，顺序由「概要页卡片设置」决定；列数随宽度自适应（每行尽量多放） */
-        '.ab-cards-grid.ab-dash-cards{padding:0 10px;margin-top:20px;width:100%;box-sizing:border-box;grid-template-columns:repeat(auto-fit,minmax(340px,1fr)) !important;gap:16px;align-items:stretch;}',
+        '.ab-cards-grid.ab-dash-cards{padding:0 10px;margin-top:20px;width:100%;max-width:100%;box-sizing:border-box;grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr)) !important;gap:16px;align-items:stretch;}',
+        /* 小屏防横溢：列宽不得小于容器宽度（minmax 的 min 必须能被压缩） */
+        '.ab-dash-cards>*{min-width:0;max-width:100%;}',
+        /* 瀑布流：卡片由 JS 绝对定位铺排（见 applyDashboardLayout），
+         * 这里只保证卡片不会被 grid 拉伸、且单列时按自然顺序堆叠 */
+        '.ab-dash-cards[data-ab-layout="masonry"]{align-items:start;}',
+        '.ab-dash-cards[data-ab-layout="masonry"]>.ab-card{align-self:start;height:auto;}',
+        /* —— 「更多」卡片 —— */
+        '.ab-more-card .ab-more-body{padding:0 0 10px;display:flex;flex-direction:column;gap:10px;}',
+        '.ab-more-donate{position:relative;margin:16px 16px 4px;border-radius:18px;padding:14px 16px;min-height:92px;cursor:pointer;overflow:hidden;display:flex;align-items:center;background:var(--md-surface-container-high,#ECE6F0);background:color-mix(in srgb,var(--md-primary,#6750a4) 14%,var(--md-surface-container-high,#ECE6F0));transition:box-shadow .2s ease,transform .2s ease;}',
+        '.ab-more-donate:hover,.ab-more-donate:focus-visible{box-shadow:0 6px 18px rgba(0,0,0,.14);transform:translateY(-1px);outline:none;}',
+        '.ab-more-donate-inner{display:flex;align-items:center;gap:12px;width:100%;min-width:0;}',
+        '.ab-more-donate-icon{font-size:28px !important;line-height:1;color:var(--md-primary,#6750a4);}',
+        '.ab-more-donate-text{display:flex;flex-direction:column;min-width:0;}',
+        '.ab-more-donate-text b{font-size:15px;font-weight:600;color:var(--md-on-surface,#1c1b1f);}',
+        '.ab-more-donate-text i{font-style:normal;font-size:12px;line-height:1.5;opacity:.72;color:var(--md-on-surface-variant,#49454f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}',
+        '.ab-more-donate-hint{margin-left:auto;font-size:11px;opacity:.6;white-space:nowrap;}',
+        '.ab-more-donate-qr{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;background:var(--md-surface-container-highest,#E6E0E9);transition:opacity .18s ease;}',
+        '.ab-more-donate:hover .ab-more-donate-qr,.ab-more-donate:focus-visible .ab-more-donate-qr{opacity:1;}',
+        '.ab-more-donate-qr img{width:84px;height:84px;object-fit:contain;border-radius:10px;}',
+        '.ab-more-card .ab-more-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:2px 16px 4px;}',
+        '.ab-more-link{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:12px 6px;border-radius:16px;text-decoration:none!important;text-align:center;min-height:74px;box-sizing:border-box;background:var(--md-surface-container-high,#ECE6F0);border:1px solid transparent;transition:background .18s ease,transform .18s ease,box-shadow .18s ease;}',
+        '.ab-more-link:hover{background:var(--md-surface-container-highest,#E6E0E9);transform:translateY(-1px);box-shadow:0 3px 10px rgba(0,0,0,.10);}',
+        '.ab-more-link .material-icons-round{font-size:24px!important;line-height:1;color:var(--md-primary,#6750a4);}',
+        '.ab-more-link-text{font-size:12.5px;font-weight:500;color:var(--md-on-surface,#1c1b1f);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}',
+        '[data-theme=dark] .ab-more-link{background:var(--md-dark-surface-container-high,#2B2930);}',
+        '[data-theme=dark] .ab-more-link:hover{background:var(--md-dark-surface-container-highest,#36343B);}',
+        '[data-theme=dark] .ab-more-link .material-icons-round{color:var(--md-dark-primary,#d0bcff);}',
+        '[data-theme=dark] .ab-more-link-text{color:var(--md-dark-on-surface,#e6e1e5);}',
+        '.ab-more-qr-img{display:block;margin:0 auto;width:min(260px,70vw);height:auto;border-radius:16px;}',
+        '[data-theme=dark] .ab-more-donate{background:var(--md-dark-surface-container-high,#2B2930);background:color-mix(in srgb,var(--md-dark-primary,#d0bcff) 16%,var(--md-dark-surface-container-high,#2B2930));}',
+        '[data-theme=dark] .ab-more-donate-icon{color:var(--md-dark-primary,#d0bcff);}',
+        '[data-theme=dark] .ab-more-donate-text b{color:var(--md-dark-on-surface,#e6e1e5);}',
+        '[data-theme=dark] .ab-more-donate-text i{color:var(--md-dark-on-surface-variant,#cac4d0);}',
+        '[data-theme=dark] .ab-more-donate-qr{background:var(--md-dark-surface-container-highest,#36343B);}',
         /* 卡片本体作为 grid 子项时拉伸等高，内部 flex 列让内容自适应 */
         '.ab-dash-cards > .ab-card{display:flex !important;flex-direction:column !important;min-width:0;}',
         '.ab-dash-cards > .ab-card > ul{flex:1 1 auto;}',

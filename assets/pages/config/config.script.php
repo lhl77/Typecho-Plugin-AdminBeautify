@@ -308,7 +308,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","navPosition","pluginCardView"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","navPosition","pluginCardView","postListStyle","pageListStyle"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -348,6 +348,8 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-umami">Umami</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-nav">导航栏</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-plugin">插件管理页</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-posts">文章页</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-pages">独立页面页</button>\
                 </div>';
             adminBody.appendChild(quickNav);
 
@@ -383,6 +385,28 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     abGroupLabel.className="ab-group-label";
                     abGroupLabel.id="ab-admin-group-plugin";
                     abGroupLabel.textContent="插件管理页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"文章页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="postListStyle"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-posts";
+                    abGroupLabel.textContent="文章页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"独立页面页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="pageListStyle"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-pages";
+                    abGroupLabel.textContent="独立页面页";
                     adminBody.appendChild(abGroupLabel);
                 }
                 // 在"概要页"分组前插入分割线 + 分组标签
@@ -806,6 +830,32 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             var customEnableHost=customBox.querySelector(".ab-dash-custom-enable");
             if(customEnableUl) customEnableHost.appendChild(customEnableUl);
             var customListEl=customBox.querySelector("#ab-dash-custom-list");
+
+            /* ---- 卡片排版模式：插到「自定义卡片」区上方 ---- */
+            var layoutUl=findFieldUl("dashboardLayout");
+            if(layoutUl){
+                var layoutBox=document.createElement("div");
+                layoutBox.className="ab-dash-custom ab-dash-subsection";
+                layoutBox.innerHTML='\
+                    <div class="ab-dash-custom-title">\
+                        <span class="material-icons-round">view_quilt</span><span>卡片排版模式</span>\
+                    </div>';
+                body.insertBefore(layoutBox,customBox);
+                layoutBox.appendChild(layoutUl);
+            }
+
+            /* ---- 「更多」卡片开关：放到折叠框最下面 ---- */
+            var moreUl=findFieldUl("dashboardMoreCardEnabled");
+            if(moreUl){
+                var moreBox=document.createElement("div");
+                moreBox.className="ab-dash-custom ab-dash-subsection";
+                moreBox.innerHTML='\
+                    <div class="ab-dash-custom-title">\
+                        <span class="material-icons-round">apps</span><span>「更多」卡片</span>\
+                    </div>';
+                body.appendChild(moreBox);
+                moreBox.appendChild(moreUl);
+            }
 
             function newCardId(){
                 return "c"+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);
