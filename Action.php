@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.51
+ * @version 2.1.52
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.51';
+        $pluginVer  = '2.1.52';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -457,11 +457,15 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             foreach ($settings as $key => $value) {
                 $merged[$key] = $value;
             }
-            $this->db->query(
-                $this->db->update('table.options')
-                    ->rows(array('value' => serialize($merged)))
-                    ->where('name = ?', 'plugin:' . $pluginName)
-            );
+            $message = '';
+            if (!AdminBeautify_Plugin::prepareCardStorage($merged, $message)) {
+                $this->jsonError($message !== '' ? $message : '卡片设置体积过大，未保存', 400);
+                return;
+            }
+            if (!AdminBeautify_Plugin::savePluginOptions($pluginName, $merged)) {
+                $this->jsonError('保存失败：Typecho 写库方法不可用', 500);
+                return;
+            }
             $this->jsonSuccess($merged, '设置已保存');
         } catch (Exception $e) {
             $this->jsonError('保存失败: ' . $e->getMessage(), 500);

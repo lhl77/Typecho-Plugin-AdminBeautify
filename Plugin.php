@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.51
+ * @version 2.1.52
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -15,7 +15,11 @@ class AdminBeautify_SafeHidden extends Typecho_Widget_Helper_Form_Element_Hidden
         if (is_array($value)) {
             $value = json_encode($value);
         }
-        $this->input->setAttribute('value', htmlspecialchars((string)$value));
+        $value = (string) $value;
+        if ($this->name === 'dashboardCustomCards') {
+            $value = AdminBeautify_Plugin::hydrateCardValueForForm($value);
+        }
+        $this->input->setAttribute('value', htmlspecialchars($value));
     }
 }
 class AdminBeautify_Plugin implements Typecho_Plugin_Interface
@@ -107,7 +111,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.51';
+        $abVer = '2.1.52';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -387,7 +391,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardCustomCards = new AdminBeautify_SafeHidden(
             'dashboardCustomCards',
             null,
-            isset($abOpt->dashboardCustomCards) ? (string) $abOpt->dashboardCustomCards : ''
+            self::hydrateCardValueForForm(isset($abOpt->dashboardCustomCards) ? (string) $abOpt->dashboardCustomCards : '')
         );
         $form->addInput($dashboardCustomCards);
         abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
@@ -714,7 +718,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.51 %c",'
+            .   '"%c AB-Admin %c v2.1.52 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -829,7 +833,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.51' . '.css">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.52' . '.css">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -932,22 +936,21 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardCustomCardsRaw = isset($pluginOptions->dashboardCustomCards) ? (string)$pluginOptions->dashboardCustomCards : '';
         $dashboardCustomCards = array();
         if ($dashboardCustomCardsEnabled === '1' && $dashboardCustomCardsRaw !== '') {
-            $decodedCards = json_decode($dashboardCustomCardsRaw, true);
-            if (is_array($decodedCards)) {
-                foreach ($decodedCards as $cardItem) {
-                    if (!is_array($cardItem)) continue;
-                    $cardId = isset($cardItem['id']) ? preg_replace('/[^A-Za-z0-9_-]/', '', (string)$cardItem['id']) : '';
-                    if ($cardId === '') $cardId = 'c' . count($dashboardCustomCards);
-                    $cardIcon = isset($cardItem['icon']) && trim((string)$cardItem['icon']) !== ''
-                        ? preg_replace('/[^A-Za-z0-9_-]/', '', (string)$cardItem['icon']) : 'widgets';
-                    $dashboardCustomCards[] = array(
-                        'id'    => $cardId,
-                        'icon'  => $cardIcon,
-                        'title' => isset($cardItem['title']) ? (string)$cardItem['title'] : '',
-                        'html'  => isset($cardItem['html'])  ? (string)$cardItem['html']  : '',
-                        'js'    => isset($cardItem['js'])    ? (string)$cardItem['js']    : '',
-                    );
+            $dashboardCustomCards = self::normalizeCards(json_decode($dashboardCustomCardsRaw, true));
+            if (!empty($dashboardCustomCards)) {
+                self::hydrateCards($dashboardCustomCards);
+                $renderable = array();
+                foreach ($dashboardCustomCards as $cardItem) {
+                    if ($cardItem['html'] === '' && $cardItem['js'] === '') {
+                        if ($cardItem['code'] !== 'db') continue;
+                        $cardItem['html'] = '<div style="padding:12px;font-size:13px;line-height:1.7;opacity:.8">'
+                            . '⚠️ 卡片代码缺失：数据表里没有找到这张卡片的代码，请到「插件 → AB Admin → 概要页卡片设置」重新粘贴代码后保存。'
+                            . '</div>';
+                        $cardItem['js'] = '';
+                    }
+                    $renderable[] = $cardItem;
                 }
+                $dashboardCustomCards = $renderable;
             }
         }
         $dashboardThemeButtonShow = isset($pluginOptions->dashboardThemeButtonShow) ? (string)$pluginOptions->dashboardThemeButtonShow : 'standalone';
@@ -1151,7 +1154,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.51',
+            'pluginVersion'          => '2.1.52',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1181,7 +1184,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.51.js"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.52.js"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1192,7 +1195,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.51"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.52"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1382,7 +1385,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.51";';
+        echo 'var __AB_VER__="2.1.52";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2438,6 +2441,9 @@ window.abSyncCompat = function(){
     const CARD_KEY_PREFIX = 'card-';
     const CARD_KEY_MAX_LEN = 64;
     const CARD_CONTENT_MAX_BYTES = 65535;
+    const CARD_CODE_KEY_PREFIX = 'cc';
+    const CARD_CODE_MAX_BYTES = 65535;
+    const OPTION_BLOB_MAX_BYTES = 61440;
     const DB_READ_DEFAULT_LIMIT = 50;
     const DB_READ_MAX_LIMIT = 200;
     const DB_READ_MAX_VALUE_BYTES = 8192;
@@ -2556,12 +2562,284 @@ window.abSyncCompat = function(){
         }
         return self::cardTableReady($db, true);
     }
+    private static function cardCodeKey($cardId, $part)
+    {
+        return self::CARD_KEY_PREFIX . self::CARD_CODE_KEY_PREFIX . '-' . $cardId . '-' . $part;
+    }
+    private static function normalizeCardField($value, $fallback)
+    {
+        $value = (string) preg_replace('/[^A-Za-z0-9_-]/', '', (string) $value);
+        if ($value === '') $value = (string) $fallback;
+        return substr($value, 0, 40);
+    }
+    private static function normalizeCards($cards)
+    {
+        $out = array();
+        if (!is_array($cards)) return $out;
+        foreach ($cards as $item) {
+            if (!is_array($item)) continue;
+            $out[] = array(
+                'id'    => self::normalizeCardField(isset($item['id']) ? $item['id'] : '', 'c' . (count($out) + 1)),
+                'icon'  => self::normalizeCardField(isset($item['icon']) ? $item['icon'] : '', 'widgets'),
+                'title' => isset($item['title']) ? (string) $item['title'] : '',
+                'html'  => isset($item['html']) ? (string) $item['html'] : '',
+                'js'    => isset($item['js']) ? (string) $item['js'] : '',
+                'code'  => isset($item['code']) ? (string) preg_replace('/[^A-Za-z0-9_-]/', '', (string) $item['code']) : '',
+            );
+        }
+        return $out;
+    }
+    private static function readCardCodeRows($db = null)
+    {
+        if ($db === null) $db = self::getDb();
+        if (!$db) return null;
+        if (!self::cardTableReady($db)) return null;
+        try {
+            $rows = $db->fetchAll(
+                $db->select('card_key', 'content')
+                    ->from('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', 0)
+                    ->where('card_key LIKE ?', self::CARD_KEY_PREFIX . self::CARD_CODE_KEY_PREFIX . '-%')
+            );
+        } catch (Exception $e) {
+            return null;
+        } catch (Throwable $e) {
+            return null;
+        }
+        $out = array();
+        foreach ((array) $rows as $row) {
+            if (!is_array($row) || !isset($row['card_key'])) continue;
+            $out[(string) $row['card_key']] = isset($row['content']) ? (string) $row['content'] : '';
+        }
+        return $out;
+    }
+    private static function hydrateCards(array &$cards, $db = null, $rows = null)
+    {
+        $missing = array();
+        foreach ($cards as $i => $card) {
+            if ($card['html'] === '' && $card['js'] === '') $missing[$i] = $card['id'];
+        }
+        if (empty($missing)) return true;
+        if ($rows === null) {
+            $rows = self::readCardCodeRows($db);
+            if ($rows === null) return false;
+        }
+        foreach ($missing as $i => $cardId) {
+            foreach (array('h' => 'html', 'j' => 'js') as $part => $field) {
+                $key = self::cardCodeKey($cardId, $part);
+                if (array_key_exists($key, $rows)) $cards[$i][$field] = $rows[$key];
+            }
+            $hasCode = ($cards[$i]['html'] !== '' || $cards[$i]['js'] !== '');
+            $cards[$i]['code'] = $hasCode ? 'db' : '';
+        }
+        return true;
+    }
+    private static function writeCardCodes($db, array $cards, &$error)
+    {
+        $now = time();
+        $keep = array();
+        foreach ($cards as $card) {
+            foreach (array('h' => $card['html'], 'j' => $card['js']) as $part => $code) {
+                $key = self::cardCodeKey($card['id'], $part);
+                $keep[$key] = true;
+                if ($code === '') continue;
+                if (strlen($code) > self::CARD_CODE_MAX_BYTES) {
+                    $error = '卡片「' . ($card['title'] !== '' ? $card['title'] : $card['id']) . '」的代码单块超过 '
+                        . self::CARD_CODE_MAX_BYTES . ' 字节，无法存入数据表，请精简后重试';
+                    return false;
+                }
+                $key = self::cardCodeKey($card['id'], $part);
+                try {
+                    self::cardUpsertOnce($db, 0, $key, $code, $now);
+                } catch (Exception $e) {
+                    $error = '卡片代码写入失败：' . $e->getMessage();
+                    return false;
+                } catch (Throwable $e) {
+                    $error = '卡片代码写入失败：' . $e->getMessage();
+                    return false;
+                }
+            }
+        }
+        $rows = self::readCardCodeRows($db);
+        if (is_array($rows)) {
+            foreach (array_keys($rows) as $key) {
+                if (isset($keep[$key])) continue;
+                try {
+                    $db->query($db->delete('table.' . self::CARD_TABLE)
+                        ->where('uid = ?', 0)
+                        ->where('card_key = ?', $key));
+                } catch (Exception $e) {
+                } catch (Throwable $e) {
+                }
+            }
+        }
+        return true;
+    }
+    private static function slimCardsJson(array $cards)
+    {
+        $slim = array();
+        foreach ($cards as $card) {
+            $item = array(
+                'id'    => $card['id'],
+                'icon'  => $card['icon'],
+                'title' => $card['title'],
+            );
+            if ($card['html'] !== '' || $card['js'] !== '') {
+                $item['code'] = 'db';
+            } else {
+                $item['html'] = '';
+                $item['js']   = '';
+            }
+            $slim[] = $item;
+        }
+        return (string) json_encode($slim, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    private static function optionBlobBytes(array $settings)
+    {
+        $json = (string) json_encode($settings);
+        $ser = '';
+        try {
+            $ser = (string) serialize($settings);
+        } catch (Exception $e) {
+            $ser = '';
+        } catch (Throwable $e) {
+            $ser = '';
+        }
+        return max(strlen($json), strlen($ser));
+    }
+    private static function optionBlobWarning(array $settings, $prefix = '自定义卡片')
+    {
+        $bytes = self::optionBlobBytes($settings);
+        if ($bytes <= self::OPTION_BLOB_MAX_BYTES) return '';
+        return $prefix . '体积 ' . number_format($bytes) . ' 字节，已超过安全阈值 '
+            . number_format(self::OPTION_BLOB_MAX_BYTES) . ' 字节（Typecho 单条设置上限是 65535 字节，这里留了 4KB 余量）';
+    }
+    private static function notice($message, $type = 'notice')
+    {
+        if ($message === '' || $message === null) return;
+        try {
+            Typecho_Widget::widget('Widget_Notice')->set($message, $type);
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    public static function savePluginOptions($pluginName, array $settings)
+    {
+        foreach (array('Widget\\Plugins\\Edit', 'Widget_Plugins_Edit') as $class) {
+            if (!class_exists($class) || !method_exists($class, 'configPlugin')) continue;
+            try {
+                call_user_func(array($class, 'configPlugin'), $pluginName, $settings);
+                return true;
+            } catch (Exception $e) {
+            } catch (Throwable $e) {
+            }
+        }
+        return false;
+    }
+    public static function configCheck($settings)
+    {
+        if (!is_array($settings)) return '';
+        $raw = isset($settings['dashboardCustomCards']) ? $settings['dashboardCustomCards'] : '';
+        if (!is_string($raw) || $raw === '') return '';
+        $cards = self::normalizeCards(json_decode($raw, true));
+        if (empty($cards)) return '';
+        $settings['dashboardCustomCards'] = self::slimCardsJson($cards);
+        $warning = self::optionBlobWarning($settings);
+        if ($warning === '') return '';
+        return '⚠️ ' . $warning . '，本次设置不会保存，请删除部分卡片后再试。';
+    }
+    public static function prepareCardStorage(array &$settings, &$message)
+    {
+        $message = '';
+        $raw = isset($settings['dashboardCustomCards']) ? $settings['dashboardCustomCards'] : '';
+        if (!is_string($raw) || $raw === '') return true;
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded)) return true;
+        $cards = self::normalizeCards($decoded);
+        if (empty($cards)) {
+            $clearDb = self::getDb();
+            if ($clearDb && self::ensureCardTable()) {
+                $clearError = '';
+                self::writeCardCodes($clearDb, array(), $clearError);
+            }
+            return true;
+        }
+        $db = self::getDb();
+        $canStore = $db ? self::ensureCardTable() : false;
+        if (!$canStore) {
+            $warning = self::optionBlobWarning($settings);
+            if ($warning === '') return true;
+            $message = '⚠️ ' . $warning . '，本次设置未保存。卡片代码需要存进数据表'
+                . '（数据库账号要有建表 / 写表权限），或先删除部分卡片再试。';
+            return false;
+        }
+        $rows = self::readCardCodeRows($db);
+        if ($rows === null) {
+            $message = '读取卡片代码失败（数据表暂时不可用），为避免把已存的代码写丢，本次设置未保存，请稍后重试。';
+            return false;
+        }
+        self::hydrateCards($cards, $db, $rows);
+        if (!self::writeCardCodes($db, $cards, $message)) {
+            if ($message === '') $message = '卡片代码写入失败，设置未保存';
+            return false;
+        }
+        $settings['dashboardCustomCards'] = self::slimCardsJson($cards);
+        $warning = self::optionBlobWarning($settings);
+        if ($warning !== '') {
+            $message = '⚠️ ' . $warning . '，设置未保存：请删除部分卡片后重试。';
+            return false;
+        }
+        return true;
+    }
+    public static function configHandle($settings, $isInit = false)
+    {
+        if (!is_array($settings)) return false;
+        $raw = isset($settings['dashboardCustomCards']) ? $settings['dashboardCustomCards'] : '';
+        if (!is_string($raw) || $raw === '') return false;
+        $message = '';
+        if (!self::prepareCardStorage($settings, $message)) {
+            self::notice($message, 'error');
+            return true;
+        }
+        if ($settings['dashboardCustomCards'] === $raw) return false;
+        if (self::savePluginOptions('AdminBeautify', $settings)) return true;
+        self::notice('卡片代码已转存到数据表，但设置写入失败（Typecho 兼容层不可用），请重试。', 'error');
+        return true;
+    }
+    public static function hydrateCardValueForForm($raw)
+    {
+        $raw = (string) $raw;
+        if ($raw === '') return $raw;
+        $decoded = json_decode($raw, true);
+        if (!is_array($decoded) || empty($decoded)) return $raw;
+        $cards = self::normalizeCards($decoded);
+        if (empty($cards)) return $raw;
+        $db = self::getDb();
+        if (!$db || !self::ensureCardTable()) return $raw;
+        $rows = self::readCardCodeRows($db);
+        if ($rows === null) return $raw;
+        if (!self::hydrateCards($cards, $db, $rows)) return $raw;
+        $needBackup = false;
+        foreach ($cards as $card) {
+            if ($card['html'] === '' && $card['js'] === '') continue;
+            if (!isset($rows[self::cardCodeKey($card['id'], 'h')]) && !isset($rows[self::cardCodeKey($card['id'], 'j')])) {
+                $needBackup = true;
+                break;
+            }
+        }
+        if ($needBackup) {
+            $error = '';
+            self::writeCardCodes($db, $cards, $error);
+        }
+        return (string) json_encode($cards, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
     private static function normalizeCardDataKey($key)
     {
         $key = is_string($key) ? trim($key) : '';
         if ($key === '' || strlen($key) > self::CARD_KEY_MAX_LEN) return '';
         if (!preg_match('/^[A-Za-z0-9_-]+$/', $key)) return '';
         if (stripos($key, self::CARD_KEY_PREFIX) === 0) return '';
+        if (stripos($key, self::CARD_CODE_KEY_PREFIX . '-') === 0) return '';
         return $key;
     }
     private static function validateCardContent($json)
@@ -2708,6 +2986,7 @@ window.abSyncCompat = function(){
                     ->from('table.' . self::CARD_TABLE)
                     ->where('uid = ?', $storeUid)
                     ->where('card_key LIKE ?', self::CARD_KEY_PREFIX . '%')
+                    ->where('card_key NOT LIKE ?', self::CARD_KEY_PREFIX . self::CARD_CODE_KEY_PREFIX . '-%')
                     ->order('updated_at', Typecho_Db::SORT_DESC)
                     ->order('id', Typecho_Db::SORT_DESC)
                     ->limit(self::DB_READ_MAX_LIMIT)
@@ -2950,6 +3229,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#4F378B',
                 '--md-dark-on-primary-container' => '#EADDFF',
                 '--md-dark-secondary'         => '#CCC2DC',
+                '--md-dark-tertiary'       => '#DEB0BF',
                 '--md-dark-surface'           => '#1C1B1F',
                 '--md-dark-surface-dim'       => '#1C1B1F',
                 '--md-dark-surface-bright'    => '#3B383E',
@@ -2995,6 +3275,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#004494',
                 '--md-dark-on-primary-container' => '#D8E2FF',
                 '--md-dark-secondary'         => '#BEC6DC',
+                '--md-dark-tertiary'       => '#DAB1DD',
                 '--md-dark-surface'           => '#1B1B1F',
                 '--md-dark-surface-dim'       => '#1B1B1F',
                 '--md-dark-surface-bright'    => '#3A3A3F',
@@ -3040,6 +3321,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#004F50',
                 '--md-dark-on-primary-container' => '#6FF7F6',
                 '--md-dark-secondary'         => '#B0CCCB',
+                '--md-dark-tertiary'       => '#B1C4DD',
                 '--md-dark-surface'           => '#191C1C',
                 '--md-dark-surface-dim'       => '#191C1C',
                 '--md-dark-surface-bright'    => '#3A3D3D',
@@ -3085,6 +3367,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#215107',
                 '--md-dark-on-primary-container' => '#B7F397',
                 '--md-dark-secondary'         => '#BDC9B0',
+                '--md-dark-tertiary'       => '#B6D8D8',
                 '--md-dark-surface'           => '#1A1C18',
                 '--md-dark-surface-dim'       => '#1A1C18',
                 '--md-dark-surface-bright'    => '#3A3D36',
@@ -3130,6 +3413,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#6A3C00',
                 '--md-dark-on-primary-container' => '#FFDCBE',
                 '--md-dark-secondary'         => '#DFBFA3',
+                '--md-dark-tertiary'       => '#CFD8B6',
                 '--md-dark-surface'           => '#201B13',
                 '--md-dark-surface-dim'       => '#201B13',
                 '--md-dark-surface-bright'    => '#423A31',
@@ -3175,6 +3459,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#7C294A',
                 '--md-dark-on-primary-container' => '#FFD9E3',
                 '--md-dark-secondary'         => '#E2BDC7',
+                '--md-dark-tertiary'       => '#DAC6B3',
                 '--md-dark-surface'           => '#201A1C',
                 '--md-dark-surface-dim'       => '#201A1C',
                 '--md-dark-surface-bright'    => '#3F383A',
@@ -3220,6 +3505,7 @@ window.abSyncCompat = function(){
                 '--md-dark-primary-container' => '#930016',
                 '--md-dark-on-primary-container' => '#FFDAD7',
                 '--md-dark-secondary'         => '#E7BDB9',
+                '--md-dark-tertiary'       => '#D8CDB5',
                 '--md-dark-surface'           => '#201A19',
                 '--md-dark-surface-dim'       => '#201A19',
                 '--md-dark-surface-bright'    => '#413735',
