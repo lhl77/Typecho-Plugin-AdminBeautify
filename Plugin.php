@@ -4,11 +4,22 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.52
+ * @version 2.1.53
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
     exit;
+}
+class AdminBeautify_MissingOptions
+{
+    public function __get($name)
+    {
+        return null;
+    }
+    public function __isset($name)
+    {
+        return false;
+    }
 }
 class AdminBeautify_SafeHidden extends Typecho_Widget_Helper_Form_Element_Hidden {
     protected function inputValue($value) {
@@ -111,7 +122,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.52';
+        $abVer = '2.1.53';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -170,12 +181,13 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $loadingAnimation = new Typecho_Widget_Helper_Form_Element_Select(
             'loadingAnimation',
             array(
-                'spinner' => 'MD3 风格转圈（默认）',
+                'morph'   => '新版转圈（默认，M3 官方变形指示器）',
+                'spinner' => '旧版转圈（MD3 圆环）',
                 'topbar'  => '顶部进度条',
             ),
-            'spinner',
+            'morph',
             _t('加载动画'),
-            _t('选择页面进入与 AJAX 切换时的加载反馈样式')
+            _t('选择页面进入与 AJAX 切换时的加载反馈样式：<b>新版转圈</b>（默认）复刻 Material 3 官方 Loading indicator —— 在 SoftBurst / Cookie9Sided / Pentagon / Pill / Sunny / Cookie4Sided / Oval 七个形状之间弹簧形变，每 700ms 切一个形状并同步旋转（官方参数：形变 ≈650ms/步 + 全局旋转 4666ms/圈）；<b>旧版转圈</b>为圆环旋转；<b>顶部进度条</b>为页面顶部细进度条。颜色均跟随插件主色。')
         );
         $form->addInput($loadingAnimation);
         $navPosition = new Typecho_Widget_Helper_Form_Element_Select(
@@ -200,6 +212,28 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择插件管理页面的展示方式：卡片网格更直观，原始表格与 Typecho 默认保持一致')
         );
         $form->addInput($pluginCardView);
+        $postListStyle = new Typecho_Widget_Helper_Form_Element_Select(
+            'postListStyle',
+            array(
+                'card' => '卡片展示（默认）',
+                'list' => '原版列表展示',
+            ),
+            'card',
+            _t('文章列表展示'),
+            _t('「管理 → 文章」列表的展示方式：<b>卡片展示</b>把每篇文章渲染成一张 MD3 卡片（标题 / 状态 / 评论 / 作者 / 分类 / 日期）；<b>原版列表展示</b>保持 Typecho 原样表格。')
+        );
+        $form->addInput($postListStyle);
+        $pageListStyle = new Typecho_Widget_Helper_Form_Element_Select(
+            'pageListStyle',
+            array(
+                'card' => '卡片展示（默认）',
+                'list' => '原版列表展示',
+            ),
+            'card',
+            _t('独立页面列表展示'),
+            _t('「管理 → 独立页面」列表的展示方式，效果与文章列表一致（子页面 / 作者 / 日期）。')
+        );
+        $form->addInput($pageListStyle);
         $dashboardQuickShow = new Typecho_Widget_Helper_Form_Element_Select(
             'dashboardQuickShow',
             array(
@@ -377,6 +411,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             isset($abOpt->dashboardCardOrder) ? (string) $abOpt->dashboardCardOrder : ''
         );
         $form->addInput($dashboardCardOrder);
+        $dashboardLayout = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardLayout',
+            array(
+                'masonry' => '瀑布流（默认，各列独立堆叠、不留空白）',
+                'grid'    => '网格流（同一行等高对齐）',
+            ),
+            'masonry',
+            _t('卡片排版模式'),
+            _t('决定概要页卡片的排列方式：<b>瀑布流</b>每列各自堆叠，卡片高度不必对齐，内容少的卡片下方不会留大块空白；<b>网格流</b>同一行卡片等高对齐（原版表现）。')
+        );
+        $form->addInput($dashboardLayout);
         $dashboardCustomCardsEnabled = new Typecho_Widget_Helper_Form_Element_Select(
             'dashboardCustomCardsEnabled',
             array(
@@ -394,6 +439,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             self::hydrateCardValueForForm(isset($abOpt->dashboardCustomCards) ? (string) $abOpt->dashboardCustomCards : '')
         );
         $form->addInput($dashboardCustomCards);
+        $dashboardMoreCardEnabled = new Typecho_Widget_Helper_Form_Element_Select(
+            'dashboardMoreCardEnabled',
+            array(
+                '1' => '显示（默认）',
+                '0' => '隐藏',
+            ),
+            '1',
+            _t('「更多」卡片'),
+            _t('在概要页显示一张「更多」卡片：<b>插件文档</b> / <b>插件仓库</b> / <b>QQ 群</b>，以及<b>捐助作者</b>（鼠标悬停变成微信赞赏码，点击弹出二维码）。<br>卡片默认排在最后，可在上方卡片清单里调整顺序。')
+        );
+        $form->addInput($dashboardMoreCardEnabled);
         abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
             abCardTip('✏️', '可在 AB Typecho 原版优化 / AB Vditor / AB Editor.md / 兼容其他编辑器 之间切换。启用 Vditor 或 Editor.md 后，会替代原版 PageDown 编辑体验，并套用 AB 的 MD3 风格。')
         );
@@ -718,7 +774,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.52 %c",'
+            .   '"%c AB-Admin %c v2.1.53 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -726,7 +782,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             . 'console.log("%c  \uD83D\uDD17 https://see.lhl.one/Typecho-AB-Admin ","color:#6750a4;font-size:11px");'
             . '}catch(e){}})();</script>';
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
         if (self::isLoginPage() && $loginIsEnabled == '1') {
             ob_start();
@@ -741,17 +797,32 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     private static function renderAdminHeader($header)
     {
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $primaryColor = $pluginOptions->primaryColor ?: 'purple';
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $borderRadius = $pluginOptions->borderRadius ?: 'medium';
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $navPosition = $pluginOptions->navPosition ?: 'left';
-        $loadingAnimation = isset($pluginOptions->loadingAnimation) ? (string)$pluginOptions->loadingAnimation : 'spinner';
-        if ($loadingAnimation !== 'spinner' && $loadingAnimation !== 'topbar') {
-            $loadingAnimation = 'spinner';
+        $loadingAnimation = isset($pluginOptions->loadingAnimation) ? (string)$pluginOptions->loadingAnimation : '';
+        if ($loadingAnimation === '') {
+            $loadingAnimation = 'morph';
         }
+        if (!in_array($loadingAnimation, array('spinner', 'topbar', 'morph'), true)) {
+            $loadingAnimation = 'morph';
+        }
+        if ((isset($pluginOptions->abLoaderDefault) ? (string)$pluginOptions->abLoaderDefault : '') !== '1'
+            && $loadingAnimation === 'spinner') {
+            $loadingAnimation = 'morph';
+            self::savePluginOptions('AdminBeautify', array(
+                'loadingAnimation' => 'morph',
+                'abLoaderDefault'  => '1',
+            ));
+        }
+        $postListStyle = isset($pluginOptions->postListStyle) ? (string)$pluginOptions->postListStyle : 'card';
+        if ($postListStyle !== 'list') $postListStyle = 'card';
+        $pageListStyle = isset($pluginOptions->pageListStyle) ? (string)$pluginOptions->pageListStyle : 'card';
+        if ($pageListStyle !== 'list') $pageListStyle = 'card';
     $colors = self::getColorScheme($primaryColor);
     $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
     $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
@@ -779,10 +850,38 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         if ($loadingAnimation === 'topbar') {
             $earlyScript .= 'document.documentElement.setAttribute("data-ab-loader","topbar");';
+        } elseif ($loadingAnimation === 'morph') {
+            $earlyScript .= 'document.documentElement.setAttribute("data-ab-loader","morph");';
         }
         if ($enableAnimation === '0') {
             $earlyScript .= 'document.documentElement.setAttribute("data-no-animation","");';
         }
+        $abTypechoVer = isset($options->version) ? (string) $options->version : '';
+        $abLegacyTypecho = ($abTypechoVer !== '' && version_compare($abTypechoVer, '1.3.0', '<'));
+        $earlyScript .= 'var AB_LIST_MODES=' . json_encode(array(
+            'posts' => $postListStyle,
+            'pages' => $pageListStyle,
+        )) . ';';
+        if ($abLegacyTypecho) {
+            $earlyScript .= 'document.documentElement.setAttribute("data-ab-tc","12");';
+        }
+        $earlyScript .= 'function abSyncListMode(){'
+            .   'var h=document.documentElement,u=(location.pathname||"")+(location.search||"");'
+            .   'h.removeAttribute("data-ab-postlist");h.removeAttribute("data-ab-pagelist");h.removeAttribute("data-ab-listcard");'
+            .   'var attr="",mode="";'
+            .   'if(u.indexOf("manage-posts.php")!==-1){attr="data-ab-postlist";mode=AB_LIST_MODES.posts;}'
+            .   'else if(u.indexOf("manage-pages.php")!==-1){attr="data-ab-pagelist";mode=AB_LIST_MODES.pages;}'
+            .   'if(!attr||!mode)return;'
+            .   'h.setAttribute(attr,mode);'
+            .   'if(mode==="card")h.setAttribute("data-ab-listcard","1");'
+            . '}'
+            . 'abSyncListMode();'
+            . 'document.addEventListener("ab:pageload",abSyncListMode);'
+            . 'window.addEventListener("popstate",abSyncListMode);'
+            . 'if(window.history){["pushState","replaceState"].forEach(function(n){'
+            .   'var orig=history[n];if(typeof orig!=="function")return;'
+            .   'history[n]=function(){var r=orig.apply(this,arguments);try{abSyncListMode();}catch(e){}return r;};'
+            . '});}';
         $earlyScript .= 'document.documentElement.setAttribute("data-ab-loading","");';
         $earlyScript .= '</script>';
         $colors = self::getColorScheme($primaryColor);
@@ -824,6 +923,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $injectHead .= '#ab-loader-spinner{position:absolute;left:0;top:0;height:100%;width:34%;background:linear-gradient(90deg,var(--md-primary,#6750a4),rgba(103,80,164,.68));border-radius:0 3px 3px 0;box-shadow:0 0 14px rgba(103,80,164,.45);animation:ab-topbar-loading 1.25s ease-in-out infinite;}';
             $injectHead .= '[data-ab-loading] #ab-page-loader{display:block!important;visibility:visible!important;}';
             $injectHead .= '@keyframes ab-topbar-loading{0%{left:-36%;width:36%}55%{left:40%;width:46%}100%{left:100%;width:32%}}';
+        } elseif ($loadingAnimation === 'morph') {
+            $injectHead .= '#ab-page-loader{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:var(--md-surface,#FFFBFE);align-items:center;justify-content:center;}';
+            $injectHead .= '[data-theme="dark"] #ab-page-loader{background:var(--md-dark-surface,#1C1B1F)!important;}';
+            $injectHead .= '[data-ab-loading] #ab-page-loader{display:flex!important;visibility:visible!important;}';
+            $injectHead .= '#ab-loader-spinner{width:48px;height:48px;background:var(--md-primary,#6750a4);animation:ab-morph-shape var(--ab-m3-loader-duration,4.9s) var(--ab-m3-loader-easing,cubic-bezier(.34,1.16,.44,1)) infinite;}';
+            $injectHead .= '[data-theme="dark"] #ab-loader-spinner{background:var(--md-dark-primary,#d0bcff);}';
         } else {
             $injectHead .= '#ab-page-loader{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999999;background:var(--md-surface,#FFFBFE);align-items:center;justify-content:center;}';
             $injectHead .= '[data-theme="dark"] #ab-page-loader{background:var(--md-dark-surface,#1C1B1F)!important;}';
@@ -833,7 +938,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.' .'v2.1.52' . '.css">';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.53.css';
+        $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.53.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -918,11 +1025,15 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         echo '<div id="ab-page-loader"><div id="ab-loader-spinner"></div></div>';
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
         $pluginCardView = isset($pluginOptions->pluginCardView) ? (string)$pluginOptions->pluginCardView : '1';
+        $postListStyle = isset($pluginOptions->postListStyle) ? (string)$pluginOptions->postListStyle : 'card';
+        if ($postListStyle !== 'list') $postListStyle = 'card';
+        $pageListStyle = isset($pluginOptions->pageListStyle) ? (string)$pluginOptions->pageListStyle : 'card';
+        if ($pageListStyle !== 'list') $pageListStyle = 'card';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
@@ -933,6 +1044,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
         $dashboardCardOrder   = isset($pluginOptions->dashboardCardOrder)   ? (string)$pluginOptions->dashboardCardOrder   : '';
         $dashboardCustomCardsEnabled = isset($pluginOptions->dashboardCustomCardsEnabled) ? (string)$pluginOptions->dashboardCustomCardsEnabled : '0';
+        $dashboardLayout      = isset($pluginOptions->dashboardLayout)      ? (string)$pluginOptions->dashboardLayout      : 'masonry';
+        if ($dashboardLayout !== 'masonry' && $dashboardLayout !== 'grid') $dashboardLayout = 'masonry';
+        $dashboardMoreCardEnabled = isset($pluginOptions->dashboardMoreCardEnabled) ? (string)$pluginOptions->dashboardMoreCardEnabled : '1';
+        if ($dashboardMoreCardEnabled !== '0') $dashboardMoreCardEnabled = '1';
         $dashboardCustomCardsRaw = isset($pluginOptions->dashboardCustomCards) ? (string)$pluginOptions->dashboardCustomCards : '';
         $dashboardCustomCards = array();
         if ($dashboardCustomCardsEnabled === '1' && $dashboardCustomCardsRaw !== '') {
@@ -970,7 +1085,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $umamiApiToken        = isset($pluginOptions->umamiApiToken)        ? (string)$pluginOptions->umamiApiToken        : '';
         $umamiTimeRange       = isset($pluginOptions->umamiTimeRange)       ? (string)$pluginOptions->umamiTimeRange       : '30';
         $ajaxEnabled          = isset($pluginOptions->ajaxEnabled)          ? (string)$pluginOptions->ajaxEnabled          : '1';
-        $loadingAnimation     = isset($pluginOptions->loadingAnimation)     ? (string)$pluginOptions->loadingAnimation     : 'spinner';
+        $loadingAnimation     = isset($pluginOptions->loadingAnimation)     ? (string)$pluginOptions->loadingAnimation     : 'morph';
+        if (!in_array($loadingAnimation, array('spinner', 'topbar', 'morph'), true)) {
+            $loadingAnimation = 'morph';
+        }
         $primaryColorScheme = $pluginOptions->primaryColor ?: 'purple';
         $colorSchemeData = self::getColorScheme($primaryColorScheme);
         $primaryColorHex     = $colorSchemeData['--md-primary'];
@@ -1138,6 +1256,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'darkMode'               => $darkMode,
             'enableAnimation'        => $enableAnimation,
             'pluginCardView'         => $pluginCardView,
+            'postListStyle'          => $postListStyle,
+            'pageListStyle'          => $pageListStyle,
             'siteName'               => $options->title,
             'user'                   => $currentUserInfo,
             'pluginUrl'              => (string)$options->pluginUrl,
@@ -1154,7 +1274,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.52',
+            'pluginVersion'          => '2.1.53',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1164,6 +1284,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'dashboardRecentStyle'   => $dashboardRecentStyle,
             'dashboardCardOrder'     => $dashboardCardOrder,
             'dashboardCustomCardsEnabled' => $dashboardCustomCardsEnabled,
+            'dashboardLayout'        => $dashboardLayout,
+            'dashboardMoreCardEnabled' => $dashboardMoreCardEnabled,
             'dashboardCustomCards'   => $dashboardCustomCards,
             'dashboardThemeButtonShow' => $dashboardThemeButtonShow,
             'overviewChartEnabled'   => $overviewChartEnabled,
@@ -1184,7 +1306,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.52.js"></script>';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.53.js';
+        $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.53.js?v=' . $abJsVer . '"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1195,7 +1319,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.52"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.53"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1297,6 +1421,76 @@ function mkBanner(release){
             echo '<script src="' . htmlspecialchars($editorMdBaseJsUrl) . '"></script>';
             echo '<script src="' . htmlspecialchars($editorMdAdapterJsUrl) . '"></script>';
         }
+        if ($editorVditor === '0' && $isWritePageFooter) {
+            $editorTipUrl = $options->adminUrl . 'options-plugin.php?config=AdminBeautify&to=editor_vditor';
+            echo '<style>'
+                . '.ab-editor-tip{margin:14px 0 0;display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:18px;'
+                . 'background:var(--md-surface-container-high,#ECE6F0);background:color-mix(in srgb,var(--md-primary,#6750a4) 10%,var(--md-surface-container-low,#F7F2FA));'
+                . 'border:1px solid color-mix(in srgb,var(--md-primary,#6750a4) 22%,transparent);box-sizing:border-box;}'
+                . '[data-theme="dark"] .ab-editor-tip{background:var(--md-dark-surface-container-high,#2B2930);background:color-mix(in srgb,var(--md-dark-primary,#d0bcff) 12%,var(--md-dark-surface-container-high,#2B2930));'
+                . 'border-color:color-mix(in srgb,var(--md-dark-primary,#d0bcff) 22%,transparent);}'
+                . '.ab-editor-tip[hidden]{display:none!important;}'
+                . '.ab-editor-tip-icon{font-size:22px!important;line-height:1;flex:0 0 auto;margin-top:2px;color:var(--md-primary,#6750a4);}'
+                . '[data-theme="dark"] .ab-editor-tip-icon{color:var(--md-dark-primary,#d0bcff);}'
+                . '.ab-editor-tip-main{flex:1 1 auto;min-width:0;}'
+                . '.ab-editor-tip-title{display:block;font-size:14px;font-weight:600;color:var(--md-on-surface,#1c1b1f);}'
+                . '[data-theme="dark"] .ab-editor-tip-title{color:var(--md-dark-on-surface,#e6e1e5);}'
+                . '.ab-editor-tip-desc{display:block;margin-top:2px;font-size:12.5px;line-height:1.6;color:var(--md-on-surface-variant,#49454f);}'
+                . '[data-theme="dark"] .ab-editor-tip-desc{color:var(--md-dark-on-surface-variant,#cac4d0);}'
+                . '.ab-editor-tip-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto;}'
+                . '.ab-editor-tip-btn{display:inline-flex;align-items:center;gap:4px;height:32px;padding:0 14px;border-radius:999px;border:1px solid transparent;'
+                . 'background:transparent;color:var(--md-primary,#6750a4);font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;text-decoration:none;'
+                . 'transition:background .15s ease,border-color .15s ease;}'
+                . '.ab-editor-tip-btn:hover{background:color-mix(in srgb,var(--md-primary,#6750a4) 10%,transparent);}'
+                . '.ab-editor-tip-btn.primary{background:var(--md-primary,#6750a4);color:#fff;}'
+                . '.ab-editor-tip-btn.primary:hover{filter:brightness(1.06);}'
+                . '.ab-editor-tip-btn.ghost{border-color:var(--md-outline-variant,#CAC4D0);color:var(--md-on-surface-variant,#49454f);}'
+                . '[data-theme="dark"] .ab-editor-tip-btn{color:var(--md-dark-primary,#d0bcff);}'
+                . '[data-theme="dark"] .ab-editor-tip-btn.ghost{border-color:var(--md-dark-outline-variant,#49454F);color:var(--md-dark-on-surface-variant,#cac4d0);}'
+                . '.ab-editor-tip-close{width:32px;height:32px;padding:0;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;'
+                . 'border:0;background:transparent;color:var(--md-on-surface-variant,#49454f);cursor:pointer;}'
+                . '.ab-editor-tip-close:hover{background:color-mix(in srgb,var(--md-on-surface,#1c1b1f) 8%,transparent);}'
+                . '.ab-editor-tip-close .material-icons-round{font-size:18px!important;line-height:1;}'
+                . '[data-theme="dark"] .ab-editor-tip-close{color:var(--md-dark-on-surface-variant,#cac4d0);}'
+                . '@media (max-width:700px){.ab-editor-tip{flex-wrap:wrap;}.ab-editor-tip-actions{width:100%;justify-content:flex-start;}}'
+                . '</style>';
+            echo '<div class="ab-editor-tip" id="ab-editor-tip" hidden>'
+                . '<span class="material-icons-round ab-editor-tip-icon">tips_and_updates</span>'
+                . '<div class="ab-editor-tip-main">'
+                .   '<b class="ab-editor-tip-title">AB Admin 有内置编辑器，是否启用？</b>'
+                .   '<span class="ab-editor-tip-desc">可切换 AB Vditor / AB Editor.md，获得实时预览、全屏写作与图片上传体验（随时可在插件设置里改回原版）。</span>'
+                . '</div>'
+                . '<div class="ab-editor-tip-actions">'
+                .   '<a class="ab-editor-tip-btn primary" href="' . htmlspecialchars($editorTipUrl) . '">进入插件设置</a>'
+                .   '<button type="button" class="ab-editor-tip-btn" data-ab-tip="later">知道了</button>'
+                .   '<button type="button" class="ab-editor-tip-btn ghost" data-ab-tip="never">不再提示</button>'
+                .   '<button type="button" class="ab-editor-tip-close" data-ab-tip="later" title="暂不提示" aria-label="关闭"><span class="material-icons-round">close</span></button>'
+                . '</div>'
+                . '</div>';
+            echo '<script>(function(){'
+                . 'var NEVER="ab-editor-tip-never",LATER="ab-editor-tip-later";'
+                . 'function read(kind,key){try{return !!(kind==="local"?localStorage:sessionStorage).getItem(key);}catch(e){return false;}}'
+                . 'function write(kind,key){try{(kind==="local"?localStorage:sessionStorage).setItem(key,"1");}catch(e){}}'
+                . 'if(read("local",NEVER)||read("session",LATER)){var dead=document.getElementById("ab-editor-tip");if(dead&&dead.parentNode)dead.parentNode.removeChild(dead);return;}'
+                . 'var tries=0;'
+                . 'function place(){'
+                .   'var tip=document.getElementById("ab-editor-tip");'
+                .   'if(!tip||tip.getAttribute("data-ab-placed")==="1")return;'
+                .   'var area=document.getElementById("wmd-editarea");'
+                .   'if(!area){if(++tries<60)setTimeout(place,100);return;}'
+                .   'tip.setAttribute("data-ab-placed","1");'
+                .   'tip.hidden=false;'
+                .   'area.parentNode.insertBefore(tip,area.nextSibling);'
+                .   'tip.addEventListener("click",function(e){'
+                .     'var btn=e.target&&e.target.closest?e.target.closest("[data-ab-tip]"):null;'
+                .     'if(!btn)return;'
+                .     'write(btn.getAttribute("data-ab-tip")==="never"?"local":"session",btn.getAttribute("data-ab-tip")==="never"?NEVER:LATER);'
+                .     'if(tip.parentNode)tip.parentNode.removeChild(tip);'
+                .   '});'
+                . '}'
+                . 'if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",place);}else{place();}'
+                . '}());</script>';
+        }
         $swUrl = Typecho_Common::url('/action/admin-beautify?do=sw', $options->index);
         echo '<script>(function(){'
             . 'function abSwToast(){'
@@ -1385,7 +1579,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.52";';
+        echo 'var __AB_VER__="2.1.53";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2354,13 +2548,13 @@ window.abSyncCompat = function(){
             return;
         }
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
         if ($loginIsEnabled !== '1') {
             return;
         }
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $showSiteName = ((string) $pluginOptions->login_showSiteName !== '0');
         $showThemeToggle = ((string) $pluginOptions->login_showThemeToggle !== '0');
         $customJs = (string) $pluginOptions->login_customJs;
@@ -2373,13 +2567,13 @@ window.abSyncCompat = function(){
     private static function outputLoginHeaderCss()
     {
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
         if ($loginIsEnabled !== '1') {
             return;
         }
         $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = $options->plugin('AdminBeautify');
+        $pluginOptions = self::pluginOptions($options);
         $themeMode = isset($pluginOptions->login_themeMode) ? (string) $pluginOptions->login_themeMode : 'auto';
         if (!in_array($themeMode, array('auto', 'light', 'dark'), true)) {
             $themeMode = 'auto';
@@ -2723,6 +2917,25 @@ window.abSyncCompat = function(){
         } catch (Throwable $e) {
         }
     }
+    public static function pluginOptions($options = null)
+    {
+        if ($options === null) {
+            try {
+                $options = Typecho_Widget::widget('Widget_Options');
+            } catch (Exception $e) {
+                return new AdminBeautify_MissingOptions();
+            } catch (Throwable $e) {
+                return new AdminBeautify_MissingOptions();
+            }
+        }
+        try {
+            return $options->plugin('AdminBeautify');
+        } catch (Exception $e) {
+            return new AdminBeautify_MissingOptions();
+        } catch (Throwable $e) {
+            return new AdminBeautify_MissingOptions();
+        }
+    }
     public static function savePluginOptions($pluginName, array $settings)
     {
         foreach (array('Widget\\Plugins\\Edit', 'Widget_Plugins_Edit') as $class) {
@@ -2793,17 +3006,19 @@ window.abSyncCompat = function(){
     }
     public static function configHandle($settings, $isInit = false)
     {
-        if (!is_array($settings)) return false;
+        if (!is_array($settings) || empty($settings)) return false;
         $raw = isset($settings['dashboardCustomCards']) ? $settings['dashboardCustomCards'] : '';
-        if (!is_string($raw) || $raw === '') return false;
-        $message = '';
-        if (!self::prepareCardStorage($settings, $message)) {
-            self::notice($message, 'error');
-            return true;
+        if (!is_string($raw)) $raw = '';
+        if ($raw !== '') {
+            $message = '';
+            if (!self::prepareCardStorage($settings, $message)) {
+                self::notice($message, 'error');
+                return true;
+            }
         }
-        if ($settings['dashboardCustomCards'] === $raw) return false;
-        if (self::savePluginOptions('AdminBeautify', $settings)) return true;
-        self::notice('卡片代码已转存到数据表，但设置写入失败（Typecho 兼容层不可用），请重试。', 'error');
+        if (!self::savePluginOptions('AdminBeautify', $settings)) {
+            self::notice('设置写入失败（Typecho 写库方法不可用），请重试。', 'error');
+        }
         return true;
     }
     public static function hydrateCardValueForForm($raw)
