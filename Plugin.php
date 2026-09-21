@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.53
+ * @version 2.1.54
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -122,7 +122,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.53';
+        $abVer = '2.1.54';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -697,6 +697,24 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('开启后后台页面在兼容场景下无刷新切换；若与浏览器或插件冲突，可关闭回退为整页加载。')
         );
         $form->addInput($ajaxEnabled);
+        abCard('channel', $abC1, 'system_update_alt', '升级通道', '选择接收正式版，或同时接收 GitHub 上的开发版（Pre-release）',
+            abCardTip('🧪',
+                '开发版 = 除正式 Release 外，还把 GitHub 上标记为 <b>Pre-release</b> 的最新版当作更新推送。<br>'
+                . '⚠️ 开发版可能不稳定，建议只在测试站点开启；从开发版回退到稳定版需要手动覆盖安装一次正式版。',
+                true
+            )
+        );
+        $updateChannel = new Typecho_Widget_Helper_Form_Element_Select(
+            'updateChannel',
+            array(
+                'stable' => '稳定版',
+                'beta'   => '开发版',
+            ),
+            'stable',
+            _t('升级通道'),
+            _t('决定「检查更新」时的通道')
+        );
+        $form->addInput($updateChannel);
         abCard('compat', $abC2, 'extension', '兼容脚本管理', '按需启用兼容脚本，修复插件页面样式与交互冲突',
             abCardTip('📦',
                 '兼容脚本默认不加载，请根据需要手动开启。脚本位于 <code>assets/compat/</code> 目录。<br>'
@@ -774,7 +792,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.53 %c",'
+            .   '"%c AB-Admin %c v2.1.54 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -938,9 +956,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.53.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.54.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.53.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.54.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1089,6 +1107,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!in_array($loadingAnimation, array('spinner', 'topbar', 'morph'), true)) {
             $loadingAnimation = 'morph';
         }
+        $updateChannel = isset($pluginOptions->updateChannel) ? (string)$pluginOptions->updateChannel : 'stable';
+        if ($updateChannel !== 'beta') $updateChannel = 'stable';
         $primaryColorScheme = $pluginOptions->primaryColor ?: 'purple';
         $colorSchemeData = self::getColorScheme($primaryColorScheme);
         $primaryColorHex     = $colorSchemeData['--md-primary'];
@@ -1274,7 +1294,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.53',
+            'pluginVersion'          => '2.1.54',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1292,6 +1312,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'overviewTimeRange'      => $overviewTimeRange,
             'ajaxEnabled'            => $ajaxEnabled,
             'loadingAnimation'       => $loadingAnimation,
+            'updateChannel'          => $updateChannel,
             'umamiEnabled'           => $umamiEnabled,
             'umamiProvider'          => $umamiProvider,
             'umamiApiBase'           => $umamiApiBase,
@@ -1306,9 +1327,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.53.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.54.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.53.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.54.js?v=' . $abJsVer . '"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1319,7 +1340,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.53"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.54"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1579,7 +1600,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.53";';
+        echo 'var __AB_VER__="2.1.54";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -1659,6 +1680,9 @@ window.abShowUpdateAvailable=function(d){
     var notify=document.createElement("div");
     notify.id="ab-update-notify";
     var dismissBtn='<button type="button" onclick="(function(el){el.remove();try{localStorage.setItem(\'ab-update-dismissed-v\'+el.dataset.ver,\'1\')}catch(e){}})(document.getElementById(\'ab-update-notify\'))" data-ver="'+d.latest+'" style="background:none;border:none;cursor:pointer;font-size:16px;opacity:.7;padding:0 0 0 8px;color:inherit;line-height:1" title="忽略此版本">✕</button>';
+    // 开发版（Pre-release）标记：让用户一眼看出这条更新不是正式版
+    // （服务端只在查最新版时标记，与当前选择的通道无关 —— 开发版通道下也可能收到正式版）
+    var prereleaseTag = d.prerelease ? '（开发版）' : '';
     // 统一按钮基础样式：圆角描边，透明背景，继承颜色
     // box-sizing + line-height + vertical-align 三项确保 button/a/span 高度完全一致
     var btnBase='display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap;text-decoration:none;border:1px solid currentColor;box-sizing:border-box;vertical-align:middle;';
@@ -1677,7 +1701,7 @@ window.abShowUpdateAvailable=function(d){
         var bodyText='';
         if(d.body){ bodyText=d.body.replace(/[#*`]/g,"").replace(/\r?\n/g," ").trim(); if(bodyText.length>120) bodyText=bodyText.substring(0,120)+"..."; }
         notify.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
-            +'<div style="flex:1"><div style="font-weight:600;margin-bottom:'+(bodyText?'6px':'0')+'">🎉 发现新版本 <strong>v'+d.latest+'</strong> <span style="font-size:11px;opacity:.7;font-weight:400">（当前 v'+d.current+'）</span></div>'
+            +'<div style="flex:1"><div style="font-weight:600;margin-bottom:'+(bodyText?'6px':'0')+'">🎉 发现新版本 <strong>v'+d.latest+'</strong>'+prereleaseTag+' <span style="font-size:11px;opacity:.7;font-weight:400">（当前 v'+d.current+'）</span></div>'
             +(bodyText?'<div style="font-size:12px;opacity:.8;margin-bottom:10px;line-height:1.5">'+bodyText+'</div>':'')
             +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+actionBtns+'</div></div>'
             +dismissBtn+'</div>';
@@ -1685,7 +1709,7 @@ window.abShowUpdateAvailable=function(d){
     } else {
         // 其他页面：固定顶部通知栏
         notify.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;background:linear-gradient(90deg,#5c6bc0,#7e57c2);color:#fff;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25);animation:ab-slideDown .3s ease;font-weight:500";
-        notify.innerHTML='<span style="flex:1">🎉 AB-Admin 发现新版本 <strong>v'+d.latest+'</strong> <span style="opacity:.8;font-size:12px;font-weight:400">（当前 v'+d.current+'）</span></span>'
+        notify.innerHTML='<span style="flex:1">🎉 AB-Admin 发现新版本 <strong>v'+d.latest+'</strong>'+prereleaseTag+' <span style="opacity:.8;font-size:12px;font-weight:400">（当前 v'+d.current+'）</span></span>'
             +'<div style="display:flex;gap:8px;align-items:center">'+actionBtns+dismissBtn+'</div>';
         document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+40)+'px';
         document.body.insertBefore(notify,document.body.firstChild);

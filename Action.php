@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.53
+ * @version 2.1.54
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.53';
+        $pluginVer  = '2.1.54';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -841,15 +841,17 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     {
         $this->checkAdmin();
         require_once dirname(__FILE__) . '/Updater.php';
-        $cacheFile = dirname(__FILE__) . '/tmp_update/.update_cache.json';
-        $lockFile  = dirname(__FILE__) . '/tmp_update/.update_lock';
+        $channel   = AdminBeautify_Updater::getChannel();
+        $chSuffix  = ($channel === 'beta') ? '.beta' : '';
+        $cacheFile = dirname(__FILE__) . '/tmp_update/.update_cache' . $chSuffix . '.json';
+        $lockFile  = dirname(__FILE__) . '/tmp_update/.update_lock' . $chSuffix;
         $cacheTTL  = 3600;
         if ($this->request->get('force', '0') === '1') {
             if (session_status() === PHP_SESSION_ACTIVE) {
                 @session_write_close();
             }
             $updater = new AdminBeautify_Updater();
-            $release = $updater->fetchLatestRelease();
+            $release = $updater->fetchLatestRelease($channel);
             if ($release === false) {
                 if (file_exists($cacheFile)) {
                     $raw = @file_get_contents($cacheFile);
@@ -875,6 +877,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'html_url'     => $release['html_url'],
                 'download_url' => $release['download_url'],
                 'body'         => $release['body'],
+                'prerelease'   => !empty($release['prerelease']),
+                'channel'      => $channel,
                 'from_cache'   => false,
             );
             $cacheDir = dirname($cacheFile);
@@ -883,9 +887,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             unset($cacheData['from_cache']);
             @file_put_contents($cacheFile, json_encode(array('ts' => time(), 'data' => $cacheData)));
             @unlink($lockFile);
+            $prereleaseTag = !empty($release['prerelease']) ? '（开发版）' : '';
             $this->jsonSuccess(
                 $freshData,
-                $hasUpdate ? '发现新版本 v' . $latest : '已是最新版本 v' . $current
+                $hasUpdate ? '发现新版本 v' . $latest . $prereleaseTag : '已是最新版本 v' . $current
             );
         }
         $cachedData = null;
@@ -906,7 +911,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'code'    => 0,
                 'message' => $isStale ? '检查中，显示上次缓存' : (
                     (isset($cachedData['has_update']) && $cachedData['has_update'])
-                        ? '发现新版本 v' . $cachedData['latest']
+                        ? '发现新版本 v' . $cachedData['latest'] . (!empty($cachedData['prerelease']) ? '（开发版）' : '')
                         : '已是最新版本 v' . $cachedData['current']
                 ),
                 'data'    => array_merge($cachedData, array(
@@ -924,6 +929,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'latest'      => null,
                     'cache_stale' => true,
                     'checking'    => true,
+                    'channel'     => $channel,
                 ),
             ));
         }
@@ -934,7 +940,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             @ignore_user_abort(true);
             @set_time_limit(60);
             $updater = new AdminBeautify_Updater();
-            $release = $updater->fetchLatestRelease();
+            $release = $updater->fetchLatestRelease($channel);
             if ($release !== false) {
                 $current   = AdminBeautify_Updater::CURRENT_VERSION;
                 $latest    = $release['version'];
@@ -948,6 +954,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'html_url'     => $release['html_url'],
                     'download_url' => $release['download_url'],
                     'body'         => $release['body'],
+                    'prerelease'   => !empty($release['prerelease']),
+                    'channel'      => $channel,
                 );
                 @file_put_contents($cacheFile, json_encode(array('ts' => time(), 'data' => $freshData)));
             }

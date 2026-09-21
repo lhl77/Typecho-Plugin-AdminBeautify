@@ -298,12 +298,16 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 updateAboutColors(abColorMap[this.value]||abColorMap.purple);
             });
         }
-        // 插入卡片到 perf 卡片之后
+        // 插入卡片：固定顺序为「速度优化 → 升级通道 → 关于插件」
+        // （升级通道卡片由 config.script.php 先插到 perf 之后；本脚本晚于它执行，
+        //   若直接锚定 perf 会把「关于插件」插到通道卡片前面，故优先锚定通道卡片）
         var perfCard=document.getElementById("ab-card-perf");
+        var channelCard=document.getElementById("ab-card-channel");
         var aboutCard=document.getElementById("ab-card-about");
-        if(perfCard&&aboutCard){
-            if(perfCard.nextSibling) perfCard.parentNode.insertBefore(aboutCard,perfCard.nextSibling);
-            else perfCard.parentNode.appendChild(aboutCard);
+        var anchorCard=(channelCard&&channelCard.parentNode)?channelCard:perfCard;
+        if(anchorCard&&aboutCard){
+            if(anchorCard.nextSibling) anchorCard.parentNode.insertBefore(aboutCard,anchorCard.nextSibling);
+            else anchorCard.parentNode.appendChild(aboutCard);
         } else if(aboutCard){
             var anyCard=document.getElementById("ab-card-compat")||document.getElementById("ab-card-login")||document.getElementById("ab-card-admin");
             if(anyCard&&anyCard.parentNode){

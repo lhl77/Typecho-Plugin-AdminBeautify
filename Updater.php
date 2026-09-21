@@ -6,11 +6,12 @@ class AdminBeautify_Updater
 {
     const GITHUB_REPO = 'lhl77/Typecho-Plugin-AdminBeautify';
     const GITHUB_API_RELEASES = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest';
+    const GITHUB_API_RELEASES_LIST = 'https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases?per_page=30';
     private static $GITHUB_MIRRORS = array(
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.53';
+    const CURRENT_VERSION = '2.1.54';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
@@ -18,15 +19,24 @@ class AdminBeautify_Updater
         $this->pluginDir = rtrim(dirname(__FILE__), '/\\');
         $this->tmpDir    = $this->pluginDir . '/tmp_update';
     }
-    public function fetchLatestRelease()
+    public static function getChannel()
     {
-        $json = $this->httpGet(self::GITHUB_API_RELEASES, 5);
-        if ($json === false) return false;
-        $data = @json_decode($json, true);
+        try {
+            $opt = Typecho_Widget::widget('Widget_Options')->plugin('AdminBeautify');
+            $ch  = isset($opt->updateChannel) ? (string) $opt->updateChannel : 'stable';
+        } catch (Exception $e) {
+            $ch = 'stable';
+        } catch (Throwable $e) {
+            $ch = 'stable';
+        }
+        return $ch === 'beta' ? 'beta' : 'stable';
+    }
+    public static function parseRelease($data)
+    {
         if (!is_array($data) || empty($data['tag_name'])) return false;
-        $version    = ltrim($data['tag_name'], 'vV');
-        $htmlUrl    = isset($data['html_url']) ? $data['html_url'] : self::GITHUB_RELEASES_PAGE;
-        $body       = isset($data['body']) ? $data['body'] : '';
+        $version  = ltrim((string) $data['tag_name'], 'vV');
+        $htmlUrl  = isset($data['html_url']) ? $data['html_url'] : self::GITHUB_RELEASES_PAGE;
+        $body     = isset($data['body']) ? $data['body'] : '';
         $downloadUrl = '';
         if (!empty($data['assets']) && is_array($data['assets'])) {
             foreach ($data['assets'] as $asset) {
@@ -44,7 +54,37 @@ class AdminBeautify_Updater
             'download_url' => $downloadUrl,
             'html_url'     => $htmlUrl,
             'body'         => $body,
+            'prerelease'   => !empty($data['prerelease']),
         );
+    }
+    public static function pickLatestFromList($list, $allowPrerelease = false)
+    {
+        if (!is_array($list)) return false;
+        $best = false;
+        foreach ($list as $item) {
+            if (!is_array($item) || empty($item['tag_name'])) continue;
+            if (!empty($item['draft'])) continue;
+            if (!$allowPrerelease && !empty($item['prerelease'])) continue;
+            if ($best === false
+                || self::compareVersion(ltrim((string) $item['tag_name'], 'vV'), ltrim((string) $best['tag_name'], 'vV')) > 0) {
+                $best = $item;
+            }
+        }
+        return $best;
+    }
+    public function fetchLatestRelease($channel = 'stable')
+    {
+        if ($channel === 'beta') {
+            $json = $this->httpGet(self::GITHUB_API_RELEASES_LIST, 5);
+            if ($json === false) return false;
+            $list = @json_decode($json, true);
+            $best = self::pickLatestFromList($list, true);
+            if ($best === false) return false;
+            return self::parseRelease($best);
+        }
+        $json = $this->httpGet(self::GITHUB_API_RELEASES, 5);
+        if ($json === false) return false;
+        return self::parseRelease(@json_decode($json, true));
     }
     public static function compareVersion($a, $b)
     {

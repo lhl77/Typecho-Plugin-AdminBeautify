@@ -1213,6 +1213,21 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             }
             perfBody.style.padding="0px 38px 16px";
         }
+
+        // ---- 升级通道卡片（插在性能优化卡片之后、「关于插件」之前） ----
+        var channelFields=["updateChannel"];
+        var channelCard=document.getElementById("ab-card-channel");
+        var channelBody=document.getElementById("ab-card-channel-body");
+        if(channelCard&&channelBody&&perfCard){
+            var formCh=perfCard.parentNode;
+            if(perfCard.nextSibling) formCh.insertBefore(channelCard,perfCard.nextSibling);
+            else formCh.appendChild(channelCard);
+            for(var qc=0;qc<channelFields.length;qc++){
+                var qcu=findFieldUl(channelFields[qc]);
+                if(qcu) channelBody.appendChild(qcu);
+            }
+            channelBody.style.padding="0px 38px 16px";
+        }
         // 自定义/本地 URL 字段的显示/隐藏
         (function(){
             var sel=document.querySelector("[name=\"staticResource\"]");
@@ -1262,7 +1277,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         })();
 
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","dashboardcards","editor","login","pwa","perf","compat"].forEach(function(id){
+        ["admin","dashboardcards","editor","login","pwa","perf","compat","channel"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
@@ -1504,6 +1519,13 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         if(i5) i5.style.background=c[0]+"1a";
         var v5=document.getElementById("ab-card-perf-chev");
         if(v5) v5.setAttribute("stroke",c[0]);
+        // 升级通道卡片
+        var s8=document.getElementById("ab-card-channel-strip");
+        if(s8) s8.style.background=c[0];
+        var i8=document.getElementById("ab-card-channel-icon");
+        if(i8) i8.style.background=c[0]+"1a";
+        var v8=document.getElementById("ab-card-channel-chev");
+        if(v8) v8.setAttribute("stroke",c[0]);
         // 关于插件卡片
         var s6=document.getElementById("ab-card-about-strip");
         if(s6) s6.style.background=c[0];

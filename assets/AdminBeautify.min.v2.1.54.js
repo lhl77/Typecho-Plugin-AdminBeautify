@@ -350,7 +350,7 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.53';
+            var ver = cfg.pluginVersion || '2.1.54';
 
             var themeInfo = document.createElement('div');
             themeInfo.className = 'ab-footer-theme';
@@ -3926,10 +3926,10 @@
         /**
          * 概要页卡片排版：瀑布流（默认）/ 网格流
          * - 网格流：CSS grid 同一行等高对齐（原版表现）
-         * - 瀑布流：**列优先铺排**（绝对定位）
-         *   · 从左往右填：只要这一列还没有超过「目标高度 + THRESHOLD」就继续往下堆；
-         *     超过了才换下一列 → 即"先排满左边，超过阈值再排右边"，不会像 grid 自动排版那样
-         *     在中间留出空洞（原来用的 grid-row-end: span 方案就会，踩过）；
+         * - 瀑布流：**逐个放进最矮的列**（绝对定位）
+         *   · 卡片按顺序自然左右铺开（前几张不会全堆在左列）；每次放进「当前最矮」的列，
+         *     两列差不多高时优先靠左（8px 容差）—— 既不会像 grid 自动排版那样在中间留空洞
+         *     （原来用的 grid-row-end: span 方案就会，踩过），也不会把前几张全压在左列；
          *   · 单列（窄屏）直接走自然堆叠，不做绝对定位；
          *   · 卡片高度变化（异步数据 / 字体 / 窗口宽度）由 ResizeObserver 重算。
          */
@@ -3985,28 +3985,23 @@
             grid.style.position = 'relative';
             for (var w = 0; w < cards.length; w++) cards[w].style.width = colW + 'px';
 
-            var heights = [], total = 0;
+            var heights = [];
             for (var h = 0; h < cards.length; h++) {
-                var hh = Math.ceil(cards[h].getBoundingClientRect().height);
-                heights.push(hh);
-                total += hh + gap;
+                heights.push(Math.ceil(cards[h].getBoundingClientRect().height));
             }
-            if (total > 0) total -= gap;
 
-            var target = total / colCount;              // 每列目标高度（大致均衡）
-            var THRESHOLD = 160;                        // 超过目标这么多 px 就不再往这列堆（换右列）
+            /* 选列：每张卡片放进「当前最矮」的那一列（经典瀑布流）——
+               卡片按顺序自然左右铺开，不会出现「前几张全堆在左列」那种情况；
+               两列差不多高时优先靠左（COL_BIAS 容差），避免等高时左右来回抖动。
+               （早先用过「先把左列填满、超过 target+阈值再换列」，那会把前面几张全压在左列，已改掉） */
+            var COL_BIAS = 8;
             var colH = [];
             for (var k = 0; k < colCount; k++) colH.push(0);
 
             for (var c2 = 0; c2 < cards.length; c2++) {
-                var pick = -1;
-                for (var t = 0; t < colCount; t++) {
-                    if (colH[t] === 0) { pick = t; break; }                                    // 还有空列 → 优先左边
-                    if (colH[t] + heights[c2] <= target + THRESHOLD) { pick = t; break; }        // 这列还装得下
-                }
-                if (pick === -1) {                                                             // 都满/都超阈值 → 放最矮的列
-                    pick = 0;
-                    for (var m = 1; m < colCount; m++) if (colH[m] < colH[pick]) pick = m;
+                var pick = 0;
+                for (var t = 1; t < colCount; t++) {
+                    if (colH[t] < colH[pick] - COL_BIAS) pick = t;        // 挑当前最矮的列（容差内优先靠左）
                 }
                 var card = cards[c2];
                 card.style.position = 'absolute';
