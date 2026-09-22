@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.54
+ * @version 2.1.55
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -122,7 +122,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.54';
+        $abVer = '2.1.55';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -297,27 +297,20 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('MD卡片：Material Design 3 列表风格，时间居右，文章单行、评论双行；原版：Typecho 原有样式。同时会隐藏"官方最新日志"卡片。')
         );
         $form->addInput($dashboardRecentStyle);
-        $themeBtnModeDefault = 'standalone';
+        $themeBtnModeDefault = 'merge';
         if (isset($abOpt->dashboardThemeButtonShow)) {
-            $themeBtnModeDefault = (string) $abOpt->dashboardThemeButtonShow;
-            if ($themeBtnModeDefault === '1') {
-                $themeBtnModeDefault = 'standalone';
-            } elseif ($themeBtnModeDefault === '0') {
-                $themeBtnModeDefault = 'hide';
-            } elseif ($themeBtnModeDefault !== 'standalone' && $themeBtnModeDefault !== 'merge' && $themeBtnModeDefault !== 'hide') {
-                $themeBtnModeDefault = 'standalone';
-            }
+            $abThemeBtnRaw = (string) $abOpt->dashboardThemeButtonShow;
+            $themeBtnModeDefault = ($abThemeBtnRaw === '0' || $abThemeBtnRaw === 'hide') ? 'hide' : 'merge';
         }
         $dashboardThemeButtonShow = new Typecho_Widget_Helper_Form_Element_Select(
             'dashboardThemeButtonShow',
             array(
-                'standalone' => '右上角单独显示（默认）',
-                'merge'      => '合并到概要页自定义快捷按钮',
-                'hide'       => '不显示',
+                'merge' => '合并到「概要页自定义快捷按钮」（默认）',
+                'hide'  => '不显示',
             ),
             $themeBtnModeDefault,
             _t('主题设置按钮'),
-            _t('设置「主题设置」入口显示方式。可右上角单独显示、合并到概要页快捷操作，或不显示。')
+            _t('设置「主题设置」入口的显示方式。<b>右上角单独显示已取消</b>，曾选过它的站点会自动改为合并到概要页快捷操作。')
         );
         $form->addInput($dashboardThemeButtonShow);
         $overviewChartEnabled = new Typecho_Widget_Helper_Form_Element_Select(
@@ -411,6 +404,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             isset($abOpt->dashboardCardOrder) ? (string) $abOpt->dashboardCardOrder : ''
         );
         $form->addInput($dashboardCardOrder);
+        $dashboardCardGroups = new AdminBeautify_SafeHidden(
+            'dashboardCardGroups',
+            null,
+            isset($abOpt->dashboardCardGroups) ? (string) $abOpt->dashboardCardGroups : ''
+        );
+        $form->addInput($dashboardCardGroups);
         $dashboardLayout = new Typecho_Widget_Helper_Form_Element_Select(
             'dashboardLayout',
             array(
@@ -792,7 +791,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.54 %c",'
+            .   '"%c AB-Admin %c v2.1.55 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -956,9 +955,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.54.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.55.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.54.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.55.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1061,6 +1060,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $dashboardCustomButtons = isset($pluginOptions->dashboardCustomButtons) ? (string)$pluginOptions->dashboardCustomButtons : '';
         $dashboardRecentStyle = isset($pluginOptions->dashboardRecentStyle) ? (string)$pluginOptions->dashboardRecentStyle : 'md3';
         $dashboardCardOrder   = isset($pluginOptions->dashboardCardOrder)   ? (string)$pluginOptions->dashboardCardOrder   : '';
+        $dashboardCardGroups = self::normalizeCardGroups(
+            isset($pluginOptions->dashboardCardGroups) ? (string)$pluginOptions->dashboardCardGroups : ''
+        );
         $dashboardCustomCardsEnabled = isset($pluginOptions->dashboardCustomCardsEnabled) ? (string)$pluginOptions->dashboardCustomCardsEnabled : '0';
         $dashboardLayout      = isset($pluginOptions->dashboardLayout)      ? (string)$pluginOptions->dashboardLayout      : 'masonry';
         if ($dashboardLayout !== 'masonry' && $dashboardLayout !== 'grid') $dashboardLayout = 'masonry';
@@ -1086,14 +1088,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 $dashboardCustomCards = $renderable;
             }
         }
-        $dashboardThemeButtonShow = isset($pluginOptions->dashboardThemeButtonShow) ? (string)$pluginOptions->dashboardThemeButtonShow : 'standalone';
-        if ($dashboardThemeButtonShow === '1') {
-            $dashboardThemeButtonShow = 'standalone';
-        } elseif ($dashboardThemeButtonShow === '0') {
-            $dashboardThemeButtonShow = 'hide';
-        } elseif ($dashboardThemeButtonShow !== 'standalone' && $dashboardThemeButtonShow !== 'merge' && $dashboardThemeButtonShow !== 'hide') {
-            $dashboardThemeButtonShow = 'standalone';
-        }
+        $dashboardThemeButtonShow = isset($pluginOptions->dashboardThemeButtonShow) ? (string)$pluginOptions->dashboardThemeButtonShow : 'merge';
+        $dashboardThemeButtonShow = ($dashboardThemeButtonShow === '0' || $dashboardThemeButtonShow === 'hide') ? 'hide' : 'merge';
         $overviewChartEnabled = isset($pluginOptions->overviewChartEnabled) ? (string)$pluginOptions->overviewChartEnabled : '1';
         $overviewTimeRange    = isset($pluginOptions->overviewTimeRange)    ? (string)$pluginOptions->overviewTimeRange    : '30';
         $umamiEnabled         = isset($pluginOptions->umamiEnabled)         ? (string)$pluginOptions->umamiEnabled         : '0';
@@ -1294,7 +1290,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.54',
+            'pluginVersion'          => '2.1.55',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1303,6 +1299,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'dashboardCustomButtons' => $customBtnsParsed,
             'dashboardRecentStyle'   => $dashboardRecentStyle,
             'dashboardCardOrder'     => $dashboardCardOrder,
+            'dashboardCardGroups'    => $dashboardCardGroups,
             'dashboardCustomCardsEnabled' => $dashboardCustomCardsEnabled,
             'dashboardLayout'        => $dashboardLayout,
             'dashboardMoreCardEnabled' => $dashboardMoreCardEnabled,
@@ -1327,9 +1324,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.54.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.55.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.54.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.55.js?v=' . $abJsVer . '"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1340,7 +1337,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.54"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.55"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1600,7 +1597,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.54";';
+        echo 'var __AB_VER__="2.1.55";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2803,6 +2800,39 @@ window.abSyncCompat = function(){
                 'html'  => isset($item['html']) ? (string) $item['html'] : '',
                 'js'    => isset($item['js']) ? (string) $item['js'] : '',
                 'code'  => isset($item['code']) ? (string) preg_replace('/[^A-Za-z0-9_-]/', '', (string) $item['code']) : '',
+            );
+        }
+        return $out;
+    }
+    private static function normalizeCardGroups($raw)
+    {
+        $out = array();
+        if (!is_string($raw) || $raw === '') return $out;
+        $data = json_decode($raw, true);
+        if (!is_array($data)) return $out;
+        $builtin = array('umami', 'freq', 'cat', 'posts', 'replies', 'more');
+        foreach ($data as $group) {
+            if (!is_array($group)) continue;
+            $id = isset($group['id']) ? preg_replace('/[^A-Za-z0-9_-]/', '', (string) $group['id']) : '';
+            if ($id === '') continue;
+            $cards = array();
+            if (isset($group['cards']) && is_array($group['cards'])) {
+                foreach ($group['cards'] as $key) {
+                    $key = (string) $key;
+                    if (strpos($key, 'custom:') === 0) {
+                        if (!preg_match('/^custom:[A-Za-z0-9_-]{1,64}$/', $key)) continue;
+                    } elseif (!in_array($key, $builtin, true)) {
+                        continue;
+                    }
+                    if (!in_array($key, $cards, true)) $cards[] = $key;
+                }
+            }
+            if (!$cards) continue;
+            $title = isset($group['title']) ? trim((string) $group['title']) : '';
+            $out[] = array(
+                'id'    => substr($id, 0, 32),
+                'title' => $title !== '' ? $title : '堆叠卡片',
+                'cards' => $cards,
             );
         }
         return $out;

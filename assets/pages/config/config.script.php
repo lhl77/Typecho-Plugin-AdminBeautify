@@ -562,6 +562,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 return null;
             }
             function metaOf(key){
+                if(isGroupToken(key)) return groupMetaOf(key);
                 if(key&&key.indexOf("custom:")===0){
                     var def=customById(key.slice(7));
                     if(!def) return null;
@@ -585,15 +586,124 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 return !customEnableSel || customEnableSel.value==="1";
             }
 
+            /* ============================================================
+               堆叠分组（数据存隐藏字段 dashboardCardGroups）
+               - 顺序里以 group:<id> 出现，可与普通卡片一起排序
+               - 组内可以放任意卡片（内置卡片与自定义卡片都能叠放，分组不能嵌套）
+               ============================================================ */
+            var groupInput=document.querySelector("[name=\"dashboardCardGroups\"]");
+            var groupDataUl=findFieldUl("dashboardCardGroups");
+            if(groupDataUl) groupDataUl.style.display="none";
+            var groups=[];
+
+            function isGroupToken(k){ return String(k||"").indexOf("group:")===0; }
+            function isCustomKey(k){ return String(k||"").indexOf("custom:")===0; }
+            /* 可入组的卡片：内置卡片（META）或仍存在的自定义卡片；分组不能嵌套 */
+            function isMemberKey(k){
+                if(isGroupToken(k)) return false;
+                if(isCustomKey(k)) return !!customById(String(k).slice(7));
+                return !!META[k];
+            }
+            function groupById(id){
+                for(var i=0;i<groups.length;i++) if(groups[i].id===id) return groups[i];
+                return null;
+            }
+            function groupMetaOf(token){
+                var g=groupById(String(token||"").slice(6));
+                if(!g) return null;
+                return {
+                    key:token, icon:"layers", title:"堆叠卡片组",
+                    desc:"点标题展开 / 收起；把卡片拖进来即可入组，组内可排序",
+                    isGroup:true, group:g
+                };
+            }
+            function nextGroupId(){
+                var n=1;
+                while(groupById("g"+n)) n++;
+                return "g"+n;
+            }
+            function groupedKeys(){
+                var out={};
+                for(var i=0;i<groups.length;i++){
+                    for(var j=0;j<groups[i].cards.length;j++) out[groups[i].cards[j]]=1;
+                }
+                return out;
+            }
+            function isGroupOpen(id){ return openGroups[id]!==false; }
+
+            function loadGroups(){
+                groups=[];
+                if(!groupInput) return;
+                try{
+                    var arr=JSON.parse(groupInput.value||"[]");
+                    if(Object.prototype.toString.call(arr)!=="[object Array]") return;
+                    for(var i=0;i<arr.length;i++){
+                        var g=arr[i];
+                        if(!g||typeof g!=="object") continue;
+                        var id=String(g.id||"").replace(/[^A-Za-z0-9_-]/g,"");
+                        if(!id) continue;
+                        var cards=[];
+                        if(Object.prototype.toString.call(g.cards)==="[object Array]"){
+                            for(var j=0;j<g.cards.length;j++){
+                                var k=String(g.cards[j]);
+                                if(isMemberKey(k)&&cards.indexOf(k)===-1) cards.push(k);
+                            }
+                        }
+                        groups.push({id:id,cards:cards});
+                    }
+                }catch(e){ groups=[]; }
+            }
+            function saveGroups(){
+                if(!groupInput) return;
+                var out=[];
+                for(var i=0;i<order.length;i++){
+                    if(!isGroupToken(order[i])) continue;
+                    var g=groupById(order[i].slice(6));
+                    if(g) out.push({id:g.id,title:"堆叠卡片组",cards:g.cards.slice()});
+                }
+                groupInput.value=JSON.stringify(out);
+            }
+
+            /* 从 DOM 读回分组 / 顺序（拖拽后调用） */
+            function readDomState(){
+                var kids=list.children,keys=[],ng=[];
+                for(var i=0;i<kids.length;i++){
+                    var el=kids[i];
+                    if(!el.classList||!el.classList.contains("ab-dash-card-row")) continue;
+                    keys.push(el.getAttribute("data-key"));
+                    if(el.classList.contains("ab-dash-group-row")){
+                        var inner=el.querySelector(".ab-dash-group-list");
+                        var cards=[];
+                        if(inner){
+                            var rows=inner.querySelectorAll(".ab-dash-card-row");
+                            for(var j=0;j<rows.length;j++) cards.push(rows[j].getAttribute("data-key"));
+                        }
+                        ng.push({id:el.getAttribute("data-group"),cards:cards});
+                    }
+                }
+                groups=ng;
+                order=normOrder(keys.join(","));
+            }
+
+            /* 只保留合法 token：内置卡片 / 未入组的自定义卡片 / 有效分组 */
             function normOrder(raw){
-                var parts=String(raw||"").split(","),out=[];
+                var parts=String(raw||"").split(","),out=[],inGroup=groupedKeys();
                 for(var i=0;i<parts.length;i++){
                     var k=parts[i].replace(/^\s+|\s+$/g,"");
-                    if(k&&metaOf(k)&&out.indexOf(k)===-1) out.push(k);
+                    if(!k||out.indexOf(k)!==-1) continue;
+                    if(isGroupToken(k)){
+                        if(groupMetaOf(k)) out.push(k);
+                        continue;
+                    }
+                    if(metaOf(k)&&!inGroup[k]) out.push(k);
                 }
                 var def=defaultOrder();
                 for(var j=0;j<def.length;j++){
-                    if(out.indexOf(def[j])===-1) out.push(def[j]);
+                    if(out.indexOf(def[j])===-1&&!inGroup[def[j]]) out.push(def[j]);
+                }
+                for(var g=0;g<groups.length;g++){       // 分组 token 一定保留（哪怕是空组，方便继续编辑）
+                    var tok="group:"+groups[g].id;
+                    if(out.indexOf(tok)===-1) out.push(tok);
                 }
                 return out;
             }
@@ -603,12 +713,15 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             wrap.innerHTML='\
                 <div class="ab-dash-cards-tip">\
                     <span class="material-icons-round">info</span>\
-                    <span>拖动卡片或使用右侧 ↑ ↓ 调整概要页卡片顺序，保存设置后生效；标记为「未启用」的卡片当前不会在概要页出现。</span>\
+                    <span>拖动卡片或使用右侧 ↑ ↓ 调整概要页卡片顺序，保存设置后生效；标记为「未启用」的卡片当前不会在概要页出现。把卡片拖进「堆叠卡片组」即可叠成一张卡片。</span>\
                 </div>\
                 <div class="ab-dash-cards-list" id="ab-dash-cards-list" role="list"></div>\
                 <div class="ab-dash-cards-actions">\
                     <button type="button" class="ab-dash-cards-reset" id="ab-dash-cards-reset">\
                         <span class="material-icons-round">restart_alt</span><span>恢复默认顺序</span>\
+                    </button>\
+                    <button type="button" class="ab-dash-cards-reset ab-dash-cards-addgroup" id="ab-dash-cards-add-group">\
+                        <span class="material-icons-round">layers</span><span>添加堆叠卡片</span>\
                     </button>\
                     <span class="ab-dash-cards-status" id="ab-dash-cards-status"></span>\
                 </div>';
@@ -616,7 +729,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
             var list=wrap.querySelector("#ab-dash-cards-list");
             loadCustomCards();
+            loadGroups();
             var order=normOrder(orderInput?orderInput.value:"");
+            var openGroups={};
             var flashTimer=null;
 
             function flash(msg){
@@ -628,69 +743,208 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 flashTimer=setTimeout(function(){ el.classList.remove("is-on"); },3000);
             }
 
+            /* 单张卡片行（insideGroup = 位于堆叠组内） */
+            function makeCardRow(def,insideGroup,index){
+                var row=document.createElement("div");
+                row.className="ab-dash-card-row"+(insideGroup?" ab-dash-group-item":"");
+                row.setAttribute("draggable","true");
+                row.setAttribute("role","listitem");
+                row.setAttribute("data-key",def.key);
+                if(def.isCustom) row.setAttribute("data-custom","1");
+
+                var drag=document.createElement("span");
+                drag.className="material-icons-round ab-dash-card-drag";
+                drag.textContent="drag_indicator";
+                drag.title=insideGroup?"拖动排序（拖到组外即移出）":"拖动排序（可拖进堆叠卡片组）";
+
+                var idx=document.createElement("span");
+                idx.className="ab-dash-card-idx";
+                idx.textContent=String(index);
+
+                var icon=document.createElement("span");
+                icon.className="ab-dash-card-icon";
+                var iconInner=document.createElement("span");
+                iconInner.className="material-icons-round";
+                iconInner.textContent=def.icon;
+                icon.appendChild(iconInner);
+
+                var meta=document.createElement("span");
+                meta.className="ab-dash-card-meta";
+                var name=document.createElement("span");
+                name.className="ab-dash-card-name";
+                name.textContent=def.title;
+                var desc=document.createElement("span");
+                desc.className="ab-dash-card-desc";
+                desc.textContent=def.desc;
+                meta.appendChild(name);
+                meta.appendChild(desc);
+
+                var state=document.createElement("span");
+                state.className="ab-dash-card-state";
+
+                var btns=document.createElement("span");
+                btns.className="ab-dash-card-btns";
+                if(insideGroup){
+                    var outBtn=document.createElement("button");
+                    outBtn.type="button";
+                    outBtn.className="ab-dash-card-btn";
+                    outBtn.setAttribute("data-eject","1");
+                    outBtn.title="移出分组";
+                    var outIcon=document.createElement("span");
+                    outIcon.className="material-icons-round";
+                    outIcon.textContent="output";
+                    outBtn.appendChild(outIcon);
+                    btns.appendChild(outBtn);
+                }
+                ["up","down"].forEach(function(dir){
+                    var b=document.createElement("button");
+                    b.type="button";
+                    b.className="ab-dash-card-btn";
+                    b.setAttribute("data-move",dir);
+                    b.title=(dir==="up"?"上移":"下移");
+                    var bi=document.createElement("span");
+                    bi.className="material-icons-round";
+                    bi.textContent=(dir==="up"?"arrow_upward":"arrow_downward");
+                    b.appendChild(bi);
+                    btns.appendChild(b);
+                });
+
+                row.appendChild(drag);
+                row.appendChild(idx);
+                row.appendChild(icon);
+                row.appendChild(meta);
+                row.appendChild(state);
+                row.appendChild(btns);
+                return row;
+            }
+
+            /* 堆叠分组行（内部嵌一个可拖入的列表） */
+            function makeGroupRow(def,index){
+                var g=def.group;
+                var open=isGroupOpen(g.id);
+                var row=document.createElement("div");
+                row.className="ab-dash-card-row ab-dash-group-row";
+                row.setAttribute("draggable","true");
+                row.setAttribute("role","listitem");
+                row.setAttribute("data-key",def.key);
+                row.setAttribute("data-group",g.id);
+                row.setAttribute("data-open",open?"1":"0");
+
+                var drag=document.createElement("span");
+                drag.className="material-icons-round ab-dash-card-drag";
+                drag.textContent="drag_indicator";
+                drag.title="拖动排序（与普通卡片一起排）";
+
+                var idx=document.createElement("span");
+                idx.className="ab-dash-card-idx";
+                idx.textContent=String(index);
+
+                var icon=document.createElement("span");
+                icon.className="ab-dash-card-icon";
+                var iconInner=document.createElement("span");
+                iconInner.className="material-icons-round";
+                iconInner.textContent="layers";
+                icon.appendChild(iconInner);
+
+                var meta=document.createElement("span");
+                meta.className="ab-dash-card-meta";
+                var name=document.createElement("span");
+                name.className="ab-dash-card-name";
+                name.textContent="堆叠卡片组（"+g.cards.length+" 张）";
+                var desc=document.createElement("span");
+                desc.className="ab-dash-card-desc";
+                desc.textContent=def.desc;
+                meta.appendChild(name);
+                meta.appendChild(desc);
+
+                var state=document.createElement("span");
+                state.className="ab-dash-card-state is-on";
+                state.textContent="堆叠";
+
+                var btns=document.createElement("span");
+                btns.className="ab-dash-card-btns";
+
+                var toggle=document.createElement("button");
+                toggle.type="button";
+                toggle.className="ab-dash-card-btn";
+                toggle.setAttribute("data-group-toggle","1");
+                toggle.title=open?"收起":"展开";
+                var tgIcon=document.createElement("span");
+                tgIcon.className="material-icons-round";
+                tgIcon.textContent=open?"expand_less":"expand_more";
+                toggle.appendChild(tgIcon);
+                btns.appendChild(toggle);
+
+                ["up","down"].forEach(function(dir){
+                    var b=document.createElement("button");
+                    b.type="button";
+                    b.className="ab-dash-card-btn";
+                    b.setAttribute("data-move",dir);
+                    b.title=(dir==="up"?"上移":"下移");
+                    var bi=document.createElement("span");
+                    bi.className="material-icons-round";
+                    bi.textContent=(dir==="up"?"arrow_upward":"arrow_downward");
+                    b.appendChild(bi);
+                    btns.appendChild(b);
+                });
+
+                var del=document.createElement("button");
+                del.type="button";
+                del.className="ab-dash-card-btn ab-dash-card-btn-danger";
+                del.setAttribute("data-group-del","1");
+                del.title="删除分组（组内卡片会回到列表，不会被删）";
+                var delIcon=document.createElement("span");
+                delIcon.className="material-icons-round";
+                delIcon.textContent="delete";
+                del.appendChild(delIcon);
+                btns.appendChild(del);
+
+                row.appendChild(drag);
+                row.appendChild(idx);
+                row.appendChild(icon);
+                row.appendChild(meta);
+                row.appendChild(state);
+                row.appendChild(btns);
+
+                var inner=document.createElement("div");
+                inner.className="ab-dash-cards-list ab-dash-group-list";
+                inner.setAttribute("data-group",g.id);
+                if(!g.cards.length){
+                    var empty=document.createElement("div");
+                    empty.className="ab-dash-group-empty";
+                    empty.textContent="把卡片拖到这里即可入组";
+                    inner.appendChild(empty);
+                }else{
+                    for(var i=0;i<g.cards.length;i++){
+                        var cd=metaOf(g.cards[i]);
+                        if(!cd) continue;
+                        inner.appendChild(makeCardRow(cd,true,i+1));
+                    }
+                }
+                row.appendChild(inner);
+                return row;
+            }
+
             function render(){
+                /* 先按当前卡片清单裁剪分组（自定义卡片被删掉时自动清理；内置卡片一律保留） */
+                var alive={};
+                for(var mk in META) if(META.hasOwnProperty(mk)) alive[mk]=1;
+                for(var ci=0;ci<customCards.length;ci++) alive[customKeyOf(customCards[ci].id)]=1;
+                for(var gi=0;gi<groups.length;gi++){
+                    var keep=[];
+                    for(var gj=0;gj<groups[gi].cards.length;gj++){
+                        if(alive[groups[gi].cards[gj]]) keep.push(groups[gi].cards[gj]);
+                    }
+                    groups[gi].cards=keep;
+                }
+
                 list.innerHTML="";
+                var idx=0;
                 for(var i=0;i<order.length;i++){
                     var def=metaOf(order[i]);
                     if(!def) continue;
-                    var row=document.createElement("div");
-                    row.className="ab-dash-card-row";
-                    row.setAttribute("draggable","true");
-                    row.setAttribute("role","listitem");
-                    row.setAttribute("data-key",def.key);
-
-                    var drag=document.createElement("span");
-                    drag.className="material-icons-round ab-dash-card-drag";
-                    drag.textContent="drag_indicator";
-                    drag.title="拖动排序";
-
-                    var idx=document.createElement("span");
-                    idx.className="ab-dash-card-idx";
-                    idx.textContent=String(i+1);
-
-                    var icon=document.createElement("span");
-                    icon.className="ab-dash-card-icon";
-                    var iconInner=document.createElement("span");
-                    iconInner.className="material-icons-round";
-                    iconInner.textContent=def.icon;
-                    icon.appendChild(iconInner);
-
-                    var meta=document.createElement("span");
-                    meta.className="ab-dash-card-meta";
-                    var name=document.createElement("span");
-                    name.className="ab-dash-card-name";
-                    name.textContent=def.title;
-                    var desc=document.createElement("span");
-                    desc.className="ab-dash-card-desc";
-                    desc.textContent=def.desc;
-                    meta.appendChild(name);
-                    meta.appendChild(desc);
-
-                    var state=document.createElement("span");
-                    state.className="ab-dash-card-state";
-
-                    var btns=document.createElement("span");
-                    btns.className="ab-dash-card-btns";
-                    ["up","down"].forEach(function(dir){
-                        var b=document.createElement("button");
-                        b.type="button";
-                        b.className="ab-dash-card-btn";
-                        b.setAttribute("data-move",dir);
-                        b.title=(dir==="up"?"上移":"下移");
-                        var bi=document.createElement("span");
-                        bi.className="material-icons-round";
-                        bi.textContent=(dir==="up"?"arrow_upward":"arrow_downward");
-                        b.appendChild(bi);
-                        btns.appendChild(b);
-                    });
-
-                    row.appendChild(drag);
-                    row.appendChild(idx);
-                    row.appendChild(icon);
-                    row.appendChild(meta);
-                    row.appendChild(state);
-                    row.appendChild(btns);
-                    list.appendChild(row);
+                    idx++;
+                    list.appendChild(def.isGroup?makeGroupRow(def,idx):makeCardRow(def,false,idx));
                 }
                 updateStates();
             }
@@ -699,6 +953,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             function updateStates(){
                 var rows=list.querySelectorAll(".ab-dash-card-row");
                 for(var i=0;i<rows.length;i++){
+                    if(isGroupToken(rows[i].getAttribute("data-key"))) continue;   /* 分组行自带「堆叠」徒标 */
                     var def=metaOf(rows[i].getAttribute("data-key"));
                     var st=rows[i].querySelector(".ab-dash-card-state");
                     if(!def||!st) continue;
@@ -719,68 +974,230 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 }
             }
 
-            /* 把当前 DOM 顺序写回隐藏字段 */
+            /* 把当前 DOM 顺序写回隐藏字段（顺序 + 分组） */
             function sync(msg){
-                var rows=list.querySelectorAll(".ab-dash-card-row"),keys=[];
-                for(var i=0;i<rows.length;i++){
-                    keys.push(rows[i].getAttribute("data-key"));
-                    var idxEl=rows[i].querySelector(".ab-dash-card-idx");
-                    if(idxEl) idxEl.textContent=String(i+1);
+                var kids=list.children,keys=[],idx=0;
+                for(var i=0;i<kids.length;i++){
+                    var el=kids[i];
+                    if(!el.classList||!el.classList.contains("ab-dash-card-row")) continue;
+                    idx++;
+                    var idxEl=el.querySelector(".ab-dash-card-idx");
+                    if(idxEl) idxEl.textContent=String(idx);
+                    keys.push(el.getAttribute("data-key"));
+
+                    if(!el.classList.contains("ab-dash-group-row")) continue;
+                    var g=groupById(el.getAttribute("data-group"));
+                    var inner=el.querySelector(".ab-dash-group-list");
+                    if(g&&inner){
+                        var mrows=inner.querySelectorAll(".ab-dash-card-row"),mc=[];
+                        for(var j=0;j<mrows.length;j++){
+                            mc.push(mrows[j].getAttribute("data-key"));
+                            var mIdx=mrows[j].querySelector(".ab-dash-card-idx");
+                            if(mIdx) mIdx.textContent=String(j+1);
+                        }
+                        g.cards=mc;
+                    }
                 }
                 order=normOrder(keys.join(","));
                 if(orderInput) orderInput.value=order.join(",");
+                saveGroups();
                 if(msg) flash(msg);
             }
 
             list.addEventListener("click",function(e){
-                var btn=e.target&&e.target.closest?e.target.closest(".ab-dash-card-btn"):null;
-                if(!btn) return;
-                var li=btn.closest(".ab-dash-card-row");
-                if(!li) return;
-                var dir=btn.getAttribute("data-move");
-                var sib=(dir==="up")?li.previousElementSibling:li.nextElementSibling;
-                if(!sib) return;
-                if(dir==="up") list.insertBefore(li,sib);
-                else list.insertBefore(sib,li);
-                sync("顺序已更新，记得点击右下角保存设置");
+                var target=e.target;
+                if(!target||!target.closest) return;
+
+                /* 展开 / 收起分组 */
+                var toggle=target.closest("[data-group-toggle]");
+                if(toggle){
+                    var trow=toggle.closest(".ab-dash-group-row");
+                    if(trow){
+                        var open=trow.getAttribute("data-open")==="1";
+                        openGroups[trow.getAttribute("data-group")]=!open;
+                        trow.setAttribute("data-open",open?"0":"1");
+                        var ti=toggle.querySelector(".material-icons-round");
+                        if(ti) ti.textContent=open?"expand_more":"expand_less";
+                        toggle.title=open?"展开":"收起";
+                    }
+                    return;
+                }
+
+                /* 删除分组：组内卡片按顺序回到顶层（卡片本身不删） */
+                var del=target.closest("[data-group-del]");
+                if(del){
+                    var drow=del.closest(".ab-dash-group-row");
+                    if(drow){
+                        var dlist=drow.querySelector(".ab-dash-group-list");
+                        var members=dlist?dlist.querySelectorAll(".ab-dash-card-row"):[];
+                        var frag=document.createDocumentFragment();
+                        for(var i=0;i<members.length;i++) frag.appendChild(members[i]);
+                        list.insertBefore(frag,drow);
+                        list.removeChild(drow);
+                        readDomState();
+                        render();
+                        sync("已删除堆叠卡片组，组内卡片已按顺序回到列表");
+                    }
+                    return;
+                }
+
+                /* 把组内卡片移出分组 */
+                var eject=target.closest("[data-eject]");
+                if(eject){
+                    var erow=eject.closest(".ab-dash-card-row");
+                    var grow=erow?erow.closest(".ab-dash-group-row"):null;
+                    if(erow&&grow){
+                        list.insertBefore(erow,grow.nextSibling);
+                        readDomState();
+                        render();
+                        sync("已移出分组，卡片仍在排序列表中");
+                    }
+                    return;
+                }
+
+                /* 上移 / 下移（在各自所在的列表内） */
+                var btn=target.closest(".ab-dash-card-btn[data-move]");
+                if(btn){
+                    var row=btn.closest(".ab-dash-card-row");
+                    if(!row) return;
+                    var parent=row.parentNode;
+                    var dir=btn.getAttribute("data-move");
+                    var sib=(dir==="up")?row.previousElementSibling:row.nextElementSibling;
+                    if(!sib) return;
+                    if(dir==="up") parent.insertBefore(row,sib);
+                    else parent.insertBefore(sib,row);
+                    readDomState();
+                    render();
+                    sync("顺序已更新，记得点击右下角保存设置");
+                }
             });
 
-            var dragKey=null;
+            var dragKey=null,dragCustom=false,dragSnapshot="";
+
+            /* 当前顺序签名（含分组与组内成员）：用于判断拖拽是否真的改变了顺序 */
+            function orderSignature(){
+                var parts=[],kids=list.children;
+                for(var i=0;i<kids.length;i++){
+                    var el=kids[i];
+                    if(!el.classList||!el.classList.contains("ab-dash-card-row")) continue;
+                    var one=el.getAttribute("data-key");
+                    if(el.classList.contains("ab-dash-group-row")){
+                        var mk=[],inner=el.querySelector(".ab-dash-group-list");
+                        if(inner){
+                            var rows=inner.querySelectorAll(".ab-dash-card-row");
+                            for(var j=0;j<rows.length;j++) mk.push(rows[j].getAttribute("data-key"));
+                        }
+                        one+="("+mk.join("|")+")";
+                    }
+                    parts.push(one);
+                }
+                return parts.join(",");
+            }
+
+            /* 当前光标所在的投放容器：组内列表 / 顶层列表 */
+            function dropListFor(el){
+                if(!el||!el.closest) return list;
+                var inner=el.closest(".ab-dash-group-list");
+                if(inner) return inner;
+                var grow=el.closest(".ab-dash-group-row");
+                if(grow){
+                    var gl=grow.querySelector(".ab-dash-group-list");
+                    if(gl) return gl;
+                }
+                return list;
+            }
+
             list.addEventListener("dragstart",function(e){
                 var li=e.target&&e.target.closest?e.target.closest(".ab-dash-card-row"):null;
                 if(!li) return;
                 dragKey=li.getAttribute("data-key");
+                dragCustom=li.getAttribute("data-custom")==="1";
+                dragSnapshot=orderSignature();
                 li.classList.add("is-dragging");
                 try{
                     e.dataTransfer.setData("text/plain",dragKey);
                     e.dataTransfer.effectAllowed="move";
                 }catch(err){}
             });
+
             list.addEventListener("dragover",function(e){
                 if(!dragKey) return;
-                e.preventDefault();
-                var li=e.target&&e.target.closest?e.target.closest(".ab-dash-card-row"):null;
-                if(!li||li.getAttribute("data-key")===dragKey) return;
                 var dragging=list.querySelector(".ab-dash-card-row[data-key=\""+dragKey+"\"]");
                 if(!dragging) return;
-                var rect=li.getBoundingClientRect();
-                var after=(e.clientY-rect.top)>rect.height/2;
-                list.insertBefore(dragging,after?li.nextSibling:li);
+                var container=dropListFor(e.target);
+                var intoGroup=container.classList.contains("ab-dash-group-list");
+
+                /* 入组限制：分组不能嵌套（内置卡片、自定义卡片都可以进组） */
+                if(intoGroup&&container!==dragging.parentNode&&dragging.classList.contains("ab-dash-group-row")){
+                    e.preventDefault();
+                    if(!container.classList.contains("is-drop-reject")){
+                        container.classList.add("is-drop-reject");
+                        flash("堆叠卡片组不能嵌套");
+                    }
+                    return;
+                }
+                container.classList.remove("is-drop-reject");
+                e.preventDefault();
+
+                var li=(e.target&&e.target.closest)?e.target.closest(".ab-dash-card-row"):null;
+                if(li&&li!==dragging&&li.parentNode===container){
+                    var rect=li.getBoundingClientRect();
+                    var after=(e.clientY-rect.top)>rect.height/2;
+                    container.insertBefore(dragging,after?li.nextSibling:li);
+                }else if(!li||li.parentNode!==container){
+                    container.appendChild(dragging);// 悬停在分组头部 / 空白处 → 追加到该容器末尾
+                }
             });
+
             list.addEventListener("drop",function(e){ e.preventDefault(); });
+
             list.addEventListener("dragend",function(e){
                 var li=e.target&&e.target.closest?e.target.closest(".ab-dash-card-row"):null;
                 if(li) li.classList.remove("is-dragging");
                 dragKey=null;
-                sync("顺序已更新，记得点击右下角保存设置");
+                dragCustom=false;
+                var rejects=list.querySelectorAll(".is-drop-reject");
+                for(var i=0;i<rejects.length;i++) rejects[i].classList.remove("is-drop-reject");
+                var changed=(orderSignature()!==dragSnapshot);
+                dragSnapshot="";
+                /* 入组 / 出组后行内按钮与类名要变 → 读回状态重建一遍 */
+                readDomState();
+                render();
+                if(changed){
+                    sync("顺序已更新，记得点击右下角保存设置");
+                }else{
+                    /* 没发生任何变化（比如想拖进分组却被拦下）：只写回字段，不要误报“已更新” */
+                    if(orderInput) orderInput.value=order.join(",");
+                    saveGroups();
+                }
             });
 
             var resetBtn=wrap.querySelector("#ab-dash-cards-reset");
             if(resetBtn){
                 resetBtn.addEventListener("click",function(){
-                    order=defaultOrder();
+                    groups=[];
+                    openGroups={};
+                    order=normOrder(defaultOrder().join(","));
+                    if(orderInput) orderInput.value=order.join(",");
+                    saveGroups();
                     render();
-                    sync("已恢复默认顺序，记得点击右下角保存设置");
+                    sync("已恢复默认顺序（堆叠分组已清空），记得点击右下角保存设置");
+                });
+            }
+
+            /* 「添加堆叠卡片」：在可拖动区域新增一个分组行（可拖到任意位置、可把卡片拖进去） */
+            var addGroupBtn=wrap.querySelector("#ab-dash-cards-add-group");
+            if(addGroupBtn){
+                addGroupBtn.addEventListener("click",function(){
+                    readDomState();
+                    var gid=nextGroupId();
+                    groups.push({id:gid,cards:[]});
+                    openGroups[gid]=true;
+                    order=normOrder(order.concat(["group:"+gid]).join(","));
+                    if(orderInput) orderInput.value=order.join(",");
+                    saveGroups();
+                    render();
+                    sync("已添加堆叠卡片组，把自定义卡片拖进去即可（记得保存设置）");
                 });
             }
 
@@ -791,6 +1208,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
             render();
             if(orderInput&&!orderInput.value) orderInput.value=order.join(",");
+            saveGroups();
             body.style.padding="0px 38px 16px";
 
             /* ============================================================

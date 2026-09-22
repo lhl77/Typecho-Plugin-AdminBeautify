@@ -350,7 +350,7 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.54';
+            var ver = cfg.pluginVersion || '2.1.55';
 
             var themeInfo = document.createElement('div');
             themeInfo.className = 'ab-footer-theme';
@@ -2907,33 +2907,382 @@
         },
 
         /**
+         * 「主题设置」入口显示方式归一化
+         * 只保留 merge（合并到概要页快捷按钮）/ hide；
+         * 历史值 standalone（旧「右上角单独显示」）与 1（更早的布尔值）一律兜底为 merge
+         */
+        normalizeThemeBtnMode: function (value) {
+            var v = (value === undefined || value === null) ? '' : String(value);
+            return (v === 'hide' || v === '0') ? 'hide' : 'merge';
+        },
+
+        /**
+         * 概要页顶部「欢迎 bar」：把 .typecho-page-title 改造成一句 MD3 大号问候
+         * —— 纯文字（无图标、无底色、无日期），文字就是问候语；原页面标题（如「网站概要」）
+         * 不再展示（h2 仍保留在 DOM 里，供其它逻辑取用）
+         * 幂等：已改造过（带 .ab-welcome-bar 类）直接返回 false
+         */
+        buildWelcomeBar: function (pageTitle) {
+            if (!pageTitle || pageTitle.classList.contains('ab-welcome-bar')) return false;
+            var h2 = pageTitle.querySelector('h2');
+            if (!h2) return false;
+
+            var cfg = window.__AB_CONFIG__ || {};
+            var name = (cfg.user && cfg.user.screenName) ? String(cfg.user.screenName) : '';
+            var hour = new Date().getHours();
+            var greet = hour < 5 ? '夜深了' : hour < 9 ? '早上好' : hour < 12 ? '上午好'
+                : hour < 14 ? '中午好' : hour < 18 ? '下午好' : hour < 23 ? '晚上好' : '夜深了';
+            /* 末尾 emoji：打招呼用 👋，夜深了（23 点后 / 5 点前）用 🌙 */
+            var emoji = (hour >= 23 || hour < 5) ? '🌙' : '👋';
+
+            var title = document.createElement('p');
+            title.className = 'ab-welcome-title';
+            title.textContent = (name ? greet + '，' + name : greet) + ' ' + emoji;
+
+            pageTitle.appendChild(title);      // 纯文字：h2 留在原位（CSS 隐藏），只额外多这一句问候
+            pageTitle.classList.add('ab-welcome-bar');
+            return true;
+        },
+
+        /**
+         * 让问候语与下方卡片左缘对齐：
+         * 概要页的卡片栅格自带宽/padding 与行负边距（不同主题、不同侧栏模式下数值不同），
+         * 写死数值不可靠 —— 这里实测卡片左缘，用 margin-left 回补差值。
+         * @return number 补偿量（px）
+         */
+        alignWelcomeBar: function () {
+            var bar = document.querySelector('.typecho-dashboard .typecho-page-title.ab-welcome-bar');
+            if (!bar) return 0;
+            var title = bar.querySelector('.ab-welcome-title');
+            var grid = document.getElementById('ab-dash-cards');
+            if (!title || !grid) return 0;
+            var ref = grid.querySelector('.ab-card') || grid;      // 以第一张卡片左缘为基准
+            var refLeft = ref.getBoundingClientRect().left;
+
+            bar.style.removeProperty('margin-left');            // 先复位，量出未补偿时的位置
+            var delta = Math.round((refLeft - title.getBoundingClientRect().left) * 100) / 100;
+            /* 样式表里 margin 是 !important，内联也得带 important 才盖得住 */
+            if (Math.abs(delta) >= 0.5) bar.style.setProperty('margin-left', delta + 'px', 'important');
+            return delta;
+        },
+
+        /**
+         * 堆叠卡片组：初始化（绑定抬头点击 + 恢复上次看的那一张）
+         */
+        _initStackCards: function () {
+            var cards = document.querySelectorAll('#ab-dash-cards .ab-stack-card');
+            for (var i = 0; i < cards.length; i++) this._bindStackCard(cards[i]);
+            this.syncStackHeights();
+        },
+
+        _bindStackCard: function (card) {
+            if (!card.__abStackBound) {
+                card.__abStackBound = true;
+                var saved = 0;
+                try {
+                    saved = parseInt(localStorage.getItem('ab-stack-' + (card.getAttribute('data-ab-card') || '')), 10) || 0;
+                } catch (e) { saved = 0; }
+                card.__abStackIndex = saved;
+
+                var head = card.querySelector('.ab-stack-head');
+                if (head) {
+                    card.style.setProperty('--ab-stack-head-height', Math.ceil(head.getBoundingClientRect().height) + 'px');
+                    head.addEventListener('click', function () { AdminBeautify._switchStack(card, 1); });
+                    head.addEventListener('keydown', function (e) {
+                        var k = e.key;
+                        if (k === 'Enter' || k === ' ' || k === 'Spacebar') {
+                            e.preventDefault();
+                            AdminBeautify._switchStack(card, 1);
+                        }
+                    });
+                }
+                var stackBody = card.querySelector('.ab-stack-body');
+                if (stackBody) {
+                    stackBody.addEventListener('click', function (e) {
+                        var layer = e.target && e.target.closest ? e.target.closest('.ab-stack-layer') : null;
+                        if (!layer || !card.__abStackSwitching || !layer.classList.contains('is-rising')) return;
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (card.__abStackCancelSwitch) card.__abStackCancelSwitch();
+                        AdminBeautify._switchStack(card, 1);
+                    });
+                }
+            }
+            var currentHead = card.querySelector('.ab-stack-head');
+            if (currentHead) {
+                card.style.setProperty('--ab-stack-head-height', Math.ceil(currentHead.getBoundingClientRect().height) + 'px');
+            }
+            this._renderStack(card);
+        },
+
+        /**
+         * 按当前索引刷新叠卡层次：当前卡在顶层，下一张在下后方露一点（「堆叠」外观）
+         * 类名一变，CSS 的 transform/left/right/opacity 过渡就是「下方卡片升到上方、上方卡片退回下方」的动画
+         * @param {Element} card 叠卡
+         * @param {boolean} [animate] 是否播放抬头文字动画（只有用户点击切换时才播）
+         */
+        _renderStack: function (card, animate) {
+            var layers = card.querySelectorAll('.ab-stack-layer');
+            var n = layers.length;
+            if (!n) return;
+            var idx = ((card.__abStackIndex || 0) % n + n) % n;
+            card.__abStackIndex = idx;
+
+            for (var i = 0; i < n; i++) {
+                var rel = (i - idx + n) % n;
+                layers[i].className = 'ab-stack-layer ' + (rel === 0 ? 'is-active' : (rel === 1 ? 'is-next' : 'is-hidden'));
+                var innerCard = layers[i].querySelector('.ab-card');
+                if (innerCard) innerCard.setAttribute('data-ab-stack-rel', String(rel));
+            }
+
+            this._updateStackHead(card, idx);
+
+            this.syncStackHeights();
+            if (animate) this._animateStackHead(card);
+        },
+
+        /* 只更新共享抬头的内容，不改变任何 layer class（物理换牌动画会单独调用） */
+        _updateStackHead: function (card, idx) {
+            var layers = card.querySelectorAll('.ab-stack-layer');
+            var n = layers.length;
+            if (!n) return;
+            idx = ((idx || 0) % n + n) % n;
+            var active = layers[idx].querySelector('.ab-card');
+            var activeH3 = active ? active.querySelector('h3') : null;
+            var titleEl = card.querySelector('.ab-stack-title');
+            var iconEl  = card.querySelector('.ab-stack-icon');
+            var countEl = card.querySelector('.ab-stack-count');
+            if (titleEl) {
+                var titleText = '';
+                if (activeH3) {
+                    /* h3 里同时有 Material 图标与标题；直接读 textContent 会得到
+                       "bolt快捷入口" / "bug_report会报错的卡片"，而叠卡抬头左侧
+                       已经单独显示图标。克隆后摘掉图标容器，只保留真正标题。 */
+                    var titleClone = activeH3.cloneNode(true);
+                    var titleIcons = titleClone.querySelectorAll('.ab-card-header-icon');
+                    for (var ti = 0; ti < titleIcons.length; ti++) {
+                        if (titleIcons[ti].parentNode) titleIcons[ti].parentNode.removeChild(titleIcons[ti]);
+                    }
+                    titleText = String(titleClone.textContent || '').replace(/\s+/g, ' ').replace(/^\s+|\s+$/g, '');
+                }
+                titleEl.textContent = titleText;
+            }
+            if (iconEl) {
+                var ic = active ? active.querySelector('.ab-card-header-icon .material-icons-round') : null;
+                iconEl.textContent = ic ? ic.textContent : 'widgets';
+            }
+            if (countEl) countEl.textContent = (idx + 1) + ' / ' + n;
+        },
+
+        /**
+         * 抬头与卡片「一起动」：整个 header（图标 / 标题 / 计数 / 箭头）
+         * 使用与进入层相同的 5px 位移与同一条缓动曲线，避免 header / 正文分成两段动画。
+         */
+        _animateStackHead: function (card, prepared) {
+            var head = card.querySelector('.ab-stack-head');
+            if (!head) return;
+
+            if (!prepared) {
+                /* 非切换路径的兜底：先无过渡地把起始态落到样式里。 */
+                head.classList.add('ab-noanim', 'ab-anim-in');
+                void head.offsetWidth;
+            }
+            /* layer class 已经在同一个 style batch 内更新：现在同时释放 header 与内容层。 */
+            head.classList.remove('ab-noanim', 'ab-anim-in');
+            if (card.__abHeadTimer) window.clearTimeout(card.__abHeadTimer);
+            card.__abHeadTimer = window.setTimeout(function () { head.classList.remove('ab-noanim', 'ab-anim-in'); }, 520);
+            /* 兜底：任何异常情况下也不让抬头停在「进场起始态」 */
+            if (card.__abHeadTimer3) window.clearTimeout(card.__abHeadTimer3);
+            card.__abHeadTimer3 = window.setTimeout(function () {
+                head.classList.remove('ab-anim-in');
+            }, 1200);
+        },
+
+        /* 叠卡容器高度 = 组内**最高**的那张卡片：切换时不改变高度 → 不会引起瀑布流大范围重排 */
+        syncStackHeights: function () {
+            var cards = document.querySelectorAll('#ab-dash-cards .ab-stack-card');
+            for (var i = 0; i < cards.length; i++) {
+                var layers = cards[i].querySelectorAll('.ab-stack-layer');
+                var n = layers.length;
+                if (!n) continue;
+                var body = cards[i].querySelector('.ab-stack-body');
+                if (!body) continue;
+                var head = cards[i].querySelector('.ab-stack-head');
+                var headH = 0;
+                if (head) {
+                    headH = Math.ceil(head.getBoundingClientRect().height);
+                    cards[i].style.setProperty('--ab-stack-head-height', headH + 'px');
+                }
+
+                /* 量高度前先退回内容高度：.is-stacked 会把自定义卡片撑满容器，
+                   不退出就是自引用测量（永远量到上一次的高度）。普通内置卡片保持原布局。 */
+                cards[i].classList.remove('is-stacked');
+                cards[i].classList.add('is-measuring');
+                var maxH = 0;
+                for (var j = 0; j < n; j++) {
+                    var inner = layers[j].querySelector('.ab-card');
+                    var h = Math.ceil((inner || layers[j]).getBoundingClientRect().height);
+                          /* 内层卡片为了铺满完整牌面增加了 header 占位 padding，
+                              body 本身只应承载正文高度，不能把 header 再算一遍。 */
+                          if (inner && headH > 0) h = Math.max(0, h - headH);
+                    if (h > maxH) maxH = h;
+                }
+                if (maxH > 0) body.style.height = maxH + 'px';
+                /* 同步写入 CSS 变量：.ab-stack-body 用它钉住高度（含 !important），
+                   否则瀑布流容器可能把 body 拉伸，导致叠卡高度不等于最高卡片。 */
+                if (maxH > 0) {
+                    cards[i].style.setProperty('--ab-stack-body-height', maxH + 'px');
+                    /* 整张牌面高度 = body + header：卡片与层都用这个绝对值，
+                       彻底避免百分比高度被容器拉伸后放大。 */
+                    cards[i].style.setProperty('--ab-stack-face-height', (maxH + headH) + 'px');
+                }
+                /* 量完再铺满：矮卡片会被拉高到容器高度 → 底部 footer 贴底、不悬空 */
+                cards[i].classList.remove('is-measuring');
+                cards[i].classList.add('is-stacked');
+            }
+        },
+
+        /* 点抬头切换：换下一张（带过渡动画），并记住选择 */
+        _switchStack: function (card, step) {
+            var layers = card.querySelectorAll('.ab-stack-layer');
+            var n = layers.length;
+            if (n < 2) return;
+            var requestedStep = step || 1;
+            if (card.__abStackSwitching) {
+                     /* 快速点击立即打断当前物理阶段，而不是等待上一轮 660ms 完成。
+                         当前轮已在点击时写入 nextIdx，取消后从该逻辑位置继续下一张。 */
+                     if (card.__abStackCancelSwitch) card.__abStackCancelSwitch();
+            }
+            card.__abStackSwitching = true;
+
+            var head = card.querySelector('.ab-stack-head');
+            var idx = ((card.__abStackIndex || 0) % n + n) % n;
+            var nextIdx = ((idx + requestedStep) % n + n) % n;
+            var outgoing = layers[idx];
+            var incoming = layers[nextIdx];
+            var shifting = null;
+            if (n > 2) {
+                /* 三层牌堆中的第三张：hidden -> next；它不是 incoming，必须单独参与位移动画。 */
+                var hiddenIdx = ((idx + 2) % n + n) % n;
+                shifting = layers[hiddenIdx];
+            }
+            var self = this;
+            outgoing.style.setProperty('--ab-stack-return-y', n > 2 ? '10px' : '5px');
+
+            /* 共享 header 需要留在原位接收点击，因此克隆一份视觉 header 放进离场顶牌；
+               克隆不带事件，也不复制 / 执行任何自定义卡片脚本。 */
+            var ghostHead = head ? head.cloneNode(true) : null;
+            if (ghostHead) {
+                ghostHead.className = 'ab-stack-head ab-stack-ghost-head';
+                ghostHead.removeAttribute('role');
+                ghostHead.removeAttribute('tabindex');
+                ghostHead.removeAttribute('title');
+                outgoing.insertBefore(ghostHead, outgoing.firstChild);
+            }
+
+            card.classList.add('is-switching');
+            outgoing.classList.add('is-dealing-out', 'is-slide-only');
+            incoming.classList.add('is-rising', 'is-rise-start');
+            if (shifting) shifting.classList.add('is-shifting-next');
+            /* 新 header 与下一张牌同为 5px 起始态；同一帧释放到 0。 */
+            if (head) head.classList.add('ab-noanim', 'ab-anim-in');
+            self._updateStackHead(card, nextIdx);
+            /* 逻辑状态在点击时立即更新；视觉层级在动画结束后提交。 */
+            card.__abStackIndex = nextIdx;
+            try {
+                localStorage.setItem('ab-stack-' + (card.getAttribute('data-ab-card') || ''), String(nextIdx));
+            } catch (e) {}
+            void card.offsetWidth;
+            if (head) head.classList.remove('ab-noanim', 'ab-anim-in');
+            incoming.classList.remove('is-rise-start');
+
+            /* 第一阶段：顶牌向前下方抽出；下一张顺势上浮。 */
+            var stageOneTimer = window.setTimeout(function () {
+                outgoing.classList.add('is-out');
+                incoming.classList.add('is-up');
+                if (shifting) shifting.classList.add('is-shifted');
+            }, 20);
+
+            /* 第二阶段（换层帧）：
+               旧顶牌在被抽到最下端的位置「就地」沉到牌堆最底层 —— 位移量与 .is-out
+               完全一致，只换 z-index 并把透明度拉回 100%，卡片在屏幕上不移动。
+               紧接着的 .is-returning 从同一个位置连续地滑回牌堆底部，
+               因此插回过程看不到跳变。 */
+            var stageTwoTimer = window.setTimeout(function () {
+                outgoing.classList.add('is-below');
+                outgoing.classList.remove('is-out');
+                outgoing.classList.remove('is-slide-only');
+                /* 这一帧只负责换层，不启动插回过渡。 */
+                outgoing.classList.add('is-bottom-jump');
+                /* 内层卡片在牌堆底部只露出卡边，其 opacity 过渡比外层 layer 慢，
+                   清掉过渡让它立刻到位，避免「插回到底后内容才慢慢显出来」的拖尾。 */
+                var jumpedCard = outgoing.querySelector('.ab-card');
+                if (jumpedCard) jumpedCard.style.transition = 'none';
+                /* 让浏览器先落到换层帧的样式，再启动插回过渡，保证两段动画严格分离。 */
+                void outgoing.offsetWidth;
+                if (jumpedCard) jumpedCard.style.removeProperty('transition');
+            }, 265);
+
+            /* 第三阶段：从换层帧的位置向上插回牌堆底部（64px → 10 / 5px）。 */
+            var stageThreeTimer = window.setTimeout(function () {
+                outgoing.classList.remove('is-below', 'is-bottom-jump');
+                outgoing.classList.add('is-returning');
+            }, 300);
+
+            var finish = function () {
+                for (var li = 0; li < layers.length; li++) {
+                    layers[li].classList.remove('is-dealing-out', 'is-slide-only', 'is-out', 'is-below', 'is-bottom-jump', 'is-returning', 'is-fade-away', 'is-rising', 'is-rise-start', 'is-up', 'is-shifting-next', 'is-shifted');
+                    layers[li].style.removeProperty('--ab-stack-return-y');
+                }
+                if (ghostHead && ghostHead.parentNode) ghostHead.parentNode.removeChild(ghostHead);
+                card.classList.remove('is-switching');
+                self._renderStack(card, false);
+                card.__abStackSwitching = false;
+            };
+            card.__abStackCancelSwitch = function () {
+                window.clearTimeout(stageOneTimer);
+                window.clearTimeout(stageTwoTimer);
+                window.clearTimeout(stageThreeTimer);
+                if (card.__abStackFinishTimer) window.clearTimeout(card.__abStackFinishTimer);
+                if (cancelShiftedTimer) { window.clearTimeout(cancelShiftedTimer); cancelShiftedTimer = null; }
+                for (var ci = 0; ci < layers.length; ci++) {
+                    layers[ci].classList.remove('is-dealing-out', 'is-slide-only', 'is-out', 'is-below', 'is-bottom-jump', 'is-returning', 'is-fade-away', 'is-rising', 'is-rise-start', 'is-up', 'is-shifting-next', 'is-shifted');
+                    layers[ci].style.removeProperty('--ab-stack-return-y');
+                }
+                if (ghostHead && ghostHead.parentNode) ghostHead.parentNode.removeChild(ghostHead);
+                card.classList.remove('is-switching');
+                card.__abStackSwitching = false;
+                card.__abStackCancelSwitch = null;
+                self._renderStack(card, false);
+            };
+            /* 打断时第三张的「回位」过渡也要收掉，否则下一轮换牌会叠上一条延迟过渡。 */
+            var cancelShiftedTimer = shifting ? window.setTimeout(function () {
+                shifting.classList.remove('is-shifting-next');
+                cancelShiftedTimer = null;
+            }, 430) : null;
+            if (card.__abStackFinishTimer) window.clearTimeout(card.__abStackFinishTimer);
+            card.__abStackFinishTimer = window.setTimeout(finish, 600);
+        },
+
+        /**
          * MD3 Dashboard 仪表盘增强
          */
         enhanceDashboard: function () {
             var dashboard = document.querySelector('.typecho-dashboard');
             if (!dashboard || dashboard.classList.contains('ab-dashboard-enhanced')) return;
 
-            // ---- 0. 在页面标题右侧添加主题设置按钮 ----
+            // ---- 0. 页面标题 → MD3 欢迎 bar（问候语 + 日期）；「主题设置」入口只走「合并到快捷操作」----
             var pageTitle = dashboard.querySelector('.typecho-page-title');
             var cfg = window.__AB_CONFIG__ || {};
-            var themeButtonMode = cfg.dashboardThemeButtonShow || 'standalone';
-            if (themeButtonMode === '1') themeButtonMode = 'standalone';
-            if (themeButtonMode === '0') themeButtonMode = 'hide';
+            var themeButtonMode = AdminBeautify.normalizeThemeBtnMode(cfg.dashboardThemeButtonShow);
 
-            if (pageTitle && themeButtonMode !== 'standalone') {
+            if (pageTitle) AdminBeautify.buildWelcomeBar(pageTitle);
+            if (pageTitle) AdminBeautify.alignWelcomeBar();
+
+            /* 「右上角单独显示」已下线：标题栏里残留的旧按钮一律清掉（合并入口由下面第 2 段生成） */
+            if (pageTitle) {
                 var oldBtn = pageTitle.querySelector('.ab-dashboard-settings-btn');
                 if (oldBtn) oldBtn.remove();
-            }
-
-            if (themeButtonMode === 'standalone' && pageTitle && !pageTitle.querySelector('.ab-dashboard-settings-btn')) {
-                var settingsBtn = document.createElement('a');
-                settingsBtn.className = 'ab-dashboard-settings-btn';
-                settingsBtn.href = 'options-plugin.php?config=AdminBeautify';
-                settingsBtn.title = '主题设置';
-                settingsBtn.innerHTML =
-                    '<span class="material-icons-round">settings</span>' +
-                    '<span>主题设置</span>';
-                pageTitle.appendChild(settingsBtn);
             }
 
             // ---- 1. 改造欢迎统计区为 stat cards ----
@@ -3872,11 +4221,76 @@
                 }
             })();
 
-            // ---- 8. 统一卡片顺序：读取「概要页卡片设置」保存的顺序（含自定义卡片） ----
+            // ---- 7.6 堆叠卡片组：组内自定义卡片叠成一张卡片，点抬头切换 ----
+            (function () {
+                var ccfg = window.__AB_CONFIG__ || {};
+                var host = document.getElementById('ab-dash-cards');
+                if (!host) return;
+
+                /* 重跑时先拆掉旧的叠卡壳：组内卡片放回容器（保证后续逻辑仍能找到它们） */
+                var oldStack = host.querySelectorAll('[data-ab-card^="group:"]');
+                for (var os = 0; os < oldStack.length; os++) {
+                    var inner = oldStack[os].querySelectorAll('.ab-stack-layer > .ab-card');
+                    for (var oi = 0; oi < inner.length; oi++) host.appendChild(inner[oi]);
+                    if (oldStack[os].parentNode) oldStack[os].parentNode.removeChild(oldStack[os]);
+                }
+
+                var groupList = ccfg.dashboardCardGroups;
+                if (!groupList || !groupList.length) return;
+                if (ccfg.dashboardCustomCardsEnabled !== '1') return;
+
+                for (var gi = 0; gi < groupList.length; gi++) {
+                    var g = groupList[gi] || {};
+                    var gkey = 'group:' + (g.id || ('g' + (gi + 1)));
+                    if (host.querySelector('[data-ab-card="' + gkey + '"]')) continue;
+
+                    var members = [];
+                    var wanted = g.cards || [];
+                    for (var wi = 0; wi < wanted.length; wi++) {
+                        var m = host.querySelector('[data-ab-card="' + wanted[wi] + '"]');
+                        if (m) members.push(m);
+                    }
+                    if (!members.length) continue;
+
+                    var stack = document.createElement('div');
+                    stack.className = 'ab-card ab-dash-card ab-stack-card';
+                    stack.setAttribute('data-ab-card', gkey);
+
+                    var head = document.createElement('h3');
+                    head.className = 'ab-stack-head';
+                    head.setAttribute('role', 'button');
+                    head.setAttribute('tabindex', '0');
+                    head.title = '点击切换卡片';
+                    head.innerHTML =
+                        '<span class="ab-card-header-icon"><span class="material-icons-round ab-stack-icon">widgets</span></span>' +
+                        '<span class="ab-stack-title"></span>' +
+                        '<span class="ab-stack-count"></span>' +
+                        '<span class="material-icons-round ab-stack-chev">expand_more</span>';
+
+                    var body = document.createElement('div');
+                    body.className = 'ab-stack-body';
+
+                    for (var mi = 0; mi < members.length; mi++) {
+                        var layer = document.createElement('div');
+                        layer.className = 'ab-stack-layer';
+                        layer.appendChild(members[mi]);        /* 卡片节点整体搬进层里 */
+                        body.appendChild(layer);
+                    }
+
+                    stack.appendChild(head);
+                    stack.appendChild(body);
+                    host.appendChild(stack);
+                }
+
+                AdminBeautify._initStackCards();
+            })();
+
+            // ---- 8. 统一卡片顺序：读取「概要页卡片设置」保存的顺序（含自定义卡片与堆叠分组） ----
             (function () {
                 var grid = document.getElementById('ab-dash-cards');
                 if (!grid) return;
-                var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-ab-card]'));
+                /* 只取直接子级：自定义卡片可能已被搬进堆叠卡片组里 */
+                var cards = Array.prototype.slice.call(grid.querySelectorAll(':scope > [data-ab-card]'));
                 if (!cards.length) return;
                 var exists = {};
                 for (var c = 0; c < cards.length; c++) {
@@ -3948,6 +4362,29 @@
             }
             if (!cards.length) return;
 
+            /* 容器宽度变化也要重排：侧栏折叠/展开只改 <html data-nav-collapsed> +
+               body 外边距（不触发 window resize），而卡片是绝对定位 + 内联固定宽度，
+               只观察卡片自身不会因为「容器变宽/变窄」而触发 → 不重排就会向右溢出。
+               这里单独观察容器，且只在「宽度」变化时重排 —— 自己写 height 触发的回调直接忽略，避免死循环 */
+            if (window.ResizeObserver) {
+                var selfGrid = this;
+                if (!this._dashGridRo) {
+                    this._dashGridRo = new ResizeObserver(function () {
+                        var el = selfGrid._dashGridEl;
+                        if (!el || el.isConnected === false) return;
+                        var w = el.clientWidth;
+                        if (w === selfGrid._dashGridW) return;
+                        selfGrid._dashGridW = w;
+                        if (selfGrid._dashRoTimer) clearTimeout(selfGrid._dashRoTimer);
+                        selfGrid._dashRoTimer = setTimeout(function () { selfGrid.fitDashboardCards(); }, 90);
+                    });
+                }
+                this._dashGridEl = grid;
+                this._dashGridRo.disconnect();
+                this._dashGridRo.observe(grid);
+                this._dashGridW = grid.clientWidth;
+            }
+
             function resetFlow(keepWidth) {
                 grid.style.position = '';
                 grid.style.height = '';
@@ -3958,6 +4395,7 @@
                     st.left = '';
                     st.top = '';
                     st.gridRowEnd = '';
+                    st.boxSizing = '';
                     if (!keepWidth) st.width = '';
                 }
             }
@@ -3978,12 +4416,20 @@
                 resetFlow(false);
                 return;
             }
-            var colW = (avail - (colCount - 1) * gap) / colCount;
+            /* 列宽取整：小数列宽在高 DPR（如 1.667x）下会被取整成设备像素，最后一张卡片的
+               右边缘可能超出版心零点几像素（实测 0.19px，表现为「右侧溢出」误报）；取整后
+               右侧天然留出 <1px 余量，卡片位置也更锐利 */
+            var colW = Math.floor((avail - (colCount - 1) * gap) / colCount);
 
-            /* 先把卡片恢复成静态流并统一宽度 —— 宽度影响换行，必须先定宽再量高度 */
+            /* 先把卡片恢复成静态流并统一宽度 —— 宽度影响换行，必须先定宽再量高度。
+               同时强制 border-box：部分卡片是 content-box（渲染宽度会比设定值多出
+               边框那 1 单位，实测约为 1.2px），会把卡片右缘挤出容器零点几像素 */
             resetFlow(true);
             grid.style.position = 'relative';
-            for (var w = 0; w < cards.length; w++) cards[w].style.width = colW + 'px';
+            for (var w = 0; w < cards.length; w++) {
+                cards[w].style.width = colW + 'px';
+                cards[w].style.boxSizing = 'border-box';
+            }
 
             var heights = [];
             for (var h = 0; h < cards.length; h++) {
@@ -4015,6 +4461,10 @@
             var maxH = 0;
             for (var q = 0; q < colCount; q++) maxH = Math.max(maxH, colH[q] - gap);
             grid.style.height = Math.max(0, maxH) + 'px';
+
+            /* 卡片列宽/列数变化后，问候语也要重新跟卡片对齐；叠卡高度也跟随重算 */
+            AdminBeautify.alignWelcomeBar();
+            AdminBeautify.syncStackHeights();
 
             if (window.ResizeObserver) {
                 if (!this._dashRo) {

@@ -50,6 +50,15 @@
 #lb-preview .lbpv-btn:hover{transform:translateY(-1px);box-shadow:0 16px 32px -14px rgba(125,82,96,1),0 4px 10px -3px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.32)}
 #lb-preview .lbpv-btn:active{transform:scale(.972);box-shadow:0 4px 12px -8px rgba(125,82,96,.9),0 1px 3px rgba(0,0,0,.2)}
 #lb-preview .lbpv-btn > span{position:relative;z-index:1}
+/* 「下次自动登录」开关（与真实登录页的 MD3 switch 一致的静态示意；点击可预览勾选态） */
+#lb-preview .lbpv-remember{display:flex;align-items:center;gap:10px;margin-top:16px;font-size:13px;color:#4b5563;cursor:pointer;user-select:none;transition:color .3s}
+#lb-preview[data-theme="dark"] .lbpv-remember{color:#9ca3af}
+#lb-preview .lbpv-switch{flex:none;position:relative;width:36px;height:20px;border-radius:100px;background:rgba(17,24,39,.10);transition:background .25s}
+#lb-preview[data-theme="dark"] .lbpv-switch{background:rgba(255,255,255,.12)}
+#lb-preview .lbpv-switch::after{content:'';position:absolute;top:50%;left:3px;width:14px;height:14px;border-radius:50%;background:#6b7280;transform:translateY(-50%);transition:transform .28s cubic-bezier(.22,1.12,.36,1),background .25s}
+#lb-preview[data-theme="dark"] .lbpv-switch::after{background:#9ca3af}
+#lb-preview .lbpv-remember.is-on .lbpv-switch{background:var(--lbpv-c1,#7d5260)}
+#lb-preview .lbpv-remember.is-on .lbpv-switch::after{background:#fff;transform:translate(16px,-50%)}
 </style>
 
 <div id="lb-preview" data-theme="light">
@@ -83,6 +92,10 @@
         <input type="password" class="lbpv-input" value="password" readonly>
       </div>
       <button class="lbpv-btn" id="lbpv-btn" type="button"><span>登录</span></button>
+      <div class="lbpv-remember" id="lbpv-remember">
+        <span class="lbpv-switch" aria-hidden="true"></span>
+        <span>下次自动登录</span>
+      </div>
     </div>
   </div>
 </div>
@@ -226,6 +239,14 @@
       render();
     });
   });
+
+  /* 「下次自动登录」开关：点击切换预览态（真实登录页由原生 checkbox 承担） */
+  var rememberEl = document.getElementById("lbpv-remember");
+  if (rememberEl) {
+    rememberEl.addEventListener("click", function () {
+      rememberEl.classList.toggle("is-on");
+    });
+  }
 
   setTimeout(function(){ render(); }, 500);
 })();

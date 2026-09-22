@@ -530,15 +530,102 @@ gap:12px;
 margin: 12px 0 6px;
 }
 
+/* ================================================================
+   「下次自动登录」（Typecho 原生 <input name="remember">）
+   - 对应 Widget_Login 里的 $this->request->is('remember=1')，
+     勾选时会把登录 Cookie 的过期时间延长到 30 天，必须保留在表单里并允许提交
+   - 视觉上改造成 MD3 switch：原生 checkbox 加 appearance:none 重绘轨道 + 滑块，
+     表单语义 / 键盘操作 / 读屏朗读全部沿用原生控件，不额外造交互
+   ================================================================ */
 .lb-remember{
-font-size: 13px;
-color: var(--lb-on-surface2);
 display:flex;
 align-items:center;
-gap:8px;
+margin: 16px 0 0;
+font-size: 13px;
+color: var(--lb-on-surface-muted);
+animation: lb-fade-up .5s var(--lb-easing) backwards;
 }
 
-.lb-remember input{ accent-color: var(--lb-primary); }
+.lb-remember > label{
+display:inline-flex;
+align-items:center;
+gap:10px;
+margin:0;
+cursor:pointer;
+line-height:1.45;
+color: inherit;
+user-select:none;
+-webkit-user-select:none;
+-webkit-tap-highlight-color: transparent;
+}
+
+/* 轨道：用字段描边/底色令牌，亮暗两套主题自动跟随 */
+.lb-remember input[type="checkbox"]{
+appearance:none;
+-webkit-appearance:none;
+flex:none;
+position:relative;
+width:36px;
+height:20px;
+margin:0;
+padding:0;
+box-sizing:border-box;
+border-radius:100px;
+border:1px solid var(--lb-field-outline-hover);
+background: var(--lb-field-bg);
+cursor:pointer;
+transition: background-color .2s var(--lb-easing), border-color .2s var(--lb-easing);
+}
+
+/* 滑块 */
+.lb-remember input[type="checkbox"]::after{
+content:'';
+position:absolute;
+top:50%;
+left:3px;
+width:14px;
+height:14px;
+border-radius:50%;
+background: var(--lb-on-surface-muted);
+transform: translateY(-50%);
+transition: transform .22s var(--lb-easing-spring), background-color .2s var(--lb-easing);
+}
+
+.lb-remember input[type="checkbox"]:checked{
+background: var(--lb-accent);
+border-color: var(--lb-accent);
+}
+
+.lb-remember input[type="checkbox"]:checked::after{
+background:#fff;
+transform: translate(16px, -50%);
+}
+
+.lb-remember input[type="checkbox"]:hover{
+border-color: var(--lb-accent);
+}
+
+.lb-remember input[type="checkbox"]:focus-visible{
+outline: 3px solid rgba(var(--lb-accent-rgb),.28);
+outline-offset: 2px;
+}
+
+.lb-remember input[type="checkbox"]:disabled{
+opacity:.5;
+cursor:default;
+}
+
+/* 不支持 appearance:none 的老浏览器：退回原生复选框，至少保证选项可用 */
+@supports not (appearance: none){
+.lb-remember input[type="checkbox"]{
+width:auto;
+height:auto;
+border:0;
+background:none;
+accent-color: var(--lb-accent);
+}
+.lb-remember input[type="checkbox"]::after{ content:none; }
+}
 
 /* ================================================================
    MD3 Filled Button：状态层 + 涟漪 + 加载动画
@@ -984,9 +1071,10 @@ opacity: 0;
 transform: rotate(90deg) scale(0.8);
 }
 
-.lb-remember{
-  display:none !important;
-}
+/* 注意：这里曾经有一条把 .lb-remember 整段隐藏掉的规则（display 强制 none）。
+   它让 Typecho 原生的「下次自动登录」复选框在美化后的登录页彻底消失
+   （虽然仍会随表单提交，但用户无法勾选）。现已删除，
+   该选项改由上方 §「下次自动登录」的 MD3 switch 样式呈现。 */
 
 /* ================================================================
    页脚版权信息（在卡片之外，固定于页面底部）

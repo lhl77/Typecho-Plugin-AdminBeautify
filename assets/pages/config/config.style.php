@@ -635,7 +635,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.54.css 里的
+   注意：AdminBeautify.v2.1.55.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }
@@ -863,6 +863,69 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 }
 .ab-dash-cards-status.is-on { opacity: 1; }
 
+/* ---- 堆叠分组（概要页卡片设置）---- */
+.ab-card .ab-dash-cards-addgroup {
+    border-color: rgba(125,82,96,.35) !important;
+    color: #7d5260 !important;
+    background: rgba(125,82,96,.06) !important;
+}
+.ab-card .ab-dash-cards-addgroup:hover { background: rgba(125,82,96,.14) !important; }
+
+.ab-card .ab-dash-cards-list .ab-dash-group-row {
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    padding-bottom: 6px !important;
+    border: 1px dashed rgba(125,82,96,.45) !important;
+    background: rgba(125,82,96,.05) !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-group-list {
+    order: 9 !important;
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+    margin: 6px 0 2px 22px !important;
+    padding: 6px 0 0 10px !important;
+    border-left: 2px solid rgba(125,82,96,.25) !important;
+    display: none !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-group-list .ab-dash-card-row {
+    min-width: 0 !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-group-row[data-open="1"] .ab-dash-group-list {
+    display: flex !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-group-list .ab-dash-card-row {
+    background: #fff !important;
+    border-color: rgba(0,0,0,.09) !important;
+    box-shadow: none !important;
+}
+
+.ab-card .ab-dash-cards-list .ab-dash-group-list.is-drop-reject {
+    border-left-color: #b3261e !important;
+    background: rgba(179,38,30,.06) !important;
+}
+
+.ab-card .ab-dash-group-empty {
+    padding: 10px 12px !important;
+    border: 1px dashed rgba(125,82,96,.35) !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+    color: #79747e !important;
+    text-align: center !important;
+}
+
+.ab-dash-card-btn-danger {
+    color: #b3261e !important;
+    border-color: rgba(179,38,30,.25) !important;
+    background: rgba(179,38,30,.06) !important;
+}
+.ab-dash-card-btn-danger:hover { background: rgba(179,38,30,.14) !important; }
+
 /* 概要页卡片设置（暗色） */
 [data-theme="dark"] .ab-card .ab-dash-cards-tip {
     background: rgba(208,188,255,.1) !important;
@@ -917,6 +980,27 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     color: #e6e1e5 !important;
 }
 [data-theme="dark"] .ab-dash-cards-reset:hover { background: rgba(208,188,255,.18) !important; }
+
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-group-row {
+    border-color: rgba(208,188,255,.4) !important;
+    background: rgba(208,188,255,.08) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-group-list {
+    border-left-color: rgba(208,188,255,.3) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-group-list .ab-dash-card-row {
+    background: rgba(255,255,255,.04) !important;
+    border-color: rgba(255,255,255,.12) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-group-empty {
+    color: #cac4d0 !important;
+    border-color: rgba(208,188,255,.3) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-cards-addgroup {
+    border-color: rgba(208,188,255,.4) !important;
+    color: #d0bcff !important;
+    background: rgba(208,188,255,.1) !important;
+}
 [data-theme="dark"] .ab-dash-cards-status { color: #81c784 !important; }
 
 /* 概要页卡片设置（窄屏） */
