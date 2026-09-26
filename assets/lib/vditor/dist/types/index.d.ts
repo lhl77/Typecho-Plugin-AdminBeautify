@@ -41,6 +41,7 @@ interface ILuteNode {
     __internal_object__: {
         Parent: {
             Type: number,
+            LinkType: number,
         },
         HeadingLevel: string,
     };
@@ -64,6 +65,7 @@ interface ILuteRender {
     renderMathBlockCloseMarker?: ILuteRenderCallback;
     renderBlockquote?: ILuteRenderCallback;
     renderBlockquoteMarker?: ILuteRenderCallback;
+    renderCallout?: ILuteRenderCallback;
     renderHeading?: ILuteRenderCallback;
     renderHeadingC8hMarker?: ILuteRenderCallback;
     renderList?: ILuteRenderCallback;
@@ -144,6 +146,9 @@ declare class Lute {
 
     public static GetHeadingID(node: ILuteNode): string;
 
+    /** 返回标题 ID 语法花括号内的原始文本，未设置时返回空字符串 */
+    public static GetHeadingIDRaw(node: ILuteNode): string;
+
     public static NewNodeID(): string;
 
     public static Sanitize(html: string): string;
@@ -163,6 +168,8 @@ declare class Lute {
     }): void;
 
     public SetChineseParagraphBeginningSpace(enable: boolean): void;
+
+    public SetCallout(enable: boolean): void;
 
     public SetHeadingID(enable: boolean): void;
 
@@ -406,7 +413,7 @@ interface IUpload {
     setHeaders?(): IObject;
 
     /** 上传成功回调 */
-    success?(editor: HTMLPreElement, msg: string): void;
+    success?(editor: HTMLPreElement | HTMLTextAreaElement, msg: string): void;
 
     /** 上传失败回调 */
     error?(msg: string): void;
@@ -502,6 +509,8 @@ interface IMath {
 interface IMarkdownConfig {
     /** 自动空格。默认值: false */
     autoSpace?: boolean;
+    /** Callout。默认值: true */
+    callout?: boolean;
     /** 段落开头是否空两格。默认值: false */
     paragraphBeginningSpace?: boolean;
     /** 自动矫正术语。默认值: false */
@@ -510,6 +519,8 @@ interface IMarkdownConfig {
     toc?: boolean;
     /** 脚注。默认值: true */
     footnotes?: boolean;
+    /** 将独占段落图片的 title 显示为图片说明。默认值: false */
+    imageCaption?: boolean;
     /** wysiwyg & ir 模式代码块是否渲染。默认值: true */
     codeBlockPreview?: boolean;
     /** wysiwyg & ir 模式数学公式块是否渲染。默认值: true */
@@ -526,6 +537,10 @@ interface IMarkdownConfig {
     mark?: boolean;
     /** 支持自动链接 */
     gfmAutoLink?: boolean;
+    /** 支持上标 */
+    sup?: boolean;
+    /** 支持下标 */
+    sub?: boolean;
 }
 
 /** @link https://ld246.com/article/1549638745630#options-preview */
@@ -813,6 +828,9 @@ interface IOptions {
 
     /** 对 wysiwyg 模式下的工具栏进行自定义 */
     customWysiwygToolbar?(type: TWYSISYGToolbar, element: HTMLElement): void
+
+    /** 对移动端 wysiwyg 模式下的工具栏进行自定义 */
+    customWysiwygMobileToolbar?(type: TWYSISYGToolbar, element: HTMLElement): void
 }
 
 interface IEChart {
@@ -871,6 +889,8 @@ interface IVditor {
         element: HTMLElement
         isUploading: boolean
         range: Range,
+        selectionEnd: number,
+        selectionStart: number,
         xhr?: XMLHttpRequest,
     };
     undo?: {
@@ -906,12 +926,9 @@ interface IVditor {
         hlToolbarTimeoutId: number,
     };
     sv?: {
-        range: Range,
-        element: HTMLPreElement,
+        element: HTMLTextAreaElement,
         processTimeoutId: number,
-        hlToolbarTimeoutId: number,
         composingLock: boolean,
-        preventInput: boolean,
     };
 }
 

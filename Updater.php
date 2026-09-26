@@ -11,7 +11,7 @@ class AdminBeautify_Updater
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.56';
+    const CURRENT_VERSION = '2.1.57';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
@@ -242,6 +242,7 @@ class AdminBeautify_Updater
         $backupDir = $this->tmpDir . '/backup_' . self::CURRENT_VERSION;
         if (!is_dir($backupDir)) @mkdir($backupDir, 0755, true);
         $this->copyDir($this->pluginDir, $backupDir, array('tmp_update'));
+        $this->pruneBackups($backupDir);
         call_user_func($emit, 'backed_up', '备份完成（' . self::CURRENT_VERSION . '）', 100);
         call_user_func($emit, 'copy_start', '正在清理旧版本文件并写入新版本...', 0);
         $this->cleanPluginDir($sourceDir);
@@ -413,6 +414,7 @@ class AdminBeautify_Updater
         $backupDir = $this->tmpDir . '/backup_' . self::CURRENT_VERSION;
         if (!is_dir($backupDir)) @mkdir($backupDir, 0755, true);
         $this->copyDir($this->pluginDir, $backupDir, array('tmp_update'));
+        $this->pruneBackups($backupDir);
         $details[] = '已备份当前版本到 tmp_update/backup_' . self::CURRENT_VERSION;
         $this->cleanPluginDir($sourceDir);
         $copied = $this->copyDir($sourceDir, $this->pluginDir, array('tmp_update'));
@@ -593,6 +595,23 @@ class AdminBeautify_Updater
         @unlink($this->tmpDir . '/update.zip');
         $extractDir = $this->tmpDir . '/extracted';
         if (is_dir($extractDir)) $this->removeDir($extractDir);
+    }
+    private function pruneBackups($keepDir = '')
+    {
+        $items = @scandir($this->tmpDir);
+        if (!$items) return;
+        $normalize = function ($path) {
+            return rtrim(str_replace('\\', '/', (string) $path), '/');
+        };
+        $keep = $normalize($keepDir);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            if (strpos($item, 'backup_') !== 0) continue;
+            $path = $this->tmpDir . '/' . $item;
+            if (!is_dir($path)) continue;
+            if ($keep !== '' && $normalize($path) === $keep) continue;
+            $this->removeDir($path);
+        }
     }
     private function invalidateOpcacheInDir($dir, $skipDirs = array())
     {

@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.56
+ * @version 2.1.57
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -333,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.56';
+        $abVer = '2.1.57';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -671,7 +671,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 '3' => 'AB Editor.md (Beta)',
                 '2' => '兼容其他编辑器',
             ),
-            '0',
+            '1',
             _t('编辑器'),
             _t('AB Typecho 优化：使用 AB-Admin 优化后的原版编辑器（含 工具栏）；AB Vditor：替换为 Vditor Markdown 编辑器；AB Editor.md：替换为 Editor.md 编辑器；兼容其他编辑器：不注入任何编辑器相关 CSS / JS，适合已安装第三方编辑器插件时使用。')
         );
@@ -828,53 +828,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('安装为 PWA 后显示的应用图标，建议使用 512×512 的正方形图片。')
         );
         $form->addInput($pwaAppIcon);
-        abCard('perf', $abC1, 'speed', '速度优化', '切换静态资源源、头像源与后台 AJAX 导航策略');
-        $staticResource = new Typecho_Widget_Helper_Form_Element_Select(
-            'staticResource',
-            array(
-                'google'    => _t('Google CDN（fonts.googleapis.com）'),
-                'loli'      => _t('loli.net 镜像（fonts.loli.net）'),
-                'jsdelivr'  => _t('jsDelivr CDN（cdn.jsdelivr.net）'),
-                'local'     => _t('本地文件（零外部依赖）'),
-                'custom'    => _t('自定义 URL')
-            ),
-            'local',
-            _t('字体 & 图标资源来源'),
-            _t('选择 Noto Sans SC 字体与 Material Icons 图标的加载方式')
-        );
-        $form->addInput($staticResource);
-        $customFontUrl = new Typecho_Widget_Helper_Form_Element_Text(
-            'customFontUrl',
-            null,
-            '',
-            _t('自定义字体 CSS URL'),
-            _t('选「自定义 URL」后生效。填入 Noto Sans SC 的 CSS 链接，如本机路径或其他 CDN。')
-        );
-        $form->addInput($customFontUrl);
-        $customIconUrl = new Typecho_Widget_Helper_Form_Element_Text(
-            'customIconUrl',
-            null,
-            '',
-            _t('自定义图标 CSS URL'),
-            _t('选「自定义 URL」后生效。填入 Material Icons Round 的 CSS 链接。注：一定是Material Icons Round，内含 .material-icons-round 类样式。')
-        );
-        $form->addInput($customIconUrl);
-        $localFontUrl = new Typecho_Widget_Helper_Form_Element_Text(
-            'localFontUrl',
-            null,
-            '',
-            _t('本地字体 CSS 路径（留空则使用默认）'),
-            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/Noto-Sans-SC-CSS/all.css）。')
-        );
-        $form->addInput($localFontUrl);
-        $localIconUrl = new Typecho_Widget_Helper_Form_Element_Text(
-            'localIconUrl',
-            null,
-            '',
-            _t('本地图标 CSS 路径（留空则使用默认）'),
-            _t('选「本地文件」后生效，留空则使用插件内默认路径（assets/fonts/MDIR/MaterialIconsRound.css）。')
-        );
-        $form->addInput($localIconUrl);
+        abCard('perf', $abC1, 'speed', '速度优化', '切换头像源与后台 AJAX 导航策略');
         $avatarSource = new Typecho_Widget_Helper_Form_Element_Select(
             'avatarSource',
             array(
@@ -1174,7 +1128,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.56 %c",'
+            .   '"%c AB-Admin %c v2.1.57 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1338,14 +1292,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.56.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.57.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.56.css?v=' . $abCssVer . '">';
-        $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.57.css?v=' . $abCssVer . '">';
+        $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePage) {
-            $vditorIndexCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.css', $options->pluginUrl);
+            $vditorIndexCssFile = dirname(__FILE__) . '/assets/lib/vditor/index.css';
+            $vditorIndexCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.css', $options->pluginUrl)
+                . '?v=' . (is_file($vditorIndexCssFile) ? filemtime($vditorIndexCssFile) : '0');
             echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorIndexCssUrl) . '">';
         }
         if ($editorVditor === '3' && $isWritePage) {
@@ -1361,38 +1317,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if ($editorVditor === '3' && $isWritePage) {
             $injectTail .= '<style>body #wmd-button-bar,body #wmd-button-row,body #wmd-preview,body #wmd-editarea{display:none!important;}</style>';
         }
-        $staticResource = isset($pluginOptions->staticResource) ? (string) $pluginOptions->staticResource : 'google';
-        $customFontUrl  = isset($pluginOptions->customFontUrl)  ? trim((string) $pluginOptions->customFontUrl)  : '';
-        $customIconUrl  = isset($pluginOptions->customIconUrl)  ? trim((string) $pluginOptions->customIconUrl)  : '';
-        $localFontUrl   = isset($pluginOptions->localFontUrl)   ? trim((string) $pluginOptions->localFontUrl)   : '';
-        $localIconUrl   = isset($pluginOptions->localIconUrl)   ? trim((string) $pluginOptions->localIconUrl)   : '';
-        if ($staticResource === 'google') {
-            $resFontUrl = 'https://fonts.googleapis.com/css2?family=Not o+Sans+SC:wght@400;500;600;700&display=swap';
-            $resIconUrl = 'https://fonts.googleapis.com/icon?family=Material+Icons+Round';
-        } elseif ($staticResource === 'loli') {
-            $resFontUrl = 'https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap';
-            $resIconUrl = 'https://fonts.loli.net/icon?family=Material+Icons+Round';
-        } elseif ($staticResource === 'jsdelivr') {
-            $resFontUrl = 'https://cdn.jsdelivr.net/npm/noto-sans-sc@37.0.0/noto_sans_sc_medium/css.min.css';
-            $resIconUrl = 'https://cdn.jsdelivr.net/npm/material-icons@1.13.14/iconfont/material-icons.min.css';
-        } elseif ($staticResource === 'local') {
-            $localPluginFontDefault = Typecho_Common::url('AdminBeautify/assets/fonts/Noto-Sans-SC-CSS/all.css', $options->pluginUrl);
-            $localPluginIconDefault = Typecho_Common::url('AdminBeautify/assets/fonts/MDIR/MaterialIconsRound.css', $options->pluginUrl);
-            $resFontUrl = ($localFontUrl !== '') ? $localFontUrl : $localPluginFontDefault;
-            $resIconUrl = ($localIconUrl !== '') ? $localIconUrl : $localPluginIconDefault;
-        } elseif ($staticResource === 'custom') {
-            $resFontUrl = $customFontUrl;
-            $resIconUrl = $customIconUrl;
-        } else {
-            $resFontUrl = '';
-            $resIconUrl = '';
-        }
-        if ($resFontUrl !== '') {
-            $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resFontUrl) . '">';
-        }
-        if ($resIconUrl !== '') {
-            $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resIconUrl) . '">';
-        }
+        $resIconUrl = Typecho_Common::url('AdminBeautify/assets/fonts/MDIR/MaterialIconsRound.css', $options->pluginUrl);
+        $injectTail .= "\n" . '<link rel="stylesheet" href="' . htmlspecialchars($resIconUrl) . '">';
         $injectTail .= '<script>document.addEventListener("DOMContentLoaded",function(){var h=document.documentElement;if(h.getAttribute("data-ab-loader")==="topbar"){setTimeout(function(){h.removeAttribute("data-ab-loading");},260);}else{h.removeAttribute("data-ab-loading");}},false);</script>';
         $themeColorMap = array(
             'purple' => '#7D5260', 'blue' => '#556270', 'teal' => '#4A6363',
@@ -1434,7 +1360,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if ($postListStyle !== 'list') $postListStyle = 'card';
         $pageListStyle = isset($pluginOptions->pageListStyle) ? (string)$pluginOptions->pageListStyle : 'card';
         if ($pageListStyle !== 'list') $pageListStyle = 'card';
-        $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
+        $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
         $dashboardQuickStyle = isset($pluginOptions->dashboardQuickStyle) ? (string)$pluginOptions->dashboardQuickStyle : 'small';
@@ -1611,7 +1537,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $currentPageCompatKey = strtolower($panelParts[0]);
         }
         $vditorAssetBaseUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor', $options->pluginUrl);
-        $vditorLocalJsUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.min.js', $options->pluginUrl);
+        $vditorIndexJsFile = dirname(__FILE__) . '/assets/lib/vditor/index.min.js';
+        $vditorLocalJsUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/index.min.js', $options->pluginUrl)
+            . '?v=' . (is_file($vditorIndexJsFile) ? filemtime($vditorIndexJsFile) : '0');
         $vditorUploadUrl = Typecho_Common::url('/action/admin-beautify?do=upload-media', $options->index);
         $editorMdAssetBaseUrl = Typecho_Common::url('AdminBeautify/assets/lib/editor.md', $options->pluginUrl);
         $editorMdLibPath = Typecho_Common::url('AdminBeautify/assets/lib/editor.md/lib/', $options->pluginUrl);
@@ -1673,7 +1601,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.56',
+            'pluginVersion'          => '2.1.57',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1707,9 +1635,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.56.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.57.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.56.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.57.js?v=' . $abJsVer . '"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1720,7 +1648,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.56"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.57"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1811,8 +1739,12 @@ function mkBanner(release){
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
         if ($editorVditor === '1' && $isWritePageFooter) {
-            $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v2.0.1.css', $options->pluginUrl);
-            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v2.0.1.js', $options->pluginUrl);
+            $vditorCssFile = dirname(__FILE__) . '/assets/lib/vditor/vditor_v2.1.1.css';
+            $vditorJsFile  = dirname(__FILE__) . '/assets/lib/vditor/vditor_v2.1.1.js';
+            $vditorCssUrl = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v2.1.1.css', $options->pluginUrl)
+                . '?v=' . (is_file($vditorCssFile) ? filemtime($vditorCssFile) : '0');
+            $vditorJsUrl  = Typecho_Common::url('AdminBeautify/assets/lib/vditor/vditor_v2.1.1.js', $options->pluginUrl)
+                . '?v=' . (is_file($vditorJsFile) ? filemtime($vditorJsFile) : '0');
             echo '<link rel="stylesheet" href="' . htmlspecialchars($vditorCssUrl) . '">';
             echo '<script src="' . htmlspecialchars($vditorJsUrl) . '"></script>';
         }
@@ -1980,7 +1912,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.56";';
+        echo 'var __AB_VER__="2.1.57";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）

@@ -1,0 +1,458 @@
+.vditor{border:1px solid var(--md-outline-variant,#cac4d0) !important;border-radius:12px !important;overflow:visible !important}.vditor-toolbar{background:var(--md-surface-container-low,#f7f2fa) !important;border-bottom:1px solid var(--md-outline-variant,#cac4d0) !important;border-radius:12px 12px 0 0 !important;padding:6px 8px !important;gap:2px !important;display:flex !important;align-items:center !important;flex-wrap:wrap !important;box-sizing:border-box !important}.vditor-toolbar__item{display:inline-flex !important;align-items:center !important;list-style:none !important;overflow:visible !important;position:relative !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button,.vditor-toolbar__item>button,:is(.vditor-toolbar,.ab-toolbar-scroller) label,.vditor-toolbar__item>label,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type],.vditor-toolbar__item>div[data-type]{width:36px !important;height:36px !important;min-width:36px !important;border-radius:8px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;padding:0 !important;border:none !important;background:transparent !important;cursor:pointer !important;transition:background .15s !important;position:relative !important;flex-shrink:0 !important;overflow:visible !important}:is(.vditor-toolbar,.ab-toolbar-scroller) .vditor-tooltipped::before,:is(.vditor-toolbar,.ab-toolbar-scroller) .vditor-tooltipped::after{z-index:36 !important;white-space:nowrap !important;pointer-events:none !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button:hover,.vditor-toolbar__item>button:hover,:is(.vditor-toolbar,.ab-toolbar-scroller) label:hover,.vditor-toolbar__item>label:hover,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type]:hover,.vditor-toolbar__item>div[data-type]:hover{background:rgba(73,69,79,.08) !important}.vditor-toolbar__item--current>button,.vditor-toolbar__item--current>button:hover,.vditor-toolbar__item--current>label,.vditor-toolbar__item--current>label:hover,.vditor-toolbar__item--current>div[data-type],.vditor-toolbar__item--current>div[data-type]:hover{background:var(--md-secondary-container,#e8def8) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button.ab-iconized svg,:is(.vditor-toolbar,.ab-toolbar-scroller) button:has(.ab-icon) svg,:is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-iconized svg,:is(.vditor-toolbar,.ab-toolbar-scroller) label:has(.ab-icon) svg,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type].ab-iconized svg,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type]:has(.ab-icon) svg{display:none !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button .ab-icon,:is(.vditor-toolbar,.ab-toolbar-scroller) label .ab-icon,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type] .ab-icon{font-family:'Material Icons Round','Material Icons',sans-serif;font-size:20px;line-height:1;font-style:normal;font-weight:normal;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;display:block;pointer-events:none;user-select:none;color:var(--md-on-surface-variant,#49454f)}.vditor-toolbar__item--current>button .ab-icon{color:var(--md-on-secondary-container,#1d192b) !important}.vditor-toolbar__item--current>label .ab-icon{color:var(--md-on-secondary-container,#1d192b) !important}.vditor-toolbar__item--current>div[data-type] .ab-icon{color:var(--md-on-secondary-container,#1d192b) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"],:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"]{overflow:hidden !important}:is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"] input[type="file"],:is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-toolbar-custom-upload input[type="file"],:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"] input[type="file"],:is(.vditor-toolbar,.ab-toolbar-scroller) div.ab-toolbar-custom-upload input[type="file"]{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;opacity:0 !important;cursor:pointer !important;z-index:3 !important;display:block !important}:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-btn .ab-toolbar-custom-svg{width:18px !important;height:18px !important;display:block !important;fill:currentColor;stroke:currentColor;pointer-events:none}:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-btn .ab-toolbar-custom-img{width:18px !important;height:18px !important;object-fit:contain;display:block !important;border-radius:4px;pointer-events:none}:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-btn .ab-toolbar-custom-iconfont{font-size:18px !important;line-height:1 !important;display:inline-flex !important;align-items:center;justify-content:center;pointer-events:none}:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-btn .ab-toolbar-custom-text{font-size:11px;line-height:1;font-weight:700;letter-spacing:.2px;max-width:30px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-btn{color:var(--md-on-surface-variant,#49454f) !important}.vditor-toolbar__item--current>button.ab-toolbar-custom-btn,.vditor-toolbar__item--current>div[data-type].ab-toolbar-custom-btn{color:var(--md-on-secondary-container,#1d192b) !important}.vditor-toolbar__divider{width:1px !important;min-width:1px !important;height:20px !important;background:var(--md-outline-variant,#cac4d0) !important;border:none !important;border-left:none !important;margin:0 6px !important;padding:0 !important;align-self:center !important;flex-shrink:0 !important;list-style:none !important}.vditor-hint,.vditor-panel:not(.vditor-panel--none){background:var(--md-surface-container,#ece6f0) !important;border:1px solid var(--md-outline-variant,#cac4d0) !important;border-radius:12px !important;box-shadow:0 4px 16px rgba(0,0,0,.14),0 1px 4px rgba(0,0,0,.08) !important;overflow:hidden !important;padding:4px !important}.vditor-panel--none{background:var(--md-surface-container,#ece6f0) !important;border:1px solid var(--md-outline-variant,#cac4d0) !important;border-radius:10px !important;box-shadow:0 8px 20px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.12) !important;padding:4px !important;margin-top:-20px !important;overflow:visible !important;opacity:1 !important;white-space:nowrap !important;backdrop-filter:saturate(135%) blur(6px);-webkit-backdrop-filter:saturate(135%) blur(6px)}.vditor-hint button,.vditor-panel:not(.vditor-panel--none) button{border-radius:8px !important;padding:6px 12px !important;transition:background .15s !important;width:calc(100% - 8px) !important;margin:0 !important;display:block !important}.vditor-hint button:hover,.vditor-panel:not(.vditor-panel--none) button:hover,.vditor-panel:not(.vditor-panel--none) button.vditor-panel__action--current{background:var(--md-secondary-container,#e8def8) !important;color:var(--md-on-secondary-container,#1d192b) !important}.vditor-toolbar__item:has(>button[data-type="edit-mode"]),.vditor-toolbar__item:has(>button[data-type="more"]){display:none !important}#ab-vditor-mode-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}.ab-mode-btn-group{display:inline-flex;background:transparent;border:1px solid var(--md-outline,#79747e);border-radius:40px;padding:0;gap:0;overflow:hidden;align-items:stretch}#ab-vditor-mode-bar button.ab-mode-btn{padding:0 20px;height:40px;border-radius:0;border:none;border-left:1px solid var(--md-outline,#79747e);cursor:pointer;font-size:14px;font-weight:500;background:transparent;color:var(--md-on-surface,#1c1b1f);transition:background .15s,color .15s;white-space:nowrap;line-height:1;font-family:inherit;letter-spacing:.1px}#ab-vditor-mode-bar button.ab-mode-btn:first-child{border-left:none}#ab-vditor-mode-bar button.ab-mode-btn:hover:not(.ab-mode-active){background:rgba(73,69,79,.08)}#ab-vditor-mode-bar button.ab-mode-btn.ab-mode-active{background:var(--md-secondary-container,#e8def8);color:var(--md-on-secondary-container,#1d192b)}[data-theme="dark"] #ab-vditor-mode-bar{border-color:var(--md-outline,#938f99)}[data-theme="dark"] .ab-mode-btn-group{border-color:var(--md-outline,#938f99)}[data-theme="dark"] #ab-vditor-mode-bar button.ab-mode-btn{border-left-color:var(--md-outline,#938f99);color:var(--md-on-surface,#e6e1e5)}[data-theme="dark"] #ab-vditor-mode-bar button.ab-mode-btn:hover:not(.ab-mode-active){background:rgba(202,196,208,.08)}[data-theme="dark"] #ab-vditor-mode-bar button.ab-mode-btn.ab-mode-active{background:var(--md-secondary-container,#4a4458);color:var(--md-on-secondary-container,#ccc2dc)}#ab-vditor-fullscreen-btn{width:36px;height:36px;min-width:36px;flex-shrink:0;border-radius:8px !important;background:transparent;color:var(--md-on-surface-variant,#49454f);border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s,transform .1s;box-shadow:none}#ab-vditor-fullscreen-btn:hover{background:rgba(73,69,79,.08)}#ab-vditor-fullscreen-btn:active{background:rgba(73,69,79,.12);transform:scale(.93)}#ab-vditor-fullscreen-btn .ab-icon{font-family:'Material Icons Round','Material Icons',sans-serif;font-size:20px;line-height:1;font-style:normal;font-weight:normal;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;display:block;pointer-events:none;user-select:none}[data-theme="dark"] #ab-vditor-fullscreen-btn{color:var(--md-on-surface-variant,#cac4d0)}[data-theme="dark"] #ab-vditor-fullscreen-btn:hover{background:rgba(202,196,208,.08)}[data-theme="dark"] #ab-vditor-fullscreen-btn:active{background:rgba(202,196,208,.12)}#ab-vditor-wrap{position:relative;display:flex;flex-direction:column;gap:0}#ab-vditor{padding-bottom:10px !important;position:relative;min-height:420px}.ab-vditor-loading{position:absolute;left:0;right:0;bottom:0;top:52px;z-index:8;border-radius:12px;border:1px solid var(--md-outline-variant,#cac4d0);margin-top:8px;background:radial-gradient(circle at 16% 16%,rgba(73,69,79,.06),transparent 45%),linear-gradient(180deg,#fcf8ff 0%,#f6f2fb 58%,#f3eef8 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;transition:opacity .22s ease,transform .22s ease;pointer-events:none}.ab-vditor-loading--leave{opacity:0;transform:translateY(6px)}.ab-vditor-loading__pulse{width:44px;height:44px;border-radius:50%;border:3px solid rgba(121,116,126,.24);border-top-color:rgba(103,80,164,.88);animation:ab-vditor-spin 1s linear infinite}.ab-vditor-loading__title{font-size:15px;font-weight:700;color:#2d2a32;letter-spacing:.1px}.ab-vditor-loading__meta{font-size:12px;color:#5b5763}.ab-vditor-loading__skeleton{width:min(560px,calc(100% - 56px));display:grid;gap:8px}.ab-vditor-loading__skeleton span{height:12px;border-radius:999px;background:linear-gradient(90deg,rgba(103,80,164,.08),rgba(103,80,164,.22),rgba(103,80,164,.08));background-size:220% 100%;animation:ab-vditor-shimmer 1.6s ease-in-out infinite}.ab-vditor-loading__skeleton span:nth-child(1){width:92%}.ab-vditor-loading__skeleton span:nth-child(2){width:88%;animation-delay:.08s}.ab-vditor-loading__skeleton span:nth-child(3){width:84%;animation-delay:.16s}.ab-vditor-loading__skeleton span:nth-child(4){width:90%;animation-delay:.24s}@keyframes ab-vditor-spin{to{transform:rotate(360deg)}}@keyframes ab-vditor-shimmer{0%{background-position:160% 0}100%{background-position:-60% 0}}[data-theme="dark"] .ab-vditor-loading,.vditor--dark .ab-vditor-loading{border-color:var(--md-outline-variant,#49454f);background:radial-gradient(circle at 12% 10%,rgba(202,196,208,.06),transparent 45%),linear-gradient(180deg,#1b1920 0%,#17151b 60%,#141218 100%)}[data-theme="dark"] .ab-vditor-loading__title,.vditor--dark .ab-vditor-loading__title{color:#e6e1e5}[data-theme="dark"] .ab-vditor-loading__meta,.vditor--dark .ab-vditor-loading__meta{color:#b6b1bc}[data-theme="dark"] .ab-vditor-loading__pulse,.vditor--dark .ab-vditor-loading__pulse{border-color:rgba(147,143,153,.32);border-top-color:rgba(208,188,255,.95)}[data-theme="dark"] .ab-vditor-loading__skeleton span,.vditor--dark .ab-vditor-loading__skeleton span{background:linear-gradient(90deg,rgba(208,188,255,.10),rgba(208,188,255,.24),rgba(208,188,255,.10));background-size:220% 100%}#ab-vditor-wrap.ab-fullscreen{position:fixed !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;width:100vw !important;height:100dvh !important;z-index:9000 !important;background:var(--md-surface,#fffbfe) !important;padding:0 !important;margin:0 !important;border-radius:0 !important;display:flex !important;flex-direction:column !important;gap:0 !important;overflow:hidden !important}[data-theme="dark"] #ab-vditor-wrap.ab-fullscreen{background:var(--md-surface,#141218) !important}body.ab-vditor-fullscreen #edit-secondary,body.ab-vditor-fullscreen .typecho-option-tabs{display:none !important}#ab-vditor-wrap.ab-fullscreen #ab-vditor-mode-bar{padding:12px 16px 8px 16px;margin-bottom:0;flex-shrink:0;background:var(--md-surface,#fffbfe);border-bottom:1px solid var(--md-outline-variant,#cac4d0);position:relative;z-index:6;overflow:visible}[data-theme="dark"] #ab-vditor-wrap.ab-fullscreen #ab-vditor-mode-bar{background:var(--md-surface,#141218);border-bottom-color:var(--md-outline-variant,#49454f)}#ab-vditor-wrap.ab-fullscreen #ab-vditor{flex:1 1 0 !important;min-height:0 !important;height:0 !important;border:none !important;border-radius:0 !important;overflow:visible !important}#ab-vditor-wrap.ab-fullscreen #ab-vditor .vditor-toolbar{position:relative;z-index:12;overflow:visible !important}#ab-vditor-wrap.ab-fullscreen #ab-vditor .vditor{height:100% !important;overflow:visible !important}#ab-vditor-wrap.ab-fullscreen #ab-vditor .vditor-content{flex:1 1 0 !important;height:0 !important;min-height:0 !important}.vditor--dark .vditor-toolbar{background:var(--md-surface-container-low,#1d1b20) !important;border-color:var(--md-outline-variant,#49454f) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) button:hover,.vditor--dark .vditor-toolbar__item>button:hover,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) label:hover,.vditor--dark .vditor-toolbar__item>label:hover,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type]:hover,.vditor--dark .vditor-toolbar__item>div[data-type]:hover{background:rgba(202,196,208,.08) !important}.vditor--dark .vditor-toolbar__item--current>button{background:var(--md-secondary-container,#4a4458) !important}.vditor--dark .vditor-toolbar__item--current>label{background:var(--md-secondary-container,#4a4458) !important}.vditor--dark .vditor-toolbar__item--current>button .ab-icon{color:var(--md-on-secondary-container,#ccc2dc) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) button .ab-icon{color:var(--md-on-surface-variant,#cac4d0) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) label .ab-icon,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type] .ab-icon{color:var(--md-on-surface-variant,#cac4d0) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-btn{color:var(--md-on-surface-variant,#cac4d0) !important}.vditor--dark .vditor-toolbar__item--current>button.ab-toolbar-custom-btn{color:var(--md-on-secondary-container,#ccc2dc) !important}.vditor--dark .vditor-toolbar__item--current>div[data-type].ab-toolbar-custom-btn{color:var(--md-on-secondary-container,#ccc2dc) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button.ab-toolbar-custom-upload{background:transparent !important;color:var(--md-on-surface-variant,#49454f) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-toolbar-custom-upload,:is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"],:is(.vditor-toolbar,.ab-toolbar-scroller) div.ab-toolbar-custom-upload,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"]{background:transparent !important;color:var(--md-on-surface-variant,#49454f) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button.ab-toolbar-custom-upload:hover{background:rgba(73,69,79,.08) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-toolbar-custom-upload:hover,:is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"]:hover,:is(.vditor-toolbar,.ab-toolbar-scroller) div.ab-toolbar-custom-upload:hover,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"]:hover{background:rgba(73,69,79,.08) !important}:is(.vditor-toolbar,.ab-toolbar-scroller) button.ab-toolbar-custom-upload .ab-icon{color:inherit !important}:is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-toolbar-custom-upload .ab-icon,:is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"] .ab-icon,:is(.vditor-toolbar,.ab-toolbar-scroller) div.ab-toolbar-custom-upload .ab-icon,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"] .ab-icon{color:inherit !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) button.ab-toolbar-custom-upload{background:transparent !important;color:var(--md-on-surface-variant,#cac4d0) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-toolbar-custom-upload,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"],.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) div.ab-toolbar-custom-upload,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"]{background:transparent !important;color:var(--md-on-surface-variant,#cac4d0) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) button.ab-toolbar-custom-upload:hover{background:rgba(202,196,208,.08) !important}.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) label.ab-toolbar-custom-upload:hover,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) label[data-type="upload"]:hover,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) div.ab-toolbar-custom-upload:hover,.vditor--dark :is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type="upload"]:hover{background:rgba(202,196,208,.08) !important}.vditor--dark .vditor-toolbar__divider{background:var(--md-outline-variant,#49454f) !important}.vditor--dark .vditor-hint,.vditor--dark .vditor-panel:not(.vditor-panel--none){background:var(--md-surface-container,#2d2b31) !important;border-color:var(--md-outline-variant,#49454f) !important}.vditor--dark .vditor-panel--none{background:rgba(45,43,49,.92) !important;border-color:var(--md-outline-variant,#49454f) !important;box-shadow:0 10px 24px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.25) !important}.vditor--dark .vditor-hint button:hover,.vditor--dark .vditor-panel:not(.vditor-panel--none) button:hover,.vditor--dark .vditor-panel:not(.vditor-panel--none) button.vditor-panel__action--current{background:var(--md-secondary-container,#4a4458) !important;color:var(--md-on-secondary-container,#ccc2dc) !important}.vditor .vditor-input{background:var(--panel-background-color) !important;background-color:var(--panel-background-color) !important;border:0 !important;padding:3px 5px !important;border-radius:3px !important;color:var(--textarea-text-color) !important;font-size:12px !important;line-height:normal !important;height:auto !important;min-height:unset !important;box-shadow:none !important;box-sizing:content-box !important;width:84px !important;text-align:center !important;display:inline-block !important;vertical-align:middle !important}.vditor-panel--none .vditor-input{border:1px solid var(--md-outline-variant,#cac4d0) !important;border-radius:7px !important;padding:0 6px !important;margin:1px 2px !important;height:24px !important;line-height:24px !important;width:64px !important;min-width:60px !important;background:var(--md-surface,#fffbfe) !important}[data-theme="dark"] .vditor-panel--none .vditor-input,.vditor--dark .vditor-panel--none .vditor-input{border-color:var(--md-outline-variant,#49454f) !important;background:#211f26 !important;color:#e6e1e5 !important}.vditor-panel--none button.vditor-icon{width:24px !important;height:24px !important;padding:0 !important;margin:1px !important;border-radius:7px !important;background:transparent !important;border:0 !important;float:left !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;cursor:pointer !important;box-shadow:none !important;box-sizing:content-box !important}.vditor-panel--none button.vditor-icon svg{display:block !important;width:14px !important;height:14px !important;float:none !important}.vditor-panel--none button.vditor-icon:hover{background:var(--md-secondary-container,#e8def8) !important;border-radius:9px !important}[data-theme="dark"] .vditor-panel--none button.vditor-icon:hover{background:var(--md-secondary-container,#4a4458) !important}.vditor-panel button.vditor-icon .ab-icon{font-family:'Material Icons Round','Material Icons',sans-serif;font-size:14px;line-height:1;font-style:normal;font-weight:normal;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased;display:block;float:none;pointer-events:none;user-select:none;color:var(--toolbar-icon-color);width:14px;height:14px}.vditor-panel button.vditor-icon:has(.ab-icon) svg{display:none !important}.ab-vditor-legacy-bar{display:none !important}body.ab-vditor-active #wmd-button-bar,body.ab-vditor-active #wmd-button-row,body.ab-vditor-active #wmd-preview,body.ab-vditor-active #wmd-editarea{display:none !important}body.ab-vditor-about-open{overflow:hidden}.ab-vditor-about{position:fixed;inset:0;z-index:9200;display:none}.ab-vditor-about.ab-show{display:block}.ab-vditor-about__mask{position:absolute;inset:0;background:rgba(24,22,28,.48)}.ab-vditor-about__dialog{position:absolute;left:50%;top:50%;width:min(560px,calc(100vw - 28px));max-width:300px;max-height:calc(100vh - 32px);overflow:auto;transform:translate(-50%,-50%) scale(.96);opacity:0;transition:transform .22s ease,opacity .22s ease;border-radius:18px;border:1px solid var(--md-outline-variant,#cac4d0);background:linear-gradient(180deg,#fffbff 0%,#f9f4fe 100%);box-shadow:0 24px 56px rgba(0,0,0,.24),0 8px 20px rgba(0,0,0,.14)}.ab-vditor-about.ab-show .ab-vditor-about__dialog{transform:translate(-50%,-50%) scale(1);opacity:1}.ab-vditor-about__head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px 18px;border-bottom:1px solid var(--md-outline-variant,#cac4d0)}.ab-vditor-about__head h3{margin:0;font-size:18px;font-weight:700;color:#1f1b24}.ab-vditor-about__close{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:#4f4a57;font-size:22px;line-height:1;cursor:pointer}.ab-vditor-about__close:hover{background:rgba(73,69,79,.10)}.ab-vditor-about__content{padding:16px 18px 18px;display:grid;gap:14px}[data-theme="dark"] .ab-vditor-about__mask,.vditor--dark .ab-vditor-about__mask{background:rgba(10,8,14,.62)}[data-theme="dark"] .ab-vditor-about__dialog,.vditor--dark .ab-vditor-about__dialog{border-color:var(--md-outline-variant,#49454f);background:linear-gradient(180deg,#201d24 0%,#1a1820 100%)}[data-theme="dark"] .ab-vditor-about__head,.vditor--dark .ab-vditor-about__head{border-bottom-color:var(--md-outline-variant,#49454f)}[data-theme="dark"] .ab-vditor-about__head h3,.vditor--dark .ab-vditor-about__head h3{color:#e8e0ee}[data-theme="dark"] .ab-vditor-about__close,.vditor--dark .ab-vditor-about__close{color:#cac4d0}[data-theme="dark"] .ab-vditor-about__close:hover,.vditor--dark .ab-vditor-about__close:hover{background:rgba(202,196,208,.10)}body.ab-vditor-insert-text-open{overflow:hidden}.ab-vditor-insert-text{position:fixed;inset:0;z-index:9300;display:none}.ab-vditor-insert-text.ab-show{display:block}.ab-vditor-insert-text__mask{position:absolute;inset:0;background:rgba(24,22,28,.52)}.ab-vditor-insert-text__dialog{position:absolute;left:50%;top:50%;width:min(660px,calc(100vw - 28px));max-width:660px;max-height:calc(100vh - 32px);overflow:auto;transform:translate(-50%,-50%) scale(.96);opacity:0;transition:transform .22s ease,opacity .22s ease;border-radius:18px;border:1px solid var(--md-outline-variant,#cac4d0);background:linear-gradient(180deg,#fffbff 0%,#f9f4fe 100%);box-shadow:0 24px 56px rgba(0,0,0,.24),0 8px 20px rgba(0,0,0,.14)}.ab-vditor-insert-text.ab-show .ab-vditor-insert-text__dialog{transform:translate(-50%,-50%) scale(1);opacity:1}.ab-vditor-insert-text__head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;border-bottom:1px solid var(--md-outline-variant,#cac4d0)}.ab-vditor-insert-text__head h3{margin:0;font-size:16px;font-weight:700;color:#1f1b24}.ab-vditor-insert-text__close{width:32px;height:32px;border-radius:50%;border:none;background:transparent;color:#4f4a57;font-size:22px;line-height:1;cursor:pointer}.ab-vditor-insert-text__close:hover{background:rgba(73,69,79,.10)}.ab-vditor-insert-text__content{padding:14px 16px 16px;display:grid;gap:10px}.ab-vditor-insert-text__desc{margin:0;font-size:13px;line-height:1.55;color:#4f4a57}.ab-vditor-insert-text__from{margin:0;font-size:12px;color:#7a7382}.ab-vditor-insert-text__editor{width:100%;min-height:126px;max-height:300px;resize:vertical;border:1px solid var(--md-outline-variant,#cac4d0);border-radius:12px;padding:10px 12px;box-sizing:border-box;background:rgba(255,255,255,.66);color:#231f2b;font-family:'JetBrains Mono','Cascadia Mono','SFMono-Regular',Consolas,monospace;font-size:13px;line-height:1.6;letter-spacing:.1px}.ab-vditor-insert-text__actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:nowrap}.ab-vditor-insert-text__btn{border:1px solid var(--md-outline-variant,#cac4d0);background:var(--md-surface-container-low,#f7f2fa);color:#3f3a49;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap}.ab-vditor-insert-text__btn:hover{background:var(--md-secondary-container,#e8def8);color:var(--md-on-secondary-container,#1d192b)}.ab-vditor-insert-text__btn--primary{border-color:transparent;background:var(--md-primary,#6750a4);color:var(--md-on-primary,#ffffff)}.ab-vditor-insert-text__btn--primary:hover{background:#5b4592;color:#ffffff}.ab-vditor-insert-text__status{min-height:0;min-width:0;margin-right:auto;max-width:calc(100% - 96px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;color:#6750a4}[data-theme="dark"] .ab-vditor-insert-text__mask,.vditor--dark .ab-vditor-insert-text__mask{background:rgba(10,8,14,.64)}[data-theme="dark"] .ab-vditor-insert-text__dialog,.vditor--dark .ab-vditor-insert-text__dialog{border-color:var(--md-outline-variant,#49454f);background:linear-gradient(180deg,#201d24 0%,#1a1820 100%)}[data-theme="dark"] .ab-vditor-insert-text__head,.vditor--dark .ab-vditor-insert-text__head{border-bottom-color:var(--md-outline-variant,#49454f)}[data-theme="dark"] .ab-vditor-insert-text__head h3,.vditor--dark .ab-vditor-insert-text__head h3{color:#e8e0ee}[data-theme="dark"] .ab-vditor-insert-text__close,.vditor--dark .ab-vditor-insert-text__close{color:#cac4d0}[data-theme="dark"] .ab-vditor-insert-text__close:hover,.vditor--dark .ab-vditor-insert-text__close:hover{background:rgba(202,196,208,.10)}[data-theme="dark"] .ab-vditor-insert-text__desc,.vditor--dark .ab-vditor-insert-text__desc{color:#ccc2dc}[data-theme="dark"] .ab-vditor-insert-text__from,.vditor--dark .ab-vditor-insert-text__from{color:#9c95a4}[data-theme="dark"] .ab-vditor-insert-text__editor,.vditor--dark .ab-vditor-insert-text__editor{border-color:var(--md-outline-variant,#49454f);background:rgba(33,31,38,.88);color:#f0e8f7}[data-theme="dark"] .ab-vditor-insert-text__btn,.vditor--dark .ab-vditor-insert-text__btn{border-color:var(--md-outline-variant,#49454f);background:#28242f;color:#d7cfdf}[data-theme="dark"] .ab-vditor-insert-text__btn:hover,.vditor--dark .ab-vditor-insert-text__btn:hover{background:var(--md-secondary-container,#4a4458);color:var(--md-on-secondary-container,#ccc2dc)}[data-theme="dark"] .ab-vditor-insert-text__btn--primary,.vditor--dark .ab-vditor-insert-text__btn--primary{border-color:transparent;background:#7f67be;color:#ffffff}[data-theme="dark"] .ab-vditor-insert-text__btn--primary:hover,.vditor--dark .ab-vditor-insert-text__btn--primary:hover{background:#8e75cc}[data-theme="dark"] .ab-vditor-insert-text__status,.vditor--dark .ab-vditor-insert-text__status{color:#d0bcff}@media (max-width:680px){.ab-vditor-insert-text__dialog{width:calc(100vw - 16px);max-width:none;max-height:calc(100vh - 16px)}.ab-vditor-insert-text__content{padding:12px;gap:8px}.ab-vditor-insert-text__editor{min-height:108px;font-size:12px}.ab-vditor-insert-text__btn{padding:7px 10px;font-size:12px}.ab-vditor-insert-text__status{font-size:11px;max-width:58vw}}
+
+
+/* ============================================================
+   A. 颜色跟随 AdminBeautify 主题色
+   ============================================================
+   背景：本文件早期把颜色写死成了 Material 默认紫（#6750a4 系）与几组紫调面/紫灰字，
+   跟插件设置里的「主题色」无关 —— 换成绿/蓝/橙等主题后，加载动画的转圈环、骨架屏
+   微光、以及两个弹窗的面色仍然是紫的。
+
+   这里统一改用 AdminBeautify 的语义色变量（--md-*）。
+   ⚠️ 只需要写亮色名（--md-primary / --md-surface / …）：
+       AdminBeautify.v2.1.57.css 里有一层 html[data-theme="dark"] 的 token 重映射
+       （--md-primary → var(--md-dark-primary)，--md-surface → var(--md-dark-surface) …），
+       所以这些变量在暗色下会自动换成对应的暗色值，不需要再各写一套 [data-theme="dark"]。
+
+   ⚠️ 选择器写成 `html .x.x`（同名类重复一次）是为了压过上方原规则：
+       原规则几乎都带 !important，且暗色版是 `[data-theme="dark"] .x`（0,2,0）。
+       `html .x.x` 是 (0,2,1)，稳压它们，因此每条只需要写一遍。
+   ============================================================ */
+
+/* ---- A1. 加载动画 ---- */
+html .ab-vditor-loading.ab-vditor-loading{
+background:radial-gradient(circle at 16% 16%,color-mix(in srgb,var(--md-on-surface,#1c1b1f) 6%,transparent),transparent 45%),linear-gradient(180deg,var(--md-surface-container-low,#f7f2fa) 0%,var(--md-surface,#fffbfe) 58%,var(--md-surface-container,#ece6f0) 100%) !important;
+border-color:var(--md-outline-variant,#cac4d0) !important}
+html .ab-vditor-loading__pulse.ab-vditor-loading__pulse{
+border-color:color-mix(in srgb,var(--md-on-surface,#1c1b1f) 24%,transparent) !important;
+border-top-color:var(--md-primary,#6750a4) !important}
+html .ab-vditor-loading__title.ab-vditor-loading__title{color:var(--md-on-surface,#1c1b1f) !important}
+html .ab-vditor-loading__meta.ab-vditor-loading__meta{color:var(--md-on-surface-variant,#49454f) !important}
+html .ab-vditor-loading__skeleton.ab-vditor-loading__skeleton span{
+background:linear-gradient(90deg,color-mix(in srgb,var(--md-primary,#6750a4) 10%,transparent),color-mix(in srgb,var(--md-primary,#6750a4) 28%,transparent),color-mix(in srgb,var(--md-primary,#6750a4) 10%,transparent)) !important;
+background-size:220% 100% !important}
+
+/* ---- A2. 「关于 AB Vditor」弹窗（Material 3 重设计） ----
+   结构（由 _abOpenVditorAboutModal() 生成）：
+     head   前导 info 圆标 + 标题/副标题 + close 图标按钮（固定不滚动）
+     hero   Vditor / AB 适配器 两个版本卡
+     section 渲染组件（逐个列出版本，数据见 JS 的 _abVditorComponents）
+     section 随包资源（图标集 / 语言 / 主题 / 表情，用数量表达）
+     links  两个仓库胶囊按钮
+   所有颜色都走 --md-*，暗色由主样式表的 html[data-theme="dark"] 重映射自动跟随。 */
+html .ab-vditor-about__dialog.ab-vditor-about__dialog{
+width:min(560px,calc(100vw - 28px)) !important;
+max-width:560px !important;
+max-height:min(88dvh,760px) !important;
+display:flex !important;
+flex-direction:column !important;
+overflow:hidden !important;
+border-radius:28px !important;
+border-color:var(--md-outline-variant,#cac4d0) !important;
+background:var(--md-surface-container-high,#ece6f0) !important;
+box-shadow:0 24px 56px rgba(0,0,0,.28),0 8px 20px rgba(0,0,0,.16) !important}
+
+html .ab-vditor-about__head.ab-vditor-about__head{
+display:flex;align-items:center;gap:12px;
+padding:20px 20px 14px;border-bottom:0 !important;flex:0 0 auto}
+html .ab-vditor-about__head.ab-vditor-about__head .ab-vditor-about__head-icon{
+width:40px;height:40px;flex:0 0 auto;border-radius:50%;
+display:inline-flex;align-items:center;justify-content:center;
+font-size:22px !important;line-height:1;
+background:var(--md-primary-container,#eaddff) !important;
+color:var(--md-on-primary-container,#21005d) !important}
+html .ab-vditor-about__head-text{flex:1 1 auto;min-width:0}
+html .ab-vditor-about__head.ab-vditor-about__head h3{
+margin:0;font-size:20px;line-height:1.3;font-weight:500;
+color:var(--md-on-surface,#1c1b1f) !important}
+html .ab-vditor-about__head-text p{
+margin:2px 0 0;font-size:12px;line-height:1.4;
+color:var(--md-on-surface-variant,#49454f)}
+html .ab-vditor-about__close.ab-vditor-about__close{
+width:44px !important;height:44px !important;flex:0 0 auto;border-radius:50% !important;
+display:inline-flex;align-items:center;justify-content:center;
+font-size:22px !important;
+color:var(--md-on-surface-variant,#49454f) !important}
+html .ab-vditor-about__close.ab-vditor-about__close .ab-icon{font-size:22px !important}
+html .ab-vditor-about__close.ab-vditor-about__close:hover{
+background:color-mix(in srgb,var(--md-on-surface,#1c1b1f) 10%,transparent) !important}
+
+html .ab-vditor-about__content.ab-vditor-about__content{
+display:flex !important;flex-direction:column;gap:16px;
+padding:0 20px 20px;flex:1 1 auto;min-height:0;
+overflow:auto;-webkit-overflow-scrolling:touch}
+
+/* 版本卡（Vditor / AB 适配器） */
+html .ab-vditor-about__hero{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+html .ab-vditor-about__hero-card{
+display:flex;flex-direction:column;gap:2px;
+padding:12px 14px;border-radius:16px;
+border:1px solid var(--md-outline-variant,#cac4d0);
+background:var(--md-surface-container-low,#f7f2fa)}
+html .ab-vditor-about__hero-label{font-size:12px;font-weight:500;color:var(--md-on-surface-variant,#49454f)}
+html .ab-vditor-about__hero-value{font-size:22px;font-weight:500;line-height:1.2;color:var(--md-primary,#6750a4)}
+
+/* 分组 */
+html .ab-vditor-about__section{display:flex;flex-direction:column;gap:8px}
+html .ab-vditor-about__section-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+html .ab-vditor-about__section-head h4{
+margin:0;font-size:14px;font-weight:600;letter-spacing:.2px;
+color:var(--md-on-surface,#1c1b1f)}
+html .ab-vditor-about__section-meta{font-size:12px;color:var(--md-on-surface-variant,#49454f)}
+html .ab-vditor-about__section-hint{
+margin:0;font-size:12px;line-height:1.5;color:var(--md-on-surface-variant,#49454f)}
+
+/* 组件列表：一个圆角容器 + 行内分隔线（MD3 list） */
+html .ab-vditor-about__list{
+list-style:none;margin:0;padding:0;border-radius:16px;overflow:hidden;
+border:1px solid var(--md-outline-variant,#cac4d0);
+background:var(--md-surface-container-low,#f7f2fa)}
+html .ab-vditor-about__item{
+display:flex;align-items:center;gap:12px;
+padding:10px 14px;min-height:56px;box-sizing:border-box}
+html .ab-vditor-about__item+.ab-vditor-about__item{border-top:1px solid var(--md-outline-variant,#cac4d0)}
+html .ab-vditor-about__item-icon{
+width:24px;flex:0 0 auto;text-align:center;
+font-size:20px !important;line-height:1;color:var(--md-on-surface-variant,#49454f)}
+html .ab-vditor-about__item-main{display:flex;flex-direction:column;gap:1px;flex:1 1 auto;min-width:0}
+html .ab-vditor-about__item-name{
+display:flex;align-items:center;gap:6px;
+font-size:14px;font-weight:500;color:var(--md-on-surface,#1c1b1f)}
+/* 已按需加载的组件前面点一个主题色小圆点 */
+html .ab-vditor-about__item.is-loaded .ab-vditor-about__item-name::before{
+content:"";width:6px;height:6px;flex:0 0 auto;border-radius:50%;
+background:var(--md-primary,#6750a4)}
+html .ab-vditor-about__item-desc{
+font-size:12px;line-height:1.4;color:var(--md-on-surface-variant,#49454f);
+overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+html .ab-vditor-about__item-chip{
+flex:0 0 auto;padding:3px 10px;border-radius:999px;
+font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+background:var(--md-secondary-container,#e8def8);
+color:var(--md-on-secondary-container,#1d192b)}
+
+/* 仓库链接 */
+html .ab-vditor-about__links{display:flex;flex-wrap:wrap;gap:8px}
+html .ab-vditor-about__links a{
+display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;
+border-radius:999px;font-size:12px;font-weight:600;text-decoration:none;
+border:1px solid var(--md-outline-variant,#cac4d0);
+background:transparent;color:var(--md-on-surface-variant,#49454f) !important;
+transition:background .15s ease,color .15s ease,border-color .15s ease}
+html .ab-vditor-about__links a:hover{
+background:var(--md-secondary-container,#e8def8);
+color:var(--md-on-secondary-container,#1d192b) !important;
+border-color:var(--md-outline,#79747e)}
+html .ab-vditor-about__links a .ab-icon{font-size:16px !important}
+
+/* ---- A3. 「插入文本」弹窗 ---- */
+html .ab-vditor-insert-text__dialog.ab-vditor-insert-text__dialog{
+background:linear-gradient(180deg,var(--md-surface-container-low,#f7f2fa) 0%,var(--md-surface-container,#ece6f0) 100%) !important;
+border-color:var(--md-outline-variant,#cac4d0) !important}
+html .ab-vditor-insert-text__head.ab-vditor-insert-text__head{border-bottom-color:var(--md-outline-variant,#cac4d0) !important}
+html .ab-vditor-insert-text__head.ab-vditor-insert-text__head h3{color:var(--md-on-surface,#1c1b1f) !important}
+html .ab-vditor-insert-text__close.ab-vditor-insert-text__close{color:var(--md-on-surface-variant,#49454f) !important}
+html .ab-vditor-insert-text__close.ab-vditor-insert-text__close:hover{background:color-mix(in srgb,var(--md-on-surface,#1c1b1f) 10%,transparent) !important}
+html .ab-vditor-insert-text__desc.ab-vditor-insert-text__desc{color:var(--md-on-surface-variant,#49454f) !important}
+html .ab-vditor-insert-text__from.ab-vditor-insert-text__from{color:var(--md-on-surface-variant,#49454f) !important}
+html .ab-vditor-insert-text__editor.ab-vditor-insert-text__editor{
+background:var(--md-surface-container-low,#f7f2fa) !important;
+border-color:var(--md-outline-variant,#cac4d0) !important;
+color:var(--md-on-surface,#1c1b1f) !important}
+html .ab-vditor-insert-text__btn.ab-vditor-insert-text__btn{
+background:var(--md-surface-container-low,#f7f2fa) !important;
+border-color:var(--md-outline-variant,#cac4d0) !important;
+color:var(--md-on-surface-variant,#49454f) !important}
+html .ab-vditor-insert-text__btn--primary.ab-vditor-insert-text__btn--primary{
+background:var(--md-primary,#6750a4) !important;
+border-color:transparent !important;
+color:var(--md-on-primary,#fff) !important}
+html .ab-vditor-insert-text__btn--primary.ab-vditor-insert-text__btn--primary:hover{
+background:color-mix(in srgb,var(--md-primary,#6750a4) 88%,#000) !important;
+color:var(--md-on-primary,#fff) !important}
+html .ab-vditor-insert-text__status.ab-vditor-insert-text__status{color:var(--md-primary,#6750a4) !important}
+
+/* ---- A4. 浮动面板与快捷插入条 ---- */
+html .vditor-panel--none.vditor-panel--none{
+background:color-mix(in srgb,var(--md-surface-container,#ece6f0) 94%,transparent) !important;
+border-color:var(--md-outline-variant,#cac4d0) !important}
+html .vditor-panel--none.vditor-panel--none .vditor-input{
+background:var(--md-surface,#fffbfe) !important;
+border-color:var(--md-outline-variant,#cac4d0) !important;
+color:var(--md-on-surface,#1c1b1f) !important}
+html .vditor-panel.vditor-panel button.vditor-icon .ab-icon{color:var(--md-on-surface-variant,#49454f) !important}
+
+/* ============================================================
+   C. 模式栏图标（配合 JS 里 _abBuildModeBar 注入的 .ab-mode-icon）
+   桌面端只显示文字，≤520px 换成纯图标（见 D2）
+   ============================================================ */
+#ab-vditor-mode-bar .ab-mode-icon{
+display:none;
+font-family:'Material Icons Round','Material Icons',sans-serif;
+font-size:20px;line-height:1;font-style:normal;font-weight:normal;
+font-feature-settings:'liga';-webkit-font-feature-settings:'liga';
+-webkit-font-smoothing:antialiased;
+pointer-events:none;user-select:none}
+#ab-vditor-mode-bar .ab-mode-label{display:inline-block;pointer-events:none}
+
+/* ============================================================
+   C2. 两行工具栏的容器（桌面端等于不存在）
+   ============================================================
+   两个容器由 JS 的 _abStructureToolbar() 创建。桌面端 display:contents 让子节点
+   直接参与 .vditor-toolbar 的 flex 排布，等于没有这两个 div
+   （保持原来的换行行为）；移动端才把容器显形，见 D1。
+   ============================================================ */
+.vditor-toolbar>.ab-toolbar-scroller,.vditor-toolbar>.ab-toolbar-pinned{display:contents}
+
+/* ⚠️ 全文的 `.vditor-toolbar X` 后代规则已统一改写成
+   `:is(.vditor-toolbar,.ab-toolbar-scroller) X`：
+   窄屏下第一行滚动行会被 JS 停靠到 #ab-vditor-wrap 里（不再是 .vditor-toolbar 的子节点），
+   不这样写的话这些规则会整批失配 —— 实测最直接的后果是
+   `.vditor-toolbar .ab-icon{font-size:24px}` 失配，图标继承按钮的 font-size:0，
+   整行按钮变成空白（只剩分隔线）。`:is()` 的两个分支都是类选择器，
+   优先级与原来完全一致，不会动到既有覆盖关系。
+   以后新增工具栏后代规则请沿用这个写法。 */
+
+/* ============================================================
+   D. 移动端深度适配
+   ============================================================
+   断点统一取 575px —— 与 AdminBeautify 自己的移动端断点一致
+   （主样式表里 10 处 @media (max-width:575px)，Plugin.php 的 abIsMobile() 也是 <=575）。
+   唯一例外：Vditor 4.0.0 的移动端「+」菜单由它自己写死 innerWidth <= 520 才生成。
+   ============================================================ */
+
+/* ---- D1. ≤575px：移动端编辑器 chrome ---- */
+@media (max-width:575px){
+/* 工具栏改单行横向滚动：默认 flex-wrap 在 390px 下会折成 9 行 / 200px 高，把编辑区挤没。
+   实测单行总宽约 1500px、高 48px，切换后编辑区多出 ~150px。
+   注意：工具栏的子面板（vditor-hint / vditor-panel--arrow）就挂在 vditor-toolbar__item
+   内部，overflow 会把它们一起裁掉 —— 面板打开时由 JS 临时把 overflow 关掉。 */
+/* 两行结构：第一行（.ab-toolbar-scroller）横向滚动；
+   第二行（.ab-toolbar-pinned）固定显示 撤销/恢复/保存/关于，
+   不再让它们被埋在滑动行的最右边。 */
+.vditor-toolbar{
+flex-direction:column !important;
+flex-wrap:nowrap !important;
+align-items:stretch !important;
+overflow:visible !important;
+padding:6px 8px !important;
+gap:6px !important}
+.ab-toolbar-scroller{
+display:flex !important;
+flex-wrap:nowrap !important;
+align-items:center !important;
+gap:4px !important;
+width:100% !important;
+overflow-x:auto !important;
+overflow-y:hidden !important;
+-webkit-overflow-scrolling:touch;
+scrollbar-width:none;-ms-overflow-style:none;
+touch-action:pan-x}
+.ab-toolbar-scroller::-webkit-scrollbar{display:none;width:0;height:0}
+.ab-toolbar-pinned{
+display:flex !important;
+flex-wrap:nowrap !important;
+align-items:center !important;
+gap:4px !important;
+width:100% !important;
+overflow-x:auto !important;
+scrollbar-width:none}
+.ab-toolbar-pinned::-webkit-scrollbar{display:none;width:0;height:0}
+/* 分隔符跟着扩展按钮走，第二行不需要前导竖线 */
+.ab-toolbar-pinned>.vditor-toolbar__divider{display:none !important}
+.vditor-toolbar__item{flex-shrink:0 !important}
+/* 去掉每个工具栏项白占的 24px：li 自带 padding:0 12px 且 box-sizing:content-box，
+   于是 44px 的按钮占 68px。收紧后滚动行总宽 1416 → 约 976px，滑动距离缩短约 1/3。 */
+.ab-toolbar-scroller>.vditor-toolbar__item{padding:0 !important;box-sizing:border-box !important}
+/* 滑动体验：按钮级吸附（proximity 比 mandatory 温和，长距离快滑不会被逐个吸住）、
+   并阻止横向滑动透传给页面（iOS 上靠近屏幕边缘时会误触「返回」手势）。 */
+.ab-toolbar-scroller{scroll-snap-type:x proximity;overscroll-behavior-x:contain;scroll-padding-left:10px}
+.ab-toolbar-scroller>.vditor-toolbar__item{scroll-snap-align:start}
+/* 「还能滑多少」：细进度条（靠 JS 写 CSS 变量驱动）。
+   ⚠️ 窄屏下滚动行被 JS 挪到编辑区末尾（#ab-vditor-wrap 的直接子节点），
+   所以指示器挂在 wrap 上、并且只在停靠态才生效。
+   注：原来右侧还有一层渐隐遮罩（::after），用户反馈「莫名出现一层遮罩」已删除，
+   别再加回来 —— 进度条本身已经说清楚还能滑多少。 */
+#ab-vditor-wrap.ab-toolbar-docked{position:relative}
+#ab-vditor-wrap.ab-toolbar-docked::before{
+content:"";position:absolute;
+bottom:3px;height:2px;border-radius:2px;
+left:calc(10px + (100% - 20px) * var(--ab-scroll-pos,0));
+width:calc((100% - 20px) * var(--ab-scroll-ratio,0));
+background:var(--md-primary,#6750a4);opacity:.35;
+pointer-events:none;
+transition:left .08s linear,width .12s ease,opacity .2s ease}
+#ab-vditor-wrap.ab-toolbar-docked.ab-scroll-none::before{display:none}
+
+/* 全屏时滚动行回到工具栏顶部两行里（不再停靠），进度条改画在固定行**上沿**：
+   固定行就在滚动行正下方，且同为工具栏子节点 → 能继承写在工具栏上的
+   --ab-scroll-pos / --ab-scroll-ratio（宿主见 _abWatchToolbarScroll）。
+   放在 ≤575 块内，桌面端全屏不受影响。 */
+#ab-vditor-wrap.ab-fullscreen .ab-toolbar-pinned{position:relative}
+#ab-vditor-wrap.ab-fullscreen .ab-toolbar-pinned::before{
+content:"";position:absolute;
+bottom:calc(100% + 2px);height:2px;border-radius:2px;
+left:calc(10px + (100% - 20px) * var(--ab-scroll-pos,0));
+width:calc((100% - 20px) * var(--ab-scroll-ratio,0));
+background:var(--md-primary,#6750a4);opacity:.35;
+pointer-events:none;
+transition:left .08s linear,width .12s ease,opacity .2s ease}
+#ab-vditor-wrap.ab-fullscreen .vditor-toolbar.ab-scroll-none .ab-toolbar-pinned::before{display:none}
+
+/* 第一行停靠到编辑区域底部（JS 在 ≤575px 时把它移到 #ab-vditor-wrap 末尾）
+   ⚠️ margin-top 必须为 0、且不写上边框：上方编辑卡片自带 1px 下边框，
+      再留 8px 间距／再画一条上边框，视觉上就是「文本区与工具栏之间有缝隙」。 */
+#ab-vditor-wrap>.ab-toolbar-scroller{
+margin-top:0;
+padding:6px 10px !important;
+box-sizing:border-box;
+background:var(--md-surface-container-low,#f7f2fa);
+border-top:0;
+border-radius:0 0 12px 12px}
+/* 与上方编辑卡片拼成一块（去掉卡片下圆角，避免中间出现接缝） */
+#ab-vditor-wrap.ab-toolbar-docked #ab-vditor{border-bottom-left-radius:0 !important;border-bottom-right-radius:0 !important}
+#ab-vditor-wrap.ab-toolbar-docked #ab-vditor{padding-bottom:0 !important}
+
+/* 停靠后「模式栏 + 编辑器 + 滚动行」会比可视区还高，滚动行被顶到屏幕外
+   （390×844 实测 scroller.top=849 > 844，等于白停靠）。
+   这里把 wrap 变成定高 flex 列，编辑器自己让位：
+   .vditor 内部本来就是 flex 链（.vditor-content / 各模式编辑器都是 flex:1），
+   缩容器能正确把高度传下去。高度由 JS 写进 --ab-dock-avail。
+   ⚠️ 必须 :not(.ab-fullscreen)：全屏下 wrap 已是 height:100dvh 的 flex 列，
+      而且这里的 flex/min-height 会比全屏那条更具体、把编辑器按回 523px。 */
+#ab-vditor-wrap.ab-toolbar-docked.ab-dock-fit:not(.ab-fullscreen){height:var(--ab-dock-avail)}
+#ab-vditor-wrap.ab-toolbar-docked.ab-dock-fit:not(.ab-fullscreen) #ab-vditor-mode-bar,
+#ab-vditor-wrap.ab-toolbar-docked.ab-dock-fit:not(.ab-fullscreen)>.ab-toolbar-scroller{flex:0 0 auto !important}
+#ab-vditor-wrap.ab-toolbar-docked.ab-dock-fit:not(.ab-fullscreen) #ab-vditor{flex:0 1 auto !important;min-height:160px !important}
+
+/* 停靠行在编辑区最底部，而 Vditor 的面板/提示是「以按钮为中心」定位的
+   （实测 headings 面板 273px 高挂在 44px 按钮上，computed top ≈ −114.6px），
+   下半截会掉出卡片甚至视口外。停靠态改成整体浮在按钮**上方**，空间反而是够的。 */
+#ab-vditor-wrap.ab-toolbar-docked>.ab-toolbar-scroller>.vditor-toolbar__item>.vditor-hint,
+#ab-vditor-wrap.ab-toolbar-docked>.ab-toolbar-scroller>.vditor-toolbar__item>.vditor-panel{
+top:auto !important;
+bottom:calc(100% + 8px) !important}
+
+/* 软键盘弹出时不需要任何特殊处理：
+   JS 的 --ab-dock-avail 已经把「视觉视口底部」当上界，编辑区自己缩到键盘上方，
+   滚动行始终是编辑区最后一行、天然贴在键盘上头。
+   曾经写过 position:fixed;bottom:var(--ab-kb) 的浮起方案，已删除 ——
+   祖先 div.body.container 上的 transform（单位阵也算）会把它当包含块，实测直接跑到屏幕外。 */
+
+:is(.vditor-toolbar,.ab-toolbar-scroller) button,.vditor-toolbar__item>button,:is(.vditor-toolbar,.ab-toolbar-scroller) label,.vditor-toolbar__item>label,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type],.vditor-toolbar__item>div[data-type]{
+width:44px !important;height:44px !important;min-width:44px !important;border-radius:10px !important}
+:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-icon,:is(.vditor-toolbar,.ab-toolbar-scroller) .ab-toolbar-custom-iconfont{font-size:24px !important}
+.vditor-toolbar__divider{height:26px !important;margin:0 4px !important}
+
+/* 触摸体验：去掉 tap 高亮 / 双击缩放延迟 / 触摸下只会糊在按钮上的 tooltip */
+.vditor-toolbar,:is(.vditor-toolbar,.ab-toolbar-scroller) *{-webkit-tap-highlight-color:transparent}
+:is(.vditor-toolbar,.ab-toolbar-scroller) button,:is(.vditor-toolbar,.ab-toolbar-scroller) label,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type],
+#ab-vditor-mode-bar button,#ab-vditor-fullscreen-btn{touch-action:manipulation}
+:is(.vditor-toolbar,.ab-toolbar-scroller) .vditor-tooltipped::before,:is(.vditor-toolbar,.ab-toolbar-scroller) .vditor-tooltipped::after{display:none !important}
+
+/* 模式栏：整行等分 + 纯图标（移动端不再显示「所见即所得」这类长文字） */
+#ab-vditor-mode-bar{gap:6px;margin-bottom:8px}
+#ab-vditor-mode-bar .ab-mode-btn-group{flex:1 1 auto;min-width:0}
+#ab-vditor-mode-bar button.ab-mode-btn{flex:1 1 0;min-width:0;height:44px;padding:0 !important;font-size:13px}
+#ab-vditor-mode-bar .ab-mode-icon{display:inline-block !important;font-size:22px !important}
+#ab-vditor-mode-bar .ab-mode-label{display:none !important}
+#ab-vditor-fullscreen-btn{width:44px;height:44px;min-width:44px;border-radius:10px}
+
+/* 浮动面板 / 提示：限宽限高，触摸目标加大 */
+.vditor-hint,.vditor-panel:not(.vditor-panel--none){
+max-width:calc(100vw - 24px) !important;
+max-height:60vh !important;
+overflow:auto !important;
+-webkit-overflow-scrolling:touch}
+.vditor-hint button,.vditor-panel:not(.vditor-panel--none) button{
+min-height:44px !important;
+padding:10px 14px !important;
+width:100% !important}
+/* 快捷插入条：允许横向滑动，避免被裁掉 */
+.vditor-panel--none{
+max-width:calc(100vw - 16px) !important;
+overflow-x:auto !important;
+overflow-y:hidden !important;
+-webkit-overflow-scrolling:touch;
+scrollbar-width:none}
+.vditor-panel--none::-webkit-scrollbar{display:none;width:0;height:0}
+/* iOS 聚焦输入框会放大整个页面 —— 字号必须 ≥16px */
+.vditor-panel--none .vditor-input{font-size:16px !important;height:36px !important;line-height:36px !important;width:72px !important}
+.vditor-panel--none button.vditor-icon{width:36px !important;height:36px !important}
+
+/* 编辑器高度：手机上 420px 的最小高度会撑出无谓的页面滚动 */
+#ab-vditor{min-height:300px !important;padding-bottom:6px !important}
+
+/* 全屏：避开刘海与手势条 */
+#ab-vditor-wrap.ab-fullscreen{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left) !important}
+#ab-vditor-wrap.ab-fullscreen #ab-vditor-mode-bar{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+
+/* 两个弹窗：占满可用宽度 + 触摸目标加大 */
+.ab-vditor-about__dialog,.ab-vditor-insert-text__dialog{
+width:calc(100vw - 20px) !important;
+max-width:none !important;
+max-height:calc(100dvh - 20px) !important}
+.ab-vditor-about__close,.ab-vditor-insert-text__close{width:44px !important;height:44px !important}
+/* 窄屏：组件说明允许折两行（桌面是单行省略；手机上一行装不下，折行比截断更好读） */
+html .ab-vditor-about__item-desc{
+white-space:normal !important;overflow:hidden !important;
+display:-webkit-box !important;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+html .ab-vditor-about__item{min-height:64px !important}
+html .ab-vditor-about__head.ab-vditor-about__head{padding:16px 16px 12px}
+html .ab-vditor-about__content.ab-vditor-about__content{padding:0 16px 16px}
+.ab-vditor-insert-text__editor{min-height:120px !important;font-size:16px !important}
+.ab-vditor-insert-text__btn{min-height:44px !important;padding:10px 14px !important}
+.ab-vditor-insert-text__actions{flex-wrap:wrap !important}
+.ab-vditor-insert-text__status{max-width:100% !important;white-space:normal !important;margin:0 0 6px !important}
+}
+
+/* D2 已合并进 D1：模式栏图标化与工具栏滚动统一用 575px（AdminBeautify 的移动端断点） */
+
+/* ============================================================
+   E. 「当前格式」高亮真正生效 + .ab-icon 字体基线
+   ============================================================
+   上方多处用 `.vditor-toolbar__item--current` / `.vditor-panel__action--current` 写
+   「选中态」，而这两个类名在 Vditor 3.11.2 与 4.0.0 里都**不存在** ——
+   它实际是加在按钮本身上：工具栏按钮是 `vditor-menu--current`，
+   面板按钮是 `vditor-icon--current`（见 Vditor 源码 setCurrentToolbar / setTableAlign）。
+   所以那些规则自始就没匹配过，选中态高亮从未生效。这里用正确的类名补上。
+   原写法保留未删；以后改这块请直接改这里。
+   ============================================================ */
+
+/* 工具栏当前格式（加粗 / 标题 / 列表…）——连同 :hover 一起盖，否则鼠标悬停会盖掉高亮 */
+:is(.vditor-toolbar,.ab-toolbar-scroller) button.vditor-menu--current,:is(.vditor-toolbar,.ab-toolbar-scroller) button.vditor-menu--current:hover,
+:is(.vditor-toolbar,.ab-toolbar-scroller) label.vditor-menu--current,:is(.vditor-toolbar,.ab-toolbar-scroller) label.vditor-menu--current:hover,
+:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type].vditor-menu--current,:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type].vditor-menu--current:hover{
+background:var(--md-secondary-container,#e8def8) !important}
+:is(.vditor-toolbar,.ab-toolbar-scroller) button.vditor-menu--current .ab-icon,
+:is(.vditor-toolbar,.ab-toolbar-scroller) label.vditor-menu--current .ab-icon,
+:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type].vditor-menu--current .ab-icon{color:var(--md-on-secondary-container,#1d192b) !important}
+:is(.vditor-toolbar,.ab-toolbar-scroller) button.vditor-menu--current.ab-toolbar-custom-btn,
+:is(.vditor-toolbar,.ab-toolbar-scroller) div[data-type].vditor-menu--current.ab-toolbar-custom-btn{color:var(--md-on-secondary-container,#1d192b) !important}
+/* 面板当前项（表格对齐 / 行列插入等） */
+.vditor-panel button.vditor-icon--current,.vditor-panel button.vditor-icon--current:hover{
+background:var(--md-secondary-container,#e8def8) !important;
+color:var(--md-on-secondary-container,#1d192b) !important}
+.vditor-panel button.vditor-icon--current .ab-icon{color:var(--md-on-secondary-container,#1d192b) !important}
+
+/* .ab-icon 字体基线 —— 修正一个真实踩过的坑：
+   原来只有几处局部规则带 font-family，凡是新加的 .ab-icon（比如曾短暂加过的移动端
+   快捷菜单按钮）都拿不到图标字体，于是连字名退化成普通文字（渲染出 “format_bold”）。 */
+.ab-icon{
+font-family:'Material Icons Round','Material Icons',sans-serif;
+font-style:normal;
+font-weight:normal;
+line-height:1;
+letter-spacing:normal;
+text-transform:none;
+white-space:nowrap;
+word-wrap:normal;
+direction:ltr;
+font-feature-settings:'liga';
+-webkit-font-feature-settings:'liga';
+-webkit-font-smoothing:antialiased}
+
+/* 气泡工具栏不得被裁剪、不得被限宽（它挂在编辑器内容区里，越界会被滚动容器吃掉） */
+html #ab-vditor .vditor-wysiwyg>.vditor-panel--none{
+overflow:visible !important;
+max-width:none !important}

@@ -1,1 +1,1 @@
-export declare const getElement: (vditor: IVditor) => HTMLPreElement;
+export declare const getElement: (vditor: IVditor) => HTMLTextAreaElement | HTMLPreElement;

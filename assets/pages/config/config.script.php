@@ -1675,7 +1675,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         }
 
         // ---- 性能优化卡片（插在 PWA 卡片之后） ----
-        var perfFields=["staticResource","customFontUrl","customIconUrl","localFontUrl","localIconUrl","avatarSource","customAvatarUrl","ajaxEnabled"];
+        var perfFields=["avatarSource","customAvatarUrl","ajaxEnabled"];
         var perfCard=document.getElementById("ab-card-perf");
         var perfBody=document.getElementById("ab-card-perf-body");
         if(perfCard&&perfBody&&pwaCard){
@@ -1703,26 +1703,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             }
             channelBody.style.padding="0px 38px 16px";
         }
-        // 自定义/本地 URL 字段的显示/隐藏
-        (function(){
-            var sel=document.querySelector("[name=\"staticResource\"]");
-            if(!sel) return;
-            function toggleCustom(){
-                var v=sel.value;
-                var isCustom=(v==="custom");
-                var isLocal=(v==="local");
-                var fontUl=findFieldUl("customFontUrl");
-                var iconUl=findFieldUl("customIconUrl");
-                var localFontUl=findFieldUl("localFontUrl");
-                var localIconUl=findFieldUl("localIconUrl");
-                if(fontUl)      fontUl.style.display=isCustom?"":"none";
-                if(iconUl)      iconUl.style.display=isCustom?"":"none";
-                if(localFontUl) localFontUl.style.display=isLocal?"":"none";
-                if(localIconUl) localIconUl.style.display=isLocal?"":"none";
-            }
-            sel.addEventListener("change",toggleCustom);
-            toggleCustom();
-        })();
+        // 注：原「静态资源来源」下拉的联动显隐逻辑已随该字段一起移除（字体字段已下线）
 
         // Umami 字段显示逻辑：仅在开启 Umami 时显示；Cloud 模式隐藏自建 API 地址
         (function(){

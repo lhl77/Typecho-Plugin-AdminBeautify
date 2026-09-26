@@ -1,7 +1,5 @@
+export declare const replaceSelection: (vditor: IVditor, text: string, selectionMode?: SelectionMode) => void;
 export declare const processPaste: (vditor: IVditor, text: string) => void;
-export declare const getSideByType: (spanNode: Node, type: string, isPrevious?: boolean) => false | Element;
-export declare const processSpinVditorSVDOM: (html: string, vditor: IVditor) => string;
-export declare const processPreviousMarkers: (spanElement: HTMLElement) => string;
 export declare const processAfterRender: (vditor: IVditor, options?: {
     enableAddUndoStack: boolean;
     enableHint: boolean;
