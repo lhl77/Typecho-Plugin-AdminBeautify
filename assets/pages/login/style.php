@@ -909,99 +909,198 @@ background: rgba(24,22,30,.96);
 }
 }
 
+/* ================================================================
+   Typecho 1.3.0 的消息提示：.message.popup.success|notice|error
+   来源：admin/common-js.php 在 $(document).ready 里读 __typecho_notice Cookie，
+        针对登录页（无 .typecho-head-nav）执行 prependTo(document.body)：
+          <div class="message popup error"><ul><li>…</li></ul></div>
+   原生只给了 sticky / 居中 / 直角 / 无背景 —— 颜色仅靠 jQuery UI 的
+   effect('highlight') 闪一下，闪完就只剩一行裸文字，登录页上很突兀。
+
+   这里按 Material Design 3 重做成「带前置图标的 tonal 提示条」：
+     · 错误 → error container（浅 #FFDAD6/#410E0B，深 #8C1D18/#F9DEDC，
+       与后台 admin 的 MD3 语义色同一套值）
+     · 警告 → 暖色 tonal 容器   · 成功 → 绿色 tonal 容器
+     · 形状：圆角 16（MD3 大圆角）；高度：单行 48 起
+     · 高度：elevation level 3
+     · 图标：用 mask + currentColor 画，不依赖图标字体，也不用 emoji
+
+   动效：Typecho 原生是 slideDown（动画高度）+ 5 秒后 fadeOut，
+   这里由脚本 login/script.php 接管，改成 MD3 的
+   进场 emphasized-decelerate / 退场 emphasized-accelerate（见 .ab-toast-*）。
+   ⚠️ 所以容器本身不再自带 animation，避免和脚本加的两个类三方打架。
+   ================================================================ */
 .message.popup{
+/* 语义色变量（默认按错误态，下面 .error/.notice/.success 各自覆盖） */
+--ab-msg-bg: #FFDAD6;
+--ab-msg-fg: #410E0B;
+--ab-msg-ic: #BA1A1A;
+
 position: fixed !important;
 top: 20px !important;
 left: 50% !important;
 transform: translateX(-50%) !important;
 width: auto !important;
-max-width: calc(100vw - 40px) !important;
 min-width: 280px !important;
-border-radius: 10px !important;
-padding: 0 !important;
+max-width: calc(100vw - 40px) !important;              /* 老浏览器兜底 */
+max-width: min(420px, calc(100vw - 40px)) !important;
+box-sizing: border-box !important;
 margin: 0 !important;
-background: none !important;
+padding: 14px 18px 14px 50px !important;
 border: none !important;
-box-shadow: none !important;
-backdrop-filter: blur(10px) !important;
--webkit-backdrop-filter: blur(10px) !important;
-animation: lb-slide-down 0.3s ease-out !important;
+border-radius: 16px !important;
+background: var(--ab-msg-bg) !important;
+color: var(--ab-msg-fg) !important;
+box-shadow: 0 4px 8px 3px rgba(0, 0, 0, .15),
+            0 1px 3px rgba(0, 0, 0, .3) !important;
+text-align: left !important;
 z-index: 9999 !important;
 }
 
-.notice{
-background:none!important;
+/* ---- 进场：emphasized decelerate（淡入 + 上浮 12px + 从 0.92 放大）---- */
+.message.popup.ab-toast-in{
+animation: lb-toast-in .3s cubic-bezier(.05, .7, .1, 1) both !important;
 }
 
-@keyframes lb-slide-down {
-from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-to { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* ---- 退场：emphasized accelerate（淡出 + 再上浮一点 + 微缩）---- */
+.message.popup.ab-toast-out{
+animation: lb-toast-out .2s cubic-bezier(.3, 0, .8, .15) forwards !important;
+}
+
+@keyframes lb-toast-in{
+from{ opacity: 0; transform: translateX(-50%) translateY(-12px) scale(.92); }
+to{ opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes lb-toast-out{
+from{ opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+to{ opacity: 0; transform: translateX(-50%) translateY(-10px) scale(.94); }
+}
+
+/* 只淡入淡出（不位移），用于「减少动态效果」偏好 */
+@keyframes lb-toast-fade-in{
+from{ opacity: 0; }
+to{ opacity: 1; }
+}
+
+@keyframes lb-toast-fade-out{
+from{ opacity: 1; }
+to{ opacity: 0; }
+}
+
+/* 前置状态图标：mask + currentColor，与文字同一套色 */
+.message.popup::before{
+content: '' !important;
+position: absolute !important;
+left: 18px !important;
+top: 50% !important;
+width: 20px !important;
+height: 20px !important;
+transform: translateY(-50%) !important;
+background-color: var(--ab-msg-ic) !important;
+-webkit-mask: var(--ab-msg-icon) center / contain no-repeat !important;
+mask: var(--ab-msg-icon) center / contain no-repeat !important;
 }
 
 .message.popup ul{
 margin: 0 !important;
 padding: 0 !important;
 list-style: none !important;
+text-align: left !important;
 }
 
 .message.popup ul li{
-padding: 14px 18px !important;
-margin: 5px !important;
+margin: 0 !important;
+padding: 0 !important;
+display: block !important;
 font-size: 14px !important;
-line-height: 1.5 !important;
-color: var(--lb-on-surface) !important;
-display: flex !important;
-align-items: center !important;
-gap: 10px !important;
+font-weight: 500 !important;
+line-height: 20px !important;
+letter-spacing: .01em !important;
+color: inherit !important;
+background: none !important;
 }
 
-.message.popup ul li:before{
-content: '⚠' !important;
-font-size: 18px !important;
-display: inline-block !important;
+/* 多条提示时分行，次要行降低字重 */
+.message.popup ul li + li{
+margin-top: 6px !important;
+font-weight: 400 !important;
+opacity: .9;
 }
 
-.message.popup.notice ul li{
-background: linear-gradient(135deg, #f59e0b, #ef4444) !important;
-color: #fff !important;
-border-radius: 14px !important;
+.message.popup ul li a{
+color: inherit !important;
+font-weight: 700 !important;
+text-decoration: underline !important;
+text-underline-offset: 2px;
 }
 
-.message.popup.notice ul li:before{
-content: '⚠' !important;
-font-weight: bold !important;
+/* ---- 错误：error container ---- */
+.message.popup.error{
+--ab-msg-bg: #FFDAD6;
+--ab-msg-fg: #410E0B;
+--ab-msg-ic: #BA1A1A;
+--ab-msg-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z'/%3E%3C/svg%3E");
 }
 
-.message.popup.success ul li{
-background: linear-gradient(135deg, #10b981, #059669) !important;
-color: #fff !important;
-border-radius: 14px !important;
+/* ---- 警告：暖色 tonal 容器 ---- */
+.message.popup.notice{
+--ab-msg-bg: #FFE4B8;
+--ab-msg-fg: #3D2E00;
+--ab-msg-ic: #B57500;
+--ab-msg-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2 1 21h22L12 2Zm1 15h-2v-2h2v2Zm0-4h-2v-4h2v4Z'/%3E%3C/svg%3E");
 }
 
-.message.popup.success ul li:before{
-content: '✓' !important;
-font-weight: bold !important;
+/* ---- 成功：绿色 tonal 容器 ---- */
+.message.popup.success{
+--ab-msg-bg: #C6EFD3;
+--ab-msg-fg: #0A3B1E;
+--ab-msg-ic: #1B7A46;
+--ab-msg-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm-1.2 14.2-4-4 1.4-1.4 2.6 2.6 5.6-5.6 1.4 1.4-7 7Z'/%3E%3C/svg%3E");
 }
 
-.message.popup.error ul li{
-background: linear-gradient(135deg, #dc2626, #ef4444) !important;
-color: #fff !important;
-border-radius: 14px !important;
+/* ---- 暗色：容器 tone-30 / 文字 tone-90（与后台 admin 的 MD3 语义色一致）---- */
+html[data-lb-theme="dark"] .message.popup.error{
+--ab-msg-bg: #8C1D18;
+--ab-msg-fg: #F9DEDC;
+--ab-msg-ic: #FFB4AB;
 }
 
-.message.popup.error ul li:before{
-content: '✕' !important;
-font-weight: bold !important;
+html[data-lb-theme="dark"] .message.popup.notice{
+--ab-msg-bg: #5C4200;
+--ab-msg-fg: #FFE08A;
+--ab-msg-ic: #FFD54F;
 }
 
-@media (max-width: 480px) {
+html[data-lb-theme="dark"] .message.popup.success{
+--ab-msg-bg: #0F5132;
+--ab-msg-fg: #A8E6B8;
+--ab-msg-ic: #7BE0A0;
+}
+
+/* 减少动态效果：只做很短的淡入淡出，不做位移/缩放（位移会让前庭敏感用户不适） */
+@media (prefers-reduced-motion: reduce){
+.message.popup.ab-toast-in{
+animation: lb-toast-fade-in .12s linear both !important;
+}
+.message.popup.ab-toast-out{
+animation: lb-toast-fade-out .12s linear forwards !important;
+}
+}
+
+@media (max-width: 480px){
 .message.popup{
 top: 16px !important;
+min-width: 0 !important;
 max-width: calc(100vw - 32px) !important;
-min-width: 260px !important;
+padding: 12px 16px 12px 46px !important;
+}
+.message.popup::before{
+left: 16px !important;
+width: 18px !important;
+height: 18px !important;
 }
 .message.popup ul li{
-padding: 12px 16px !important;
 font-size: 13px !important;
 }
 }

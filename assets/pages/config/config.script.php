@@ -1486,13 +1486,70 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         var hiddenUl=findFieldUl("compat_disabledScripts");
         if(hiddenUl) hiddenUl.style.display="none";
 
-        // ---- PWA 应用卡片（插在兼容脚本卡片之后）----
+        // ---- SMTP 发件设置卡片（紧跟兼容脚本卡片）----
+        var smtpFields=["smtp_enabled","smtp_host","smtp_port","smtp_secure","smtp_user","smtp_pass","smtp_from","smtp_fromName"];
+        var smtpCard=document.getElementById("ab-card-smtp");
+        var smtpBody=document.getElementById("ab-card-smtp-body");
+        if(smtpCard&&smtpBody&&compatCard){
+            var formS=compatCard.parentNode;
+            if(compatCard.nextSibling) formS.insertBefore(smtpCard,compatCard.nextSibling);
+            else formS.appendChild(smtpCard);
+
+            for(var q=0;q<smtpFields.length;q++){
+                var qu=findFieldUl(smtpFields[q]);
+                if(qu) smtpBody.appendChild(qu);
+            }
+            smtpBody.style.padding="0px 38px 16px";
+
+            // 未启用发件功能时，将服务器相关字段置灰，避免误填
+            (function(){
+                var sync=function(){
+                    var radios=document.querySelectorAll("[name=\"smtp_enabled\"]");
+                    if(!radios.length) return;
+                    var on=false;
+                    for(var r=0;r<radios.length;r++){
+                        if(radios[r].checked && radios[r].value==="1") on=true;
+                    }
+                    for(var k=1;k<smtpFields.length;k++){
+                        var fu=findFieldUl(smtpFields[k]);
+                        if(fu) fu.style.opacity = on ? "" : "0.55";
+                    }
+                };
+                document.addEventListener("change",function(e){
+                    if(e.target&&e.target.name==="smtp_enabled") sync();
+                });
+                sync();
+            })();
+        }
+
+        // ---- 安全验证设置卡片（紧跟 SMTP 卡片）----
+        var securityFields=["turnstile_siteKey","turnstile_secretKey","turnstile_login","turnstile_register","turnstile_forgot"];
+        var securityCard=document.getElementById("ab-card-security");
+        var securityBody=document.getElementById("ab-card-security-body");
+        if(securityCard&&securityBody&&compatCard){
+            var formSec=compatCard.parentNode;
+            var secAnchor=(typeof smtpCard!=="undefined"&&smtpCard)?smtpCard:compatCard;
+            if(secAnchor.nextSibling) formSec.insertBefore(securityCard,secAnchor.nextSibling);
+            else formSec.appendChild(securityCard);
+
+            for(var q2=0;q2<securityFields.length;q2++){
+                var qu2=findFieldUl(securityFields[q2]);
+                if(qu2) securityBody.appendChild(qu2);
+            }
+            securityBody.style.padding="0px 38px 16px";
+        }
+
+        // ---- PWA 应用卡片（插在安全验证卡片之后）----
         var pwaFields=["pwa_appName","pwa_appIcon"];
         var pwaCard=document.getElementById("ab-card-pwa");
         var pwaBody=document.getElementById("ab-card-pwa-body");
         if(pwaCard&&pwaBody&&compatCard){
             var form3=compatCard.parentNode;
-            if(compatCard.nextSibling) form3.insertBefore(pwaCard,compatCard.nextSibling);
+            // 顺序：兼容脚本 → SMTP → 安全验证 → PWA（前面的卡片不存在时逐级回退）
+            var pwaAnchor=(typeof securityCard!=="undefined"&&securityCard)
+                ? securityCard
+                : ((typeof smtpCard!=="undefined"&&smtpCard)?smtpCard:compatCard);
+            if(pwaAnchor.nextSibling) form3.insertBefore(pwaCard,pwaAnchor.nextSibling);
             else form3.appendChild(pwaCard);
             for(var p=0;p<pwaFields.length;p++){
                 var pu=findFieldUl(pwaFields[p]);
@@ -1695,7 +1752,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         })();
 
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","dashboardcards","editor","login","pwa","perf","compat","channel"].forEach(function(id){
+        ["admin","dashboardcards","editor","login","pwa","perf","compat","smtp","security","channel"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
@@ -1923,6 +1980,20 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         if(i4) i4.style.background=c[1]+"1a";
         var v4=document.getElementById("ab-card-compat-chev");
         if(v4) v4.setAttribute("stroke",c[1]);
+        // SMTP 发件设置卡片
+        var s9=document.getElementById("ab-card-smtp-strip");
+        if(s9) s9.style.background=c[1];
+        var i9=document.getElementById("ab-card-smtp-icon");
+        if(i9) i9.style.background=c[1]+"1a";
+        var v9=document.getElementById("ab-card-smtp-chev");
+        if(v9) v9.setAttribute("stroke",c[1]);
+        // 安全验证设置卡片
+        var s10=document.getElementById("ab-card-security-strip");
+        if(s10) s10.style.background=c[0];
+        var i10=document.getElementById("ab-card-security-icon");
+        if(i10) i10.style.background=c[0]+"1a";
+        var v10=document.getElementById("ab-card-security-chev");
+        if(v10) v10.setAttribute("stroke",c[0]);
         // 登录页卡片
         var s2=document.getElementById("ab-card-login-strip");
         if(s2) s2.style.background=c[1];

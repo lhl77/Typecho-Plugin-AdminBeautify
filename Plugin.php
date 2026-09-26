@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.55
+ * @version 2.1.56
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -94,15 +94,226 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         Typecho_Plugin::factory('admin/footer.php')->begin = array(__CLASS__, 'renderFooter');
         Typecho_Plugin::factory('admin/footer.php')->end = array(__CLASS__, 'renderLoginFooter');
         Utils\Helper::addAction('admin-beautify', 'AdminBeautify_Action');
+        self::ensureTurnstileActions();
         return _t('AB-Admin 已启用');
     }
     public static function deactivate()
     {
         Utils\Helper::removeAction('admin-beautify');
+        Utils\Helper::removeAction('login');
+        Utils\Helper::removeAction('register');
         return _t('AdminBeautify 已禁用');
+    }
+    public static function ensureTurnstileActions()
+    {
+        $actionTable = array();
+        try {
+            $actionTable = Utils\Helper::options()->actionTable;
+        } catch (Exception $e) {
+            $actionTable = array();
+        } catch (Throwable $e) {
+            $actionTable = array();
+        }
+        if (!is_array($actionTable)) {
+            $actionTable = array();
+        }
+        if (!isset($actionTable['login']) || $actionTable['login'] !== 'AdminBeautify_Login') {
+            Utils\Helper::addAction('login', 'AdminBeautify_Login');
+        }
+        if (!isset($actionTable['register']) || $actionTable['register'] !== 'AdminBeautify_Register') {
+            Utils\Helper::addAction('register', 'AdminBeautify_Register');
+        }
+    }
+    public static function turnstileSiteKey($page)
+    {
+        if (self::turnstileIsDisabled()) {
+            return '';
+        }
+        $opt = self::pluginOptions();
+        $siteKey = trim((string) $opt->turnstile_siteKey);
+        $secret  = trim((string) $opt->turnstile_secretKey);
+        if ($siteKey === '' || $secret === '') {
+            return '';
+        }
+        $flag = 'turnstile_' . $page;
+        if (empty($opt->{$flag})) {
+            return '';
+        }
+        return $siteKey;
+    }
+    public static function turnstileKillSwitchPath()
+    {
+        return dirname(__FILE__) . '/turnstile-off';
+    }
+    public static function turnstileIsDisabled()
+    {
+        if (file_exists(self::turnstileKillSwitchPath())) {
+            return true;
+        }
+        return self::turnstileIsSuspended();
+    }
+    private static $turnstileResumedThisRequest = false;
+    public static function turnstileIsSuspended()
+    {
+        if (self::$turnstileResumedThisRequest) {
+            return false;
+        }
+        $opt = self::pluginOptions();
+        if (empty($opt->turnstile_suspended)) {
+            return false;
+        }
+        $now  = self::turnstileKeyPrint($opt);
+        $then = isset($opt->turnstile_keyPrint) ? (string) $opt->turnstile_keyPrint : '';
+        if ($then !== '' && $then !== $now) {
+            self::turnstileClearSuspend();
+            return false;
+        }
+        return true;
+    }
+    private static function turnstileKeyPrint($opt = null)
+    {
+        if ($opt === null) {
+            $opt = self::pluginOptions();
+        }
+        return md5(trim((string) $opt->turnstile_siteKey) . '|' . trim((string) $opt->turnstile_secretKey));
+    }
+    public static function turnstileClearSuspend()
+    {
+        try {
+            self::savePluginOptions('AdminBeautify', array(
+                'turnstile_suspended'       => '',
+                'turnstile_suspendedAt'     => '',
+                'turnstile_suspendedReason' => '',
+                'turnstile_failStreak'      => '',
+                'turnstile_keyPrint'        => '',
+            ));
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    public static function turnstileEnabledFor($page)
+    {
+        return self::turnstileSiteKey($page) !== '';
+    }
+    public static function turnstileVerifyToken($token, $secret)
+    {
+        if (!is_string($secret) || $secret === '') {
+            return true;
+        }
+        if (!is_string($token) || $token === '') {
+            self::turnstileNoteError('missing-token');
+            return false;
+        }
+        $ctx = stream_context_create(array('http' => array(
+            'method'  => 'POST',
+            'header'  => "Content-Type: application/x-www-form-urlencoded\r\n",
+            'content' => http_build_query(array(
+                'secret'   => $secret,
+                'response' => $token,
+            )),
+            'timeout' => 5,
+            'ignore_errors' => true,
+        )));
+        $body = @file_get_contents('https://challenges.cloudflare.com/turnstile/v0/siteverify', false, $ctx);
+        if ($body === false) {
+            return true;
+        }
+        $json = json_decode($body, true);
+        if (!is_array($json) || !array_key_exists('success', $json)) {
+            return true;
+        }
+        if (!empty($json['success'])) {
+            self::turnstileNoteError('');
+            return true;
+        }
+        $codes = (isset($json['error-codes']) && is_array($json['error-codes']))
+            ? implode(',', $json['error-codes'])
+            : 'unknown';
+        self::turnstileNoteError($codes);
+        return false;
+    }
+    public static function turnstileVerifyRequest($page)
+    {
+        if (!self::turnstileEnabledFor($page)) {
+            return true;
+        }
+        $secret = trim((string) self::pluginOptions()->turnstile_secretKey);
+        $token  = isset($_POST['cf-turnstile-response']) ? $_POST['cf-turnstile-response'] : '';
+        return self::turnstileVerifyToken($token, $secret);
+    }
+    private static function turnstileNoteError($code)
+    {
+        $code = (string) $code;
+        $opt = self::pluginOptions();
+        if ($code === '') {
+            $had = (!empty($opt->turnstile_lastError) || !empty($opt->turnstile_failStreak));
+            if (!$had) {
+                return;
+            }
+            try {
+                self::savePluginOptions('AdminBeautify', array(
+                    'turnstile_lastError'   => '',
+                    'turnstile_lastErrorAt' => '',
+                    'turnstile_failStreak'  => '',
+                ));
+            } catch (Exception $e) {
+            } catch (Throwable $e) {
+            }
+            return;
+        }
+        $fatal  = in_array($code, self::turnstileConfigErrorCodes(), true);
+        $streak = (int) (isset($opt->turnstile_failStreak) ? $opt->turnstile_failStreak : 0);
+        $streak = $fatal ? ($streak + 1) : 0;
+        $patch = array(
+            'turnstile_lastError'   => $code,
+            'turnstile_lastErrorAt' => (string) time(),
+            'turnstile_failStreak'  => $streak > 0 ? (string) $streak : '',
+        );
+        if ($fatal && $streak >= 3 && empty($opt->turnstile_suspended)) {
+            $patch['turnstile_suspended']       = '1';
+            $patch['turnstile_suspendedAt']     = (string) time();
+            $patch['turnstile_suspendedReason'] = $code;
+            $patch['turnstile_keyPrint']        = self::turnstileKeyPrint($opt);
+        }
+        try {
+            self::savePluginOptions('AdminBeautify', $patch);
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    public static function turnstileConfigErrorCodes()
+    {
+        return array('invalid-input-secret', 'bad-request');
+    }
+    public static function turnstileErrorHint($code)
+    {
+        $code = trim((string) $code);
+        if ($code === '') {
+            return '';
+        }
+        $map = array(
+            'missing-token'        => '浏览器没有把验证令牌提交上来：多半是组件还没加载完就点了提交，或页面上的 JS 被拦截。让用户刷新页面后重试。',
+            'invalid-input-secret' => 'Secret Key 不对（Site Key 与 Secret Key 不是同一个 Turnstile 部件的，或密钥被重置过）。请回 Cloudflare 控制台重新复制两个密钥。',
+            'invalid-input-response' => '令牌无效：组件所属域名与当前站点不匹配，或令牌被改动过。请检查 Turnstile 部件的「域」是否包含本站域名（本地测试要加上 127.0.0.1）。',
+            'timeout-or-duplicate' => '令牌已过期或已被使用过（令牌只有 5 分钟有效期且只能用一次）。刷新页面拿到新令牌即可。',
+            'bad-request'          => '请求格式不对（Secret Key 里可能混入了空格或换行）。',
+            'internal-error'       => 'Cloudflare 侧临时故障，稍后重试即可。',
+        );
+        if (isset($map[$code])) {
+            return $map[$code];
+        }
+        $parts = array();
+        foreach (explode(',', $code) as $one) {
+            $one = trim($one);
+            if ($one !== '' && isset($map[$one])) {
+                $parts[] = $map[$one];
+            }
+        }
+        return $parts ? implode(' ', array_unique($parts)) : ('Cloudflare 返回：' . $code);
     }
     public static function config(Typecho_Widget_Helper_Form $form)
     {
+        self::ensureTurnstileActions();
         $abConfigColors = array(
             'purple' => array('#7D5260', '#9E7B8A'),
             'blue'   => array('#556270', '#7A8A9E'),
@@ -122,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.55';
+        $abVer = '2.1.56';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -770,6 +981,178 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('关闭后，将不再显示插件更新横幅通知和公告弹窗。')
         );
         $form->addInput($notifyOptOut);
+        abCard('smtp', $abC2, 'outbox', 'SMTP 发件设置', '配置发信服务器，供登录页「忘记密码」等功能发送邮件',
+            abCardTip('✉️',
+                '在需要发送邮件时会使用以上设置，如登录页面的「忘记密码」功能等。<br>'
+                . '多数邮箱（QQ、163、Gmail 等）需要填写<strong>授权码</strong>，而不是邮箱登录密码。'
+            )
+        );
+        $smtpEnabled = new Typecho_Widget_Helper_Form_Element_Radio(
+            'smtp_enabled',
+            array(
+                '1' => _t('启用'),
+                '0' => _t('关闭（默认）'),
+            ),
+            '0',
+            _t('SMTP 发件功能'),
+            _t('开启后，插件在需要发送邮件时才会使用以下设置。')
+        );
+        $form->addInput($smtpEnabled);
+        $smtpHost = new Typecho_Widget_Helper_Form_Element_Text(
+            'smtp_host',
+            null,
+            '',
+            _t('SMTP 服务器地址'),
+            _t('如 smtp.qq.com、smtp.163.com、smtp.gmail.com。')
+        );
+        $form->addInput($smtpHost);
+        $smtpPort = new Typecho_Widget_Helper_Form_Element_Text(
+            'smtp_port',
+            null,
+            '465',
+            _t('SMTP 端口'),
+            _t('SSL 常用 465，STARTTLS 常用 587。')
+        );
+        $form->addInput($smtpPort);
+        $smtpSecure = new Typecho_Widget_Helper_Form_Element_Select(
+            'smtp_secure',
+            array(
+                'ssl'  => _t('SSL / TLS 隐式加密（465）'),
+                'tls'  => _t('STARTTLS 明文升级（587）'),
+                'none' => _t('不加密（仅内网使用）'),
+            ),
+            'ssl',
+            _t('加密方式'),
+            _t('需与端口匹配：465 选 SSL，587 选 STARTTLS。')
+        );
+        $form->addInput($smtpSecure);
+        $smtpUser = new Typecho_Widget_Helper_Form_Element_Text(
+            'smtp_user',
+            null,
+            '',
+            _t('SMTP 账号'),
+            _t('通常就是发件邮箱地址；部分服务商要求与发件人邮箱完全一致。')
+        );
+        $form->addInput($smtpUser);
+        $smtpPass = new Typecho_Widget_Helper_Form_Element_Password(
+            'smtp_pass',
+            null,
+            '',
+            _t('SMTP 密码 / 授权码'),
+            _t('多数邮箱（QQ、163、Gmail 等）需要填写「授权码」，不是邮箱登录密码。')
+        );
+        $smtpPass->setInputsAttribute('autocomplete', 'new-password');
+        $form->addInput($smtpPass);
+        $smtpFrom = new Typecho_Widget_Helper_Form_Element_Text(
+            'smtp_from',
+            null,
+            '',
+            _t('发件人邮箱'),
+            _t('留空则使用上面的 SMTP 账号。')
+        );
+        $form->addInput($smtpFrom);
+        $smtpFromName = new Typecho_Widget_Helper_Form_Element_Text(
+            'smtp_fromName',
+            null,
+            '',
+            _t('发件人名称'),
+            _t('收件方看到的发件人名称，留空则使用站点名称。')
+        );
+        $form->addInput($smtpFromName);
+        if (isset($_REQUEST['ab-turnstile-resume']) && (string) $_REQUEST['ab-turnstile-resume'] === '1') {
+            self::turnstileClearSuspend();
+            self::$turnstileResumedThisRequest = true;
+        }
+        $abTsOptNow = self::pluginOptions();
+        $abTsAdminUrl = (string) Typecho_Widget::widget('Widget_Options')->adminUrl;
+        $abTsErrHtml = '';
+        if (self::$turnstileResumedThisRequest) {
+            $abTsErrHtml .= '<br><br><b style="color:#2e7d32">✅ 已恢复人机验证</b><br>'
+                . '请确认上面的密钥与 Cloudflare 控制台一致，再让用户重试登录。';
+        }
+        if (file_exists(self::turnstileKillSwitchPath())) {
+            $abTsErrHtml .= '<br><br><b style="color:#b3261e">⛔ 紧急开关生效中</b><br>'
+                . '检测到文件 <code>usr/plugins/AdminBeautify/turnstile-off</code>，'
+                . '人机验证已<b>全部跳过</b>。确认能正常登录后请删除该文件。';
+        } elseif (self::turnstileIsSuspended()) {
+            $abTsWhen = !empty($abTsOptNow->turnstile_suspendedAt)
+                ? '（' . date('Y-m-d H:i', (int) $abTsOptNow->turnstile_suspendedAt) . '）'
+                : '';
+            $abTsReason = isset($abTsOptNow->turnstile_suspendedReason)
+                ? (string) $abTsOptNow->turnstile_suspendedReason
+                : '';
+            $abTsErrHtml .= '<br><br><b style="color:#b3261e">⛔ 人机验证已被自动暂停' . $abTsWhen . '</b><br>'
+                . '连续多次出现「服务器侧配置错」（<code>' . htmlspecialchars($abTsReason, ENT_QUOTES | ENT_HTML5) . '</code>），'
+                . '为避免把管理员锁在后台外面，插件已自动跳过验证、放行登录。<br>'
+                . htmlspecialchars(self::turnstileErrorHint($abTsReason), ENT_QUOTES | ENT_HTML5) . '<br>'
+                . '<b>改好上面的密钥并保存后会自动恢复</b>；也可以 '
+                . '<a href="' . htmlspecialchars($abTsAdminUrl, ENT_QUOTES) . 'options-plugin.php?config=AdminBeautify&amp;ab-turnstile-resume=1">立即恢复验证</a>。';
+        }
+        $abTsLast = isset($abTsOptNow->turnstile_lastError) ? (string) $abTsOptNow->turnstile_lastError : '';
+        if ($abTsLast !== '') {
+            $abTsWhen = !empty($abTsOptNow->turnstile_lastErrorAt)
+                ? '（' . date('Y-m-d H:i', (int) $abTsOptNow->turnstile_lastErrorAt) . '）'
+                : '';
+            $abTsErrHtml .= '<br><br><b style="color:#b3261e">⚠ 上次安全验证失败' . $abTsWhen . '</b><br>'
+                . '原因：<code>' . htmlspecialchars($abTsLast, ENT_QUOTES | ENT_HTML5) . '</code><br>'
+                . htmlspecialchars(self::turnstileErrorHint($abTsLast), ENT_QUOTES | ENT_HTML5);
+        }
+        $abTsErrHtml .= '<br><br><b>🔑 万一配错把自己锁在门外：</b><br>'
+            . '① 用 FTP / 主机文件管理，在 <code>usr/plugins/AdminBeautify/</code> 下新建一个<b>空文件</b>'
+            . ' <code>turnstile-off</code> → 人机验证立即全部跳过，登录后回来修配置，修好再删掉该文件；<br>'
+            . '② 若改不了文件，可在数据库里把本插件设置中的 <code>turnstile_login</code> / '
+            . '<code>turnstile_register</code> / <code>turnstile_forgot</code> 三个值改成 <code>0</code>（或把两个密钥清空）。';
+        abCard('security', $abC1, 'admin_panel_settings', '安全验证设置', 'Cloudflare Turnstile 人机验证，保护登录、注册与找回密码入口',
+            abCardTip('🛡️',
+                'Turnstile 是 Cloudflare 提供的人机验证服务（免费）。'
+                . '在 Cloudflare 控制台创建站点后即可拿到「站点密钥（Site Key）」与「密钥（Secret Key）」。<br>'
+                . '<b>两项密钥都留空 = 视为未启用</b>，不会拦截任何页面，避免配置到一半把自己锁在门外。'
+                . '开启后，勾选的入口在提交前会先完成一次人机验证。'
+                . '开启前请先确认密钥填对了：配错会导致登录页无法通过验证。'
+                . $abTsErrHtml
+            )
+        );
+        $turnstileSiteKey = new Typecho_Widget_Helper_Form_Element_Text(
+            'turnstile_siteKey',
+            null,
+            '',
+            _t('Turnstile 站点密钥（Site Key）'),
+            _t('公开密钥，渲染人机验证组件时使用。')
+        );
+        $form->addInput($turnstileSiteKey);
+        $turnstileSecretKey = new Typecho_Widget_Helper_Form_Element_Password(
+            'turnstile_secretKey',
+            null,
+            '',
+            _t('Turnstile 密钥（Secret Key）'),
+            _t('私密密钥，服务端校验用，切勿泄露。')
+        );
+        $turnstileSecretKey->setInputsAttribute('autocomplete', 'new-password');
+        $form->addInput($turnstileSecretKey);
+        $turnstileLogin = new Typecho_Widget_Helper_Form_Element_Radio(
+            'turnstile_login',
+            array('1' => _t('开启'), '0' => _t('关闭（默认）')),
+            '0',
+            _t('登录页安全验证'),
+            _t('开启后，登录提交前需先完成 Turnstile 人机验证。')
+        );
+        $form->addInput($turnstileLogin);
+        $turnstileRegister = new Typecho_Widget_Helper_Form_Element_Radio(
+            'turnstile_register',
+            array('1' => _t('开启'), '0' => _t('关闭（默认）')),
+            '0',
+            _t('注册页安全验证'),
+            _t('开启后，注册提交前需先完成 Turnstile 人机验证。')
+        );
+        $form->addInput($turnstileRegister);
+        $turnstileForgot = new Typecho_Widget_Helper_Form_Element_Radio(
+            'turnstile_forgot',
+            array('1' => _t('开启'), '0' => _t('关闭（默认）')),
+            '0',
+            _t('忘记密码页安全验证'),
+            _t('开启后，忘记密码提交邮箱前需先完成 Turnstile 人机验证。')
+        );
+        $form->addInput($turnstileForgot);
         if ($abOpt) {
             $existingInputs = $form->getInputs();
             foreach ($abOpt as $key => $val) {
@@ -791,7 +1174,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.55 %c",'
+            .   '"%c AB-Admin %c v2.1.56 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -955,9 +1338,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.55.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.56.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.55.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.56.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '0';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1290,7 +1673,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.55',
+            'pluginVersion'          => '2.1.56',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1324,9 +1707,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.55.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.56.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.55.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.56.js?v=' . $abJsVer . '"></script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1337,7 +1720,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.55"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.56"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1597,7 +1980,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.55";';
+        echo 'var __AB_VER__="2.1.56";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2565,17 +2948,19 @@ window.abSyncCompat = function(){
     }
     public static function renderLoginFooter()
     {
-        if (!self::isLoginPage()) {
+        self::renderLoginScript(false);
+    }
+    public static function renderLoginScript($ignoreEnabled = false)
+    {
+        if (!$ignoreEnabled && !self::isLoginPage()) {
             return;
         }
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = self::pluginOptions($options);
         $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
-        if ($loginIsEnabled !== '1') {
+        if (!$ignoreEnabled && $loginIsEnabled !== '1') {
             return;
         }
-        $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = self::pluginOptions($options);
         $showSiteName = ((string) $pluginOptions->login_showSiteName !== '0');
         $showThemeToggle = ((string) $pluginOptions->login_showThemeToggle !== '0');
         $customJs = (string) $pluginOptions->login_customJs;
@@ -2583,18 +2968,34 @@ window.abSyncCompat = function(){
         $jsSiteTitle = self::jsString($siteTitle);
         $jsShowSiteName = $showSiteName ? 'true' : 'false';
         $jsShowToggle = $showThemeToggle ? 'true' : 'false';
+        $loginUrl = (string) $options->loginUrl;
+        $jsForgotUrl = self::jsString(
+            $loginUrl . (strpos($loginUrl, '?') === false ? '?' : '&') . 'ab-forgot=1'
+        );
+        $jsLoginUrl = self::jsString($loginUrl);
+        $jsForgotApiUrl = self::jsString((string) Typecho_Common::url(
+            'AdminBeautify/assets/pages/forgot/forgot-password.php',
+            $options->pluginUrl
+        ) . '?format=json');
+        $jsTurnstileLogin = self::jsString(self::turnstileSiteKey('login'));
+        $jsTurnstileRegister = self::jsString(self::turnstileSiteKey('register'));
+        $jsTurnstileForgot = self::jsString(self::turnstileSiteKey('forgot'));
         include dirname(__FILE__) . '/assets/pages/login/script.php';
+        include dirname(__FILE__) . '/assets/pages/forgot/client.php';
+        include dirname(__FILE__) . '/assets/pages/forgot/turnstile.php';
     }
     private static function outputLoginHeaderCss()
+    {
+        self::renderLoginStyle(false);
+    }
+    public static function renderLoginStyle($ignoreEnabled = false)
     {
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = self::pluginOptions($options);
         $loginIsEnabled = isset($pluginOptions->login_isEnabled) ? (string)$pluginOptions->login_isEnabled : '1';
-        if ($loginIsEnabled !== '1') {
+        if (!$ignoreEnabled && $loginIsEnabled !== '1') {
             return;
         }
-        $options = Typecho_Widget::widget('Widget_Options');
-        $pluginOptions = self::pluginOptions($options);
         $themeMode = isset($pluginOptions->login_themeMode) ? (string) $pluginOptions->login_themeMode : 'auto';
         if (!in_array($themeMode, array('auto', 'light', 'dark'), true)) {
             $themeMode = 'auto';
@@ -2631,6 +3032,7 @@ window.abSyncCompat = function(){
         $bgCss = $bgImage !== '' ? "url(" . htmlspecialchars($bgImage, ENT_QUOTES, 'UTF-8') . ")" : "none";
         $jsThemeMode = self::jsString($themeMode);
         include dirname(__FILE__) . '/assets/pages/login/style.php';
+        include dirname(__FILE__) . '/assets/pages/forgot/style.php';
     }
     private static function renderLoginPreview()
     {

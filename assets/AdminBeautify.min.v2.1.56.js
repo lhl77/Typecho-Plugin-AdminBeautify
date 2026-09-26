@@ -17,6 +17,9 @@
         _hideTimer: null,
         _loadedScripts: {}, // track loaded external scripts
 
+        /* 微信赞赏码图片地址：页脚「捐助作者」与概要页「更多」卡片共用，只在这里维护一份 */
+        DONATE_QR_URL: 'https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg',
+
         // ── 页面级请求登记表 ──────────────────────────────────────────────
         // 统计 / 图表 / Umami 代理等"属于当前页面"的请求。页面切换时立即中断：
         // 这些请求（尤其 Umami 需要服务端出网）会长期占用浏览器同域连接与
@@ -350,44 +353,77 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.55';
+            var ver = cfg.pluginVersion || '2.1.56';
+            var esc = function (s) { return AdminBeautify._escHtml(String(s == null ? '' : s)); };
+
+            /* GitHub 标记：内联 SVG（图标字体里没有品牌图标），fill 跟随 currentColor */
+            var ghIcon =
+                '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+                '<path fill="currentColor" d="M12 .5C5.73.5.5 5.73.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2.17c-3.2.7-3.88-1.54-3.88-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.71 1.26 3.37.96.1-.75.4-1.26.73-1.55-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.1 11.1 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.66.41.35.78 1.05.78 2.12v3.14c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"/>' +
+                '</svg>';
 
             var themeInfo = document.createElement('div');
             themeInfo.className = 'ab-footer-theme';
-            themeInfo.style.marginLeft = '0px';
-            themeInfo.style.marginRight = '0px';
             themeInfo.innerHTML =
-                '<div class="ab-footer-inner">' +
+                '<div class="ab-footer-pill">' +
                   '<div class="ab-footer-brand">' +
-                    '<div class="ab-footer-logo">' +
-                      '<span class="material-icons-round">admin_panel_settings</span>' +
-                      '<span class="ab-footer-brand-name">AB-Admin</span>' +
-                    '</div>' +
-                    '<p class="ab-footer-desc">一款为 Typecho 打造的后台美化增强插件，基于 Material Design 3 风格设计，让后台更美观、更好用。</p>' +
-                    '<span class="ab-footer-ver">v' + AdminBeautify._escHtml(ver) + (tcVerStr ? ' \u00b7 Typecho ' + AdminBeautify._escHtml(tcVerStr) : '') + '</span>' +
+                    '<span class="material-icons-round ab-footer-badge" aria-hidden="true">admin_panel_settings</span>' +
+                    '<span class="ab-footer-brand-text">' +
+                      '<span class="ab-footer-name">AB-Admin</span>' +
+                      '<span class="ab-footer-vers">' +
+                        '<span class="ab-footer-chip" title="AB-Admin 版本">v' + esc(ver) + '</span>' +
+                        (tcVerStr ? '<span class="ab-footer-chip" title="Typecho 版本">Typecho ' + esc(tcVerStr) + '</span>' : '') +
+                      '</span>' +
+                    '</span>' +
                   '</div>' +
-                  '<div class="ab-footer-cols">' +
-                    '<div class="ab-footer-col">' +
-                      '<div class="ab-footer-col-title">\u9879\u76ee</div>' +
-                      '<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener noreferrer">GitHub</a>' +
-                      '<a href="https://see.lhl.one/Typecho-AB-Admin" target="_blank" rel="noopener noreferrer">\u6587\u6863</a>' +
-                      '<a href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases" target="_blank" rel="noopener noreferrer">\u66f4\u65b0\u65e5\u5fd7</a>' +
-                    '</div>' +
-                    '<div class="ab-footer-col">' +
-                      '<div class="ab-footer-col-title">建言献策</div>' +
-                      '<a href="https://blog.lhl.one/artical/977.html" target="_blank" rel="noopener noreferrer">\u535a\u5ba2\u7559\u8a00</a>' +
-                      '<a href="https://t.me/+S_rnDEUlSPPRzvW_" target="_blank" rel="noopener noreferrer">Telegram \u7fa4</a>' +
-                      '<a href="https://qm.qq.com/q/OOzG20idi2" target="_blank" rel="noopener noreferrer">QQ \u7fa4</a>' +
-                    '</div>' +
-                    '<div class="ab-footer-col">' +
-                      '<div class="ab-footer-col-title">关于作者</div>' +
-                      '<a href="https://blog.lhl.one" target="_blank" rel="noopener noreferrer">\u535a\u5ba2</a>' +
-                      '<a href="options-plugin.php?config=AdminBeautify&amp;to=donateModal">\u6350\u52a9\u4f5c\u8005</a>' +
-                    '</div>' +
+                  '<span class="ab-footer-divider" aria-hidden="true"></span>' +
+                  '<div class="ab-footer-actions">' +
+                    '<a class="ab-footer-link" href="https://github.com/lhl77/Typecho-Plugin-AdminBeautify" target="_blank" rel="noopener noreferrer" title="AB-Admin GitHub 仓库">' +
+                      ghIcon + '<span>GitHub</span>' +
+                    '</a>' +
+                    '<a class="ab-footer-link" href="https://see.lhl.one/Typecho-AB-Admin" target="_blank" rel="noopener noreferrer" title="AB-Admin 使用文档">' +
+                      '<span class="material-icons-round">menu_book</span><span>文档</span>' +
+                    '</a>' +
+                    '<a class="ab-footer-donate" href="options-plugin.php?config=AdminBeautify&amp;to=donateModal" title="捐助作者">' +
+                      '<span class="material-icons-round">volunteer_activism</span><span>捐助作者</span>' +
+                    '</a>' +
                   '</div>' +
                 '</div>';
 
+            /* 捐助按钮：优先就地弹出 MD3 赞赏码弹窗（不打断当前页面）；
+               JS 弹窗不可用时保留 href，退回「跳设置页 + 打开捐助弹窗」的原路径。 */
+            var donateBtn = themeInfo.querySelector('.ab-footer-donate');
+            if (donateBtn) {
+                donateBtn.addEventListener('click', function (e) {
+                    if (AdminBeautify._showDonateDialog()) e.preventDefault();
+                });
+            }
+
             foot.parentNode.insertBefore(themeInfo, foot.nextSibling);
+        },
+
+        /**
+         * 赞赏码弹窗（页脚「捐助作者」与概要页「更多」卡片共用）
+         * @returns {boolean} 是否成功弹出；false 表示调用方应退回普通跳转
+         */
+        _showDonateDialog: function () {
+            var ui = AdminBeautify.ui;
+            if (!ui || typeof ui.dialog !== 'function') return false;
+
+            var img = document.createElement('img');
+            img.src = AdminBeautify.DONATE_QR_URL;
+            img.alt = '微信赞赏码';
+            /* 复用「更多」卡片已有的弹窗图片样式（宽度自适应、圆角） */
+            img.className = 'ab-more-qr-img';
+
+            ui.dialog({
+                title: '微信赞赏码',
+                icon: 'volunteer_activism',
+                text: '请在备注中填写：[捐赠 AdminBeautify] + [您的昵称] + [GitHub 或 个人博客]，作者会定期把您加入鸣谢列表。',
+                body: img,
+                actions: [{ text: '知道了', primary: true }]
+            });
+            return true;
         },
 
         /**
@@ -905,7 +941,7 @@
                         '</div>' +
                     '</div>' +
                     '<div class="ab-user-card-body">' +
-                        (mail ? '<a class="ab-user-mail" href="mailto:' + AdminBeautify._escHtml(mail) + '"><span class="material-icons-round">mail</span>' + AdminBeautify._escHtml(mail) + '</a>' : '<span class="ab-user-mail ab-user-mail-empty"><span class="material-icons-round">mail_off</span>暂无邮箱</span>') +
+                        (mail ? '<a class="ab-user-mail" href="mailto:' + AdminBeautify._escHtml(mail) + '"><span class="material-icons-round">mail</span>' + AdminBeautify._escHtml(mail) + '</a>' : '<span class="ab-user-mail ab-user-mail-empty"><span class="material-icons-round">mail_outline</span>暂无邮箱</span>') +
                     '</div>' +
                     '<div class="ab-user-card-footer">' +
                         '<a class="ab-user-posts-btn" href="' + AdminBeautify._escHtml(postsHref) + '" title="查看文章"><span class="material-icons-round">article</span>' + AdminBeautify._escHtml(postsNum) + ' 篇</a>' +
@@ -4130,7 +4166,7 @@
                 }
                 if (host.querySelector('[data-ab-card="more"]')) return;
 
-                var QR_IMG    = 'https://i.see.you/2026/03/09/eS6p/4151a74124898d38a4e53fa8c7dcf3be.jpg';
+                var QR_IMG    = AdminBeautify.DONATE_QR_URL;
                 var DOC_URL   = 'https://blog.lhl.one/artical/977.html';
                 var STORE_URL = 'https://ab-store.lhl.one/';
                 var QQ_URL    = 'https://qm.qq.com/q/OOzG20idi2';
@@ -9077,7 +9113,7 @@ var AB_TS = (function(){
                   '</div>',
                   '<div id="ab-ts-list-view">',
                     '<div id="ab-ts-loading">',
-                      '<span class="material-icons-round" style="animation:ab-ts-spin 1s linear infinite;font-size:28px">progress_activity</span>',
+                      '<span class="material-icons-round" style="animation:ab-ts-spin 1s linear infinite;font-size:28px">autorenew</span>',
                       '<br>正在加载外观仓库...',
                     '</div>',
                   '</div>',
@@ -9145,7 +9181,7 @@ var AB_TS = (function(){
             allThemes = [];
             shuffledThemes = [];
             loaded = false;
-            listView.innerHTML = '<div id="ab-ts-loading"><span class="material-icons-round" style="animation:ab-ts-spin 1s linear infinite;font-size:28px">progress_activity</span><br>正在加载外观仓库...</div>';
+            listView.innerHTML = '<div id="ab-ts-loading"><span class="material-icons-round" style="animation:ab-ts-spin 1s linear infinite;font-size:28px">autorenew</span><br>正在加载外观仓库...</div>';
             loadList();
             setTimeout(function(){ btn.classList.remove('ab-ts-refreshing'); }, 1500);
         });

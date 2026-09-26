@@ -8,6 +8,7 @@
  * @var string $jsShowSiteName  是否显示站点名称，JS 布尔字符串 true / false
  * @var string $jsShowToggle    是否显示主题切换按钮，JS 布尔字符串 true / false
  * @var string $jsSiteTitle     站点标题的 JS 安全字符串（已转义）
+ * @var string $jsForgotUrl     「忘记密码」页面的 JS 安全 URL
  * @var string $customJs        自定义 JS 原始字符串
  */
 ?>
@@ -17,8 +18,104 @@
     function qs(sel, root){ return (root||document).querySelector(sel); }
     function qsa(sel, root){ return Array.prototype.slice.call((root||document).querySelectorAll(sel)); }
 
+    /* ================================================================
+       Typecho 的消息提示（.message.popup，来自 admin/common-js.php）
+       接管它的进场 / 退场动画，换成 Material Design 3 的两条标准曲线：
+
+         进场  emphasized decelerate  .3s cubic-bezier(.05,.7,.1,1)
+               淡入 + 上浮 12px + 0.92 → 1 放大
+         退场  emphasized accelerate  .2s cubic-bezier(.3,0,.8,.15)
+               淡出 + 再上浮 10px + 1 → 0.94 微缩
+
+       原生做法是 slideDown（动画高度）+ effect('highlight') + 5 秒后 fadeOut：
+       高度动画套在一行字上会"跳"一下，highlight 又被我们的 !important 背景盖掉，
+       等于闪了个寂寞，所以整条队列都停掉，由这里接管。
+       顺带加上「悬停 / 聚焦时暂停倒计时」（WCAG 2.2.1 可调时限）。
+
+       ⚠️ 放在最前面：后面 form 找不到时会 return，不能让它把这段跳过。
+       ================================================================ */
+    (function noticeMotion(){
+      var DWELL = 4500;   /* 停留时长（ms） */
+
+      function ready(cb){
+        /* 用 jQuery 注册 → 一定排在 common-js.php 那个 ready 回调之后，
+           此时 .message.popup 已经由 Typecho 建好并塞进了它的动画队列 */
+        if (window.jQuery) { jQuery(document).ready(cb); }
+        else if (document.readyState !== 'loading') { cb(); }
+        else { document.addEventListener('DOMContentLoaded', cb); }
+      }
+
+      ready(function(){
+        var old = qs('.message.popup');
+        if (!old || old.__abMotion) return;
+
+        /* 1) 直接换一个全新的同构节点 —— 这是关键：
+              Typecho 把 slideDown → effect('highlight') → delay(5000) → fadeOut(remove)
+              挂在**原节点**的 jQuery 队列上。单纯 stop() 不行：
+              stop(true, true) 会让 slideDown 的回调立刻执行，而那个回调又会把
+              highlight / delay / fadeOut 重新排进队列，几秒后照样把提示框删掉。
+              换成克隆节点，等于连带那条队列一起丢掉。
+              顺手清掉 highlight/fadeOut 可能已写上的内联样式。 */
+        var el = old.cloneNode(true);
+        ['background-color', 'color', 'opacity', 'height', 'overflow', 'filter'].forEach(function(p){
+          el.style.removeProperty(p);
+        });
+        el.style.display = 'block';
+        el.__abMotion = true;
+        old.parentNode.replaceChild(el, old);
+
+        /* 2) 加类触发进场动画（先移除再强制重排，保证每次都从头播） */
+        el.classList.remove('ab-toast-in', 'ab-toast-out');
+        void el.offsetWidth;
+        el.classList.add('ab-toast-in');
+
+        var timer = null, left = DWELL, startedAt = 0;
+
+        function drop(){
+          if (el.parentNode) { el.parentNode.removeChild(el); }
+        }
+
+        function dismiss(){
+          timer = null;
+          el.classList.remove('ab-toast-in');
+          el.classList.add('ab-toast-out');
+          el.addEventListener('animationend', drop, { once: true });
+          setTimeout(drop, 600);   /* 兜底：动画被系统禁用/被打断时也要移除 */
+        }
+
+        function schedule(ms){
+          startedAt = Date.now();
+          timer = setTimeout(dismiss, ms);
+        }
+
+        /* 悬停 / 聚焦 → 暂停倒计时；离开 → 接着走剩下的时间（至少留 0.9s） */
+        function pause(){
+          if (!timer) return;
+          clearTimeout(timer);
+          timer = null;
+          left = Math.max(900, left - (Date.now() - startedAt));
+        }
+
+        function resume(){
+          if (timer) return;
+          schedule(left);
+        }
+
+        el.addEventListener('mouseenter', pause);
+        el.addEventListener('mouseleave', resume);
+        el.addEventListener('focusin', pause);
+        el.addEventListener('focusout', resume);
+
+        schedule(DWELL);
+      });
+    })();
+
     var form = qs('form[action*="login"]') || qs('form') || qs('.typecho-login form') || qs('.typecho-login');
     if (!form) return;
+
+    /* 独立页面（如「忘记密码」）可用 window.__AB_PAGE_TITLE__ 覆盖副标题与徽章图标，
+       这样同一个脚本既能装配登录/注册页，也能装配同风格的子页面 */
+    var pageTitle = (typeof window.__AB_PAGE_TITLE__ === 'string') ? window.__AB_PAGE_TITLE__ : '';
 
     var wrap = document.createElement('div');
     wrap.className = 'lb-wrap';
@@ -53,14 +150,18 @@
 
     var sub = document.createElement('div');
     sub.className = 'sub';
-    sub.textContent = isRegister ? '注册' : '登录';
+    sub.textContent = pageTitle || (isRegister ? '注册' : '登录');
     titleWrap.appendChild(sub);
 
     // 顶部图标徽章（内联 SVG，不依赖图标字体）
     var badge = document.createElement('div');
     badge.className = 'lb-badge';
     badge.setAttribute('aria-hidden', 'true');
-    badge.innerHTML = isRegister
+    badge.innerHTML = pageTitle
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'
+          + '<circle cx="8.6" cy="8.4" r="3.6"/>'
+          + '<path d="M11.2 11 20 19.8"/><path d="M17.4 17.2l1.9 1.9"/><path d="M15 14.8l1.9 1.9"/></svg>'
+      : isRegister
       ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'
           + '<circle cx="10" cy="8" r="3.7"/><path d="M3.6 20c.5-3.6 3.2-5.6 6.4-5.6 1 0 1.9.2 2.7.5"/>'
           + '<path d="M18.4 8.4v5M15.9 10.9h5"/></svg>'
@@ -121,6 +222,10 @@
         }
       }
 
+      /* 独立页面可用 data-ab-label 指定浮动标签文案（优先级最高） */
+      var customLabel = input.getAttribute('data-ab-label');
+      if (customLabel) label.textContent = customLabel;
+
       var parent = input.parentNode;
       parent.insertBefore(field, input);
       field.appendChild(label);
@@ -175,7 +280,10 @@
       }
     }
 
-    var submit = qs('input[type="submit"], button[type="submit"]', form);
+    /* data-ab-raw 的元素表示「外观与提交都由页面自己控制」，不参与主按钮改造 */
+    var submit = qsa('input[type="submit"], button[type="submit"]', form).filter(function(b){
+      return !b.hasAttribute('data-ab-raw');
+    })[0];
     if (submit) {
       var submitWrap = document.createElement('div');
       submitWrap.className = 'lb-submit';
@@ -282,9 +390,46 @@
       moreLink.classList.add('lb-more-link');
       var homeIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>';
       var regIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>';
+      var keyIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12.65 10A6 6 0 1 0 7 18a6 6 0 0 0 5.65-4H17v4h4v-4h2v-4H12.65zM7 14a2 2 0 1 1 0-4 2 2 0 0 1 0 4z"/></svg>';
+      var loginIconSvg = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M11 7 9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>';
+
+      /* 登录页追加「忘记密码」入口（注册页、以及已经身处该流程的页面上不追加）。
+         判断「已经在忘记密码流程里」优先看 __AB_PAGE_TITLE__ 与 ab-forgot 标记：
+         那才是这类子页面的显式标记，比匹配 URL 里的文件名可靠。 */
+      var forgotUrl = <?php echo $jsForgotUrl; ?>;
+      var onForgotPage = !!pageTitle
+                      || /[?&]ab-forgot=1(&|$)/.test(location.search)
+                      || location.href.indexOf('forgot-password') !== -1;
+      if (!isRegister && !onForgotPage && forgotUrl
+          && !moreLink.querySelector('a[href*="forgot-password"]')) {
+        var forgotA = document.createElement('a');
+        forgotA.href = forgotUrl;
+        forgotA.textContent = '忘记密码';
+        moreLink.appendChild(forgotA);
+      }
+
+      /* 忘记密码流程里，底部的「返回首页」要改成「返回登录页面」：
+         用户是从登录页点进来的，回去的落点应该是登录表单而不是站点首页。 */
+      var loginUrl = <?php echo $jsLoginUrl; ?>;
       moreLink.querySelectorAll('a').forEach(function(a) {
         var txt = a.textContent.trim();
-        var icon = (txt.indexOf('\u9996\u9875') !== -1 || txt.indexOf('\u8fd4\u56de') !== -1) ? homeIconSvg : regIconSvg;
+
+        if (onForgotPage && loginUrl && txt.indexOf('\u9996\u9875') !== -1) {
+          a.setAttribute('href', loginUrl);
+          txt = '返回登录页面';
+          a.textContent = txt;
+        }
+
+        var icon;
+        if (onForgotPage && txt.indexOf('\u767b\u5f55') !== -1) {
+          icon = loginIconSvg;
+        } else if (txt.indexOf('\u9996\u9875') !== -1 || txt.indexOf('\u8fd4\u56de') !== -1) {
+          icon = homeIconSvg;
+        } else if (txt.indexOf('\u5bc6\u7801') !== -1) {
+          icon = keyIconSvg;
+        } else {
+          icon = regIconSvg;
+        }
         a.innerHTML = icon + '<span>' + txt + '</span>';
       });
       // 清除原有分隔符文本节点（" • " 等）
