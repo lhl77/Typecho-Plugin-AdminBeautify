@@ -308,7 +308,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","navPosition","pluginCardView","postListStyle","pageListStyle"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","navPosition","pluginCardView","postListStyle","pageListStyle","commentListStyle","categoryListStyle"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -350,6 +350,8 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-plugin">插件管理页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-posts">文章页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-pages">独立页面页</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-comments">评论页</button>\
+                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-categories">分类页</button>\
                 </div>';
             adminBody.appendChild(quickNav);
 
@@ -407,6 +409,28 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     abGroupLabel.className="ab-group-label";
                     abGroupLabel.id="ab-admin-group-pages";
                     abGroupLabel.textContent="独立页面页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"评论页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="commentListStyle"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-comments";
+                    abGroupLabel.textContent="评论页";
+                    adminBody.appendChild(abGroupLabel);
+                }
+                // 在"分类页"分组前插入分割线 + 分组标签
+                if(adminFields[i]==="categoryListStyle"){
+                    var abDivider=document.createElement("div");
+                    abDivider.className="ab-group-divider";
+                    adminBody.appendChild(abDivider);
+                    var abGroupLabel=document.createElement("div");
+                    abGroupLabel.className="ab-group-label";
+                    abGroupLabel.id="ab-admin-group-categories";
+                    abGroupLabel.textContent="分类页";
                     adminBody.appendChild(abGroupLabel);
                 }
                 // 在"概要页"分组前插入分割线 + 分组标签

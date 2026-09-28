@@ -420,14 +420,22 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    color: #fff;
-    background: linear-gradient(135deg, var(--md-primary, #6750a4), #8a6bc2);
-    box-shadow: 0 10px 28px rgba(103,80,164,.35);
+    /* 全部跟随插件主题色：
+       - 文字色用 --md-on-primary（暗色主题下主样式表已把它重映射到 --md-dark-on-primary）
+       - 渐变第二档由主色与 on-primary 混出（原来写死 #8a6bc2 —— Material 默认紫的浅色版，
+         换成绿 / 蓝 / 橙主题后渐变尾部仍是紫的）
+       - 阴影也是写死的紫 rgba(103,80,164,…)，改用主色混透明 */
+    color: var(--md-on-primary, #fff);
+    background: linear-gradient(135deg, var(--md-primary, #6750a4), color-mix(in srgb, var(--md-primary, #6750a4) 78%, var(--md-on-primary, #fff)));
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--md-primary, #6750a4) 35%, transparent);
     transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, width .24s cubic-bezier(.2,0,.2,1), border-radius .24s cubic-bezier(.2,0,.2,1);
 }
-.ab-config-save-fab:hover {
+/* ⚠️ hover 抬起只给「支持悬停 + 指针精确 + 非触摸」的设备（ab-hover-capable 由
+   config.script.php 的 syncHoverCapability() 按 matchMedia + maxTouchPoints 维护）。
+   原来这条写在全局：手机上点一下会让 FAB 抬起 2px 并放大阴影，看起来像误触。 */
+.ab-hover-capable .ab-config-save-fab:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 30px rgba(103,80,164,.42);
+    box-shadow: 0 14px 30px color-mix(in srgb, var(--md-primary, #6750a4) 42%, transparent);
 }
 .ab-config-save-fab .material-icons-round {
     font-size: 24px;
@@ -469,6 +477,22 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         width: 54px;
         height: 54px;
         padding: 0;
+    }
+    /* 移动端彻底关掉 hover / focus 动效：触摸设备上 hover 会「粘住」（点完手指移开
+       仍保持抬起 + 放大阴影，看起来像误触）。
+       ⚠️ 必须连 .ab-hover-capable 那两条一起写：上面那条全局规则的选择器是
+          `.ab-hover-capable .ab-config-save-fab:hover`（0,3,0），
+          只写 `.ab-config-save-fab:hover`（0,2,0）压不住它。
+          这里两组同优先级、靠「源码顺序在后」取胜（本块在 hover 块之后）。
+       尺寸也要一并复位：hover 块会把 FAB 拉成长胶囊（146px）。 */
+    .ab-config-save-fab:hover,
+    .ab-config-save-fab:focus-visible,
+    .ab-hover-capable .ab-config-save-fab:hover,
+    .ab-hover-capable .ab-config-save-fab:focus-visible {
+        transform: none;
+        width: 54px;
+        border-radius: 50%;
+        box-shadow: 0 10px 28px color-mix(in srgb, var(--md-primary, #6750a4) 35%, transparent);
     }
     .ab-config-save-fab-label {
         display: none;
@@ -598,7 +622,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     background: rgba(28,27,31,.94) !important;
 }
 [data-theme="dark"] .ab-config-save-fab {
-    box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 1px rgba(208,188,255,.12) inset;
+    /* 暗色下底色 / 文字色已由主样式表重映射的 --md-primary / --md-on-primary 自动跟随；
+       这里只保留一层深投影做抬升，内描边也改用主色（原来是写死的紫 rgba(208,188,255,.12)） */
+    box-shadow: 0 12px 30px rgba(0,0,0,.5), 0 0 0 1px color-mix(in srgb, var(--md-primary, #d0bcff) 18%, transparent) inset;
 }
 [data-theme="dark"] .ab-admin-chip {
     background: rgba(208,188,255,.18) !important;
@@ -635,7 +661,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.57.css 里的
+   注意：AdminBeautify.v2.1.58.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }

@@ -287,9 +287,13 @@
             this.enhanceOptions();    // MD3 options pages
             this.enhanceComments();   // MD3 comment management page
             this.enhancePosts();      // MD3 post/page management page
+            this.enhanceCategories(); // MD3 category management page (卡片模式下的操作钮)
+            this.initDragFeedback();  // 列表拖拽排序的反馈动画（独立页面 / 分类）
             this.enhanceUsers();      // MD3 user management page
             this.enhanceMedias();     // MD3 media management page
             this.enhanceMediaEdit();  // MD3 media detail page (delete button)
+            // 六个页面的卡片操作钮统一涟漪 —— 必须在上面这些卡片 DOM 生成完之后
+            this.bindCardButtonRipple();
             this.enhanceTags();       // MD3 tags management page
             this.initTabsFab();       // Collapse tabs to FAB when wrapping
             this.initEditorToolbar(); // MD3 pill toolbar for write-post/write-page
@@ -353,7 +357,7 @@
             }
 
             var cfg = window.__AB_CONFIG__ || {};
-            var ver = cfg.pluginVersion || '2.1.57';
+            var ver = cfg.pluginVersion || '2.1.58';
             var esc = function (s) { return AdminBeautify._escHtml(String(s == null ? '' : s)); };
 
             /* GitHub 标记：内联 SVG（图标字体里没有品牌图标），fill 跟随 currentColor */
@@ -596,31 +600,45 @@
          * MD3 涟漪动画效果
          */
         createRipple: function (event, element) {
-            var existingRipple = element.querySelector('.md3-ripple');
-            if (existingRipple) existingRipple.remove();
+            if (!element || !event) return;
+            /* 系统开了「减少动态效果」就整个跳过（CSS 里那层 :active 状态层不受影响） */
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            var old = element.querySelector('.md3-ripple');
+            if (old) old.remove();
 
             var rect = element.getBoundingClientRect();
-            var ripple = document.createElement('span');
-            var size = Math.max(rect.width, rect.height);
-            var x = event.clientX - rect.left - size / 2;
-            var y = event.clientY - rect.top - size / 2;
+            var x = event.clientX - rect.left;
+            var y = event.clientY - rect.top;
+            /* ⚠️ 半径要取「点击点到最远那个角」的距离。
+               原来写的是 max(width, height)：在 32px 的圆形图标钮上，
+               涟漪只、刚好填满按钮、根本铺不开（再叠上关键帧缺失，等于完全看不见）。 */
+            var r = Math.max(
+                Math.hypot(x, y),
+                Math.hypot(rect.width - x, y),
+                Math.hypot(x, rect.height - y),
+                Math.hypot(rect.width - x, rect.height - y)
+            ) || Math.max(rect.width, rect.height);
 
+            var ripple = document.createElement('span');
             ripple.className = 'md3-ripple';
             ripple.style.cssText =
                 'position:absolute;border-radius:50%;pointer-events:none;' +
-                'width:' + size + 'px;height:' + size + 'px;' +
-                'left:' + x + 'px;top:' + y + 'px;' +
-                'background:currentColor;opacity:0.12;' +
-                'transform:scale(0);animation:md3Ripple 0.8s cubic-bezier(0.2,0,0,1) forwards;' +
+                'width:' + (r * 2) + 'px;height:' + (r * 2) + 'px;' +
+                'left:' + (x - r) + 'px;top:' + (y - r) + 'px;' +
+                'background:currentColor;opacity:0;transform:scale(0);' +
+                'animation:md3Ripple .42s cubic-bezier(.2,0,0,1) forwards;' +
                 'z-index:1;';
 
-            element.style.position = 'relative';
+            if (getComputedStyle(element).position === 'static') element.style.position = 'relative';
             element.style.overflow = 'hidden';
             element.appendChild(ripple);
 
-            setTimeout(function () {
-                if (ripple.parentNode) ripple.remove();
-            }, 600);
+            /* 动画放完再移除。原来写死 600ms 就删，而动画是 800ms ——
+               涟漪会在扩散到一半时被硬切掉（那种"嗝一下"的观感）*/ 
+            var done = function () { if (ripple.parentNode) ripple.remove(); };
+            ripple.addEventListener('animationend', done);
+            setTimeout(done, 800);
         },
 
         /**
@@ -727,19 +745,27 @@
                 });
 
                 // 将 chip 的纯文本节点包裹进 <span class="ab-chip-text">，
-                // 以便在窄屏下通过 CSS 隐藏文字、仅保留图标
+                // 操作钮现在全程只显示图标（CSS 隐藏文字），文案同时挂到
+                // title / aria-label 上 —— 悬停可见、读屏可读
                 var allChips = actionBar.querySelectorAll('a, span.weak');
                 Array.prototype.forEach.call(allChips, function (chip) {
-                    if (chip.querySelector('.ab-chip-text')) return; // 幂等
-                    var nodes = Array.prototype.slice.call(chip.childNodes);
-                    nodes.forEach(function (n) {
-                        if (n.nodeType === 3 && n.textContent.trim()) {
-                            var labelSpan = document.createElement('span');
-                            labelSpan.className = 'ab-chip-text';
-                            labelSpan.textContent = n.textContent;
-                            chip.replaceChild(labelSpan, n);
-                        }
-                    });
+                    if (!chip.querySelector('.ab-chip-text')) {   // 幂等
+                        var nodes = Array.prototype.slice.call(chip.childNodes);
+                        nodes.forEach(function (n) {
+                            if (n.nodeType === 3 && n.textContent.trim()) {
+                                var labelSpan = document.createElement('span');
+                                labelSpan.className = 'ab-chip-text';
+                                labelSpan.textContent = n.textContent;
+                                chip.replaceChild(labelSpan, n);
+                            }
+                        });
+                    }
+                    var label = chip.querySelector('.ab-chip-text');
+                    var labelText = label ? (label.textContent || '').trim() : '';
+                    if (labelText) {
+                        if (!chip.getAttribute('title')) chip.setAttribute('title', labelText);
+                        if (!chip.getAttribute('aria-label')) chip.setAttribute('aria-label', labelText);
+                    }
                 });
             });
 
@@ -749,6 +775,18 @@
             rows.forEach(function (tr) {
                 if (tr.classList.contains('ab-comment-enhanced')) return;
                 tr.classList.add('ab-comment-enhanced');
+
+                // ── 作者（访客主页）链接改成新标签页打开 ──
+                //    邮箱链接保留原行为（mailto 开新页没意义）
+                Array.prototype.forEach.call(
+                    tr.querySelectorAll('.comment-meta a'),
+                    function (a) {
+                        var href = a.getAttribute('href') || '';
+                        if (href.indexOf('mailto:') === 0) return;
+                        a.setAttribute('target', '_blank');
+                        a.setAttribute('rel', 'noopener noreferrer nofollow');
+                    }
+                );
 
                 // ── 状态色条 ──
                 var actionBar = tr.querySelector('.comment-action');
@@ -765,6 +803,106 @@
                     tr.classList.add('ab-comment-spam');
                 }
             });
+
+            /* ── 「编辑」/「回复」走弹窗（带窗口动画）───────────────────────
+               ⚠️⚠️ 绝不能 GET .operate-edit 的 rel：Typecho 1.3 的 action() 里
+                 do=edit&coid → editComment()（**保存**接口，字段全取自 request），
+                 用 GET 打它等于提交了一份空表单 —— 会把评论的
+                 作者/邮箱/网址/内容当场清空写库（实测：打开一次编辑弹窗评论就没了）。
+                 只读接口是 do=get&coid → getComment()。
+               评论数据本来就在行上：核心模板把 author/mail/url/ip/type/text
+                 串成 tr[data-comment] 的 JSON（核心自己的行内编辑表单也是读它），
+                 所以优先读属性，读不到才退到 do=get（只读，安全）。
+               保存依旧 POST 同一个 rel（do=edit&coid，自带 security token）。 */
+            function abEsc(s) {
+                return String(s == null ? '' : s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            }
+            function abVal(id) {
+                var el = document.getElementById(id);
+                return el ? el.value : '';
+            }
+            function abSaveComment(rel, body) {
+                fetch(rel, {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: body.toString()
+                }).then(function (r) { return r.json(); }).then(function (j) {
+                    if (j && j.success) { location.reload(); return; }
+                    AdminBeautify.alert((j && j.message) || '保存失败，请重试');
+                }).catch(function () { AdminBeautify.alert('保存失败，请重试'); });
+            }
+            /* 读取评论数据：优先 tr[data-comment]（核心模板串好的 JSON，只读），
+               读不到才退到 do=get（只读接口）。**绝不 GET rel**（那是保存接口）。 */
+            function abReadComment(a, cb) {
+                var row = a.closest ? a.closest('tr') : null;
+                var raw = row ? row.getAttribute('data-comment') : '';
+                if (raw) {
+                    try { cb(JSON.parse(raw)); return; } catch (err) { /* 落到兜底 */ }
+                }
+                var getUrl = (a.getAttribute('rel') || '').replace(/([?&])do=edit/, '$1do=get');
+                fetch(getUrl, { credentials: 'same-origin' })
+                    .then(function (r) { return r.json(); })
+                    .then(function (j) {
+                        if (!j || !j.success || !j.comment) { AdminBeautify.alert('读取评论失败'); return; }
+                        cb(j.comment);
+                    })
+                    .catch(function () { AdminBeautify.alert('读取评论失败'); });
+            }
+
+            function openCommentDialog(a) {
+                if (!AdminBeautify.formDialog) return;
+                var rel = a.getAttribute('rel');
+                var isReply = a.classList.contains('operate-reply');
+                if (isReply) {
+                    AdminBeautify.formDialog({
+                        type: 'confirm', wide: true, title: '回复评论', confirmText: '发送',
+                        html: '<div class="ab-cd-field"><label>回复内容</label>' +
+                              '<textarea id="ab-cd-text" placeholder="写下你的回复…"></textarea></div>',
+                        onConfirm: function () {
+                            var body = new URLSearchParams();
+                            body.set('text', abVal('ab-cd-text'));
+                            if (!abVal('ab-cd-text').trim()) { return; }
+                            abSaveComment(rel, body);
+                        }
+                    });
+                    return;
+                }
+                abReadComment(a, function (c) {
+                    c = c || {};
+                    AdminBeautify.formDialog({
+                        type: 'confirm', wide: true, title: '编辑评论', confirmText: '保存',
+                        html:
+                            '<div class="ab-cd-row">' +
+                                '<div class="ab-cd-field"><label>作者</label><input type="text" id="ab-cd-author" value="' + abEsc(c.author) + '"></div>' +
+                                '<div class="ab-cd-field"><label>邮箱</label><input type="text" id="ab-cd-mail" value="' + abEsc(c.mail) + '"></div>' +
+                            '</div>' +
+                            '<div class="ab-cd-field"><label>网址</label><input type="text" id="ab-cd-url" value="' + abEsc(c.url) + '"></div>' +
+                            '<div class="ab-cd-field"><label>评论内容</label><textarea id="ab-cd-text">' + abEsc(c.text) + '</textarea></div>',
+                        onConfirm: function () {
+                            var body = new URLSearchParams();
+                            body.set('text', abVal('ab-cd-text'));
+                            body.set('author', abVal('ab-cd-author'));
+                            body.set('mail', abVal('ab-cd-mail'));
+                            body.set('url', abVal('ab-cd-url'));
+                            abSaveComment(rel, body);
+                        }
+                    });
+                });
+            }
+            if (!AdminBeautify.__abCommentDialogBound) {
+                AdminBeautify.__abCommentDialogBound = true;
+                document.addEventListener('click', function (e) {
+                    var a = e.target && e.target.closest
+                        ? e.target.closest('.comment-action a.operate-edit, .comment-action a.operate-reply') : null;
+                    if (!a) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openCommentDialog(a);
+                }, true);
+            }
         },
 
         /**
@@ -848,6 +986,143 @@
                     actionsSpan.appendChild(a);
                 });
                 titleTd.appendChild(actionsSpan);
+            });
+        },
+
+        /**
+         * 统一给各页卡片里的操作钮绑涟漪（mousedown 时从点击点向外扩散）。
+         * 按压动画本体是纯 CSS（:active 状态层 + 缩放），这里只是再叠一层涟漪；
+         * 评论卡原来自己绑过一次，靠 __abRipple 标记去重。
+         */
+        bindCardButtonRipple: function () {
+            var sel = 'html[data-ab-listcard] .ab-post-actions a, .ab-cat-btn, .comment-action > a, .ab-media-btn, .ab-user-btn';
+            var els = document.querySelectorAll(sel);
+            Array.prototype.forEach.call(els, function (el) {
+                if (el.__abRipple) return;
+                el.__abRipple = true;
+                el.addEventListener('mousedown', function (e) { AdminBeautify.createRipple(e, this); });
+            });
+        },
+
+        /**
+         * 拖拽排序的反馈动画（只有「独立页面」「分类」两个列表挂了 tableDnD）
+         * tableDnD 只给被拖的那一行加 .tDnD_whileDrag，开始拖之前没有任何提示、
+         * 其余卡片也不会让位。这里在「按下 + 真正移动超过 6px」后给 body 挂
+         * ab-dragging（CSS 据此把其余卡片淡到 55%），松手 / 离开窗口即摘。
+         * ⚠️ 监听器绑在 document 上，用 __abDragFeedbackBound 守一道
+         *    （Typecho 的 AJAX 翻页会把注入脚本再执行一遍，不守就会重复绑定）。
+         */
+        initDragFeedback: function () {
+            if (window.__abDragFeedbackBound) return;
+            window.__abDragFeedbackBound = true;
+
+            var SCOPE = 'form[name="manage_pages"] .typecho-list-table tbody > tr[id],' +
+                        'form[name="manage_categories"] .typecho-list-table tbody > tr[id]';
+            var sx = 0, sy = 0, armed = false, dragging = false;
+
+            function stop() {
+                armed = false;
+                if (dragging) {
+                    dragging = false;
+                    document.body.classList.remove('ab-dragging');
+                }
+            }
+
+            document.addEventListener('mousedown', function (e) {
+                if (e.button !== 0) return;
+                if (!e.target || !e.target.closest) return;
+                var tr = e.target.closest(SCOPE);
+                if (!tr) return;
+                // 点在链接 / 按钮 / 勾选框 / 输入框上不算拖拽
+                if (e.target.closest('a, button, input, select, textarea, label')) return;
+                armed = true;
+                sx = e.clientX;
+                sy = e.clientY;
+            }, true);
+
+            document.addEventListener('mousemove', function (e) {
+                if (!armed || dragging) return;
+                if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) < 6) return;
+                dragging = true;
+                document.body.classList.add('ab-dragging');
+            });
+
+            document.addEventListener('mouseup', stop, true);
+            document.addEventListener('mouseleave', stop);
+            window.addEventListener('blur', stop);
+        },
+
+        /**
+         * MD3 分类管理页增强（manage-categories.php 卡片模式）：
+         *  1. 「新增」子分类 → 加号图标钮；已有子分类（「N个分类」）→ 「进入子分类」箭头图标钮
+         *  2. 注入「编辑」图标钮（核心模板里没有，复用分类名链接的 category.php?mid=N）
+         *  3. 把名称格里的「浏览」搬过来，三个钮一起放在底部操作带右侧（编辑在浏览左侧）
+         *  4. 文案全部改挂 title / aria-label
+         * ⚠️ 只在卡片模式下动 DOM —— 列表模式多插按钮会挤坏表格；
+         *    行上有 tableDnD 拖拽排序，所以只在格子内部搬运、不动 tr 结构。
+         */
+        enhanceCategories: function () {
+            if (location.href.indexOf('manage-categories.php') === -1) return;
+            if (!document.documentElement.hasAttribute('data-ab-listcard')) return;
+            var table = document.querySelector('form[name="manage_categories"] table.typecho-list-table');
+            if (!table) return;
+
+            var rows = table.querySelectorAll('tbody > tr[id^="mid-"]');
+            Array.prototype.forEach.call(rows, function (tr) {
+                if (tr.classList.contains('ab-cat-enhanced')) return;
+                tr.classList.add('ab-cat-enhanced');
+
+                var kidsTd = tr.querySelector('td:nth-child(3)');
+                var nameTd = tr.querySelector('td:nth-child(2)');
+                if (!kidsTd || !nameTd) return;
+
+                // 名称格里有两个链接：分类名（→ 编辑页）和浏览（带 i-exlink）
+                var nameLink = null, viewLink = null;
+                Array.prototype.forEach.call(nameTd.querySelectorAll(':scope > a'), function (a) {
+                    if (a.querySelector('.i-exlink')) { if (!viewLink) viewLink = a; }
+                    else if (!nameLink) nameLink = a;
+                });
+
+                kidsTd.classList.add('ab-cat-actions');
+
+                function setIcon(el, name) {
+                    el.innerHTML = '';
+                    var s = document.createElement('span');
+                    s.className = 'material-icons-round';
+                    s.textContent = name;
+                    el.appendChild(s);
+                }
+
+                // ① 子分类：新增 → add 图标；已有子分类 → 进入箭头
+                var kidsLink = kidsTd.querySelector('a');
+                if (kidsLink) {
+                    var label = (kidsLink.textContent || '').replace(/\s+/g, ' ').trim();
+                    var isAdd = label.indexOf('新增') !== -1;
+                    setIcon(kidsLink, isAdd ? 'add' : 'arrow_forward');
+                    kidsLink.className = 'ab-cat-btn ab-cat-kids' + (isAdd ? ' ab-cat-add' : ' ab-cat-enter');
+                    kidsLink.setAttribute('title', isAdd ? '新增子分类' : ('进入子分类' + (label ? ' · ' + label : '')));
+                    kidsLink.setAttribute('aria-label', kidsLink.getAttribute('title'));
+                }
+
+                // ② 编辑：用分类名链接的地址（category.php?mid=N）
+                if (nameLink && nameLink.getAttribute('href')) {
+                    var edit = document.createElement('a');
+                    edit.className = 'ab-cat-btn ab-cat-edit';
+                    edit.setAttribute('href', nameLink.getAttribute('href'));
+                    edit.setAttribute('title', '编辑');
+                    edit.setAttribute('aria-label', '编辑');
+                    setIcon(edit, 'edit');
+                    kidsTd.appendChild(edit);
+                }
+
+                // ③ 浏览：从名称格搬过来，排在编辑右侧
+                if (viewLink) {
+                    setIcon(viewLink, 'open_in_new');
+                    viewLink.className = 'ab-cat-btn ab-cat-view';
+                    viewLink.setAttribute('title', '浏览');
+                    viewLink.setAttribute('aria-label', '浏览');
+                    kidsTd.appendChild(viewLink);
+                }
             });
         },
 
@@ -946,8 +1221,8 @@
                     '<div class="ab-user-card-footer">' +
                         '<a class="ab-user-posts-btn" href="' + AdminBeautify._escHtml(postsHref) + '" title="查看文章"><span class="material-icons-round">article</span>' + AdminBeautify._escHtml(postsNum) + ' 篇</a>' +
                         '<div class="ab-user-actions">' +
-                            '<a class="ab-user-btn ab-user-btn-edit" href="' + AdminBeautify._escHtml(userEditHref) + '"><span class="material-icons-round">edit</span>编辑</a>' +
-                            (userSiteHref ? '<a class="ab-user-btn ab-user-btn-view" href="' + AdminBeautify._escHtml(userSiteHref) + '" target="_blank"><span class="material-icons-round">open_in_new</span></a>' : '') +
+                            '<a class="ab-user-btn ab-user-btn-edit" href="' + AdminBeautify._escHtml(userEditHref) + '" title="编辑" aria-label="编辑"><span class="material-icons-round">edit</span></a>' +
+                            (userSiteHref ? '<a class="ab-user-btn ab-user-btn-view" href="' + AdminBeautify._escHtml(userSiteHref) + '" target="_blank" rel="noopener noreferrer" title="浏览" aria-label="浏览"><span class="material-icons-round">open_in_new</span></a>' : '') +
                         '</div>' +
                     '</div>';
 
@@ -2229,7 +2504,10 @@
                 var iconName = iconMap[opts.type] || 'info';
 
                 var inputHtml = '';
-                if (opts.type === 'prompt') {
+                if (opts.html !== undefined) {
+                    /* 自定义内容（如评论编辑 / 回复表单）：原样插进 #ab-dialog-content */
+                    inputHtml = '<div id="ab-dialog-content">' + opts.html + '</div>';
+                } else if (opts.type === 'prompt') {
                     inputHtml = '<div id="ab-dialog-input-wrap">' +
                         '<input id="ab-dialog-input" type="text" autocomplete="off" value="' +
                         (opts.defaultVal || '').replace(/"/g, '&quot;') + '"></div>';
@@ -2238,6 +2516,7 @@
                     ? '<button class="ab-dialog-btn ab-dialog-btn-cancel" id="ab-dialog-cancel">取消</button>'
                     : '';
 
+                box.classList.toggle('ab-dialog-wide', !!opts.wide);
                 box.innerHTML =
                     '<div id="ab-dialog-host"><span class="material-icons-round">language</span>' + location.hostname + '</div>' +
                     '<div id="ab-dialog-title"><span class="material-icons-round" style="font-size:22px;vertical-align:-4px;color:var(--md-primary,#6750a4);margin-right:6px">' +
@@ -2246,7 +2525,7 @@
                     inputHtml +
                     '<div id="ab-dialog-actions">' + cancelHtml +
                     '<button class="ab-dialog-btn ab-dialog-btn-confirm" id="ab-dialog-confirm">' +
-                    (opts.type === 'alert' ? '好的' : '确定') + '</button></div>';
+                    (opts.confirmText || (opts.type === 'alert' ? '好的' : '确定')) + '</button></div>';
 
                 overlay.classList.add('ab-dialog-open');
 
@@ -2308,7 +2587,10 @@
 
                 document.getElementById('ab-dialog-confirm').addEventListener('click', function () {
                     _close();
-                    if (opts.onConfirm) opts.onConfirm(inputEl ? inputEl.value : true);
+                    if (opts.onConfirm) {
+                        opts.onConfirm(inputEl ? inputEl.value
+                            : (opts.html !== undefined ? document.getElementById('ab-dialog-content') : true));
+                    }
                 });
                 var cancelBtn = document.getElementById('ab-dialog-cancel');
                 if (cancelBtn) {
@@ -2318,11 +2600,16 @@
                     if (e.target === overlay) { overlay.removeEventListener('click', handler); _close(); if (opts.onCancel) opts.onCancel(); }
                 });
                 function _keyHandler(e) {
+                    /* 表单弹窗里 Enter 应该是换行（textarea），不要直接提交 */
+                    if (e.key === 'Enter' && e.target && e.target.tagName === 'TEXTAREA') { return; }
                     if (e.key === 'Enter')  { e.preventDefault(); document.getElementById('ab-dialog-confirm').click(); }
                     if (e.key === 'Escape') { e.preventDefault(); if (cancelBtn) cancelBtn.click(); else document.getElementById('ab-dialog-confirm').click(); }
                 }
                 document.addEventListener('keydown', _keyHandler);
             }
+
+            /* 供外部（如评论页的编辑/回复弹窗）复用同一套窗口与动画 */
+            AdminBeautify.formDialog = function (opts) { _open(opts || {}); };
 
             function _parseMsg(message) {
                 var parts = (''+message).split('\n');
@@ -7475,9 +7762,12 @@
                     self.enhanceOptions();
                     self.enhanceComments();
                     self.enhancePosts();
+                    self.enhanceCategories();
+                    self.initDragFeedback();
                     self.enhanceUsers();
                     self.enhanceMedias();
                     self.enhanceMediaEdit();
+                    self.bindCardButtonRipple();
                     self.enhanceTags();
                     self.initTabsFab();
                     self.initEditorToolbar();

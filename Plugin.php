@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.57
+ * @version 2.1.58
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -333,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.57';
+        $abVer = '2.1.58';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -445,6 +445,28 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('「管理 → 独立页面」列表的展示方式，效果与文章列表一致（子页面 / 作者 / 日期）。')
         );
         $form->addInput($pageListStyle);
+        $commentListStyle = new Typecho_Widget_Helper_Form_Element_Select(
+            'commentListStyle',
+            array(
+                'card' => '卡片展示（默认）',
+                'list' => '原版列表展示',
+            ),
+            'card',
+            _t('评论列表展示'),
+            _t('「管理 → 评论」列表的展示方式：<b>卡片展示</b>把每条评论渲染成一张 MD3 卡片（头像 / 作者 / 内容 / 日期与文章，底部一条操作带）；<b>原版列表展示</b>保持 Typecho 原样表格。两种模式下「编辑 / 回复」都在带窗口动画的弹窗里完成。')
+        );
+        $form->addInput($commentListStyle);
+        $categoryListStyle = new Typecho_Widget_Helper_Form_Element_Select(
+            'categoryListStyle',
+            array(
+                'card' => '卡片展示（默认）',
+                'list' => '原版列表展示',
+            ),
+            'card',
+            _t('分类列表展示'),
+            _t('「管理 → 分类」列表的展示方式：<b>卡片展示</b>把每个分类渲染成一张 MD3 卡片（名称 / 缩略名 / 子分类 / 文章数 / 默认，右下角一条操作带）；<b>原版列表展示</b>保持 Typecho 原样表格。拖拽排序在两种模式下都可用。')
+        );
+        $form->addInput($categoryListStyle);
         $dashboardQuickShow = new Typecho_Widget_Helper_Form_Element_Select(
             'dashboardQuickShow',
             array(
@@ -1128,7 +1150,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.57 %c",'
+            .   '"%c AB-Admin %c v2.1.58 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1177,6 +1199,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if ($postListStyle !== 'list') $postListStyle = 'card';
         $pageListStyle = isset($pluginOptions->pageListStyle) ? (string)$pluginOptions->pageListStyle : 'card';
         if ($pageListStyle !== 'list') $pageListStyle = 'card';
+        $commentListStyle = isset($pluginOptions->commentListStyle) ? (string)$pluginOptions->commentListStyle : 'card';
+        if ($commentListStyle !== 'list') $commentListStyle = 'card';
+        $categoryListStyle = isset($pluginOptions->categoryListStyle) ? (string)$pluginOptions->categoryListStyle : 'card';
+        if ($categoryListStyle !== 'list') $categoryListStyle = 'card';
     $colors = self::getColorScheme($primaryColor);
     $lightBg = isset($colors['--md-surface'])      ? $colors['--md-surface']      : '#FFFBFE';
     $darkBg  = isset($colors['--md-dark-surface']) ? $colors['--md-dark-surface'] : '#1C1B1F';
@@ -1215,16 +1241,20 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $earlyScript .= 'var AB_LIST_MODES=' . json_encode(array(
             'posts' => $postListStyle,
             'pages' => $pageListStyle,
+            'comments' => $commentListStyle,
+            'categories' => $categoryListStyle,
         )) . ';';
         if ($abLegacyTypecho) {
             $earlyScript .= 'document.documentElement.setAttribute("data-ab-tc","12");';
         }
         $earlyScript .= 'function abSyncListMode(){'
             .   'var h=document.documentElement,u=(location.pathname||"")+(location.search||"");'
-            .   'h.removeAttribute("data-ab-postlist");h.removeAttribute("data-ab-pagelist");h.removeAttribute("data-ab-listcard");'
+            .   'h.removeAttribute("data-ab-postlist");h.removeAttribute("data-ab-pagelist");h.removeAttribute("data-ab-commentlist");h.removeAttribute("data-ab-categorylist");h.removeAttribute("data-ab-listcard");'
             .   'var attr="",mode="";'
             .   'if(u.indexOf("manage-posts.php")!==-1){attr="data-ab-postlist";mode=AB_LIST_MODES.posts;}'
             .   'else if(u.indexOf("manage-pages.php")!==-1){attr="data-ab-pagelist";mode=AB_LIST_MODES.pages;}'
+            .   'else if(u.indexOf("manage-comments.php")!==-1){attr="data-ab-commentlist";mode=AB_LIST_MODES.comments;}'
+            .   'else if(u.indexOf("manage-categories.php")!==-1){attr="data-ab-categorylist";mode=AB_LIST_MODES.categories;}'
             .   'if(!attr||!mode)return;'
             .   'h.setAttribute(attr,mode);'
             .   'if(mode==="card")h.setAttribute("data-ab-listcard","1");'
@@ -1292,9 +1322,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.57.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.58.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.57.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.58.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1360,6 +1390,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if ($postListStyle !== 'list') $postListStyle = 'card';
         $pageListStyle = isset($pluginOptions->pageListStyle) ? (string)$pluginOptions->pageListStyle : 'card';
         if ($pageListStyle !== 'list') $pageListStyle = 'card';
+        $commentListStyle = isset($pluginOptions->commentListStyle) ? (string)$pluginOptions->commentListStyle : 'card';
+        if ($commentListStyle !== 'list') $commentListStyle = 'card';
+        $categoryListStyle = isset($pluginOptions->categoryListStyle) ? (string)$pluginOptions->categoryListStyle : 'card';
+        if ($categoryListStyle !== 'list') $categoryListStyle = 'card';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $editorVditorMode = isset($pluginOptions->editor_vditorMode) ? (string)$pluginOptions->editor_vditorMode : 'ir';
         $dashboardQuickShow = isset($pluginOptions->dashboardQuickShow) ? (string)$pluginOptions->dashboardQuickShow : '1';
@@ -1585,6 +1619,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginCardView'         => $pluginCardView,
             'postListStyle'          => $postListStyle,
             'pageListStyle'          => $pageListStyle,
+            'commentListStyle'       => $commentListStyle,
+            'categoryListStyle'      => $categoryListStyle,
             'siteName'               => $options->title,
             'user'                   => $currentUserInfo,
             'pluginUrl'              => (string)$options->pluginUrl,
@@ -1601,7 +1637,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.57',
+            'pluginVersion'          => '2.1.58',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1635,9 +1671,141 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.57.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.58.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.57.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.58.js?v=' . $abJsVer . '"></script>';
+        echo '<script>(function(){"use strict";
+  var CQ = 575, OPEN = "ab-search-open";
+  function box(f){ return f.querySelector(".search"); }
+  function inp(f){ var b = box(f); return b ? b.querySelector(":scope > input[type=text]") : null; }
+  function narrow(f){ return f.getBoundingClientRect().width <= CQ; }
+  function filtered(f){
+    if (f.querySelector(".search > a, .ab-filter-group > a")) return true;
+    var i = inp(f); return !!(i && i.value);
+  }
+  /* 实测展开态输入框的「尾部长度」：左容器宽 + 容器左右内边距 + (输入框之后每个可见兄弟的宽 + 间隔)。
+     减 1px 是故意的：让右容器内容宽略大于可用宽，靠 flex-shrink 精确收在可用宽度上，接缝恒为 0 */
+  function sizeTail(f){
+    var b = box(f), i = inp(f);
+    if (!b || !i) return;
+    var cs = getComputedStyle(b), gap = parseFloat(cs.columnGap) || 0;
+    var op = f.querySelector(".operate");
+    var tail = op ? op.getBoundingClientRect().width : 0;
+    tail += (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var k = b.children, seen = false;
+    for (var j = 0; j < k.length; j++){
+      if (k[j] === i){ seen = true; continue; }
+      if (!seen) continue;
+      var st = getComputedStyle(k[j]);
+      if (st.display === "none" || st.position === "absolute") continue;
+      tail += k[j].getBoundingClientRect().width + gap;
+    }
+    f.style.setProperty("--ab-tail", (tail - 1).toFixed(2) + "px");
+  }
+  /* 移动端把「« 取消筛选」搬进第一行的 .ab-filter-group（它是 .search 的第一个子元素，
+     order 挪不出容器，只能真搬 DOM）；桌面再搬回原位 */
+  function placeLink(f){
+    var b = box(f), g = f.querySelector(".ab-filter-group");
+    if (!b || !g) return;
+    var a = b.querySelector(":scope > a") || g.querySelector(":scope > a");
+    if (!a) return;
+    if (!a.__abHome) a.__abHome = { p: b, n: a.nextSibling };
+    if (narrow(f)){ if (a.parentNode !== g) g.insertBefore(a, g.firstChild); }
+    else if (a.parentNode !== b) b.insertBefore(a, a.__abHome.n);
+  }
+  function sync(f){
+    var btn = f.querySelector(".ab-filter-toggle");
+    if (!btn) return;
+    btn.setAttribute("aria-expanded", f.classList.contains(OPEN) ? "true" : "false");
+    btn.setAttribute("aria-disabled", (narrow(f) && filtered(f)) ? "true" : "false");
+  }
+  /* 折叠按钮是 JS 注入的（不改 Typecho 模板）：
+     <span class="ab-filter-group"><button class="ab-filter-toggle">两种图标</button></span> */
+  function ensureToggle(f){
+    var op = f.querySelector(".operate");
+    if (!op || op.querySelector(".ab-filter-toggle")) return;
+    var g = op.querySelector(".ab-filter-group");
+    if (!g){ g = document.createElement("span"); g.className = "ab-filter-group"; op.appendChild(g); }
+    var b = document.createElement("button");
+    b.className = "ab-filter-toggle";
+    b.type = "button";
+    var sub = f.querySelector(".search > .btn");
+    b.setAttribute("aria-label", (sub && sub.textContent.trim()) || "筛选");
+    var i1 = document.createElement("i"); i1.className = "material-icons-round ab-ft-open"; i1.textContent = "filter_alt";
+    var i2 = document.createElement("i"); i2.className = "material-icons-round ab-ft-close"; i2.textContent = "close";
+    b.appendChild(i1); b.appendChild(i2);
+    g.appendChild(b);
+  }
+  function each(fn){
+    var fs = document.querySelectorAll("form.typecho-list-operate");
+    for (var i = 0; i < fs.length; i++){
+      /* ⚠️ 列表**底部**还有一条同名 form（只有「选中项」+ 分页，没有 .search）——
+         它不是工具条：不给它插折叠按钮，也不需要量 --ab-tail。 */
+      if (!fs[i].querySelector(".search")) continue;
+      ensureToggle(fs[i]); fn(fs[i]);
+    }
+  }
+  function sizeAll(){ each(function(f){ placeLink(f); sizeTail(f); }); }
+  function init(){
+    each(function(f){
+      var i = inp(f);
+      if (!i) return;
+      placeLink(f); sizeTail(f);
+      if (i.value || (narrow(f) && filtered(f))) f.classList.add(OPEN);
+      sync(f);
+    });
+  }
+  /* ⚠️⚠️ 监听器只能绑一次！Typecho 后台的 AJAX 翻页会把整段脚本**再执行一遍**
+     （服务端只输出一次，DOM 里会变成两份），于是 document 上的 click 处理器被绑两遍：
+     一次点击里两个处理器各 toggle 一次 → 又切回原状 = 净零。
+     表现就是移动端点「筛选」折叠按钮“没反应”（桌面看不出来 —— 桌面靠 :focus-within
+     展开、按钮本身是 display:none）。
+     所以监听器用 window 标记守一道；但 init() 每次执行都跑，
+     保证 AJAX 换页后新出现的工具条也能被初始化。 */
+  if (!window.__abToolbarBound){
+  window.__abToolbarBound = 1;
+  document.addEventListener("click", function(e){
+    var btn = e.target && e.target.closest ? e.target.closest(".ab-filter-toggle") : null;
+    if (!btn) return;
+    e.preventDefault();
+    var f = btn.closest("form.typecho-list-operate");
+    if (!f) return;
+    if (filtered(f)){ var i0 = inp(f); if (i0) i0.focus(); return; }
+    var open = f.classList.toggle(OPEN);
+    if (open){ var i1 = inp(f); if (i1) i1.focus(); }
+    else {
+      /* 收起时务必把焦点移出去：CSS 的 :has(.search:focus-within) 也算展开，
+         刚点过输入框/分类的话这一下会关不上 */
+      var a = document.activeElement;
+      if (a && a.blur && a.closest && a.closest(".search") && f.contains(a)) a.blur();
+    }
+    sync(f);
+  });
+  /* 桌面兜底：浏览器不支持 :has() 时靠这里维持展开态 */
+  document.addEventListener("focusin", function(e){
+    var t = e.target;
+    if (!t || !t.closest || !t.closest(".search")) return;
+    var f = t.closest("form.typecho-list-operate");
+    if (!f) return;
+    f.classList.add(OPEN); sync(f);
+  });
+  document.addEventListener("focusout", function(e){
+    var t = e.target;
+    if (!t || !t.closest || !t.closest(".search")) return;
+    var f = t.closest("form.typecho-list-operate");
+    if (!f) return;
+    setTimeout(function(){
+      if (narrow(f) || filtered(f)) return;
+      var a = document.activeElement;
+      if (a && a.closest && a.closest(".search") && f.contains(a)) return;
+      f.classList.remove(OPEN); sync(f);
+    }, 0);
+  });
+  window.addEventListener("resize", sizeAll);
+  window.addEventListener("load", sizeAll);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(sizeAll);
+  }
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();})();</script>';
         $reqUriForEditor = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageForEditor = (strpos($reqUriForEditor, 'write-post.php') !== false || strpos($reqUriForEditor, 'write-page.php') !== false);
         if (($editorVditor === '2' || $editorVditor === '3') && $isWritePageForEditor) {
@@ -1648,7 +1816,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.57"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.58"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         if ($notifyOptOut !== '1') {
             echo '<script>(function(){
@@ -1912,7 +2080,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.57";';
+        echo 'var __AB_VER__="2.1.58";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
