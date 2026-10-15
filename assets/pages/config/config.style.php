@@ -91,7 +91,18 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     border-radius: 12px;
 }
 .ab-card-tip-inner      { display: flex; align-items: flex-start; gap: 10px; }
-.ab-card-tip-icon       { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+/* 提示框左侧图标：Material 图标字体（不再是 emoji）。
+   ⚠️ 必须提高特异度 + 写在图标字体 CSS 之后：.material-icons-round 自带 font-size:24px。
+   18px + line-height 1.2 大致对齐 13px/1.7 的首行。 */
+.ab-card-tip .ab-card-tip-icon,
+.ab-card-tip-green .ab-card-tip-icon { font-size: 18px; line-height: 1.2; flex-shrink: 0; margin-top: 1px; }
+/* emoji 自带颜色，换成图标字体后要显式给色，否则会跟着卡片文字（on-surface）走、与提示框不同色 */
+.ab-card-tip .ab-card-tip-icon       { color: #1e40af; }
+.ab-card-tip-green .ab-card-tip-icon { color: #166534; }
+[data-theme="dark"] .ab-card-tip .ab-card-tip-icon       { color: #93c5fd !important; }
+[data-theme="dark"] .ab-card-tip-green .ab-card-tip-icon { color: #86efac !important; }
+/* 提示框正文里的行内图标（如「警告」），跟着文字大小与颜色走 */
+.ab-tip-ico             { font-size: 15px; line-height: 1; vertical-align: -2px; color: inherit; }
 .ab-card-tip-text       { flex: 1; font-size: 13px; color: #1e40af; line-height: 1.7; }
 .ab-card-tip-green-text { flex: 1; font-size: 13px; color: #166534; line-height: 1.7; }
 .ab-card-tip-green-text code {
@@ -101,28 +112,59 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     font-size: 12px;
 }
 
-/* ── 分组分割线 & 标签（config.script.php 动态创建） ── */
+/* ── 分组分割线 & 标签（config.script.php 动态创建） ──
+   MD3 排版：
+     · 分割线 = 1px outline-variant 细线，上方 24px（分割线距内容 16/24 的节奏），
+       下方留白交给标题自身的 padding-top，避免两处间距叠加。
+     · 段落标题（Title）：20px / 700 / 行高 1.3 / 字距 0，左对齐到内容边缘（不再缩进 6px，
+       否则整列标题会比卡片右移，破坏左对齐基线）。
+     · 子标题（Title Small）：14px / 600 / 行高 1.35 / 字距 .01em，上方 18px 拉开与上一块的层次。
+   ⚠️ 文字渐变按用户要求保留：渐变按文字宽度铺（width:fit-content），
+      否则会拉满整行、看不出渐变；裁切只在支持 background-clip:text 时才开
+      （@supports 包着），不支持时退回上面的纯色 color，不会出现“一片透明”。 */
 .ab-group-divider {
     height: 1px;
+    border: 0;
     background: var(--md-outline-variant, rgba(0,0,0,.1));
-    margin: 8px 0 4px;
+    margin: 24px 0 0;
 }
 .ab-group-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--md-on-surface-variant, #79747e);
-    padding: 4px 6px 2px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: 0;
+    color: var(--md-on-surface, #1c1b1f);
+    padding: 12px 0 6px;
+    margin: 0;
+    width: fit-content;
+    max-width: 100%;
+    background-image: linear-gradient(100deg,
+        var(--md-primary, #6750a4) 0%,
+        var(--md-primary, #6750a4) 32%,
+        color-mix(in srgb, var(--md-primary, #6750a4) 45%, var(--md-secondary, #625b71)) 100%);
 }
 .ab-group-sublabel {
-    font-size: 10.5px;
+    font-size: 14px;
     font-weight: 600;
-    color: var(--md-primary, #6750a4);
-    padding: 10px 6px 2px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    opacity: .85;
+    line-height: 1.35;
+    letter-spacing: .01em;
+    color: var(--md-on-surface, #1c1b1f);
+    padding: 18px 0 6px;
+    margin: 0;
+    width: fit-content;
+    max-width: 100%;
+    background-image: linear-gradient(100deg,
+        var(--md-primary, #6750a4) 0%,
+        color-mix(in srgb, var(--md-primary, #6750a4) 55%, var(--md-secondary, #625b71)) 100%);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .ab-group-label,
+    .ab-group-sublabel {
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 }
 
 /* ── 管理后台设置：快速定位 / 搜索 ── */
@@ -558,9 +600,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     color: #86efac !important;
 }
 
-[data-theme="dark"] .ab-group-label    { color: var(--md-on-surface-variant, #cac4d0) !important; }
-[data-theme="dark"] .ab-group-sublabel { color: var(--md-primary, #d0bcff) !important; }
-[data-theme="dark"] .ab-group-divider  { background: rgba(255,255,255,.1) !important; }
+/* 分组标题 / 子标题 / 分割线的暗色不需要单独覆盖：
+   渐变色与底线都取自 --md-* 令牌（暗色下已被主样式表重映射），
+   color 仅作为 background-clip:text 不可用时的纯色兜底，也走 on-surface 令牌。 */
 
 [data-theme="dark"] .ab-admin-quick {
     background: rgba(208,188,255,.08) !important;
@@ -661,7 +703,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.58.css 里的
+   注意：AdminBeautify.v2.1.59.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }
@@ -675,11 +717,12 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     gap: 8px !important;
     padding: 12px 14px !important;
     margin: 0 0 14px !important;
-    border-radius: 14px !important;
+    border-radius: 12px !important;
     font-size: 12.5px !important;
     line-height: 1.6 !important;
-    background: rgba(125,82,96,.08) !important;
-    color: #6b5b62 !important;
+    /* MD3：提示条用 secondary-container（自动随主色/亮暗变化）*/
+    background: var(--md-secondary-container, #E8DEF8) !important;
+    color: var(--md-on-secondary-container, #1D192B) !important;
 }
 .ab-card .ab-dash-cards-tip .material-icons-round {
     font-size: 18px !important;
@@ -713,44 +756,53 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     line-height: 1 !important;
 }
 
+/* ── 排序行 = MD3 list item：56px 高 / 12px 圆角 / surface-container 底 ────────
+   静止不投影（MD3 列表项靠底色分层，不靠阴影） */
 .ab-card .ab-dash-cards-list .ab-dash-card-row {
     display: flex !important;
     align-items: center !important;
-    gap: 10px !important;
-    padding: 10px 12px !important;
+    gap: 12px !important;
+    min-height: 56px !important;
+    padding: 8px 10px !important;
     margin: 0 !important;
-    border-radius: 14px !important;
-    background: #fff !important;
-    border: 1px solid rgba(0,0,0,.07) !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,.04) !important;
+    border-radius: 12px !important;
+    background: var(--md-surface-container, #F3EDF7) !important;
+    border: 1px solid var(--md-outline-variant, #CAC4D0) !important;
+    box-shadow: none !important;
     font-size: 13px !important;
     color: var(--md-on-surface, #1c1b1f) !important;
-    transition: box-shadow .18s, border-color .18s !important;
+    transition: background .18s, border-color .18s, box-shadow .18s, transform .18s !important;
     cursor: default !important;
     overflow: visible !important;
     min-width: 0 !important;
 }
 .ab-card .ab-dash-cards-list .ab-dash-card-row:hover {
-    border-color: rgba(125,82,96,.32) !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,.08) !important;
-    background: #fff !important;
+    background: var(--md-surface-container-high, #ECE6F0) !important;
+    border-color: var(--md-outline, #79747E) !important;
+    box-shadow: var(--md-elevation-1, 0 1px 2px rgba(0,0,0,.12)) !important;
 }
+/* 拖动中：抬起（与列表页卡片拖动同一套观感）*/
 .ab-card .ab-dash-cards-list .ab-dash-card-row.is-dragging {
-    opacity: .55 !important;
-    border-style: dashed !important;
+    opacity: .92 !important;
+    border-style: solid !important;
+    border-color: var(--md-primary, #6750A4) !important;
+    background: var(--md-primary-container, #EADDFF) !important;
+    box-shadow: var(--md-elevation-3, 0 4px 8px 3px rgba(0,0,0,.15)) !important;
+    transform: scale(1.01);
 }
 
-/* 拖拽手柄（本行第一个 span，需反制日期徽章规则） */
+/* 拖拽手柄：24px 图标 + 28px 圆形点击区 + 8% 状态层（MD3 icon button） */
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-drag {
     flex: none !important;
-    width: auto !important;
-    min-width: 0 !important;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
     padding: 0 !important;
     margin: 0 !important;
     border: 0 !important;
-    border-radius: 0 !important;
+    border-radius: 999px !important;
     background: transparent !important;
-    color: #9a9aa2 !important;
+    color: var(--md-on-surface-variant, #49454F) !important;
     font-size: 20px !important;
     font-weight: normal !important;
     font-variant-numeric: normal !important;
@@ -758,39 +810,53 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     align-items: center !important;
     justify-content: center !important;
     cursor: grab !important;
+    transition: background .15s !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-drag:hover {
+    background: color-mix(in srgb, var(--md-on-surface) 8%, transparent) !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-drag:active {
+    cursor: grabbing !important;
+    background: color-mix(in srgb, var(--md-on-surface) 12%, transparent) !important;
 }
 
+/* 序号：顺序已经由位置表达了，所以不给它容器 ——
+   原来的灰色药丸在左侧和拖拽手柄堆成两个圆点，看起来像两个按钮。
+   改成无底的 tabular 数字（MD3 里这类辅助信息只用字型/色阶降级）。 */
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-idx {
     flex: none !important;
-    min-width: 22px !important;
+    min-width: 14px !important;
     text-align: center !important;
-    font-size: 11px !important;
-    font-weight: 700 !important;
+    font-size: 12px !important;
+    font-weight: 500 !important;
     font-variant-numeric: tabular-nums !important;
-    color: #7d5260 !important;
-    background: rgba(125,82,96,.1) !important;
-    border-radius: 999px !important;
-    padding: 2px 0 !important;
+    color: var(--md-on-surface-variant, #49454F) !important;
+    opacity: .75 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
     margin: 0 !important;
 }
 
+/* 图标：36px tonal 容器（MD3 medium 圆角 12）*/
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-icon {
     flex: none !important;
-    width: 34px !important;
-    height: 34px !important;
-    min-width: 34px !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
     padding: 0 !important;
     margin: 0 !important;
-    border-radius: 10px !important;
+    border-radius: 12px !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    background: rgba(125,82,96,.1) !important;
-    color: #7d5260 !important;
-    font-size: 19px !important;
+    background: var(--md-primary-container, #EADDFF) !important;
+    color: var(--md-on-primary-container, #21005D) !important;
+    font-size: 20px !important;
 }
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-icon .material-icons-round {
-    font-size: 19px !important;
+    font-size: 20px !important;
     color: inherit !important;
 }
 
@@ -803,13 +869,20 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     align-items: flex-start !important;
 }
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-name {
-    font-size: 13.5px !important;
+    font-size: 14px !important;
     font-weight: 600 !important;
     color: var(--md-on-surface, #1c1b1f) !important;
     line-height: 1.4 !important;
+    /* 长标题（如「最近发布的文章」）必须单行省略：一旦折行行高就从 56px 涨到 73px，
+       和单行行并排时参差不齐 —— MD3 列表项要求行高一致。 */
+    display: block !important;
+    max-width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-desc {
-    font-size: 11.5px !important;
+    font-size: 12px !important;
     color: var(--md-on-surface-variant, #79747e) !important;
     line-height: 1.45 !important;
     overflow: hidden !important;
@@ -818,45 +891,69 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     max-width: 100% !important;
 }
 
+/* 状态 = MD3 assist chip：8px 圆角 / 前置圆点 / 色调底（开=绿 tonal，关=中性）*/
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state {
     flex: none !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
-    padding: 2px 9px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    height: 24px !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    padding: 0 10px !important;
     margin: 0 !important;
-    border-radius: 999px !important;
-    background: rgba(0,0,0,.06) !important;
-    color: #79747e !important;
+    border-radius: 8px !important;
+    background: var(--md-surface-container-highest, #E6E0E9) !important;
+    color: var(--md-on-surface-variant, #49454F) !important;
     white-space: nowrap !important;
 }
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state::before {
+    content: '' !important;
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: currentColor !important;
+    opacity: .7 !important;
+    flex: none !important;
+}
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state.is-on {
-    background: rgba(46,125,50,.12) !important;
-    color: #2e7d32 !important;
+    background: var(--md-approve-bg, #D6F0DA) !important;
+    color: var(--md-approve-color, #276535) !important;
+}
+/* 「始终显示」= 没有开关的常驻卡片：用 primary tonal 和「已启用」的绿区分开，
+   否则两枚绿 chip 语义撞车；「未启用 / 已关闭」保持基类的中性灰。 */
+.ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state.is-always {
+    background: var(--md-primary-container, #EADDFF) !important;
+    color: var(--md-on-primary-container, #21005D) !important;
 }
 
 .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-btns {
     flex: none !important;
     display: inline-flex !important;
-    gap: 4px !important;
+    gap: 2px !important;
 }
+/* 操作 = MD3 icon button：32px 全圆 / 无描边 / 悬停 8% 状态层 / 按下 12% */
 .ab-dash-card-btn {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 9px !important;
-    border: 1px solid rgba(0,0,0,.08) !important;
-    background: #f7f2fa !important;
-    color: #4a4458 !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 999px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--md-on-surface-variant, #49454F) !important;
     cursor: pointer !important;
     padding: 0 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    transition: background .15s, border-color .15s !important;
+    transition: background .15s, color .15s !important;
 }
-.ab-dash-card-btn .material-icons-round { font-size: 16px !important; }
+.ab-dash-card-btn .material-icons-round { font-size: 20px !important; }
 .ab-dash-card-btn:hover {
-    background: rgba(125,82,96,.12) !important;
-    border-color: rgba(125,82,96,.3) !important;
+    background: color-mix(in srgb, var(--md-on-surface) 8%, transparent) !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+}
+.ab-dash-card-btn:active {
+    background: color-mix(in srgb, var(--md-on-surface) 12%, transparent) !important;
 }
 
 .ab-card .ab-dash-cards-actions {
@@ -865,45 +962,56 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     gap: 12px !important;
     margin-top: 14px !important;
 }
+/* 底部两个按钮：MD3 outlined button（恢复默认顺序）/ tonal button（新建分组）*/
 .ab-dash-cards-reset {
     display: inline-flex !important;
     align-items: center !important;
-    gap: 6px !important;
-    padding: 8px 14px !important;
+    gap: 8px !important;
+    height: 36px !important;
+    padding: 0 16px !important;
     border-radius: 999px !important;
     cursor: pointer !important;
-    border: 1px solid rgba(0,0,0,.1) !important;
-    background: #fff !important;
-    color: #4a4458 !important;
-    font-size: 12.5px !important;
-    font-weight: 600 !important;
+    border: 1px solid var(--md-outline, #79747E) !important;
+    background: transparent !important;
+    color: var(--md-primary, #6750A4) !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
     transition: background .15s !important;
 }
-.ab-dash-cards-reset .material-icons-round { font-size: 16px !important; }
-.ab-dash-cards-reset:hover { background: rgba(125,82,96,.1) !important; }
+.ab-dash-cards-reset .material-icons-round { font-size: 18px !important; }
+.ab-dash-cards-reset:hover { background: color-mix(in srgb, var(--md-primary) 8%, transparent) !important; }
 .ab-dash-cards-status {
     font-size: 12px !important;
-    color: #2e7d32 !important;
+    color: var(--md-approve-color, #276535) !important;
     opacity: 0;
     transition: opacity .2s;
 }
 .ab-dash-cards-status.is-on { opacity: 1; }
 
-/* ---- 堆叠分组（概要页卡片设置）---- */
+/* ---- 堆叠分组：MD3 色调容器（primary-container）+ 子列表用 surface-container-low ---- */
 .ab-card .ab-dash-cards-addgroup {
-    border-color: rgba(125,82,96,.35) !important;
-    color: #7d5260 !important;
-    background: rgba(125,82,96,.06) !important;
+    border: 0 !important;
+    background: var(--md-secondary-container, #E8DEF8) !important;
+    color: var(--md-on-secondary-container, #1D192B) !important;
 }
-.ab-card .ab-dash-cards-addgroup:hover { background: rgba(125,82,96,.14) !important; }
+.ab-card .ab-dash-cards-addgroup:hover {
+    background: color-mix(in srgb, var(--md-on-secondary-container) 10%, var(--md-secondary-container, #E8DEF8)) !important;
+}
 
 .ab-card .ab-dash-cards-list .ab-dash-group-row {
     flex-wrap: wrap !important;
     align-items: center !important;
-    padding-bottom: 6px !important;
-    border: 1px dashed rgba(125,82,96,.45) !important;
-    background: rgba(125,82,96,.05) !important;
+    padding: 8px 10px !important;
+    border: 1px solid color-mix(in srgb, var(--md-primary) 26%, transparent) !important;
+    background: var(--md-primary-container, #EADDFF) !important;
+    color: var(--md-on-primary-container, #21005D) !important;
 }
+.ab-card .ab-dash-cards-list .ab-dash-group-row .ab-dash-card-name,
+.ab-card .ab-dash-cards-list .ab-dash-group-row .ab-dash-card-desc,
+.ab-card .ab-dash-cards-list .ab-dash-group-row .ab-dash-card-drag {
+    color: inherit !important;
+}
+.ab-card .ab-dash-cards-list .ab-dash-group-row .ab-dash-card-desc { opacity: .78; }
 
 .ab-card .ab-dash-cards-list .ab-dash-group-list {
     order: 9 !important;
@@ -911,123 +1019,49 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     min-width: 0 !important;
     width: auto !important;
     box-sizing: border-box !important;
-    margin: 6px 0 2px 22px !important;
-    padding: 6px 0 0 10px !important;
-    border-left: 2px solid rgba(125,82,96,.25) !important;
+    margin: 8px 0 2px !important;
+    padding: 8px 0 0 !important;
+    border-top: 1px solid color-mix(in srgb, var(--md-on-primary-container) 16%, transparent) !important;
     display: none !important;
+    flex-direction: column !important;
+    gap: 8px !important;
 }
 
 .ab-card .ab-dash-cards-list .ab-dash-group-list .ab-dash-card-row {
     min-width: 0 !important;
+    background: var(--md-surface-container-low, #F7F2FA) !important;
+    border-color: var(--md-outline-variant, #CAC4D0) !important;
+    box-shadow: none !important;
 }
 
 .ab-card .ab-dash-cards-list .ab-dash-group-row[data-open="1"] .ab-dash-group-list {
     display: flex !important;
 }
 
-.ab-card .ab-dash-cards-list .ab-dash-group-list .ab-dash-card-row {
-    background: #fff !important;
-    border-color: rgba(0,0,0,.09) !important;
-    box-shadow: none !important;
-}
-
 .ab-card .ab-dash-cards-list .ab-dash-group-list.is-drop-reject {
-    border-left-color: #b3261e !important;
-    background: rgba(179,38,30,.06) !important;
+    border-top-color: var(--md-error, #B3261E) !important;
+    background: color-mix(in srgb, var(--md-error) 6%, transparent) !important;
 }
 
 .ab-card .ab-dash-group-empty {
-    padding: 10px 12px !important;
-    border: 1px dashed rgba(125,82,96,.35) !important;
+    padding: 12px !important;
+    border: 1px dashed var(--md-outline, #79747E) !important;
     border-radius: 12px !important;
     font-size: 12px !important;
-    color: #79747e !important;
+    color: var(--md-on-surface-variant, #49454F) !important;
     text-align: center !important;
 }
 
 .ab-dash-card-btn-danger {
-    color: #b3261e !important;
-    border-color: rgba(179,38,30,.25) !important;
-    background: rgba(179,38,30,.06) !important;
+    color: var(--md-error, #B3261E) !important;
 }
-.ab-dash-card-btn-danger:hover { background: rgba(179,38,30,.14) !important; }
+.ab-dash-card-btn-danger:hover {
+    background: color-mix(in srgb, var(--md-error) 10%, transparent) !important;
+    color: var(--md-error, #B3261E) !important;
+}
 
-/* 概要页卡片设置（暗色） */
-[data-theme="dark"] .ab-card .ab-dash-cards-tip {
-    background: rgba(208,188,255,.1) !important;
-    color: #cac4d0 !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row {
-    background: var(--md-surface-container, #211f26) !important;
-    border-color: rgba(255,255,255,.12) !important;
-    box-shadow: none !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row:hover {
-    background: var(--md-surface-container-high, #2b2930) !important;
-    border-color: rgba(208,188,255,.35) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-drag {
-    color: rgba(255,255,255,.45) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-idx {
-    color: #d0bcff !important;
-    background: rgba(208,188,255,.16) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-icon {
-    background: rgba(208,188,255,.16) !important;
-    color: #d0bcff !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-name {
-    color: var(--md-on-surface, #e6e1e5) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-desc {
-    color: var(--md-on-surface-variant, #cac4d0) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state {
-    background: rgba(255,255,255,.1) !important;
-    color: #cac4d0 !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-card-row .ab-dash-card-state.is-on {
-    background: rgba(129,199,132,.18) !important;
-    color: #81c784 !important;
-}
-[data-theme="dark"] .ab-dash-card-btn {
-    background: rgba(255,255,255,.07) !important;
-    border-color: rgba(255,255,255,.12) !important;
-    color: #d0bcff !important;
-}
-[data-theme="dark"] .ab-dash-card-btn:hover {
-    background: rgba(208,188,255,.2) !important;
-    border-color: rgba(208,188,255,.35) !important;
-}
-[data-theme="dark"] .ab-dash-cards-reset {
-    background: rgba(255,255,255,.07) !important;
-    border-color: rgba(255,255,255,.12) !important;
-    color: #e6e1e5 !important;
-}
-[data-theme="dark"] .ab-dash-cards-reset:hover { background: rgba(208,188,255,.18) !important; }
-
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-group-row {
-    border-color: rgba(208,188,255,.4) !important;
-    background: rgba(208,188,255,.08) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-group-list {
-    border-left-color: rgba(208,188,255,.3) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-list .ab-dash-group-list .ab-dash-card-row {
-    background: rgba(255,255,255,.04) !important;
-    border-color: rgba(255,255,255,.12) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-group-empty {
-    color: #cac4d0 !important;
-    border-color: rgba(208,188,255,.3) !important;
-}
-[data-theme="dark"] .ab-card .ab-dash-cards-addgroup {
-    border-color: rgba(208,188,255,.4) !important;
-    color: #d0bcff !important;
-    background: rgba(208,188,255,.1) !important;
-}
-[data-theme="dark"] .ab-dash-cards-status { color: #81c784 !important; }
+/* 概要页卡片设置：上面这些规则全部用 --md-* 令牌取色，
+   亮/暗与换主色都自动跟随，原先那份 [data-theme="dark"] 覆盖块已删除。 */
 
 /* 概要页卡片设置（窄屏） */
 @media (max-width: 575px) {
@@ -1051,18 +1085,27 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 .ab-card .ab-dash-custom {
     margin-top: 22px;
     padding-top: 18px;
-    border-top: 1px dashed rgba(0, 0, 0, .12);
+    /* MD3 用实线 hairline 分割；原来的虚线是写死的黑色，暗色下几乎看不见 */
+    border-top: 1px solid var(--md-outline-variant, rgba(0, 0, 0, .12));
 }
+/* 子区块标题（卡片排版模式 / 自定义卡片 /「更多」卡片）：
+   与 .ab-group-sublabel 同一层级的 Title Small，图标 18px 走 primary。 */
 .ab-card .ab-dash-custom-title {
     display: flex !important;
     align-items: center !important;
     gap: 8px !important;
     font-size: 14px !important;
-    font-weight: 700 !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    letter-spacing: .01em !important;
     color: var(--md-on-surface, #1c1b1f) !important;
     margin-bottom: 10px !important;
 }
-.ab-card .ab-dash-custom-title .material-icons-round { font-size: 20px !important; color: var(--md-primary, #7d5260) !important; }
+.ab-card .ab-dash-custom-title .material-icons-round { font-size: 18px !important; color: var(--md-primary, #6750a4) !important; }
+
+/* 子区块标题与字段自带 label 同名时（卡片排版模式 /「更多」卡片），
+   由 config.script.php 给重复的那个 label 打上此类并隐藏，避免同一句话出现两次。 */
+.ab-card .ab-dash-subsection .ab-dup-label { display: none !important; }
 
 /* 概要页卡片设置里的子区块（卡片排版模式 / 「更多」卡片）：
    沿用自定义卡片区的虚线分隔节奏，间距略收紧一点 */

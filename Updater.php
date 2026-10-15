@@ -11,7 +11,7 @@ class AdminBeautify_Updater
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.58';
+    const CURRENT_VERSION = '2.1.59';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
@@ -250,6 +250,7 @@ class AdminBeautify_Updater
         call_user_func($emit, 'copied', "已写入 {$copied} 个文件", 100);
         @unlink($zipFile);
         $this->removeDir($extractDir);
+        $releaseBody = $this->cachedReleaseBody($newVersion);
         $postUpdateData = array(
             'has_update'   => false,
             'current'      => $newVersion,
@@ -265,6 +266,7 @@ class AdminBeautify_Updater
         );
         @unlink($this->tmpDir . '/.update_lock');
         $this->invalidateOpcacheInDir($this->pluginDir, array('tmp_update'));
+        $this->pushUpdatedNotice($newVersion, $copied, $releaseBody);
         call_user_func($emit, 'done',
             '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。',
             100
@@ -422,6 +424,7 @@ class AdminBeautify_Updater
         @unlink($zipFile);
         $this->removeDir($extractDir);
         $details[] = '临时文件已清理';
+        $releaseBody = $this->cachedReleaseBody($newVersion);
         $postUpdateData = array(
             'has_update'   => false,
             'current'      => $newVersion,
@@ -437,7 +440,64 @@ class AdminBeautify_Updater
         );
         @unlink($this->tmpDir . '/.update_lock');
         $this->invalidateOpcacheInDir($this->pluginDir, array('tmp_update'));
+        $this->pushUpdatedNotice($newVersion, $copied, $releaseBody);
         return array('ok' => true, 'msg' => '更新成功！已从 v' . self::CURRENT_VERSION . ' 更新至 v' . $newVersion . '，请刷新页面。', 'details' => $details);
+    }
+    private function pushUpdatedNotice($newVersion, $copied = 0, $cachedReleaseBody = '')
+    {
+        $from = (string) self::CURRENT_VERSION;
+        $to   = (string) $newVersion;
+        $detail = '';
+        $log = $this->readReleaseLog($to, $cachedReleaseBody);
+        if ($log !== '') {
+            $maxLen = AdminBeautify_Plugin::NOTICE_DETAIL_MAX - 200;
+            if ($maxLen < 500) $maxLen = 500;
+            if (mb_strlen($log) > $maxLen) {
+                $log = mb_substr($log, 0, $maxLen) . "\n\n…（更新说明过长已截断）";
+            }
+            $detail = $log;
+        }
+        try {
+            if (!class_exists('AdminBeautify_Plugin')) return;
+            $opt = array('dedup' => 'updated:' . $to);
+            if ($detail !== '') $opt['detail'] = $detail;
+            AdminBeautify_Plugin::pushNotice(
+                '更新完成 v' . $to,
+                '已从 v' . $from . ' 更新至 v' . $to . '，共写入 ' . (int) $copied . ' 个文件。',
+                'success',
+                $opt
+            );
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    private function cachedReleaseBody($version)
+    {
+        $file = $this->tmpDir . '/.update_cache.json';
+        if (!is_file($file)) return '';
+        $raw = @file_get_contents($file);
+        $obj = $raw ? @json_decode($raw, true) : null;
+        if (!is_array($obj) || !isset($obj['data']) || !is_array($obj['data'])) return '';
+        $data = $obj['data'];
+        if (!isset($data['latest']) || (string) $data['latest'] !== (string) $version) return '';
+        return isset($data['body']) ? trim((string) $data['body']) : '';
+    }
+    private function readReleaseLog($version, $cachedBody = '')
+    {
+        $log = trim((string) $cachedBody);
+        if ($log !== '') return $log;
+        foreach (array('v' . $version, (string) $version) as $tag) {
+            $json = $this->httpGet(
+                'https://api.github.com/repos/' . self::GITHUB_REPO . '/releases/tags/' . rawurlencode($tag),
+                8
+            );
+            if ($json === false) continue;
+            $release = self::parseRelease(@json_decode($json, true));
+            if ($release !== false && trim((string) $release['body']) !== '') {
+                return trim((string) $release['body']);
+            }
+        }
+        return '';
     }
     private function verifyZipIntegrity($zipFile)
     {

@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.58
+ * @version 2.1.59
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.58';
+        $pluginVer  = '2.1.59';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -439,7 +439,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->checkAdmin();
         $settings = $this->request->from(
             'primaryColor', 'darkMode', 'borderRadius',
-            'enableAnimation', 'navPosition'
+            'enableAnimation'
         );
         $settings = array_filter($settings, function ($v) {
             return $v !== null && $v !== '';
@@ -888,6 +888,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             @file_put_contents($cacheFile, json_encode(array('ts' => time(), 'data' => $cacheData)));
             @unlink($lockFile);
             $prereleaseTag = !empty($release['prerelease']) ? '（开发版）' : '';
+            $this->noticeUpdateAvailable($freshData);
             $this->jsonSuccess(
                 $freshData,
                 $hasUpdate ? '发现新版本 v' . $latest . $prereleaseTag : '已是最新版本 v' . $current
@@ -932,6 +933,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'channel'     => $channel,
                 ),
             ));
+        }
+        if (is_array($cachedData) && !empty($cachedData['has_update'])) {
+            $this->noticeUpdateAvailable($cachedData);
         }
         if ($needsBgRefresh) {
             $cacheDir = dirname($cacheFile);
@@ -1527,6 +1531,87 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $this->jsonSuccess($result, $successMessage);
     }
+    private function noticeUpdateAvailable(array $data)
+    {
+        if (empty($data['has_update']) || empty($data['latest'])) return;
+        $latest  = (string) $data['latest'];
+        $current = isset($data['current']) ? (string) $data['current'] : '?';
+        $beta    = !empty($data['prerelease']);
+        $direct  = !empty($data['can_direct']);
+        $bump    = $this->versionBumpLabel($current, $latest);
+        $level = $direct ? 'info' : 'warn';
+        $how   = $direct ? '可在后台一键更新。' : '后台无法一键更新，需下载后手动覆盖。';
+        try {
+            AdminBeautify_Plugin::pushNotice(
+                '发现新版本 v' . $latest . ($beta ? '（开发版）' : ''),
+                '当前 v' . $current . ' → v' . $latest . '（' . $bump . '），' . $how,
+                $level,
+                array(
+                    'dedup'  => 'update:' . $latest . ($beta ? ':beta' : ''),
+                    'link'   => ($direct && !empty($data['download_url']))
+                        ? (string) $data['download_url']
+                        : (isset($data['html_url']) ? (string) $data['html_url'] : ''),
+                    'act'    => $direct ? 'ab-update' : '',
+                    'src'    => $beta ? '升级通道·开发版' : '升级通道',
+                    'detail' => $this->buildUpdateNoticeDetail($data, $bump),
+                )
+            );
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    private function versionBumpLabel($current, $latest)
+    {
+        $pc = array_map('intval', explode('.', ltrim((string) $current, 'vV')));
+        $pl = array_map('intval', explode('.', ltrim((string) $latest, 'vV')));
+        while (count($pc) < 3) $pc[] = 0;
+        while (count($pl) < 3) $pl[] = 0;
+        if ($pl[0] !== $pc[0]) return '主版本更新';
+        if ($pl[1] !== $pc[1]) return '次版本更新';
+        if ($pl[2] !== $pc[2]) return '补丁更新';
+        return '版本更新';
+    }
+    private function buildUpdateNoticeDetail(array $data, $bump)
+    {
+        $latest  = (string) $data['latest'];
+        $current = isset($data['current']) ? (string) $data['current'] : '?';
+        $beta    = !empty($data['prerelease']);
+        $direct  = !empty($data['can_direct']);
+        $channel = isset($data['channel']) ? (string) $data['channel'] : 'stable';
+        $url     = isset($data['html_url']) ? (string) $data['html_url'] : '';
+        $dl      = isset($data['download_url']) ? (string) $data['download_url'] : '';
+        $notes   = isset($data['body']) ? trim((string) $data['body']) : '';
+        $reserve = 1200;
+        $maxNotes = AdminBeautify_Plugin::NOTICE_DETAIL_MAX - $reserve;
+        if ($maxNotes < 500) $maxNotes = 500;
+        if ($notes !== '' && mb_strlen($notes) > $maxNotes) {
+            $notes = mb_substr($notes, 0, $maxNotes) . "\n\n…（更新说明过长已截断，完整内容请见 Release 页）";
+        }
+        if ($notes === '') $notes = '本次 Release 未提供更新说明。';
+        $lines = array();
+        $lines[] = '- **当前版本**：v' . $current;
+        $lines[] = '- **最新版本**：v' . $latest;
+        $lines[] = '- **升级幅度**：' . $bump;
+        $lines[] = '- **升级通道**：' . ($channel === 'beta' ? '开发版（beta）' : '正式版（stable）');
+        $lines[] = '- **更新方式**：' . ($direct ? '后台一键更新' : '下载后手动覆盖');
+        if (!$direct) {
+            $lines[] = '';
+            $lines[] = '> 本次为跨次版本 / 跨主版本更新，后台不会提供「一键更新」，'
+                . '请下载后覆盖 `usr/plugins/AdminBeautify/` 目录（建议先备份）。';
+        }
+        $lines[] = '';
+        $lines[] = '## 更新说明';
+        $lines[] = '';
+        $lines[] = $notes;
+        $lines[] = '';
+        $lines[] = '---';
+        $lines[] = '';
+        $lines[] = '**相关链接**';
+        $lines[] = '';
+        if ($url !== '') $lines[] = '- [在 GitHub 查看 Release](' . $url . ')';
+        if ($dl !== '')  $lines[] = '- [直接下载 ZIP](' . $dl . ')';
+        return implode("\n", $lines);
+    }
     private function cardScopeParam()
     {
         return (strtolower(trim((string) $this->request->get('scope', 'user'))) === 'site') ? 'site' : 'user';
@@ -1558,6 +1643,408 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->checkWriteRequest();
         $key = (string) $this->request->get('key');
         $this->sendCardResult(AdminBeautify_Plugin::cardDataDelete($key, $this->cardScopeParam()), '数据已删除');
+    }
+    public function noticeList()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $this->sendCardResult(
+            AdminBeautify_Plugin::noticeList(
+                (string) $this->request->get('state', 'all'),
+                (int) $this->request->get('limit', 30),
+                (int) $this->request->get('offset', 0)
+            ),
+            'ok'
+        );
+    }
+    public function noticeCount()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $this->sendCardResult(AdminBeautify_Plugin::noticeCount(), 'ok');
+    }
+    public function noticeDetail()
+    {
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $this->sendCardResult(
+            AdminBeautify_Plugin::noticeDetail((int) $this->request->get('id', 0)),
+            'ok'
+        );
+    }
+    public function noticeState()
+    {
+        $this->checkWriteRequest();
+        $this->sendCardResult(
+            AdminBeautify_Plugin::noticeSetState(
+                $this->noticeIdsParam(),
+                (string) $this->request->get('state', 'read')
+            ),
+            'ok'
+        );
+    }
+    public function noticeClearRead()
+    {
+        $this->checkWriteRequest();
+        $this->sendCardResult(AdminBeautify_Plugin::noticeClearRead(), '已清空已读通知');
+    }
+    public function noticePurge()
+    {
+        $this->checkWriteRequest();
+        $this->sendCardResult(AdminBeautify_Plugin::noticePurgeDeleted(), '已彻底清除');
+    }
+    public function noticePush()
+    {
+        $this->checkWriteRequest();
+        $opt = array(
+            'link' => (string) $this->request->get('link', ''),
+            'src'  => (string) $this->request->get('src', ''),
+            'act'  => (string) $this->request->get('act', ''),
+        );
+        $detail = (string) $this->request->get('detail', '');
+        if ($detail !== '') $opt['detail'] = $detail;
+        $dedup = (string) $this->request->get('dedup', '');
+        if ($dedup !== '') $opt['dedup'] = $dedup;
+        $this->sendCardResult(
+            AdminBeautify_Plugin::pushNotice(
+                (string) $this->request->get('title', ''),
+                (string) $this->request->get('body', ''),
+                (string) $this->request->get('level', 'info'),
+                $opt
+            ),
+            '通知已写入'
+        );
+    }
+    private function noticeIdsParam()
+    {
+        if ((string) $this->request->get('all', '') === '1') return 'all';
+        $raw = (string) $this->request->get('ids', '');
+        if ($raw === '') return array();
+        $ids = array();
+        foreach (explode(',', $raw) as $one) {
+            $one = (int) trim($one);
+            if ($one > 0) $ids[] = $one;
+        }
+        return array_values(array_unique($ids));
+    }
+    private function noticePlatformUrl()
+    {
+        $url = '';
+        try {
+            $opt = AdminBeautify_Plugin::pluginOptions();
+            $url = isset($opt->noticePlatformUrl) ? trim((string) $opt->noticePlatformUrl) : '';
+        } catch (Exception $e) {
+            $url = '';
+        } catch (Throwable $e) {
+            $url = '';
+        }
+        if ($url === '') $url = 'https://ab-admin-notice.lhl.one';
+        if (!preg_match('#^https?://#i', $url)) $url = 'https://ab-admin-notice.lhl.one';
+        return rtrim($url, '/');
+    }
+    private function noticeSyncEnabled()
+    {
+        try {
+            $opt = AdminBeautify_Plugin::pluginOptions();
+            $v = isset($opt->noticeSyncEnabled) ? (string) $opt->noticeSyncEnabled : '1';
+        } catch (Exception $e) {
+            return true;
+        } catch (Throwable $e) {
+            return true;
+        }
+        return ($v !== '0');
+    }
+    private function noticeSyncStateFile()
+    {
+        return dirname(__FILE__) . '/tmp_update/.notice_sync.json';
+    }
+    private function readNoticeSyncState()
+    {
+        $file = $this->noticeSyncStateFile();
+        if (!is_file($file)) return array();
+        $raw = @file_get_contents($file);
+        $data = $raw ? @json_decode($raw, true) : null;
+        return is_array($data) ? $data : array();
+    }
+    private function writeNoticeSyncState(array $state)
+    {
+        $dir = dirname($this->noticeSyncStateFile());
+        if (!is_dir($dir)) @mkdir($dir, 0755, true);
+        @file_put_contents($this->noticeSyncStateFile(), json_encode($state, JSON_UNESCAPED_UNICODE));
+    }
+    private function collectEnabledPlugins()
+    {
+        $list = array();
+        if (!class_exists('Typecho_Plugin') || !method_exists('Typecho_Plugin', 'export')) {
+            return $list;
+        }
+        $root = defined('__TYPECHO_ROOT_DIR__') ? __TYPECHO_ROOT_DIR__ : dirname(dirname(dirname(__FILE__)));
+        $pluginDir = rtrim($root, '/\\') . '/usr/plugins/';
+        $export = Typecho_Plugin::export();
+        if (empty($export['activated']) || !is_array($export['activated'])) {
+            return $list;
+        }
+        foreach (array_keys($export['activated']) as $name) {
+            $name = (string) $name;
+            if ($name === '' || strpos($name, '/') !== false || strpos($name, '\\') !== false) continue;
+            $file = $pluginDir . $name . '/Plugin.php';
+            if (!is_file($file)) continue;
+            $info = array();
+            if (method_exists('Typecho_Plugin', 'parseInfo')) {
+                try {
+                    $info = (array) Typecho_Plugin::parseInfo($file);
+                } catch (Exception $e) {
+                    $info = array();
+                } catch (Throwable $e) {
+                    $info = array();
+                }
+            }
+            $list[] = array(
+                'name'    => $name,
+                'title'   => self::plainPluginMeta(isset($info['title']) ? $info['title'] : ''),
+                'author'  => self::plainPluginMeta(isset($info['author']) ? $info['author'] : ''),
+                'version' => self::plainPluginMeta(isset($info['version']) ? $info['version'] : ''),
+            );
+        }
+        return $list;
+    }
+    private static function plainPluginMeta($raw)
+    {
+        $s = (string) $raw;
+        $s = preg_replace('#<[^>]*>#', '', $s);
+        $s = html_entity_decode((string) $s, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $s = preg_replace('/[\x00-\x08\x0b\x0c\x0e-\x1f]/', '', (string) $s);
+        $s = preg_replace('/\s+/u', ' ', (string) $s);
+        $s = trim((string) $s);
+        if (function_exists('mb_substr') && mb_strlen($s, 'UTF-8') > 80) {
+            $s = mb_substr($s, 0, 80, 'UTF-8');
+        } elseif (!function_exists('mb_substr') && strlen($s) > 80) {
+            $s = substr($s, 0, 80);
+        }
+        return $s;
+    }
+    private function httpPostJson($url, array $payload, $timeout = 8)
+    {
+        $body = json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($body === false) return array('ok' => false, 'status' => 0, 'body' => '', 'error' => '请求体编码失败');
+        $headers = array(
+            'Content-Type: application/json; charset=utf-8',
+            'Accept: application/json',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.59',
+        );
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, array(
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST           => true,
+                CURLOPT_POSTFIELDS     => $body,
+                CURLOPT_HTTPHEADER     => $headers,
+                CURLOPT_TIMEOUT        => $timeout,
+                CURLOPT_CONNECTTIMEOUT => min(5, $timeout),
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_MAXREDIRS      => 2,
+            ));
+            $result = curl_exec($ch);
+            $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err    = curl_error($ch);
+            curl_close($ch);
+            if ($result !== false && $status > 0) {
+                return array('ok' => ($status >= 200 && $status < 300), 'status' => $status, 'body' => (string) $result, 'error' => '');
+            }
+            return array('ok' => false, 'status' => $status, 'body' => '', 'error' => ($err !== '' ? $err : '连接失败'));
+        }
+        $context = stream_context_create(array(
+            'http' => array(
+                'method'        => 'POST',
+                'header'        => implode("\r\n", $headers),
+                'content'       => $body,
+                'timeout'       => $timeout,
+                'ignore_errors' => true,
+            ),
+            'ssl' => array(
+                'verify_peer'      => true,
+                'verify_peer_name' => true,
+            ),
+        ));
+        $result = @file_get_contents($url, false, $context);
+        if ($result === false) {
+            return array('ok' => false, 'status' => 0, 'body' => '', 'error' => '网络不可达（可能未开启 allow_url_fopen）');
+        }
+        $status = 0;
+        if (!empty($http_response_header) && preg_match('#HTTP/\S+\s+(\d{3})#', $http_response_header[0], $m)) {
+            $status = (int) $m[1];
+        }
+        return array('ok' => ($status >= 200 && $status < 300), 'status' => $status, 'body' => (string) $result, 'error' => '');
+    }
+    private static function localDomainReason($host)
+    {
+        $host = strtolower(trim((string) $host));
+        if ($host === '') return '未配置站点地址';
+        if ($host === 'localhost' || substr($host, -6) === '.local') return 'localhost 域名';
+        if (preg_match('/^127\./', $host)) return '回环地址';
+        if (preg_match('/^(10|192\.168)\./', $host)) return '内网地址';
+        if (preg_match('/^172\.(1[6-9]|2[0-9]|3[01])\./', $host)) return '内网地址';
+        if (preg_match('/^169\.254\./', $host)) return '链路本地地址';
+        if (strpos($host, ':') !== false) return 'IPv6 地址';
+        if (strpos($host, '.') === false) return '单标签主机名';
+        return '';
+    }
+    private static function typechoVersion()
+    {
+        if (class_exists('Typecho_Common') && defined('Typecho_Common::VERSION')) {
+            return (string) Typecho_Common::VERSION;
+        }
+        return '';
+    }
+    public function noticeSync()
+    {
+        $this->checkWriteRequest();
+        $force   = ((string) $this->request->get('force', '0') === '1');
+        $now     = time();
+        $interval = 600;
+        $overlap  = 120;
+        $state    = $this->readNoticeSyncState();
+        if (!$this->noticeSyncEnabled()) {
+            $this->jsonSuccess(array('skipped' => true, 'reason' => 'disabled'), '远程通知同步已关闭');
+        }
+        $lastTry = isset($state['last_try']) ? (int) $state['last_try'] : 0;
+        if (!$force && $lastTry > 0 && ($now - $lastTry) < $interval) {
+            $this->jsonSuccess(array(
+                'skipped'   => true,
+                'reason'    => 'interval',
+                'next_in'   => $interval - ($now - $lastTry),
+                'since'     => isset($state['since']) ? (int) $state['since'] : 0,
+                'last_ok'   => isset($state['last_ok']) ? (int) $state['last_ok'] : 0,
+                'last_count' => isset($state['last_count']) ? (int) $state['last_count'] : 0,
+                'poll'      => isset($state['poll']) ? (int) $state['poll'] : $interval,
+                'last_error' => isset($state['last_error']) ? (string) $state['last_error'] : '',
+            ), '未到同步间隔');
+        }
+        try {
+            $options = Typecho_Widget::widget('Widget_Options');
+        } catch (Exception $e) {
+            $this->jsonError('无法读取站点配置', 500);
+            return;
+        } catch (Throwable $e) {
+            $this->jsonError('无法读取站点配置', 500);
+            return;
+        }
+        $siteUrl = (string) $options->siteUrl;
+        $domain  = (string) parse_url($siteUrl, PHP_URL_HOST);
+        if ($domain === '' && !empty($_SERVER['HTTP_HOST'])) {
+            $domain = (string) $_SERVER['HTTP_HOST'];
+        }
+        $domain = strtolower(trim($domain));
+        $domain = (string) preg_replace('/:\d+$/', '', $domain);
+        $domain = rtrim($domain, '.');
+        $localHint = self::localDomainReason($domain);
+        require_once dirname(__FILE__) . '/Updater.php';
+        $plugins = $this->collectEnabledPlugins();
+        $storedSince = isset($state['since']) ? (int) $state['since'] : 0;
+        $isFirst     = ($storedSince <= 0);
+        $sendSince   = $isFirst ? $now : max(1, $storedSince - $overlap);
+        $payload = array(
+            'domain'  => $domain,
+            'url'     => $siteUrl,
+            'version' => AdminBeautify_Updater::CURRENT_VERSION,
+            'since'   => $sendSince,
+            'typecho' => self::typechoVersion(),
+            'php'     => PHP_VERSION,
+            'locale'  => (string) $options->lang,
+            'plugins' => $plugins,
+        );
+        $endpoint = $this->noticePlatformUrl() . '/api/v1/check';
+        $t0       = microtime(true);
+        $res      = $this->httpPostJson($endpoint, $payload, 15);
+        $elapsed  = round(microtime(true) - $t0, 1);
+        if (!$res['ok'] && $res['body'] === '') {
+            $state['last_try']   = $now;
+            $state['last_error'] = (string) $res['error'];
+            $this->writeNoticeSyncState($state);
+            $this->jsonError(
+                '无法连接通知服务（' . $res['error'] . '，耗时 ' . $elapsed . 's）：' . $endpoint,
+                502
+            );
+        }
+        $json = @json_decode($res['body'], true);
+        if (!is_array($json)) {
+            $state['last_try']   = $now;
+            $state['last_error'] = '响应不是合法 JSON（HTTP ' . $res['status'] . '）';
+            $this->writeNoticeSyncState($state);
+            $this->jsonError('通知服务响应异常（HTTP ' . $res['status'] . '，耗时 ' . $elapsed . 's）', 502);
+        }
+        if (!isset($json['code']) || (int) $json['code'] !== 0) {
+            $msg = isset($json['message']) ? (string) $json['message'] : ('HTTP ' . $res['status']);
+            $state['last_try']   = $now;
+            $state['last_error'] = $msg;
+            $this->writeNoticeSyncState($state);
+            $this->jsonError('通知服务返回错误：' . $msg . '（本站上报域名：' . $domain . '）', 502);
+        }
+        if (!empty($json['throttled'])) {
+            $state['last_try'] = $now;
+            $this->writeNoticeSyncState($state);
+            $this->jsonSuccess(array(
+                'throttled' => true,
+                'next_in'   => isset($json['next_in']) ? (int) $json['next_in'] : 0,
+                'since'     => $storedSince,
+            ), '通知服务限流，稍后重试');
+        }
+        $items   = (isset($json['items']) && is_array($json['items'])) ? $json['items'] : array();
+        $pushed  = 0;
+        $created = 0;
+        $errors  = array();
+        foreach ($items as $it) {
+            if (!is_array($it)) continue;
+            $title = isset($it['title']) ? (string) $it['title'] : '';
+            if ($title === '') continue;
+            $opt = array(
+                'src'   => isset($it['src']) ? (string) $it['src'] : '官方公告',
+                'dedup' => isset($it['dedup']) && (string) $it['dedup'] !== ''
+                    ? (string) $it['dedup']
+                    : ('remote:' . (isset($it['id']) ? (int) $it['id'] : md5($title))),
+            );
+            if (!empty($it['link']))   $opt['link']   = (string) $it['link'];
+            if (!empty($it['act']))    $opt['act']    = (string) $it['act'];
+            if (!empty($it['detail'])) $opt['detail'] = (string) $it['detail'];
+            $r = AdminBeautify_Plugin::pushNotice(
+                $title,
+                isset($it['body']) ? (string) $it['body'] : '',
+                isset($it['lv']) ? (string) $it['lv'] : 'info',
+                $opt
+            );
+            if (isset($r['error'])) {
+                $errors[] = $r['error'];
+            } else {
+                $pushed++;
+                if (!empty($r['created'])) $created++;
+            }
+        }
+        $state['since']      = isset($json['now']) ? (int) $json['now'] : $now;
+        $state['last_try']   = $now;
+        $state['last_ok']    = $now;
+        $state['last_error'] = '';
+        $state['last_count'] = count($items);
+        $state['last_ms']    = (int) round($elapsed * 1000);
+        $state['poll']       = isset($json['poll']) ? (int) $json['poll'] : $interval;
+        $state['plugins']    = count($plugins);
+        if (!empty($json['first_run'])) $state['first_run'] = true;
+        $this->writeNoticeSyncState($state);
+        $this->jsonSuccess(array(
+            'fetch'      => count($items),
+            'pushed'     => $pushed,
+            'created'    => $created,
+            'since'      => $state['since'],
+            'poll'       => $state['poll'],
+            'domain'     => $domain,
+            'local_hint' => $localHint,
+            'ms'         => $state['last_ms'],
+            'plugins'    => count($plugins),
+            'first_run'  => $isFirst,
+            'server_now' => isset($json['now']) ? (int) $json['now'] : 0,
+            'errors'     => $errors,
+        ), $pushed > 0 ? ('已写入 ' . $pushed . ' 条通知') : '没有新通知');
     }
     public function dbRead()
     {
@@ -1657,6 +2144,30 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 break;
             case 'delete-card-data':
                 $this->deleteCardData();
+                break;
+            case 'notice-list':
+                $this->noticeList();
+                break;
+            case 'notice-count':
+                $this->noticeCount();
+                break;
+            case 'notice-detail':
+                $this->noticeDetail();
+                break;
+            case 'notice-state':
+                $this->noticeState();
+                break;
+            case 'notice-clear-read':
+                $this->noticeClearRead();
+                break;
+            case 'notice-purge':
+                $this->noticePurge();
+                break;
+            case 'notice-push':
+                $this->noticePush();
+                break;
+            case 'notice-sync':
+                $this->noticeSync();
                 break;
             case 'db-read':
                 $this->dbRead();

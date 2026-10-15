@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.58
+ * @version 2.1.59
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -333,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.58';
+        $abVer = '2.1.59';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -401,17 +401,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择页面进入与 AJAX 切换时的加载反馈样式：<b>新版转圈</b>（默认）复刻 Material 3 官方 Loading indicator —— 在 SoftBurst / Cookie9Sided / Pentagon / Pill / Sunny / Cookie4Sided / Oval 七个形状之间弹簧形变，每 700ms 切一个形状并同步旋转（官方参数：形变 ≈650ms/步 + 全局旋转 4666ms/圈）；<b>旧版转圈</b>为圆环旋转；<b>顶部进度条</b>为页面顶部细进度条。颜色均跟随插件主色。')
         );
         $form->addInput($loadingAnimation);
-        $navPosition = new Typecho_Widget_Helper_Form_Element_Select(
-            'navPosition',
-            array(
-                'left' => '侧边栏 (默认)',
-                'top'  => '导航栏 (原版)',
-            ),
-            'left',
-            _t('导航栏位置'),
-            _t('选择导航栏在页面顶部还是左侧显示（仅桌面端生效，移动端始终为顶部折叠菜单）')
-        );
-        $form->addInput($navPosition);
         $pluginCardView = new Typecho_Widget_Helper_Form_Element_Select(
             'pluginCardView',
             array(
@@ -516,7 +505,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             null,
             '',
             _t('概要页自定义快捷按钮'),
-            _t('每行一个按钮，格式：<code>名称:地址:图标</code> 或 <code>名称:地址:图标:highlight</code>。<br><code>:highlight</code> 为强调样式。图标名称可在 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a> 查询。<br>⚠️ 外链地址需以 <code>http://</code> 或 <code>https://</code> 开头，站内路径可直接填写。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:https://example.com:public:highlight</code><br><code>管理评论:manage-comments.php:comment</code>')
+            _t('每行一个按钮，格式：<code>名称:地址:图标</code> 或 <code>名称:地址:图标:highlight</code>。<br><code>:highlight</code> 为强调样式。图标名称可在 <a href="https://fonts.google.com/icons" target="_blank" rel="noopener noreferrer">Material Symbols</a> 查询。<br><span class="ab-tip-ico material-icons-round">warning</span> 外链地址需以 <code>http://</code> 或 <code>https://</code> 开头，站内路径可直接填写。<br>示例：<br><code>写文章:write-post.php:edit</code><br><code>查看前台:https://example.com:public:highlight</code><br><code>管理评论:manage-comments.php:comment</code>')
         );
         $form->addInput($dashboardCustomButtons);
         $dashboardRecentStyle = new Typecho_Widget_Helper_Form_Element_Select(
@@ -662,7 +651,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             ),
             '0',
             _t('自定义卡片'),
-            _t('开启后，才会在概要页渲染下方配置的自定义卡片。<br>卡片脚本可直接使用内置 MD3 组件库 <code>ab.ui</code>（磁贴指标 / 行列表 / 大号数字 / 清单 / 徽标 / 按钮 / 提示条 / 空状态 / 卡片底部入口 <code>ab-card-footer</code>），无需自己写 CSS，详见「自定义卡片开发说明」。<br>⚠️ 卡片内容支持任意 HTML 与 JavaScript，将在后台页面执行，请仅粘贴自己信任的代码。')
+            _t('开启后，才会在概要页渲染下方配置的自定义卡片。<br>卡片脚本可直接使用内置 MD3 组件库 <code>ab.ui</code>（磁贴指标 / 行列表 / 大号数字 / 清单 / 徽标 / 按钮 / 提示条 / 空状态 / 卡片底部入口 <code>ab-card-footer</code>），无需自己写 CSS，详见「自定义卡片开发说明」。<br><span class="ab-tip-ico material-icons-round">warning</span> 卡片内容支持任意 HTML 与 JavaScript，将在后台页面执行，请仅粘贴自己信任的代码。')
         );
         $form->addInput($dashboardCustomCardsEnabled);
         $dashboardCustomCards = new AdminBeautify_SafeHidden(
@@ -683,7 +672,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($dashboardMoreCardEnabled);
         abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
-            abCardTip('✏️', '可在 AB Typecho 原版优化 / AB Vditor / AB Editor.md / 兼容其他编辑器 之间切换。启用 Vditor 或 Editor.md 后，会替代原版 PageDown 编辑体验，并套用 AB 的 MD3 风格。')
+            abCardTip('edit', '可在 AB Typecho 原版优化 / AB Vditor / AB Editor.md / 兼容其他编辑器 之间切换。启用 Vditor 或 Editor.md 后，会替代原版 PageDown 编辑体验，并套用 AB 的 MD3 风格。')
         );
         $editorVditor = new Typecho_Widget_Helper_Form_Element_Select(
             'editor_vditor',
@@ -722,7 +711,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($editorHideToolbar);
         abCard('login', $abC2, 'lock', '登录页设置', '自定义登录页主题、背景、虚化与扩展样式脚本',
-            abCardTip('💡', '以下设置控制登录页面的样式，支持自定义配色、背景图片、虚化效果等。')
+            abCardTip('tips_and_updates', '以下设置控制登录页面的样式，支持自定义配色、背景图片、虚化效果等。')
         );
         $loginIsEnabled = new Typecho_Widget_Helper_Form_Element_Radio(
             'login_isEnabled',
@@ -884,9 +873,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($ajaxEnabled);
         abCard('channel', $abC1, 'system_update_alt', '升级通道', '选择接收正式版，或同时接收 GitHub 上的开发版（Pre-release）',
-            abCardTip('🧪',
+            abCardTip('science',
                 '开发版 = 除正式 Release 外，还把 GitHub 上标记为 <b>Pre-release</b> 的最新版当作更新推送。<br>'
-                . '⚠️ 开发版可能不稳定，建议只在测试站点开启；从开发版回退到稳定版需要手动覆盖安装一次正式版。',
+                . '<span class="ab-tip-ico material-icons-round">warning</span> 开发版可能不稳定，建议只在测试站点开启；从开发版回退到稳定版需要手动覆盖安装一次正式版。',
                 true
             )
         );
@@ -902,7 +891,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         );
         $form->addInput($updateChannel);
         abCard('compat', $abC2, 'extension', '兼容脚本管理', '按需启用兼容脚本，修复插件页面样式与交互冲突',
-            abCardTip('📦',
+            abCardTip('inventory_2',
                 '兼容脚本默认不加载，请根据需要手动开启。脚本位于 <code>assets/compat/</code> 目录。<br>'
                 . '开发者可参考 <code>assets/compat/README.md</code> 编写兼容脚本（需包含 <code>@name</code> / <code>@plugins</code> / <code>@description</code> 元数据）。<br>'
                 . '文档：<a href="https://blog.lhl.one/artical/977.html" target="_blank">https://blog.lhl.one/artical/977.html</a>',
@@ -954,11 +943,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             ),
             '0',
             _t('插件通知'),
-            _t('关闭后，将不再显示插件更新横幅通知和公告弹窗。')
+            _t('关闭后，将不再显示设置页的插件公告弹窗。')
         );
         $form->addInput($notifyOptOut);
         abCard('smtp', $abC2, 'outbox', 'SMTP 发件设置', '配置发信服务器，供登录页「忘记密码」等功能发送邮件',
-            abCardTip('✉️',
+            abCardTip('mail',
                 '在需要发送邮件时会使用以上设置，如登录页面的「忘记密码」功能等。<br>'
                 . '多数邮箱（QQ、163、Gmail 等）需要填写<strong>授权码</strong>，而不是邮箱登录密码。'
             )
@@ -1043,11 +1032,11 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $abTsAdminUrl = (string) Typecho_Widget::widget('Widget_Options')->adminUrl;
         $abTsErrHtml = '';
         if (self::$turnstileResumedThisRequest) {
-            $abTsErrHtml .= '<br><br><b style="color:#2e7d32">✅ 已恢复人机验证</b><br>'
+            $abTsErrHtml .= '<br><br><b style="color:#2e7d32"><span class="ab-tip-ico material-icons-round">check_circle</span> 已恢复人机验证</b><br>'
                 . '请确认上面的密钥与 Cloudflare 控制台一致，再让用户重试登录。';
         }
         if (file_exists(self::turnstileKillSwitchPath())) {
-            $abTsErrHtml .= '<br><br><b style="color:#b3261e">⛔ 紧急开关生效中</b><br>'
+            $abTsErrHtml .= '<br><br><b style="color:#b3261e"><span class="ab-tip-ico material-icons-round">block</span> 紧急开关生效中</b><br>'
                 . '检测到文件 <code>usr/plugins/AdminBeautify/turnstile-off</code>，'
                 . '人机验证已<b>全部跳过</b>。确认能正常登录后请删除该文件。';
         } elseif (self::turnstileIsSuspended()) {
@@ -1057,7 +1046,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $abTsReason = isset($abTsOptNow->turnstile_suspendedReason)
                 ? (string) $abTsOptNow->turnstile_suspendedReason
                 : '';
-            $abTsErrHtml .= '<br><br><b style="color:#b3261e">⛔ 人机验证已被自动暂停' . $abTsWhen . '</b><br>'
+            $abTsErrHtml .= '<br><br><b style="color:#b3261e"><span class="ab-tip-ico material-icons-round">block</span> 人机验证已被自动暂停' . $abTsWhen . '</b><br>'
                 . '连续多次出现「服务器侧配置错」（<code>' . htmlspecialchars($abTsReason, ENT_QUOTES | ENT_HTML5) . '</code>），'
                 . '为避免把管理员锁在后台外面，插件已自动跳过验证、放行登录。<br>'
                 . htmlspecialchars(self::turnstileErrorHint($abTsReason), ENT_QUOTES | ENT_HTML5) . '<br>'
@@ -1069,17 +1058,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             $abTsWhen = !empty($abTsOptNow->turnstile_lastErrorAt)
                 ? '（' . date('Y-m-d H:i', (int) $abTsOptNow->turnstile_lastErrorAt) . '）'
                 : '';
-            $abTsErrHtml .= '<br><br><b style="color:#b3261e">⚠ 上次安全验证失败' . $abTsWhen . '</b><br>'
+            $abTsErrHtml .= '<br><br><b style="color:#b3261e"><span class="ab-tip-ico material-icons-round">warning</span> 上次安全验证失败' . $abTsWhen . '</b><br>'
                 . '原因：<code>' . htmlspecialchars($abTsLast, ENT_QUOTES | ENT_HTML5) . '</code><br>'
                 . htmlspecialchars(self::turnstileErrorHint($abTsLast), ENT_QUOTES | ENT_HTML5);
         }
-        $abTsErrHtml .= '<br><br><b>🔑 万一配错把自己锁在门外：</b><br>'
+        $abTsErrHtml .= '<br><br><b><span class="ab-tip-ico material-icons-round">key</span> 万一配错把自己锁在门外：</b><br>'
             . '① 用 FTP / 主机文件管理，在 <code>usr/plugins/AdminBeautify/</code> 下新建一个<b>空文件</b>'
             . ' <code>turnstile-off</code> → 人机验证立即全部跳过，登录后回来修配置，修好再删掉该文件；<br>'
             . '② 若改不了文件，可在数据库里把本插件设置中的 <code>turnstile_login</code> / '
             . '<code>turnstile_register</code> / <code>turnstile_forgot</code> 三个值改成 <code>0</code>（或把两个密钥清空）。';
         abCard('security', $abC1, 'admin_panel_settings', '安全验证设置', 'Cloudflare Turnstile 人机验证，保护登录、注册与找回密码入口',
-            abCardTip('🛡️',
+            abCardTip('verified_user',
                 'Turnstile 是 Cloudflare 提供的人机验证服务（免费）。'
                 . '在 Cloudflare 控制台创建站点后即可拿到「站点密钥（Site Key）」与「密钥（Secret Key）」。<br>'
                 . '<b>两项密钥都留空 = 视为未启用</b>，不会拦截任何页面，避免配置到一半把自己锁在门外。'
@@ -1150,7 +1139,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     {
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.58 %c",'
+            .   '"%c AB-Admin %c v2.1.59 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1179,7 +1168,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $borderRadius = $pluginOptions->borderRadius ?: 'medium';
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
-        $navPosition = $pluginOptions->navPosition ?: 'left';
         $loadingAnimation = isset($pluginOptions->loadingAnimation) ? (string)$pluginOptions->loadingAnimation : '';
         if ($loadingAnimation === '') {
             $loadingAnimation = 'morph';
@@ -1225,9 +1213,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $earlyScript .= 'if(d){document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.setProperty("color-scheme","dark");}';
         $earlyScript .= 'else{document.documentElement.removeAttribute("data-theme");document.documentElement.style.setProperty("color-scheme","light");}';
         $earlyScript .= '})();';
-        if ($navPosition === 'left') {
-            $earlyScript .= 'document.documentElement.setAttribute("data-nav","left");if(localStorage.getItem("adminBeautifySidebarCollapsed")==="1"){document.documentElement.setAttribute("data-nav-collapsed","");}';
-        }
+        $earlyScript .= 'document.documentElement.setAttribute("data-nav","left");if(localStorage.getItem("adminBeautifySidebarCollapsed")==="1"){document.documentElement.setAttribute("data-nav-collapsed","");}';
         if ($loadingAnimation === 'topbar') {
             $earlyScript .= 'document.documentElement.setAttribute("data-ab-loader","topbar");';
         } elseif ($loadingAnimation === 'morph') {
@@ -1322,9 +1308,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.58.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.59.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.58.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.59.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1637,7 +1623,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.58',
+            'pluginVersion'          => '2.1.59',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1671,9 +1657,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.58.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.59.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.58.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.59.js?v=' . $abJsVer . '"></script>';
         echo '<script>(function(){"use strict";
   var CQ = 575, OPEN = "ab-search-open";
   function box(f){ return f.querySelector(".search"); }
@@ -1816,93 +1802,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.58"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
-        }
-        if ($notifyOptOut !== '1') {
-            echo '<script>(function(){
-var CFG=window.__AB_CONFIG__||{};
-var ver=CFG.pluginVersion||"";
-if(!ver) return;
-var lsKey="ab-seen-version";
-var seen="";
-try{seen=localStorage.getItem(lsKey)||"";}catch(e){}
-if(seen===ver) return;
-function mkBanner(release){
-    var tag=release.tag_name||ver;
-    var body=release.body||"";
-    var url=release.html_url||("https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases");
-    var lines=body.split("\n").filter(function(l){return l.trim()!=="";});
-    var preview=lines.slice(0,4).join("\n");
-    var hasMore=lines.length>4;
-    var wrap=document.createElement("div");
-    wrap.id="ab-banner-notify";
-    wrap.setAttribute("role","region");
-    wrap.setAttribute("aria-label","插件更新通知");
-    wrap.style.transform="translateX(380px)";
-    var hdr=document.createElement("div");
-    hdr.className="ab-notify-hdr";
-    var ic=document.createElement("span");
-    ic.textContent="🎉";
-    ic.style.fontSize="18px";
-    var ttl=document.createElement("div");
-    ttl.className="ab-notify-title";
-    ttl.textContent="AdminBeautify 已更新";
-    var pill=document.createElement("span");
-    pill.className="ab-notify-pill";
-    pill.textContent=tag;
-    var cls=document.createElement("button");
-    cls.className="ab-notify-close";
-    cls.setAttribute("aria-label","关闭");
-    cls.textContent="×";
-    cls.onclick=function(){
-        wrap.style.transform="translateX(380px)";
-        setTimeout(function(){wrap.parentNode&&wrap.parentNode.removeChild(wrap);},400);
-        try{localStorage.setItem(lsKey,ver);}catch(e){}
-    };
-    hdr.appendChild(ic);hdr.appendChild(ttl);hdr.appendChild(pill);hdr.appendChild(cls);
-    var bd=document.createElement("div");
-    bd.className="ab-notify-bd";
-    var pre=document.createElement("pre");
-    pre.id="ab-banner-preview";
-    pre.className="ab-notify-pre";
-    pre.textContent=preview;
-    bd.appendChild(pre);
-    if(hasMore){
-        var full=document.createElement("pre");
-        full.id="ab-banner-full";
-        full.className="ab-notify-pre-full";
-        full.textContent=lines.join("\n");
-        bd.appendChild(full);
-        var tog=document.createElement("button");
-        tog.className="ab-notify-toggle";
-        tog.textContent="展开更多 ▾";
-        tog.onclick=function(){
-            var expanded=full.style.display!=="none";
-            full.style.display=expanded?"none":"block";
-            pre.style.display=expanded?"block":"none";
-            tog.textContent=expanded?"展开更多 ▾":"收起 ▴";
-        };
-        bd.appendChild(tog);
-    }
-    var ft=document.createElement("div");
-    ft.className="ab-notify-ft";
-    var lnk=document.createElement("a");
-    lnk.href=url;lnk.target="_blank";lnk.rel="noopener";
-    lnk.className="ab-notify-link";
-    lnk.textContent="查看完整更新日志 →";
-    ft.appendChild(lnk);
-    wrap.appendChild(hdr);wrap.appendChild(bd);wrap.appendChild(ft);
-    document.body.appendChild(wrap);
-    setTimeout(function(){wrap.style.transform="translateX(0)";},50);
-}
-// api.github.com 直连（不走代理，避免封禁）
-(function(){
-    fetch("https://api.github.com/repos/lhl77/Typecho-Plugin-AdminBeautify/releases/latest",{cache:"no-cache"})
-        .then(function(r){return r.ok?r.json():Promise.reject();})
-        .then(function(d){if(d&&d.tag_name)mkBanner(d);})
-        .catch(function(){});
-}());
-})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.59"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
@@ -2080,7 +1980,7 @@ function mkBanner(release){
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.58";';
+        echo 'var __AB_VER__="2.1.59";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2187,12 +2087,12 @@ window.abShowUpdateAvailable=function(d){
             +dismissBtn+'</div>';
         banner.appendChild(notify);
     } else {
-        // 其他页面：固定顶部通知栏
-        notify.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;padding:8px 16px;background:linear-gradient(90deg,#5c6bc0,#7e57c2);color:#fff;font-size:13px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.25);animation:ab-slideDown .3s ease;font-weight:500";
-        notify.innerHTML='<span style="flex:1">🎉 AB-Admin 发现新版本 <strong>v'+d.latest+'</strong>'+prereleaseTag+' <span style="opacity:.8;font-size:12px;font-weight:400">（当前 v'+d.current+'）</span></span>'
-            +'<div style="display:flex;gap:8px;align-items:center">'+actionBtns+dismissBtn+'</div>';
-        document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+40)+'px';
-        document.body.insertBefore(notify,document.body.firstChild);
+        // 其他后台页面：不再插顶部横条 —— 「发现新版本」已由通知中心展示
+        // （服务端 do=check-update 会写一条通知）。这里只把铃铛未读数刷一下。
+        if(window.AdminBeautify&&AdminBeautify.noticeCenter){
+            try{ AdminBeautify.noticeCenter.refresh(); }catch(e){}
+        }
+        return;
     }
     if(d.can_direct){
         notify.setAttribute("data-download-url",d.download_url||"");
@@ -2203,8 +2103,10 @@ window.abShowUpdateAvailable=function(d){
 window.abDoUpdate=function(){
     var notify=document.getElementById("ab-update-notify");
     if(!notify) return;
-    var dlUrl=notify.getAttribute("data-download-url");
-    var newVer=notify.getAttribute("data-new-version");
+    window.abDoUpdateFrom(notify.getAttribute("data-download-url"), notify.getAttribute("data-new-version"));
+};
+// ---- abDoUpdateFrom: 真正执行更新（通知中心里的「立即更新」也调它，保证行为一致）----
+window.abDoUpdateFrom=function(dlUrl,newVer){
     if(!dlUrl||!newVer){ window.open("https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases","_blank"); return; }
     var ajax=window.__AB_AJAX__||{};
     if(!ajax.url) return;
@@ -2499,9 +2401,8 @@ window.abShowUpdateToast=function(type,msg){
         toast.innerHTML="<span>"+msg+"</span>";
         banner.appendChild(toast);
     } else {
-        toast.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99999;padding:10px 20px;background:"+(colors[type]||"#6366f1")+";color:#fff;font-size:13px;text-align:center;animation:ab-slideDown .3s ease;font-weight:500";
-        toast.innerHTML=msg;
-        document.body.insertBefore(toast,document.body.firstChild);
+        // 非设置页：不再插顶部横条（插件仓库更新等改由通知中心展示）
+        return;
     }
     setTimeout(function(){ if(toast.parentNode) toast.remove(); },6000);
 };
@@ -3808,6 +3709,425 @@ window.abSyncCompat = function(){
     private static function normalizeCardScope($scope)
     {
         return (strtolower(trim((string) $scope)) === 'site') ? 'site' : 'user';
+    }
+    const NOTICE_KEY_PREFIX = 'notice-';
+    const NOTICE_MAX_ROWS = 200;
+    const NOTICE_DELETED_TTL = 2592000;
+    const NOTICE_TITLE_MAX = 120;
+    const NOTICE_BODY_MAX = 500;
+    const NOTICE_DETAIL_MAX = 8000;
+    const NOTICE_PAGE_MAX = 50;
+    private static $noticeLevels = array('info', 'success', 'warn', 'error');
+    public static function pushNotice($title, $body = '', $level = 'info', array $opt = array())
+    {
+        $title = self::noticeText($title, self::NOTICE_TITLE_MAX);
+        if ($title === '') return array('error' => '通知标题不能为空', 'code' => 400);
+        $body = self::noticeText($body, self::NOTICE_BODY_MAX);
+        $detail = isset($opt['detail']) ? self::noticeText($opt['detail'], self::NOTICE_DETAIL_MAX) : '';
+        $level = strtolower(trim((string) $level));
+        if (!in_array($level, self::$noticeLevels, true)) $level = 'info';
+        $uid = isset($opt['uid']) ? (int) $opt['uid'] : self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $ts = isset($opt['ts']) ? (int) $opt['ts'] : time();
+        if ($ts <= 0) $ts = time();
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::ensureCardTable()) {
+            return array('error' => '数据表不可用（请检查数据库账号是否具备建表权限）', 'code' => 500);
+        }
+        $dedup = isset($opt['dedup']) && (string) $opt['dedup'] !== ''
+            ? (string) $opt['dedup']
+            : ($level . '|' . $title . '|' . $body);
+        $key = self::NOTICE_KEY_PREFIX . substr(md5($dedup), 0, 12) . '-' . date('Ymd', $ts);
+        $payload = array(
+            'v'     => 1,
+            'lv'    => $level,
+            'title' => $title,
+            'body'  => $body,
+            'link'  => isset($opt['link']) ? (string) $opt['link'] : '',
+            'src'   => isset($opt['src']) ? self::noticeText($opt['src'], 40) : '',
+            'act'   => isset($opt['act']) ? self::noticeText($opt['act'], 24) : '',
+            'state' => 0,
+            'ts'    => $ts,
+            'rd'    => 0,
+            'n'     => 1,
+            'day'   => date('Ymd', $ts),
+        );
+        if ($detail !== '') $payload['detail'] = $detail;
+        $result = null;
+        $lastError = '';
+        for ($attempt = 0; $attempt < 2 && $result === null; $attempt++) {
+            try {
+                $result = self::noticeUpsertOnce($db, $uid, $key, $payload);
+            } catch (Exception $e) {
+                $lastError = $e->getMessage();
+            } catch (Throwable $e) {
+                $lastError = $e->getMessage();
+            }
+        }
+        if ($result === null) {
+            return array('error' => '写入失败：' . $lastError, 'code' => 500);
+        }
+        self::noticePrune($db, $uid);
+        return $result;
+    }
+    private static function noticeUpsertOnce($db, $uid, $key, array $payload)
+    {
+        $row = $db->fetchRow(
+            $db->select('id', 'content', 'created_at')
+                ->from('table.' . self::CARD_TABLE)
+                ->where('uid = ?', $uid)
+                ->where('card_key = ?', $key)
+                ->limit(1)
+        );
+        $now = time();
+        if ($row) {
+            $old = json_decode((string) $row['content'], true);
+            if (!is_array($old)) $old = array();
+            $merged = array_merge($payload, array(
+                'state' => isset($old['state']) ? (int) $old['state'] : 0,
+                'rd'    => isset($old['rd']) ? (int) $old['rd'] : 0,
+                'ts'    => isset($old['ts']) ? (int) $old['ts'] : (int) $row['created_at'],
+                'n'     => (isset($old['n']) ? (int) $old['n'] : 1) + 1,
+                'link'  => isset($old['link']) && $old['link'] !== '' ? $old['link'] : $payload['link'],
+            ));
+            if (!isset($payload['detail']) && isset($old['detail'])) $merged['detail'] = $old['detail'];
+            $db->query(
+                $db->update('table.' . self::CARD_TABLE)
+                    ->rows(array(
+                        'content'    => self::noticeJson($merged),
+                        'updated_at' => $now,
+                    ))
+                    ->where('id = ?', (int) $row['id'])
+            );
+            return array('id' => (int) $row['id'], 'created' => false, 'counted' => (int) $merged['n']);
+        }
+        $db->query(
+            $db->insert('table.' . self::CARD_TABLE)
+                ->rows(array(
+                    'uid'        => $uid,
+                    'card_key'   => $key,
+                    'content'    => self::noticeJson($payload),
+                    'created_at' => $payload['ts'],
+                    'updated_at' => $now,
+                ))
+        );
+        $id = 0;
+        $row = $db->fetchRow(
+            $db->select('id')
+                ->from('table.' . self::CARD_TABLE)
+                ->where('uid = ?', $uid)
+                ->where('card_key = ?', $key)
+                ->limit(1)
+        );
+        if ($row) $id = (int) $row['id'];
+        return array('id' => $id, 'created' => true, 'counted' => 1);
+    }
+    public static function noticeDetail($id)
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $id = (int) $id;
+        if ($id <= 0) return array('error' => '通知不存在', 'code' => 404);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) return array('error' => '数据表不可用', 'code' => 500);
+        try {
+            $row = $db->fetchRow(
+                $db->select('id', 'content', 'created_at', 'updated_at')
+                    ->from('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $uid)
+                    ->where('id = ?', $id)
+                    ->where('card_key LIKE ?', self::NOTICE_KEY_PREFIX . '%')
+                    ->limit(1)
+            );
+        } catch (Exception $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        }
+        if (!$row) return array('error' => '通知不存在', 'code' => 404);
+        $data = json_decode((string) $row['content'], true);
+        $item = self::noticeRowItem($row);
+        $item['detail'] = (is_array($data) && isset($data['detail'])) ? (string) $data['detail'] : '';
+        $item['md'] = ($item['detail'] !== '') ? $item['detail'] : $item['body'];
+        return $item;
+    }
+    public static function noticeList($state = 'all', $limit = 30, $offset = 0)
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $state = self::noticeStateName($state);
+        $limit = (int) $limit;
+        if ($limit < 0) $limit = 0;
+        if ($limit > self::NOTICE_PAGE_MAX) $limit = self::NOTICE_PAGE_MAX;
+        $offset = max(0, (int) $offset);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        $empty = array('items' => array(), 'state' => $state, 'hasMore' => false,
+                       'counts' => array('unread' => 0, 'read' => 0, 'deleted' => 0, 'all' => 0));
+        if (!self::cardTableReady($db)) return $empty;
+        try {
+            $items = array();
+            if ($limit > 0) {
+                $rows = $db->fetchAll(
+                    self::noticeBaseQuery($db, $uid, $state)
+                        ->order('updated_at', Typecho_Db::SORT_DESC)
+                        ->order('id', Typecho_Db::SORT_DESC)
+                        ->limit($limit)
+                        ->offset($offset)
+                );
+                foreach ((array) $rows as $row) $items[] = self::noticeRowItem($row);
+                $hasMore = count($items) === $limit;
+            } else {
+                $hasMore = false;
+            }
+            $counts = self::noticeCounts($db, $uid);
+        } catch (Exception $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        }
+        return array('items' => $items, 'state' => $state, 'hasMore' => $hasMore, 'counts' => $counts);
+    }
+    public static function noticeCount()
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) return array('unread' => 0, 'counts' => array('unread' => 0, 'read' => 0, 'deleted' => 0, 'all' => 0));
+        try {
+            $counts = self::noticeCounts($db, $uid);
+        } catch (Exception $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '读取失败：' . $e->getMessage(), 'code' => 500);
+        }
+        return array('unread' => $counts['unread'], 'counts' => $counts);
+    }
+    public static function noticeSetState($ids, $state)
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $newState = self::noticeStateValue($state);
+        if ($newState === null) return array('error' => '状态非法', 'code' => 400);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) return array('updated' => 0, 'state' => $newState);
+        $elapsed = time();
+        try {
+            if ($ids === 'all' || $ids === null) {
+                $list = $db->fetchAll(self::noticeBaseQuery($db, $uid, 'all'));
+            } else {
+                $clean = array();
+                foreach ((array) $ids as $one) {
+                    $one = (int) $one;
+                    if ($one > 0) $clean[] = $one;
+                }
+                $clean = array_values(array_unique($clean));
+                if (empty($clean)) return array('updated' => 0, 'state' => $newState);
+                $list = $db->fetchAll(
+                    $db->select('id', 'content')
+                        ->from('table.' . self::CARD_TABLE)
+                        ->where('uid = ?', $uid)
+                        ->where('id IN ?', $clean)
+                        ->where('card_key LIKE ?', self::NOTICE_KEY_PREFIX . '%')
+                );
+            }
+            $updated = 0;
+            foreach ((array) $list as $row) {
+                $data = json_decode((string) $row['content'], true);
+                if (!is_array($data)) continue;
+                $cur = isset($data['state']) ? (int) $data['state'] : 0;
+                if ($cur === $newState) continue;
+                $data['state'] = $newState;
+                if ($newState === 1 && empty($data['rd'])) $data['rd'] = $elapsed;
+                $db->query(
+                    $db->update('table.' . self::CARD_TABLE)
+                        ->rows(array('content' => self::noticeJson($data), 'updated_at' => $elapsed))
+                        ->where('uid = ?', $uid)
+                        ->where('id = ?', (int) $row['id'])
+                );
+                $updated++;
+            }
+        } catch (Exception $e) {
+            return array('error' => '更新失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '更新失败：' . $e->getMessage(), 'code' => 500);
+        }
+        return array('updated' => $updated, 'state' => $newState);
+    }
+    public static function noticeClearRead()
+    {
+        return self::noticeSetState(self::noticeIdsByState(1), 2);
+    }
+    public static function noticePurgeDeleted()
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array('error' => '未登录', 'code' => 401);
+        $db = self::getDb();
+        if (!$db) return array('error' => '数据库不可用', 'code' => 500);
+        if (!self::cardTableReady($db)) return array('deleted' => 0);
+        $ids = self::noticeIdsByState(2);
+        if (empty($ids)) return array('deleted' => 0);
+        try {
+            $deleted = (int) $db->query(
+                $db->delete('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $uid)
+                    ->where('id IN ?', $ids)
+            );
+        } catch (Exception $e) {
+            return array('error' => '删除失败：' . $e->getMessage(), 'code' => 500);
+        } catch (Throwable $e) {
+            return array('error' => '删除失败：' . $e->getMessage(), 'code' => 500);
+        }
+        return array('deleted' => $deleted);
+    }
+    private static function noticeIdsByState($state)
+    {
+        $uid = self::currentUid();
+        if ($uid <= 0) return array();
+        $db = self::getDb();
+        if (!$db || !self::cardTableReady($db)) return array();
+        try {
+            $rows = $db->fetchAll(self::noticeBaseQuery($db, $uid, self::noticeStateName($state)));
+        } catch (Exception $e) {
+            return array();
+        } catch (Throwable $e) {
+            return array();
+        }
+        $ids = array();
+        foreach ((array) $rows as $row) $ids[] = (int) $row['id'];
+        return $ids;
+    }
+    private static function noticeBaseQuery($db, $uid, $state)
+    {
+        $q = $db->select('id', 'content', 'created_at', 'updated_at')
+            ->from('table.' . self::CARD_TABLE)
+            ->where('uid = ?', $uid)
+            ->where('card_key LIKE ?', self::NOTICE_KEY_PREFIX . '%');
+        $state = self::noticeStateName($state);
+        if ($state !== 'all') {
+            $q->where('content LIKE ?', '%"state":' . self::noticeStateValue($state) . ',%');
+        } else {
+            $q->where('content NOT LIKE ?', '%"state":2,%');
+        }
+        return $q;
+    }
+    private static function noticeCounts($db, $uid)
+    {
+        $out = array('unread' => 0, 'read' => 0, 'deleted' => 0, 'all' => 0);
+        foreach (array('unread' => 0, 'read' => 1, 'deleted' => 2) as $name => $val) {
+            $row = $db->fetchRow(
+                $db->select(array('COUNT(*)' => 'num'))
+                    ->from('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $uid)
+                    ->where('card_key LIKE ?', self::NOTICE_KEY_PREFIX . '%')
+                    ->where('content LIKE ?', '%"state":' . $val . ',%')
+            );
+            $out[$name] = isset($row['num']) ? (int) $row['num'] : 0;
+        }
+        $out['all'] = $out['unread'] + $out['read'] + $out['deleted'];
+        return $out;
+    }
+    private static function noticePrune($db, $uid)
+    {
+        try {
+            $deadline = time() - self::NOTICE_DELETED_TTL;
+            $rows = $db->fetchAll(self::noticeBaseQuery($db, $uid, 'deleted'));
+            $expired = array();
+            foreach ((array) $rows as $row) {
+                $t = max((int) $row['updated_at'], (int) $row['created_at']);
+                if ($t > 0 && $t < $deadline) $expired[] = (int) $row['id'];
+            }
+            if (!empty($expired)) {
+                $db->query($db->delete('table.' . self::CARD_TABLE)->where('uid = ?', $uid)->where('id IN ?', $expired));
+            }
+            $row = $db->fetchRow(
+                $db->select(array('COUNT(*)' => 'num'))
+                    ->from('table.' . self::CARD_TABLE)
+                    ->where('uid = ?', $uid)
+                    ->where('card_key LIKE ?', self::NOTICE_KEY_PREFIX . '%')
+            );
+            $total = isset($row['num']) ? (int) $row['num'] : 0;
+            $over = $total - self::NOTICE_MAX_ROWS;
+            if ($over > 0) {
+                $old = $db->fetchAll(
+                    self::noticeBaseQuery($db, $uid, 'all')
+                        ->order('updated_at', Typecho_Db::SORT_ASC)
+                        ->order('id', Typecho_Db::SORT_ASC)
+                        ->limit($over)
+                );
+                $ids = array();
+                foreach ((array) $old as $r) $ids[] = (int) $r['id'];
+                if (!empty($ids)) {
+                    $db->query($db->delete('table.' . self::CARD_TABLE)->where('uid = ?', $uid)->where('id IN ?', $ids));
+                }
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    private static function noticeRowItem($row)
+    {
+        $data = json_decode((string) $row['content'], true);
+        if (!is_array($data)) $data = array();
+        $ts = isset($data['ts']) ? (int) $data['ts'] : (int) $row['created_at'];
+        if ($ts <= 0) $ts = (int) $row['created_at'];
+        return array(
+            'id'      => (int) $row['id'],
+            'lv'      => isset($data['lv']) ? (string) $data['lv'] : 'info',
+            'title'   => isset($data['title']) ? (string) $data['title'] : '',
+            'body'    => isset($data['body']) ? (string) $data['body'] : '',
+            'link'    => isset($data['link']) ? (string) $data['link'] : '',
+            'src'     => isset($data['src']) ? (string) $data['src'] : '',
+            'act'     => isset($data['act']) ? (string) $data['act'] : '',
+            'state'   => isset($data['state']) ? (int) $data['state'] : 0,
+            'ts'      => $ts,
+            'rd'      => isset($data['rd']) ? (int) $data['rd'] : 0,
+            'n'       => isset($data['n']) ? (int) $data['n'] : 1,
+            'hasDetail' => !empty($data['detail']),
+            'updated' => (int) $row['updated_at'],
+        );
+    }
+    private static function noticeStateValue($state)
+    {
+        if (is_int($state) || (is_string($state) && ctype_digit($state))) {
+            $state = (int) $state;
+            return in_array($state, array(0, 1, 2), true) ? $state : null;
+        }
+        $map = array('unread' => 0, 'read' => 1, 'deleted' => 2);
+        $key = strtolower(trim((string) $state));
+        return isset($map[$key]) ? $map[$key] : null;
+    }
+    private static function noticeStateName($state)
+    {
+        if (is_string($state)) {
+            $key = strtolower(trim($state));
+            if (in_array($key, array('all', 'unread', 'read', 'deleted'), true)) return $key;
+        }
+        $val = self::noticeStateValue($state);
+        if ($val === null) return 'all';
+        return array(0 => 'unread', 1 => 'read', 2 => 'deleted')[$val];
+    }
+    private static function noticeText($text, $max)
+    {
+        $text = str_replace(array("\r\n", "\r"), "\n", (string) $text);
+        $text = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $text);
+        if ($text === null) $text = '';
+        $text = trim($text);
+        if (function_exists('mb_substr')) {
+            if (mb_strlen($text, 'UTF-8') > $max) $text = mb_substr($text, 0, $max, 'UTF-8') . '…';
+        } elseif (strlen($text) > $max) {
+            $text = substr($text, 0, $max) . '…';
+        }
+        return $text;
+    }
+    private static function noticeJson(array $data)
+    {
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return ($json === false) ? '{}' : $json;
     }
     private static function isDeniedDbColumn($column)
     {

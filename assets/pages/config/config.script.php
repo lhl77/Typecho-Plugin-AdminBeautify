@@ -308,7 +308,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","navPosition","pluginCardView","postListStyle","pageListStyle","commentListStyle","categoryListStyle"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","pluginCardView","postListStyle","pageListStyle","commentListStyle","categoryListStyle"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -346,7 +346,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-quick">快捷操作</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-chart">图表</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-umami">Umami</button>\
-                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-nav">导航栏</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-plugin">插件管理页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-posts">文章页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-pages">独立页面页</button>\
@@ -365,17 +364,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     abGroupLabel.className="ab-group-label";
                     abGroupLabel.id="ab-admin-group-style";
                     abGroupLabel.textContent="样式";
-                    adminBody.appendChild(abGroupLabel);
-                }
-                // 在"导航栏"分组前插入分割线 + 分组标签
-                if(adminFields[i]==="navPosition"){
-                    var abDivider=document.createElement("div");
-                    abDivider.className="ab-group-divider";
-                    adminBody.appendChild(abDivider);
-                    var abGroupLabel=document.createElement("div");
-                    abGroupLabel.className="ab-group-label";
-                    abGroupLabel.id="ab-admin-group-nav";
-                    abGroupLabel.textContent="导航栏";
                     adminBody.appendChild(abGroupLabel);
                 }
                 // 在"插件管理页"分组前插入分割线 + 分组标签
@@ -988,7 +976,8 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     }
                     if(!def.gate){
                         st.textContent="始终显示";
-                        st.className="ab-dash-card-state is-on";
+                        /* 常驻卡片用 is-always（primary tonal），和「已启用」的绿区分开 */
+                        st.className="ab-dash-card-state is-always";
                         continue;
                     }
                     var sel=document.querySelector("[name=\""+def.gate+"\"]");
@@ -1273,6 +1262,25 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             if(customEnableUl) customEnableHost.appendChild(customEnableUl);
             var customListEl=customBox.querySelector("#ab-dash-custom-list");
 
+            /* 子区块标题与字段自带 label 同名时（卡片排版模式 /「更多」卡片），
+               把重复的那个 label 隐藏，避免同一句话在同一个区块里出现两次。
+               字段 label 会随 <ul> 一起被搬进子区块，所以这里是精确匹配后再隐藏。 */
+            function hideDupLabel(box,title){
+                if(!box) return;
+                var want=String(title||"").replace(/[\s「」]/g,"");
+                if(!want) return;
+                var labels=box.querySelectorAll(".typecho-label,label,h4");
+                for(var i=0;i<labels.length;i++){
+                    var el=labels[i];
+                    if(el.classList.contains("ab-dash-custom-title")) continue;
+                    if(el.querySelector("input,select,textarea")) continue;   /* 别误伤把控件包进 <label> 的写法 */
+                    if((el.textContent||"").replace(/[\s「」]/g,"")===want){
+                        el.classList.add("ab-dup-label");
+                        el.style.display="none";
+                    }
+                }
+            }
+
             /* ---- 卡片排版模式：插到「自定义卡片」区上方 ---- */
             var layoutUl=findFieldUl("dashboardLayout");
             if(layoutUl){
@@ -1284,6 +1292,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     </div>';
                 body.insertBefore(layoutBox,customBox);
                 layoutBox.appendChild(layoutUl);
+                hideDupLabel(layoutBox,"卡片排版模式");
             }
 
             /* ---- 「更多」卡片开关：放到折叠框最下面 ---- */
@@ -1297,6 +1306,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     </div>';
                 body.appendChild(moreBox);
                 moreBox.appendChild(moreUl);
+                hideDupLabel(moreBox,"「更多」卡片");
             }
 
             function newCardId(){

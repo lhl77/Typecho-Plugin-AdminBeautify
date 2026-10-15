@@ -49,13 +49,16 @@ if (!function_exists('abCardTip')):
 /**
  * 构建卡片提示框 HTML 字符串（不转义 $html，支持内嵌标签）
  * $green = false → 蓝色，$green = true → 绿色
+ *
+ * $icon 传 **Material 图标名**（渲染成图标字体字形），不再用 emoji ——
+ * 图标名字必须先跑 tools/make_icon_probe.py 到浏览器里确认命中合字（字体是子集）。
  */
 function abCardTip($icon, $html, $green = false) {
     $wrap  = $green ? 'ab-card-tip-green'      : 'ab-card-tip';
     $inner = $green ? 'ab-card-tip-green-text'  : 'ab-card-tip-text';
     return '<div class="' . $wrap . '">'
          .   '<div class="ab-card-tip-inner">'
-         .     '<span class="ab-card-tip-icon">' . $icon . '</span>'
+         .     '<span class="ab-card-tip-icon material-icons-round">' . $icon . '</span>'
          .     '<div class="' . $inner . '">' . $html . '</div>'
          .   '</div>'
          . '</div>';
