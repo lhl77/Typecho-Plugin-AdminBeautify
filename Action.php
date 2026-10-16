@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.60
+ * @version 2.1.61
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.60';
+        $pluginVer  = '2.1.61';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -206,7 +206,13 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $swContent = file_get_contents($swFile);
         $precacheUrls = json_encode(array($cssUrl, $jsUrl), JSON_UNESCAPED_SLASHES);
-        $swContent = str_replace('var PRECACHE_URLS = [];', 'var PRECACHE_URLS = ' . $precacheUrls . ';', $swContent);
+        $replaced = preg_replace(
+            '/var\s+PRECACHE_URLS\s*=\s*\[[\s\S]*?\];/',
+            'var PRECACHE_URLS = ' . $precacheUrls . ';',
+            $swContent,
+            1
+        );
+        if (is_string($replaced)) $swContent = $replaced;
         $this->response->setContentType('application/javascript');
         $this->response->setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         $this->response->setHeader('Service-Worker-Allowed', rtrim((string) $options->adminUrl, '/') . '/');
@@ -1754,23 +1760,66 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         return ($v !== '0');
     }
-    private function noticeSyncStateFile()
+    private function noticeSyncStateKey()
+    {
+        return 'notice-sync-state';
+    }
+    private function noticeSyncLegacyStateFile()
     {
         return dirname(__FILE__) . '/tmp_update/.notice_sync.json';
     }
     private function readNoticeSyncState()
     {
-        $file = $this->noticeSyncStateFile();
+        $fromDb = $this->readNoticeSyncStateFromDb();
+        if (is_array($fromDb) && !empty($fromDb)) return $fromDb;
+        $legacy = $this->readNoticeSyncLegacyStateFile();
+        if (!empty($legacy)) {
+            if ($fromDb !== null && $this->writeNoticeSyncState($legacy)) {
+                @unlink($this->noticeSyncLegacyStateFile());
+            }
+            return $legacy;
+        }
+        return is_array($fromDb) ? $fromDb : array();
+    }
+    private function readNoticeSyncStateFromDb()
+    {
+        if (!class_exists('AdminBeautify_Plugin')) return null;
+        try {
+            $row = AdminBeautify_Plugin::cardDataGet($this->noticeSyncStateKey(), 'site');
+        } catch (Exception $e) {
+            return null;
+        } catch (Throwable $e) {
+            return null;
+        }
+        if (!is_array($row) || isset($row['error'])) return null;
+        if (empty($row['exists']) || !is_array($row['json'])) return array();
+        return $row['json'];
+    }
+    private function readNoticeSyncLegacyStateFile()
+    {
+        $file = $this->noticeSyncLegacyStateFile();
         if (!is_file($file)) return array();
-        $raw = @file_get_contents($file);
+        $raw  = @file_get_contents($file);
         $data = $raw ? @json_decode($raw, true) : null;
         return is_array($data) ? $data : array();
     }
     private function writeNoticeSyncState(array $state)
     {
-        $dir = dirname($this->noticeSyncStateFile());
+        $json = json_encode($state, JSON_UNESCAPED_UNICODE);
+        if ($json === false) return false;
+        $json = (string) $json;
+        if (class_exists('AdminBeautify_Plugin')) {
+            try {
+                $r = AdminBeautify_Plugin::cardDataSave($this->noticeSyncStateKey(), $json, 'site');
+                if (is_array($r) && !isset($r['error'])) return true;
+            } catch (Exception $e) {
+            } catch (Throwable $e) {
+            }
+        }
+        $file = $this->noticeSyncLegacyStateFile();
+        $dir  = dirname($file);
         if (!is_dir($dir)) @mkdir($dir, 0755, true);
-        @file_put_contents($this->noticeSyncStateFile(), json_encode($state, JSON_UNESCAPED_UNICODE));
+        return (@file_put_contents($file, $json) !== false);
     }
     private function collectEnabledPlugins()
     {
@@ -1830,7 +1879,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.60',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.61',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
