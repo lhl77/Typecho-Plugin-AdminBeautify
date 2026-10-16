@@ -11,7 +11,7 @@ class AdminBeautify_Updater
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.59';
+    const CURRENT_VERSION = '2.1.60';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
