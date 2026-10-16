@@ -84,7 +84,7 @@ your-site/
 ```
 
 ### 截图
-![](https://i.see.you/2026/03/28/9Jdq/9b3028ef0009824db65eafa8acdd30a6.jpg)
+![](https://i.see.you/2026/10/16/2Tnn/879442e18e5bf8c6bbb27de6621ffc68.jpg)
 
 
 ## 捐助
