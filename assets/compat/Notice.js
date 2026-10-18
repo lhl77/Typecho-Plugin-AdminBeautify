@@ -9,34 +9,8 @@
  *                    同时修复 AB 的 `!important` 导致保存按钮重复显示，添加暗色模式适配，
  *                    以及防止 v2.0.0 独立页面错误修改 ab-sidebar-title 内容。
  * @plugins     Notice
- * @version     2.0.3
+ * @version     2.0.4
  * @author      LHL
- *
- * Changelog:
- *   2.0.3 – 适配 Notice 2.0.1（2026-10-13），并把 Notice 的暗色适配**全量**收进本脚本：
- *           ① 2.0.1 重做了「编辑邮件模版」页，新增编辑器工具栏 / 行号槽 / 状态栏 /
- *              常用变量卡 —— 这些元素在 notice.css 里是硬编码浅色，逐条补暗色；
- *           ② 补齐历史遗留的浅色面：下拉菜单与选项、输入框聚焦、choice 选中、
- *              secret-toggle / tab / 折叠头 hover、错误提示条、mdui 对话框、
- *              底部提交条（带 !important 的纯白底）等；
- *           ③ ⚠️ 关键修复：`--notice-md3-*` 变量覆盖的选择器改用 html[data-theme="dark"]。
- *              Notice 的 libs/Config.php::style() 会在页面加载后把 notice.css 追加到
- *              文档末尾（本脚本的 <style> 在它之前），而 :root 与 [data-theme="dark"]
- *              同为 (0,1,0)，同优先级下后出现者胜 —— 原来的变量覆盖整组被 :root 反盖，
- *              表现为设置页与两个 Panel 页仍是白底卡片 + #e6e0ec 浅色边框
- *              （notice.css 里所有 border: 1px solid var(--notice-md3-outline) 都吃它）；
- *           ④ 补齐非变量的硬编码浅色值：#dcd4e6（控件/下拉边框）、#bbaeca（控件 hover）、
- *              #eee8f3 / #f0ebf5（展开面板头下边框）、#7c718d（下拉箭头）、
- *              #ebe5f1（设置页子设置项面板外框）、#e4dced（底部悬浮提交条外框）；
- *           ⑤ 对比度修复：.notice-md3-tab.is-current / .notice-md3-inline-submit /
- *              .submit_only 在暗色下底为浅紫，notice.css 固定白字不可读 → 改用
- *              MD3 on-primary 深色文字（并对 .submit_only 提升一级优先级，避免同优先级被反盖）。
- *           不动的两类：hero 内部的半透明白叠加（在紫色渐变上本就正确）、
- *           以及 .typecho-foot（AdminBeautify 已 display:none 隐藏）。
- *   2.0.2 – 修复 [data-theme="dark"] 下编辑邮件模板/配置测试页面文本框无暗色样式；
- *           修复 notice-md3-panel-zone 各 section 卡片在暗色模式下显示为亮白色；
- *           修复 submit_only 保存按钮在暗色模式（浅紫背景+白字）对比度过低；
- *           修复 edit-template.php / test.php 页面错误修改 ab-sidebar-title 的问题。
  */
 (function () {
     'use strict';
@@ -645,3 +619,4 @@
         applyFix(url);
     });
 })();
+
