@@ -32,7 +32,7 @@ class AdminBeautify_StorePage
         $ajaxUrl = Typecho_Common::url('/action/admin-beautify', Typecho_Widget::widget('Widget_Options')->index);
         $token = $security->getToken($ajaxUrl);
         $tabs = array(
-            'all'      => array('全部', $counts['all'], 'apps'),
+            'all'      => array('全部', $counts['installed'], 'apps'),
             'update'   => array('可更新', $counts['update'], 'system_update_alt'),
             'active'   => array('已启用', $counts['active'], 'check_circle'),
             'inactive' => array('已停用', $counts['inactive'], 'do_not_disturb_on'),
@@ -112,7 +112,7 @@ class AdminBeautify_StorePage
             $html .= '<div class="abp-empty"><span class="material-icons-round">extension</span><p>没有找到插件</p></div>';
         }
         if ($privateRows) {
-            $html .= '<section class="abp-private" id="abp-private">'
+            $html .= '<section class="abp-private" id="abp-private"' . ($tab === 'store' ? '' : ' hidden') . '>'
                 . '<div class="abp-private-h">'
                 . '<span class="material-icons-round">key</span>'
                 . '<b>私密插件</b><span class="abp-private-n">口令安装 · ' . count($privateRows) . ' 个</span>'
@@ -126,7 +126,7 @@ class AdminBeautify_StorePage
             $html .= self::row($row, $tab, $security, $ajaxUrl);
         }
         $html .= '</div>';
-        $html .= '<div class="abp-foot">共 ' . (int) $counts['all'] . ' 个插件 · 商店源 '
+        $html .= '<div class="abp-foot">共 ' . (int) $counts['installed'] . ' 个已安装插件 · 商店源 '
             . self::e(AdminBeautify_Store::BASE) . ' · 安装前会自动备份旧版本到 <code>usr/plugins/.ab-store/backup</code>'
             . '</div>';
         $html .= '</div></div></div></main>';
@@ -166,7 +166,7 @@ class AdminBeautify_StorePage
         if (!$r['installed']) {
             $flags[] = 'notinstalled';
         }
-        if ($tab !== 'all' && !in_array($tab, $flags, true)) {
+        if ($tab === 'all' ? !$r['installed'] : !in_array($tab, $flags, true)) {
             $flags[] = 'is-hidden';
         }
         $search = strtolower($r['title'] . ' ' . $r['dir'] . ' ' . $r['desc'] . ' ' . $r['author']

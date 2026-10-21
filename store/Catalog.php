@@ -163,8 +163,14 @@ class AdminBeautify_StoreCatalog
     }
     private static function counts(array $rows)
     {
-        $c = array('all' => count($rows), 'active' => 0, 'inactive' => 0, 'update' => 0, 'store' => 0);
+        $c = array(
+            'all' => count($rows), 'installed' => 0,
+            'active' => 0, 'inactive' => 0, 'update' => 0, 'store' => 0
+        );
         foreach ($rows as $r) {
+            if (!empty($r['installed'])) {
+                $c['installed']++;
+            }
             if ($r['installed'] && $r['activated']) {
                 $c['active']++;
             }
