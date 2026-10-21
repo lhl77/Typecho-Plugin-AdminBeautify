@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.61
+ * @version 2.1.62
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.61';
+        $pluginVer  = '2.1.62';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -1879,7 +1879,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.61',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.62',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -2124,6 +2124,21 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         if ($do === 'do-update-stream') {
             $this->doUpdateStream();
+            return;
+        }
+        require_once dirname(__FILE__) . '/store/bootstrap.php';
+        if (AdminBeautify_StoreAjax::owns($do)) {
+            $this->response->setContentType('application/json');
+            $this->checkWriteRequest();
+            $result = AdminBeautify_StoreAjax::handle($do);
+            if (isset($result['error'])) {
+                $this->jsonError($result['error'], isset($result['code']) ? (int) $result['code'] : 400);
+                return;
+            }
+            $this->jsonSuccess(
+                isset($result['data']) ? $result['data'] : null,
+                isset($result['message']) ? $result['message'] : 'ok'
+            );
             return;
         }
         $this->response->setContentType('application/json');

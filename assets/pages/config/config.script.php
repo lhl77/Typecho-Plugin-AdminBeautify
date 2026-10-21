@@ -308,7 +308,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
     function buildCards(){
         // ---- 管理后台卡片 ----
-        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","pluginCardView","postListStyle","pageListStyle","commentListStyle","categoryListStyle"];
+        var adminFields=["primaryColor","darkMode","borderRadius","enableAnimation","loadingAnimation","dashboardQuickShow","dashboardQuickStyle","dashboardQuickHint","dashboardThemeButtonShow","dashboardHideDonate","dashboardCustomButtons","dashboardRecentStyle","overviewChartEnabled","overviewTimeRange","umamiEnabled","umamiProvider","umamiApiBase","umamiWebsiteId","umamiApiToken","umamiTimeRange","postListStyle","pageListStyle","commentListStyle","categoryListStyle"];
         var firstAdminUl=findFieldUl("primaryColor");
         var adminCard=document.getElementById("ab-card-admin");
         var adminBody=document.getElementById("ab-card-admin-body");
@@ -346,7 +346,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-quick">快捷操作</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-chart">图表</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-subgroup-umami">Umami</button>\
-                    <button type="button" class="ab-admin-chip" data-target="ab-admin-group-plugin">插件管理页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-posts">文章页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-pages">独立页面页</button>\
                     <button type="button" class="ab-admin-chip" data-target="ab-admin-group-comments">评论页</button>\
@@ -364,17 +363,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     abGroupLabel.className="ab-group-label";
                     abGroupLabel.id="ab-admin-group-style";
                     abGroupLabel.textContent="样式";
-                    adminBody.appendChild(abGroupLabel);
-                }
-                // 在"插件管理页"分组前插入分割线 + 分组标签
-                if(adminFields[i]==="pluginCardView"){
-                    var abDivider=document.createElement("div");
-                    abDivider.className="ab-group-divider";
-                    adminBody.appendChild(abDivider);
-                    var abGroupLabel=document.createElement("div");
-                    abGroupLabel.className="ab-group-label";
-                    abGroupLabel.id="ab-admin-group-plugin";
-                    abGroupLabel.textContent="插件管理页";
                     adminBody.appendChild(abGroupLabel);
                 }
                 // 在"文章页"分组前插入分割线 + 分组标签

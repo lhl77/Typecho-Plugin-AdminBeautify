@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.61
+ * @version 2.1.62
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -333,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.61';
+        $abVer = '2.1.62';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -401,17 +401,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('选择页面进入与 AJAX 切换时的加载反馈样式：<b>新版转圈</b>（默认）复刻 Material 3 官方 Loading indicator —— 在 SoftBurst / Cookie9Sided / Pentagon / Pill / Sunny / Cookie4Sided / Oval 七个形状之间弹簧形变，每 700ms 切一个形状并同步旋转（官方参数：形变 ≈650ms/步 + 全局旋转 4666ms/圈）；<b>旧版转圈</b>为圆环旋转；<b>顶部进度条</b>为页面顶部细进度条。颜色均跟随插件主色。')
         );
         $form->addInput($loadingAnimation);
-        $pluginCardView = new Typecho_Widget_Helper_Form_Element_Select(
-            'pluginCardView',
-            array(
-                '1' => '卡片网格 (默认)',
-                '0' => '原始表格',
-            ),
-            '1',
-            _t('插件列表样式'),
-            _t('选择插件管理页面的展示方式：卡片网格更直观，原始表格与 Typecho 默认保持一致')
-        );
-        $form->addInput($pluginCardView);
         $postListStyle = new Typecho_Widget_Helper_Form_Element_Select(
             'postListStyle',
             array(
@@ -1135,11 +1124,66 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
     {
     }
+    public static function storeBoot()
+    {
+        if (!defined('__TYPECHO_ADMIN__')) {
+            return false;
+        }
+        if (!class_exists('AdminBeautify_Store')) {
+            $file = dirname(__FILE__) . '/store/bootstrap.php';
+            if (!is_file($file)) {
+                return false;
+            }
+            require_once $file;
+        }
+        return class_exists('AdminBeautify_Store');
+    }
+    private static function storeHeaderInject()
+    {
+        if (!self::storeBoot()) {
+            return '';
+        }
+        $out = '';
+        $storeOn = false;
+        try {
+            $storeOn = AdminBeautify_Store::enabled();
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        if (!$storeOn) {
+            return '';
+        }
+        try {
+            $export = Typecho_Plugin::export();
+            if (!empty($export['activated']['AdminBeautifyStore'])) {
+                $out .= '<style id="ab-store-legacy-hide">'
+                    . '.typecho-head-nav nav menu li:has(>a[href*="panel=AdminBeautifyStore"]),'
+                    . '.typecho-head-nav nav menu li>a[href*="panel=AdminBeautifyStore"]{display:none!important}'
+                    . '</style>';
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        try {
+            if (AdminBeautify_StoreTakeover::canTakeover()) {
+                AdminBeautify_StoreTakeover::arm();
+                $options = Typecho_Widget::widget('Widget_Options');
+                $css = Typecho_Common::url('AdminBeautify/store/assets/store.css', $options->pluginUrl);
+                $file = dirname(__FILE__) . '/store/assets/store.css';
+                $ver = is_file($file) ? (string) filemtime($file) : '0';
+                $out .= '<link rel="stylesheet" href="' . htmlspecialchars($css . '?v=' . $ver) . '">';
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return $out;
+    }
     public static function renderHeader($header)
     {
+        $header .= self::storeHeaderInject();
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.61 %c",'
+            .   '"%c AB-Admin %c v2.1.62 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1308,9 +1352,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.61.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.62.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.61.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.62.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1365,13 +1409,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (self::isLoginPage()) {
             return;
         }
+        if (self::storeBoot()) {
+            AdminBeautify_StoreTakeover::finish();
+        }
         echo '<div id="ab-page-loader"><div id="ab-loader-spinner"></div></div>';
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = self::pluginOptions($options);
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
-        $pluginCardView = isset($pluginOptions->pluginCardView) ? (string)$pluginOptions->pluginCardView : '1';
+        $pluginCardView = '1';
         $postListStyle = isset($pluginOptions->postListStyle) ? (string)$pluginOptions->postListStyle : 'card';
         if ($postListStyle !== 'list') $postListStyle = 'card';
         $pageListStyle = isset($pluginOptions->pageListStyle) ? (string)$pluginOptions->pageListStyle : 'card';
@@ -1623,7 +1670,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.61',
+            'pluginVersion'          => '2.1.62',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1657,9 +1704,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.61.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.62.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.61.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.62.js?v=' . $abJsVer . '"></script>';
         echo '<script>(function(){"use strict";
   var CQ = 575, OPEN = "ab-search-open";
   function box(f){ return f.querySelector(".search"); }
@@ -1802,7 +1849,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.61"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.62"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
@@ -1980,7 +2027,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.61";';
+        echo 'var __AB_VER__="2.1.62";';
         echo <<<'UPDATEJS'
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
@@ -2507,6 +2554,7 @@ UPDATEJS;
             }
             echo '<script>(function(){try{var b=document.createElement("div");b.id="ab-typecho-version-note";b.style.cssText="position:fixed;top:0;left:0;right:0;z-index:99998;padding:10px 14px;background:#fef3c7;color:#92400e;font-size:13px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,.06);";b.innerHTML=' . json_encode($noteMsg) . ';document.body.insertBefore(b,document.body.firstChild);document.body.style.paddingTop=(parseInt(document.body.style.paddingTop||0)+48)+"px";setTimeout(function(){b.style.transform="translateY(0)";},10);}catch(e){} })();</script>';
         }
+        if (!(self::storeBoot() && class_exists('AdminBeautify_Store') && AdminBeautify_Store::enabled())) {
         $absDir = rtrim(dirname(__FILE__), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'AdminBeautifyStore';
         $absInstalled = is_dir($absDir);
         $absActivated = false;
@@ -2633,6 +2681,22 @@ UPDATEJS;
             .   'abCheckAndInject(url);'
             . '});'
             . '})();</script>';
+        }
+        if (self::storeBoot() && AdminBeautify_Store::enabled()) {
+            $storeOpts = Typecho_Widget::widget('Widget_Options');
+            $storeJsUrl = Typecho_Common::url('AdminBeautify/store/assets/store.js', $storeOpts->pluginUrl);
+            $storeJsFile = dirname(__FILE__) . '/store/assets/store.js';
+            $storeJsVer = is_file($storeJsFile) ? (string) filemtime($storeJsFile) : '0';
+            echo '<script src="' . htmlspecialchars($storeJsUrl . '?v=' . $storeJsVer) . '"></script>' . "\n";
+        }
+        if (self::storeBoot() && AdminBeautify_Store::enabled()
+            && !AdminBeautify_Store::notifyOptOut()) {
+            $ucOpts = Typecho_Widget::widget('Widget_Options');
+            $ucUrl = Typecho_Common::url('AdminBeautify/store/assets/update-check.js', $ucOpts->pluginUrl);
+            $ucFile = dirname(__FILE__) . '/store/assets/update-check.js';
+            $ucVer = is_file($ucFile) ? (string) filemtime($ucFile) : '0';
+            echo '<script src="' . htmlspecialchars($ucUrl . '?v=' . $ucVer) . '"></script>' . "\n";
+        }
         echo '<script>(function(){
 setTimeout(function(){
     var LS_KEY="ab-compat-auto-sync-ts";
@@ -3758,7 +3822,13 @@ window.abSyncCompat = function(){
         $lastError = '';
         for ($attempt = 0; $attempt < 2 && $result === null; $attempt++) {
             try {
-                $result = self::noticeUpsertOnce($db, $uid, $key, $payload);
+                $result = self::noticeUpsertOnce(
+                    $db,
+                    $uid,
+                    $key,
+                    $payload,
+                    !empty($opt['rearm'])
+                );
             } catch (Exception $e) {
                 $lastError = $e->getMessage();
             } catch (Throwable $e) {
@@ -3771,7 +3841,7 @@ window.abSyncCompat = function(){
         self::noticePrune($db, $uid);
         return $result;
     }
-    private static function noticeUpsertOnce($db, $uid, $key, array $payload)
+    private static function noticeUpsertOnce($db, $uid, $key, array $payload, $rearm = false)
     {
         $row = $db->fetchRow(
             $db->select('id', 'content', 'created_at')
@@ -3785,8 +3855,8 @@ window.abSyncCompat = function(){
             $old = json_decode((string) $row['content'], true);
             if (!is_array($old)) $old = array();
             $merged = array_merge($payload, array(
-                'state' => isset($old['state']) ? (int) $old['state'] : 0,
-                'rd'    => isset($old['rd']) ? (int) $old['rd'] : 0,
+                'state' => $rearm ? 0 : (isset($old['state']) ? (int) $old['state'] : 0),
+                'rd'    => $rearm ? 0 : (isset($old['rd']) ? (int) $old['rd'] : 0),
                 'ts'    => isset($old['ts']) ? (int) $old['ts'] : (int) $row['created_at'],
                 'n'     => (isset($old['n']) ? (int) $old['n'] : 1) + 1,
                 'link'  => isset($old['link']) && $old['link'] !== '' ? $old['link'] : $payload['link'],
