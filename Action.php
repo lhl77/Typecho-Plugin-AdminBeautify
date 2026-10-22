@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.62
+ * @version 2.1.63
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.62';
+        $pluginVer  = '2.1.63';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -852,6 +852,9 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $cacheFile = dirname(__FILE__) . '/tmp_update/.update_cache' . $chSuffix . '.json';
         $lockFile  = dirname(__FILE__) . '/tmp_update/.update_lock' . $chSuffix;
         $cacheTTL  = 3600;
+        require_once dirname(__FILE__) . '/Patch.php';
+        $patchForce = ($this->request->get('force', '0') === '1');
+        $patches    = AdminBeautify_Patch::summary($patchForce);
         if ($this->request->get('force', '0') === '1') {
             if (session_status() === PHP_SESSION_ACTIVE) {
                 @session_write_close();
@@ -864,7 +867,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     $obj = $raw ? @json_decode($raw, true) : null;
                     if (is_array($obj) && isset($obj['data'])) {
                         $this->jsonSuccess(
-                            array_merge($obj['data'], array('from_cache' => true, 'force_failed' => true)),
+                            array_merge($obj['data'], array('from_cache' => true, 'force_failed' => true, 'patches' => $patches)),
                             '网络不可用，显示上次缓存结果'
                         );
                     }
@@ -886,6 +889,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'prerelease'   => !empty($release['prerelease']),
                 'channel'      => $channel,
                 'from_cache'   => false,
+                'patches'      => $patches,
             );
             $cacheDir = dirname($cacheFile);
             if (!is_dir($cacheDir)) @mkdir($cacheDir, 0755, true);
@@ -924,6 +928,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 'data'    => array_merge($cachedData, array(
                     'from_cache'  => true,
                     'cache_stale' => $isStale,
+                    'patches'     => $patches,
                 )),
             ));
         } else {
@@ -937,11 +942,18 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'cache_stale' => true,
                     'checking'    => true,
                     'channel'     => $channel,
+                    'patches'     => $patches,
                 ),
             ));
         }
         if (is_array($cachedData) && !empty($cachedData['has_update'])) {
             $this->noticeUpdateAvailable($cachedData);
+        }
+        $this->noticePatchAvailable($patches);
+        if (!empty($patches['stale'])) {
+            @ignore_user_abort(true);
+            @set_time_limit(30);
+            AdminBeautify_Patch::fetchIndex(true);
         }
         if ($needsBgRefresh) {
             $cacheDir = dirname($cacheFile);
@@ -966,6 +978,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'body'         => $release['body'],
                     'prerelease'   => !empty($release['prerelease']),
                     'channel'      => $channel,
+                    'patches'      => $patches,
                 );
                 @file_put_contents($cacheFile, json_encode(array('ts' => time(), 'data' => $freshData)));
             }
@@ -1537,6 +1550,205 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $this->jsonSuccess($result, $successMessage);
     }
+    public function patchList()
+    {
+        $this->checkAdmin();
+        require_once dirname(__FILE__) . '/Patch.php';
+        $force = ($this->request->get('force', '0') === '1');
+        $idx   = AdminBeautify_Patch::fetchIndex($force);
+        $this->jsonSuccess(array(
+            'status'  => AdminBeautify_Patch::analyze($idx['index']),
+            'backups' => AdminBeautify_Patch::backups(),
+            'index'   => array(
+                'from_cache' => (bool) $idx['from_cache'],
+                'checked_at' => (int) $idx['ts'],
+                'stale'      => !empty($idx['stale']),
+                'error'      => (string) $idx['error'],
+            ),
+        ), $force ? '已刷新补丁清单' : '补丁清单');
+    }
+    public function patchApplyStream()
+    {
+        $this->checkWriteRequest();
+        require_once dirname(__FILE__) . '/Patch.php';
+        $id = trim((string) $this->request->get('id', ''));
+        if ($id === '') {
+            $this->jsonError('缺少 id 参数');
+        }
+        @ini_set('zlib.output_compression', 'Off');
+        while (ob_get_level() > 0) { @ob_end_clean(); }
+        @set_time_limit(300);
+        @ob_implicit_flush(1);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_write_close();
+        }
+        header('Content-Type: text/event-stream; charset=utf-8');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('X-Accel-Buffering: no');
+        header('X-Content-Type-Options: nosniff');
+        header('Connection: keep-alive');
+        $emit = function ($type, $message, $progress) {
+            echo 'data: ' . json_encode(array(
+                'type'     => $type,
+                'message'  => $message,
+                'progress' => $progress,
+            ), JSON_UNESCAPED_UNICODE) . "\n\n";
+            if (ob_get_level() > 0) @ob_flush();
+            @flush();
+        };
+        $emit('progress', '准备中…', 2);
+        $opt = array(
+            'emit' => function ($pct, $msg) use ($emit) {
+                $emit('progress', $msg, $pct);
+            },
+        );
+        $result = ($id === 'all')
+            ? AdminBeautify_Patch::applyAll(null, $opt)
+            : AdminBeautify_Patch::apply($id, $opt);
+        if (empty($result['ok'])) {
+            $this->noticePatchFailed($result);
+            $emit('error', (string) $result['message'], 100);
+            exit;
+        }
+        $this->noticePatchApplied($result);
+        $emit('done', (string) $result['message'], 100);
+        exit;
+    }
+    public function patchApply()
+    {
+        $this->checkWriteRequest();
+        require_once dirname(__FILE__) . '/Patch.php';
+        $id = trim((string) $this->request->get('id', ''));
+        if ($id === '') {
+            $this->jsonError('缺少 id 参数');
+        }
+        $result = ($id === 'all')
+            ? AdminBeautify_Patch::applyAll()
+            : AdminBeautify_Patch::apply($id);
+        if (empty($result['ok'])) {
+            $this->noticePatchFailed($result);
+            $this->jsonError((string) $result['message'], 400);
+        }
+        $this->noticePatchApplied($result);
+        $this->jsonSuccess($result, (string) $result['message']);
+    }
+    public function patchRollback()
+    {
+        $this->checkWriteRequest();
+        require_once dirname(__FILE__) . '/Patch.php';
+        $id = trim((string) $this->request->get('id', ''));
+        if ($id === '') {
+            $this->jsonError('缺少 id 参数');
+        }
+        $force = ($this->request->get('force', '0') === '1');
+        $result = AdminBeautify_Patch::rollback($id, $force);
+        if (empty($result['ok'])) {
+            $this->jsonError((string) $result['message'], 400);
+        }
+        $this->jsonSuccess($result, (string) $result['message']);
+    }
+    public function patchBackups()
+    {
+        $this->checkAdmin();
+        require_once dirname(__FILE__) . '/Patch.php';
+        $this->jsonSuccess(array('backups' => AdminBeautify_Patch::backups()), '备份列表');
+    }
+    private function noticePatchAvailable(array $p)
+    {
+        if (empty($p['have'])) return;
+        $count = isset($p['count']) ? (int) $p['count'] : 0;
+        $conf  = isset($p['conflict']) ? (int) $p['conflict'] : 0;
+        if ($count <= 0 && $conf <= 0) return;
+        $ids    = (isset($p['ids']) && is_array($p['ids'])) ? $p['ids'] : array();
+        $list   = (isset($p['list']) && is_array($p['list'])) ? $p['list'] : array();
+        $level  = 'warn';
+        $lines  = array();
+        foreach ($list as $it) {
+            $sev   = isset($it['severity']) ? (string) $it['severity'] : 'warn';
+            $paths = (isset($it['files']) && is_array($it['files'])) ? $it['files'] : array();
+            if ($sev === 'security') $level = 'error';
+            $line = '- **' . (isset($it['title']) ? $it['title'] : '') . '**';
+            if ($sev === 'security') $line .= '（⚠️ 安全）';
+            if ($paths) $line .= "\n  `" . implode('`, `', $paths) . '`';
+            if (isset($it['status']) && $it['status'] === 'conflict') {
+                $line .= "\n  ⚠️ 本地文件与补丁清单不一致，需手工处理";
+            }
+            $lines[] = $line;
+        }
+        if (empty($lines)) $lines[] = '- 无';
+        $title = $count > 0
+            ? '有 ' . $count . ' 个 Typecho 核心补丁'
+            : '有 ' . $conf . ' 个核心补丁需要手工处理';
+        $body  = $count > 0
+            ? '点通知里的按钮可一键修复，会自动备份并可回滚。'
+            : '本地文件与补丁清单不一致，请照详情里的说明手工处理。';
+        try {
+            AdminBeautify_Plugin::pushNotice(
+                $title,
+                $body,
+                $level,
+                array(
+                    'dedup'  => 'patch:' . (isset($p['typecho']) ? $p['typecho'] : '') . ':' . implode(',', $ids),
+                    'act'    => $count > 0 ? 'ab-patch' : 'ab-patch-why',
+                    'src'    => '核心补丁',
+                    'detail' => "### 补丁清单\n\n" . implode("\n", $lines)
+                        . "\n\nTypecho " . (isset($p['typecho']) ? $p['typecho'] : '?')
+                        . ' · 检查于 ' . date('Y-m-d H:i', isset($p['checked_at']) ? (int) $p['checked_at'] : time()),
+                )
+            );
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    private function noticePatchApplied(array $result)
+    {
+        $n   = (isset($result['applied']) && is_array($result['applied'])) ? count($result['applied']) : 1;
+        $msg = isset($result['message']) ? (string) $result['message'] : '核心补丁已应用';
+        try {
+            AdminBeautify_Plugin::pushNotice(
+                '已应用 ' . $n . ' 个 Typecho 核心补丁',
+                $msg,
+                'success',
+                array(
+                    'dedup'  => 'patch-ok:' . md5($msg),
+                    'src'    => '核心补丁',
+                    'rearm'  => true,
+                    'detail' => "**" . $msg . "**\n\n已自动备份，可在「插件设置 → 补丁」卡片里一键回滚。",
+                )
+            );
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
+    private function noticePatchFailed(array $result)
+    {
+        $msg  = isset($result['message']) ? (string) $result['message'] : '补丁未应用';
+        $rows = array();
+        if (isset($result['files']) && is_array($result['files'])) {
+            foreach ($result['files'] as $f) {
+                if (!is_array($f)) continue;
+                $rows[] = '- `' . (isset($f['path']) ? $f['path'] : '') . '`：'
+                    . (isset($f['message']) ? $f['message'] : '');
+            }
+        }
+        try {
+            AdminBeautify_Plugin::pushNotice(
+                '核心补丁未应用',
+                $msg,
+                'error',
+                array(
+                    'dedup'  => 'patch-fail:' . md5($msg),
+                    'act'    => 'ab-patch-why',
+                    'src'    => '核心补丁',
+                    'detail' => "**" . $msg . "**"
+                        . ($rows ? "\n\n" . implode("\n", $rows) : '')
+                        . "\n\n常见原因：本地文件被改过（与清单里的原版哈希不一致）。可手工比对 `change.diff` 后处理。",
+                )
+            );
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+    }
     private function noticeUpdateAvailable(array $data)
     {
         if (empty($data['has_update']) || empty($data['latest'])) return;
@@ -1879,7 +2091,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.62',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.63',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -2126,6 +2338,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->doUpdateStream();
             return;
         }
+        if ($do === 'patch-apply-stream') {
+            $this->patchApplyStream();
+            return;
+        }
         require_once dirname(__FILE__) . '/store/bootstrap.php';
         if (AdminBeautify_StoreAjax::owns($do)) {
             $this->response->setContentType('application/json');
@@ -2178,6 +2394,18 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 break;
             case 'check-update':
                 $this->checkUpdate();
+                break;
+            case 'patch-list':
+                $this->patchList();
+                break;
+            case 'patch-apply':
+                $this->patchApply();
+                break;
+            case 'patch-rollback':
+                $this->patchRollback();
+                break;
+            case 'patch-backups':
+                $this->patchBackups();
                 break;
             case 'get-notice':
                 $this->getNotice();

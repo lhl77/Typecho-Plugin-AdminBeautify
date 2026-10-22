@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.62
+ * @version 2.1.63
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -333,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.62';
+        $abVer = '2.1.63';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -1118,6 +1118,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
         }
         include dirname(__FILE__) . '/assets/pages/config/config.script.php';
+        include dirname(__FILE__) . '/assets/pages/config/patch.php';
         include dirname(__FILE__) . '/assets/pages/config/about.php';
         include dirname(__FILE__) . '/assets/pages/config/notice.script.php';
     }
@@ -1183,7 +1184,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $header .= self::storeHeaderInject();
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.62 %c",'
+            .   '"%c AB-Admin %c v2.1.63 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1352,9 +1353,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.62.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.63.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.62.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.63.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1670,7 +1671,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.62',
+            'pluginVersion'          => '2.1.63',
             'notifyOptOut'           => $notifyOptOut,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
@@ -1704,9 +1705,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.62.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.63.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.62.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.63.js?v=' . $abJsVer . '"></script>';
         echo '<script>(function(){"use strict";
   var CQ = 575, OPEN = "ab-search-open";
   function box(f){ return f.querySelector(".search"); }
@@ -1849,7 +1850,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.62"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.63"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
@@ -2027,8 +2028,17 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.62";';
+        echo 'var __AB_VER__="2.1.63";';
         echo <<<'UPDATEJS'
+// ---- abPatchKey: 把一批补丁 id 变成一个稳定的忽略 key ----
+window.abPatchKey=function(pt){
+    var ids=(pt&&pt.ids&&pt.ids.slice)?pt.ids.slice():[];
+    ids.sort();
+    var s=ids.join(",")+"|"+((pt&&pt.typecho)||"");
+    var h=5381;
+    for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))|0; }
+    return (h>>>0).toString(36);
+};
 // ---- abCheckUpdate: 向后端请求最新版信息 ----
 // manual=true  → ?force=1，跳过缓存直连 GitHub，等待真实结果（超时 25s）
 // manual=false → 自动后台模式，stale-while-revalidate，立即返回缓存
@@ -2055,6 +2065,12 @@ window.abCheckUpdate=function(manual){
                 return;
             }
             var d=res.data;
+            // 补丁索引过期 / 从未拉过：后台会在响应发出后去拉，10 秒后重查一次把结果取回来
+            // （每次页面加载最多补查一次，避免网络一直不通时无限重试）
+            if(!manual&&d.patches&&d.patches.stale&&!window.__abPatchRetry){
+                window.__abPatchRetry=1;
+                setTimeout(function(){ window.abCheckUpdate(false); },10000);
+            }
             // ── 自动后台模式：stale-while-revalidate 处理 ──
             if(!manual && d.cache_stale){
                 // 若有旧缓存数据且有更新，仍然展示（不阻止旧通知）
@@ -2075,20 +2091,33 @@ window.abCheckUpdate=function(manual){
             if(!d.cache_stale && !d.force_failed){
                 try{ localStorage.setItem("ab-update-check",JSON.stringify({ts:Date.now(),data:d})); }catch(e){}
             }
-            if(!d.has_update){
-                // 已是最新版：清理旧"已忽略"标记
+            // ── 核心补丁：与插件更新并列判断（任一有内容就要提示）──
+            var pt=d.patches||{};
+            var pCount=parseInt(pt.count||0,10)||0;
+            var pConf=parseInt(pt.conflict||0,10)||0;
+            var hasPatch=!!pt.have&&(pCount>0||pConf>0);
+            var patchKey="ab-patch-dismissed-"+window.abPatchKey(pt);
+            if(!d.has_update&&!hasPatch){
+                // 都没有：清理旧「已忽略」标记
                 try{
                     var keysToRemove=[];
                     for(var k in localStorage){
-                        if(k.indexOf("ab-update-dismissed-v")===0) keysToRemove.push(k);
+                        if(k.indexOf("ab-update-dismissed-v")===0||k.indexOf("ab-patch-dismissed-")===0) keysToRemove.push(k);
                     }
                     keysToRemove.forEach(function(k){ localStorage.removeItem(k); });
                 }catch(e){}
                 if(manual) abShowUpdateToast("ok","✅ 已是最新版本 v"+d.current);
                 return;
             }
-            // 检查是否已忽略该版本
-            try{ if(localStorage.getItem("ab-update-dismissed-v"+d.latest)) return; }catch(e){}
+            // 两者各自独立忽略：只忽略插件版本不能把补丁提示一起藏掉，反之亦然
+            var verOff=false,patOff=false;
+            try{ verOff=!!localStorage.getItem("ab-update-dismissed-v"+d.latest); }catch(e){}
+            try{ patOff=!!localStorage.getItem(patchKey); }catch(e){}
+            if(verOff&&(patOff||!hasPatch)) return;
+            if(patOff&&!d.has_update) return;
+            if(manual&&!d.has_update&&pCount>0){
+                abShowUpdateToast("ok","✅ 已是最新版本 v"+d.current+"，另有 "+pCount+" 个核心补丁");
+            }
             abShowUpdateAvailable(d);
         }catch(e){
             if(manual) abShowUpdateToast("error","❌ 响应解析失败");
@@ -2106,7 +2135,16 @@ window.abShowUpdateAvailable=function(d){
     var banner=document.getElementById("ab-header-banner");
     var notify=document.createElement("div");
     notify.id="ab-update-notify";
-    var dismissBtn='<button type="button" onclick="(function(el){el.remove();try{localStorage.setItem(\'ab-update-dismissed-v\'+el.dataset.ver,\'1\')}catch(e){}})(document.getElementById(\'ab-update-notify\'))" data-ver="'+d.latest+'" style="background:none;border:none;cursor:pointer;font-size:16px;opacity:.7;padding:0 0 0 8px;color:inherit;line-height:1" title="忽略此版本">✕</button>';
+    /* 核心补丁（可能只有补丁、没有插件更新） */
+    var pt=d.patches||{};
+    var pCount=parseInt(pt.count||0,10)||0;
+    var pConf=parseInt(pt.conflict||0,10)||0;
+    var hasPatch=!!pt.have&&(pCount>0||pConf>0);
+    /* 忽略：插件版本与补丁批次各自一个 key，一起写才能把这条 banner 收掉 */
+    var dismissKeys=[];
+    if(d.has_update) dismissKeys.push("ab-update-dismissed-v"+d.latest);
+    if(hasPatch) dismissKeys.push("ab-patch-dismissed-"+window.abPatchKey(pt));
+    var dismissBtn='<button type="button" onclick="(function(el){el.remove();try{(el.dataset.keys||\'\').split(\'|\').forEach(function(k){if(k)localStorage.setItem(k,\'1\')})}catch(e){}})(document.getElementById(\'ab-update-notify\'))" data-keys="'+dismissKeys.join("|")+'" data-ver="'+d.latest+'" style="background:none;border:none;cursor:pointer;font-size:16px;opacity:.7;padding:0 0 0 8px;color:inherit;line-height:1" title="忽略">✕</button>';
     // 开发版（Pre-release）标记：让用户一眼看出这条更新不是正式版
     // （服务端只在查最新版时标记，与当前选择的通道无关 —— 开发版通道下也可能收到正式版）
     var prereleaseTag = d.prerelease ? '（开发版）' : '';
@@ -2114,21 +2152,52 @@ window.abShowUpdateAvailable=function(d){
     // box-sizing + line-height + vertical-align 三项确保 button/a/span 高度完全一致
     var btnBase='display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;line-height:1.4;white-space:nowrap;text-decoration:none;border:1px solid currentColor;box-sizing:border-box;vertical-align:middle;';
     var actionBtns='';
-    if(d.can_direct){
-        actionBtns+='<button id="ab-btn-do-update" type="button" onclick="abDoUpdate()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">立即更新</button>';
-    } else {
-        // 不支持直接更新：显示禁用态按钮 + 原因提示
-        actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">立即更新</span>'
-                   +'<span style="font-size:11px;opacity:.65;align-self:center;">需手动更新</span>';
+    /* 核心补丁优先（修 bug / 安全问题比装新功能更要紧） */
+    if(hasPatch&&pCount>0){
+        actionBtns+='<button id="ab-btn-do-patch" type="button" onclick="abDoPatch()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">立即修复</button>';
+    } else if(hasPatch&&pConf>0){
+        actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.7;cursor:not-allowed;" title="本地文件与补丁清单不一致，需手工处理">需手工处理</span>';
     }
-    actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;color:white!important">查看详情</a>';
+    /* 插件更新相关的按钮只在确实有新版本时出现 —— 只有补丁时不显示更新/详情 */
+    if(d.has_update){
+        if(d.can_direct){
+            actionBtns+='<button id="ab-btn-do-update" type="button" onclick="abDoUpdate()" style="'+btnBase+'background:rgba(255,255,255,.25);color:inherit;cursor:pointer;">立即更新</button>';
+        } else {
+            // 不支持直接更新：显示禁用态按钮 + 原因提示
+            actionBtns+='<span style="'+btnBase+'background:rgba(255,255,255,.08);color:inherit;opacity:.5;cursor:not-allowed;" title="当前版本跨越了主/次版本号，需手动下载">立即更新</span>'
+                       +'<span style="font-size:11px;opacity:.65;align-self:center;">需手动更新</span>';
+        }
+        if(d.html_url){
+            actionBtns+='<a href="'+d.html_url+'" target="_blank" style="'+btnBase+'background:transparent;color:inherit;opacity:.85;color:white!important">查看详情</a>';
+        }
+    }
     if(banner){
         // 配置页：嵌入 banner 内
         notify.style.cssText="margin:12px 0 0;padding:12px 16px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);border-radius:14px;font-size:13px;color:#fff;animation:ab-fadeIn .3s ease;backdrop-filter:blur(4px)";
         var bodyText='';
-        if(d.body){ bodyText=d.body.replace(/[#*`]/g,"").replace(/\r?\n/g," ").trim(); if(bodyText.length>120) bodyText=bodyText.substring(0,120)+"..."; }
+        if(d.has_update&&d.body){ bodyText=d.body.replace(/[#*`]/g,"").replace(/\r?\n/g," ").trim(); if(bodyText.length>120) bodyText=bodyText.substring(0,120)+"..."; }
+        // 核心补丁块：标题 + 逐个补丁（冲突项标注需手工处理）
+        var patchHtml='';
+        if(hasPatch){
+            var rows='';
+            var arr=(pt.list||[]);
+            for(var pi=0;pi<arr.length;pi++){
+                var it=arr[pi]||{};
+                rows+='<div style="font-size:12px;opacity:.85;margin-top:4px;line-height:1.5">• '
+                    +String(it.title||'')
+                    +(it.status==='conflict'?'　⚠️ 需手工处理':'')
+                    +'</div>';
+            }
+            patchHtml='<div style="margin-bottom:10px">'
+                +'<div style="font-size:12px;font-weight:600;opacity:.92">Typecho 核心补丁'
+                +(pCount>0?'（'+pCount+' 个可安装）':'')
+                +(pConf>0?'　'+pConf+' 个冲突':'')
+                +'</div>'+rows+'</div>';
+        }
         notify.innerHTML='<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
-            +'<div style="flex:1"><div style="font-weight:600;margin-bottom:'+(bodyText?'6px':'0')+'">🎉 发现新版本 <strong>v'+d.latest+'</strong>'+prereleaseTag+' <span style="font-size:11px;opacity:.7;font-weight:400">（当前 v'+d.current+'）</span></div>'
+            +'<div style="flex:1">'
+            +(d.has_update?'<div style="font-weight:600;margin-bottom:'+(bodyText?'6px':'0')+'">🎉 发现新版本 <strong>v'+d.latest+'</strong>'+prereleaseTag+' <span style="font-size:11px;opacity:.7;font-weight:400">（当前 v'+d.current+'）</span></div>':'')
+            +patchHtml
             +(bodyText?'<div style="font-size:12px;opacity:.8;margin-bottom:10px;line-height:1.5">'+bodyText+'</div>':'')
             +'<div style="display:flex;gap:8px;flex-wrap:wrap">'+actionBtns+'</div></div>'
             +dismissBtn+'</div>';
@@ -2145,6 +2214,240 @@ window.abShowUpdateAvailable=function(d){
         notify.setAttribute("data-download-url",d.download_url||"");
         notify.setAttribute("data-new-version",d.latest);
     }
+    if(hasPatch){
+        notify.setAttribute("data-patch-count",String(pCount));
+        notify.setAttribute("data-patch-ids",(pt.ids||[]).join(","));
+    }
+};
+// ---- abAskConfirm: AB Admin 劫持了 window.confirm（返回 Promise<boolean>），这里统一成 Promise 用法 ----
+// 注意：绝不能用 `if(!window.confirm(msg)) return;` —— 被劫持后返回值是 Promise，恒为真/或为 undefined，
+// 会导致「点了确定没反应」。
+window.abAskConfirm=function(msg){
+    var ab=window.AdminBeautify;
+    if(ab&&typeof ab.confirm==="function"){
+        try{
+            var p=ab.confirm(msg);
+            if(p&&typeof p.then==="function") return p.then(function(v){ return v!==false; });
+            return Promise.resolve(p!==false);
+        }catch(e){}
+    }
+    var r=null;
+    try{ r=window.confirm(msg); }catch(e){}
+    if(r&&typeof r.then==="function") return r.then(function(v){ return v!==false; });
+    return Promise.resolve(!!r);
+};
+// ---- 补丁进度遮罩（自带样式，可反复开关）----
+window.abPatchOverlay=function(show){
+    var el=document.getElementById("ab-patch-overlay");
+    if(show===false){ if(el) el.remove(); return null; }
+    if(!document.getElementById("ab-patch-ovl-style")){
+        var st=document.createElement("style");
+        st.id="ab-patch-ovl-style";
+        st.textContent=[
+            "#ab-patch-overlay{position:fixed;inset:0;z-index:999999;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:16px;box-sizing:border-box}",
+            "#ab-patch-card{width:100%;max-width:420px;background:var(--md-surface,#fff);color:var(--md-on-surface,#1c1b1f);border-radius:28px;padding:32px 28px 28px;box-shadow:0 8px 40px rgba(0,0,0,.28);box-sizing:border-box}",
+            "[data-theme=dark] #ab-patch-card{background:var(--md-dark-surface,#1c1b1f);color:var(--md-dark-on-surface,#e6e1e5);box-shadow:0 8px 40px rgba(0,0,0,.55)}",
+            "#ab-patch-card .abp-icon{font-size:36px;text-align:center;margin-bottom:16px}",
+            "#ab-patch-card .abp-title{font-size:18px;font-weight:700;text-align:center;margin-bottom:6px}",
+            "#ab-patch-card .abp-sub{font-size:13px;text-align:center;color:var(--md-on-surface-variant,#49454f);margin-bottom:24px}",
+            "[data-theme=dark] #ab-patch-card .abp-sub{color:var(--md-dark-on-surface-variant,#cac4d0)}",
+            "#abp-bar-track{height:6px;border-radius:3px;overflow:hidden;background:var(--md-surface-variant,#e7e0ec);margin-bottom:10px}",
+            "[data-theme=dark] #abp-bar-track{background:var(--md-dark-surface-variant,#49454f)}",
+            "#abp-bar-fill{height:100%;border-radius:3px;background:var(--md-primary,#6750a4);width:0%;transition:width .35s cubic-bezier(.4,0,.2,1)}",
+            "#abp-pct{font-size:12px;text-align:right;color:var(--md-on-surface-variant,#49454f);margin-bottom:4px;min-height:16px}",
+            "#abp-msg{font-size:13px;text-align:center;min-height:20px;color:var(--md-on-surface-variant,#49454f);word-break:break-word}",
+            "[data-theme=dark] #abp-pct,[data-theme=dark] #abp-msg{color:var(--md-dark-on-surface-variant,#cac4d0)}",
+            "#ab-patch-btns{display:none;gap:10px;justify-content:center;margin-top:20px;flex-wrap:wrap}",
+            ".abp-btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;border:none;cursor:pointer;gap:6px}",
+            ".abp-btn-primary{background:var(--md-primary,#6750a4);color:#fff}",
+            ".abp-btn-secondary{background:var(--md-surface-variant,#e7e0ec);color:var(--md-on-surface,#1c1b1f)}",
+            "[data-theme=dark] .abp-btn-secondary{background:var(--md-dark-surface-variant,#49454f);color:var(--md-dark-on-surface,#e6e1e5)}"
+        ].join("");
+        document.head.appendChild(st);
+    }
+    if(el) return el;
+    el=document.createElement("div");
+    el.id="ab-patch-overlay";
+    el.innerHTML='<div id="ab-patch-card">'
+        +'<div class="abp-icon">🛡️</div>'
+        +'<div class="abp-title">正在应用核心补丁</div>'
+        +'<div class="abp-sub">请勿关闭或刷新页面</div>'
+        +'<div id="abp-pct"></div>'
+        +'<div id="abp-bar-track"><div id="abp-bar-fill"></div></div>'
+        +'<div id="abp-msg">准备中…</div>'
+        +'<div id="ab-patch-btns"></div>'
+        +'</div>';
+    document.body.appendChild(el);
+    return el;
+};
+window.abPatchSet=function(pct,msg){
+    var f=document.getElementById("abp-bar-fill");
+    var p=document.getElementById("abp-pct");
+    var m=document.getElementById("abp-msg");
+    if(m&&msg!==undefined&&msg!==null) m.textContent=msg;
+    if(f&&pct>=0){
+        f.style.animation="";
+        f.style.width=Math.min(100,pct)+"%";
+        if(p) p.textContent=Math.min(100,pct)+"%";
+    }
+};
+window.abPatchFinish=function(okFlag,text,detail,titleText){
+    var card=document.getElementById("ab-patch-card");
+    if(!card) return;
+    var icon=card.querySelector(".abp-icon"),
+        title=card.querySelector(".abp-title"),
+        sub=card.querySelector(".abp-sub");
+    if(icon) icon.textContent=okFlag?"✅":"❌";
+    if(title) title.textContent=titleText||(okFlag?"补丁已应用":"补丁未应用");
+    if(sub) sub.textContent=text||"";
+    var f=document.getElementById("abp-bar-fill");
+    if(f){ f.style.width="100%"; if(!okFlag) f.style.background="#dc2626"; }
+    var m=document.getElementById("abp-msg");
+    if(m) m.textContent=detail||"";
+    var box=document.getElementById("ab-patch-btns");
+    if(box){
+        box.style.display="flex";
+        box.innerHTML='<button class="abp-btn abp-btn-primary" type="button" id="abp-close">'+(okFlag?"完成":"关闭")+'</button>';
+        var c=document.getElementById("abp-close");
+        if(c) c.onclick=function(){ window.abPatchOverlay(false); };
+    }
+    // 广播结果：设置页「补丁」卡片 / 其他面板可以据此刷新
+    try{
+        document.dispatchEvent(new CustomEvent("ab:patchdone",{detail:{ok:!!okFlag,message:text||""}}));
+    }catch(e){}
+};
+// ---- abPatchRollback: 回滚单个补丁（设置页「补丁」卡片用）----
+window.abPatchRollback=function(id){
+    var ajax=window.__AB_AJAX__||{};
+    if(!ajax.url||!id) return;
+    window.abAskConfirm("确定回滚补丁「"+id+"」？\n会把对应核心文件还原到打补丁前的版本。").then(function(ok){
+        if(!ok) return;
+        window.abPatchOverlay(true);
+        window.abPatchSet(5,"回滚中…");
+        var sep=ajax.url.indexOf('?')>=0?'&':'?';
+        var xhr=new XMLHttpRequest();
+        xhr.open("POST",ajax.url+sep+"do=patch-rollback&id="+encodeURIComponent(id)
+            +"&_="+encodeURIComponent(ajax.token||""),true);
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+        xhr.timeout=60000;
+        xhr.onload=function(){
+            var j=null; try{ j=JSON.parse(xhr.responseText); }catch(e){}
+            window.abPatchSet(100,"完成");
+            if(j&&j.code===0) window.abPatchFinish(true,(j.message||"已回滚"),"","已回滚");
+            else window.abPatchFinish(false,(j&&j.message)||"回滚失败","","回滚失败");
+        };
+        xhr.onerror=xhr.ontimeout=function(){ window.abPatchFinish(false,"请求失败","请检查网络后重试","回滚失败"); };
+        xhr.send("id="+encodeURIComponent(id));
+    });
+};
+// ---- abDoPatch: 一键应用 Typecho 核心补丁（banner 与通知中心共用）----
+window.abDoPatch=function(id){
+    var ajax=window.__AB_AJAX__||{};
+    if(!ajax.url) return;
+    id=id||"all";
+    // 从缓存里取本次要改哪些文件，用于二次确认
+    var files=[];
+    try{
+        var c=JSON.parse(localStorage.getItem("ab-update-check")||"null");
+        var pt=(c&&c.data&&c.data.patches)||{};
+        var list=pt.list||[];
+        for(var i=0;i<list.length;i++){
+            if(list[i].status!=="pending") continue;
+            var fs=list[i].files||[];
+            for(var j=0;j<fs.length;j++) files.push(fs[j]);
+        }
+    }catch(e){}
+    var msg="将修改 Typecho 核心文件：\n"
+        +(files.length?("· "+files.join("\n· ")):"（清单未缓存，仍继续？）")
+        +"\n\n会先自动备份，可直接回滚。继续？";
+    window.abAskConfirm(msg).then(function(ok){
+        if(!ok) return;
+        abPatchRun(id);
+    });
+};
+// ---- abPatchRun: 真正执行（SSE 流式读进度）----
+window.abPatchRun=function(id){
+    var ajax=window.__AB_AJAX__||{};
+    if(!ajax.url) return;
+    window.abPatchOverlay(true);
+    window.abPatchSet(0,"准备中…");
+    var sep=ajax.url.indexOf('?')>=0?'&':'?';
+    function endpoint(act){
+        return ajax.url+sep+"do="+act+"&id="+encodeURIComponent(id||"all")
+            +"&_="+encodeURIComponent(ajax.token||"");
+    }
+    function finish(okFlag,text,detail){
+        window.abPatchFinish(okFlag,text,detail);
+        if(okFlag){
+            try{ localStorage.removeItem("ab-update-check"); }catch(e){}
+            try{
+                if(window.AdminBeautify&&AdminBeautify.noticeCenter) AdminBeautify.noticeCenter.refresh();
+            }catch(e){}
+            var old=document.getElementById("ab-update-notify"); if(old) old.remove();
+            setTimeout(function(){ window.abCheckUpdate(true); },800);
+        }
+    }
+    // 老浏览器（无 ReadableStream）：退回一次性 JSON 接口，只显示「不确定进度」
+    var useStream=!!(window.fetch&&window.ReadableStream&&window.TextDecoder);
+    if(!useStream){
+        var xhr=new XMLHttpRequest();
+        xhr.open("POST",endpoint("patch-apply"),true);
+        xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+        xhr.timeout=120000;
+        xhr.onload=function(){
+            var j=null; try{ j=JSON.parse(xhr.responseText); }catch(e){}
+            if(j&&j.code===0) finish(true,(j.message||"补丁已应用"),"");
+            else finish(false,(j&&j.message)||"应用失败","");
+        };
+        xhr.onerror=xhr.ontimeout=function(){ finish(false,"请求失败","请检查网络后重试"); };
+        xhr.send("id="+encodeURIComponent(id||"all"));
+        return;
+    }
+    fetch(endpoint("patch-apply-stream"),{
+        method:"POST",
+        credentials:"same-origin",
+        headers:{"Content-Type":"application/x-www-form-urlencoded"}
+    }).then(function(resp){
+        if(!resp.ok||!resp.body){
+            finish(false,"服务器返回 HTTP "+resp.status,"如果刚升级过插件，请确认 Patch.php 已上传");
+            return;
+        }
+        var ct=resp.headers.get("content-type")||"";
+        if(ct.indexOf("text/event-stream")<0){
+            return resp.text().then(function(t){
+                var plain=t?t.replace(/<[^>]+>/g,"").trim().substring(0,180):"";
+                finish(false,"响应格式异常（"+ct+"）",plain);
+            });
+        }
+        var reader=resp.body.getReader(), dec=new TextDecoder(), buf="", last=null;
+        function pump(){
+            return reader.read().then(function(r){
+                if(r.done){
+                    if(!last) finish(false,"连接中断","未收到结果，请刷新页面确认核心文件状态");
+                    return;
+                }
+                buf+=dec.decode(r.value,{stream:true});
+                var parts=buf.split("\n\n");
+                buf=parts.pop();
+                for(var i=0;i<parts.length;i++){
+                    var m=parts[i].match(/^data:\s*(.+)$/m);
+                    if(!m) continue;
+                    var ev=null; try{ ev=JSON.parse(m[1]); }catch(e){}
+                    if(!ev) continue;
+                    last=ev;
+                    if(ev.type==="progress") window.abPatchSet(parseInt(ev.progress,10)||0,ev.message||"");
+                    else if(ev.type==="done") finish(true,ev.message||"补丁已应用","");
+                    else if(ev.type==="error") finish(false,ev.message||"应用失败","");
+                }
+                return pump();
+            });
+        }
+        return pump();
+    }).catch(function(){
+        finish(false,"请求失败","请检查网络后重试");
+    });
 };
 // ---- abDoUpdate: 执行直接更新（fetch 流式版，全屏进度遮罩）----
 window.abDoUpdate=function(){

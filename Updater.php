@@ -11,7 +11,7 @@ class AdminBeautify_Updater
         'https://gh1.lhl.one/',
     );
     const GITHUB_RELEASES_PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/releases';
-    const CURRENT_VERSION = '2.1.62';
+    const CURRENT_VERSION = '2.1.63';
     private $pluginDir;
     private $tmpDir;
     public function __construct()
@@ -551,6 +551,7 @@ class AdminBeautify_Updater
     {
         $pluginDir  = $this->pluginDir;
         $tmpRelName = 'tmp_update';
+        $keepNames  = array('tmp_update', '.patch-backup');
         $newCompatDir  = $sourceDir . '/assets/compat';
         $newCompatFiles = array();
         if (is_dir($newCompatDir)) {
@@ -568,7 +569,7 @@ class AdminBeautify_Updater
         if (!$items) return;
         foreach ($items as $item) {
             if ($item === '.' || $item === '..') continue;
-            if ($item === $tmpRelName) continue;
+            if (in_array($item, $keepNames, true)) continue;
             $path = $pluginDir . '/' . $item;
             if ($item === 'assets') {
                 $this->cleanAssetsDir($path, $newCompatFiles);

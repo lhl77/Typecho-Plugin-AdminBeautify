@@ -403,7 +403,7 @@ class AdminBeautify_Store
                 CURLOPT_TIMEOUT        => $timeout,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.62'),
+                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.63'),
                 CURLOPT_HTTPHEADER     => array('Accept: application/json'),
             ));
             $raw = curl_exec($ch);
@@ -414,7 +414,7 @@ class AdminBeautify_Store
         $ctx = stream_context_create(array(
             'http' => array(
                 'timeout'       => $timeout,
-                'user_agent'    => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.62'),
+                'user_agent'    => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.63'),
                 'ignore_errors' => true,
             ),
             'ssl'  => array('verify_peer' => true, 'verify_peer_name' => true),
@@ -438,7 +438,7 @@ class AdminBeautify_Store
                 CURLOPT_TIMEOUT        => $timeout,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.62'),
+                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.63'),
             ));
             $ok = curl_exec($ch);
             $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
