@@ -1250,6 +1250,98 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             if(customEnableUl) customEnableHost.appendChild(customEnableUl);
             var customListEl=customBox.querySelector("#ab-dash-custom-list");
 
+            /* ============================================================
+               允许非管理员用户使用的卡片（数据存隐藏字段 dashboardCustomCardsShared）
+               - 只列自定义卡片；内置卡片（统计 / 最近文章 / 最近回复）由角色规则决定，
+                 Umami / 图表这类管理侧卡片本来就不对非管理员开放，不在此列
+               - 勾中的卡片会下发给非管理员概要页，并进入他们的个人偏好白名单
+               ============================================================ */
+            var sharedInput=document.querySelector("[name=\"dashboardCustomCardsShared\"]");
+            var sharedDataUl=findFieldUl("dashboardCustomCardsShared");
+            if(sharedDataUl) sharedDataUl.style.display="none";
+            var sharedIds=[];
+            function loadShared(){
+                sharedIds=[];
+                if(!sharedInput) return;
+                try{
+                    var arr=JSON.parse(sharedInput.value||"[]");
+                    if(Object.prototype.toString.call(arr)==="[object Array]"){
+                        for(var i=0;i<arr.length;i++){
+                            var sid=String(arr[i]||"").replace(/[^A-Za-z0-9_-]/g,"");
+                            if(sid&&sharedIds.indexOf(sid)===-1) sharedIds.push(sid);
+                        }
+                    }
+                }catch(e){ sharedIds=[]; }
+            }
+            function saveShared(){
+                if(sharedInput) sharedInput.value=JSON.stringify(sharedIds);
+            }
+
+            var sharedBox=document.createElement("div");
+            sharedBox.className="ab-dash-custom";
+            sharedBox.innerHTML='\
+                <div class="ab-dash-custom-title">\
+                    <span class="material-icons-round">group</span><span>允许非管理员用户使用的卡片</span>\
+                </div>\
+                <div class="ab-dash-custom-help" style="margin-bottom:10px">\
+                    勾选后，该自定义卡片会出现在非管理员（编辑 / 贡献者 / 关注者）的概要页，\
+                    他们可以在「设置」里自行隐藏或调整顺序。未勾选的卡片仍然只有管理员看得到。\
+                </div>\
+                <div class="ab-dash-shared-list" id="ab-dash-shared-list"></div>';
+            customBox.appendChild(sharedBox);
+            var sharedListEl=sharedBox.querySelector("#ab-dash-shared-list");
+
+            function renderShared(){
+                if(!sharedListEl) return;
+                sharedListEl.innerHTML="";
+                if(!customCards.length){
+                    var empt=document.createElement("div");
+                    empt.className="ab-dash-custom-empty";
+                    empt.textContent="还没有自定义卡片，添加卡片后即可在这里授权给非管理员。";
+                    sharedListEl.appendChild(empt);
+                    return;
+                }
+                for(var si=0;si<customCards.length;si++){
+                    (function(def){
+                        var on=sharedIds.indexOf(def.id)>=0;
+                        var chip=document.createElement("button");
+                        chip.type="button";
+                        chip.className="ab-dash-shared-chip"+(on?" is-on":"");
+                        chip.setAttribute("data-id",def.id);
+                        chip.innerHTML='\
+                            <span class="material-icons-round">'+(on?"check_box":"check_box_outline_blank")+'</span>\
+                            <span class="ab-dash-shared-name">'+String(def.title||"未命名卡片").replace(/[<>&"]/g,function(c){
+                                return {"<":"&lt;",">":"&gt;","&":"&amp;","\"":"&quot;"}[c];
+                            })+'</span>\
+                            <span class="ab-dash-shared-id">'+def.id+'</span>';
+                        chip.addEventListener("click",function(){
+                            var id=this.getAttribute("data-id");
+                            var at=sharedIds.indexOf(id);
+                            if(at>=0) sharedIds.splice(at,1); else sharedIds.push(id);
+                            saveShared();
+                            renderShared();
+                            sync("已更新非管理员可用的卡片，记得点击右下角保存设置");
+                        });
+                        sharedListEl.appendChild(chip);
+                    })(customCards[si]);
+                }
+            }
+
+            /* 卡片被删掉后，白名单里不能留下对应 id */
+            function pruneShared(){
+                if(!sharedIds.length) return;
+                var alive=[];
+                for(var pi=0;pi<sharedIds.length;pi++){
+                    if(customById(sharedIds[pi])) alive.push(sharedIds[pi]);
+                }
+                if(alive.length!==sharedIds.length){
+                    sharedIds=alive;
+                    saveShared();
+                }
+            }
+
+            loadShared();
+
             /* 子区块标题与字段自带 label 同名时（卡片排版模式 /「更多」卡片），
                把重复的那个 label 隐藏，避免同一句话在同一个区块里出现两次。
                字段 label 会随 <ul> 一起被搬进子区块，所以这里是精确匹配后再隐藏。 */
@@ -1297,6 +1389,44 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 hideDupLabel(moreBox,"「更多」卡片");
             }
 
+            /* ---- 概要页公告（按身份，Markdown）：独立折叠卡，紧跟「概要页卡片设置」 ---- */
+            (function(){
+                var NOTICE_FIELDS=[
+                    ["dashboardNoticeAdmin","管理员"],
+                    ["dashboardNoticeEditor","编辑"],
+                    ["dashboardNoticeContributor","贡献者"],
+                    ["dashboardNoticeSubscriber","关注者"]
+                ];
+                var noticeCard=document.getElementById("ab-card-dashboardnotice");
+                var noticeBody=document.getElementById("ab-card-dashboardnotice-body");
+                if(!noticeCard||!noticeBody) return;
+
+                /* 定位：dashboardcards 卡之后（此时它已被 placeCard 插到编辑器设置之前） */
+                var cardsCard=document.getElementById("ab-card-dashboardcards");
+                if(cardsCard&&cardsCard.parentNode){
+                    cardsCard.parentNode.insertBefore(noticeCard,cardsCard.nextSibling);
+                }else{
+                    var anchorUl2=findFieldUl("editor_vditor");
+                    if(anchorUl2&&anchorUl2.parentNode){
+                        anchorUl2.parentNode.insertBefore(noticeCard,anchorUl2);
+                    }
+                }
+
+                for(var ni=0;ni<NOTICE_FIELDS.length;ni++){
+                    var ul=findFieldUl(NOTICE_FIELDS[ni][0]);
+                    if(!ul) continue;
+                    ul.style.display="";
+                    var wrap=document.createElement("div");
+                    wrap.className="ab-dash-notice-field";
+                    var hd=document.createElement("div");
+                    hd.className="ab-dash-notice-field-hd";
+                    hd.textContent=NOTICE_FIELDS[ni][1];
+                    wrap.appendChild(hd);
+                    wrap.appendChild(ul);
+                    noticeBody.appendChild(wrap);
+                }
+            })();
+
             function newCardId(){
                 return "c"+Date.now().toString(36)+Math.floor(Math.random()*46656).toString(36);
             }
@@ -1309,6 +1439,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     emptyEl.className="ab-dash-custom-empty";
                     emptyEl.textContent="还没有自定义卡片，点击下方「添加卡片」创建。";
                     customListEl.appendChild(emptyEl);
+                    renderShared();
                     return;
                 }
                 for(var i=0;i<customCards.length;i++){
@@ -1339,10 +1470,13 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                         customListEl.appendChild(item);
                     })(customCards[i]);
                 }
+                renderShared();
             }
 
             function refreshCustom(msg){
                 saveCustomCards();
+                pruneShared();
+                saveShared();
                 render();          /* 排序列表同步增删自定义卡片 */
                 sync(msg||"");
                 renderCustom();
@@ -1755,7 +1889,9 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         })();
 
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
-        ["admin","dashboardcards","editor","login","pwa","perf","compat","smtp","security","channel"].forEach(function(id){
+        // ⚠️ 这里是白名单：新加一张 MD3 折叠卡（abCard('xxx', …)）时必须把 id 补进数组，
+        //    否则那张卡点标题不会折叠（概要页公告卡片就漏过一次）。
+        ["admin","dashboardcards","dashboardnotice","editor","login","pwa","perf","compat","smtp","security","channel"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
@@ -1969,9 +2105,15 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         if(i7) i7.style.background=c[0]+"1a";
         var v7=document.getElementById("ab-card-dashboardcards-chev");
         if(v7) v7.setAttribute("stroke",c[0]);
+        // 概要页公告卡片
+        var s11=document.getElementById("ab-card-dashboardnotice-strip");
+        if(s11) s11.style.background=c[0];
+        var i11=document.getElementById("ab-card-dashboardnotice-icon");
+        if(i11) i11.style.background=c[0]+"1a";
+        var v11=document.getElementById("ab-card-dashboardnotice-chev");
+        if(v11) v11.setAttribute("stroke",c[0]);
         // PWA 卡片
-        var s3=document.getElementById("ab-card-pwa-strip");
-        if(s3) s3.style.background=c[0];
+        var s3=document.getElementById("ab-card-pwa-strip");        if(s3) s3.style.background=c[0];
         var i3=document.getElementById("ab-card-pwa-icon");
         if(i3) i3.style.background=c[0]+"1a";
         var v3=document.getElementById("ab-card-pwa-chev");

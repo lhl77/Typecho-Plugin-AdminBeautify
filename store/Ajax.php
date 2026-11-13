@@ -140,6 +140,11 @@ class AdminBeautify_StoreAjax
     }
     private static function pushUpdateNotice($rearm = false)
     {
+        try {
+            AdminBeautify_Store::refreshRegistryIfStale();
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
         $data = AdminBeautify_StoreCatalog::build();
         $updates = array();
         $sig = array();

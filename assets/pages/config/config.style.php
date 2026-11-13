@@ -703,7 +703,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.63.css 里的
+   注意：AdminBeautify.v2.1.64.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }
@@ -1110,6 +1110,111 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 /* 概要页卡片设置里的子区块（卡片排版模式 / 「更多」卡片）：
    沿用自定义卡片区的虚线分隔节奏，间距略收紧一点 */
 .ab-card .ab-dash-subsection { margin-top: 18px; padding-top: 14px; }
+
+/* 「允许非管理员用户使用的卡片」：自定义卡片的可切换 chip 列表 */
+.ab-card .ab-dash-shared-list {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+.ab-card .ab-dash-shared-chip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    max-width: 100% !important;
+    padding: 7px 14px 7px 10px !important;
+    border-radius: var(--md-radius-full, 999px) !important;
+    border: 1px solid var(--md-outline-variant, #cac4d0) !important;
+    background: var(--md-surface-container-low, #f7f2fa) !important;
+    color: var(--md-on-surface-variant, #49454f) !important;
+    font-size: 12.5px !important;
+    line-height: 1.35 !important;
+    cursor: pointer !important;
+    transition: background .18s, border-color .18s, color .18s !important;
+}
+.ab-card .ab-dash-shared-chip .material-icons-round {
+    font-size: 18px !important;
+    color: var(--md-outline, #79747e) !important;
+    flex: 0 0 auto;
+}
+.ab-card .ab-dash-shared-chip .ab-dash-shared-name {
+    font-weight: 500 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+}
+.ab-card .ab-dash-shared-chip .ab-dash-shared-id {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+    font-size: 11px !important;
+    opacity: .55 !important;
+}
+.ab-card .ab-dash-shared-chip:hover {
+    border-color: var(--md-primary, #6750a4) !important;
+    background: color-mix(in srgb, var(--md-primary, #6750a4) 6%, var(--md-surface-container-low, #f7f2fa)) !important;
+}
+.ab-card .ab-dash-shared-chip.is-on {
+    border-color: var(--md-primary, #6750a4) !important;
+    background: var(--md-primary-container, #eaddff) !important;
+    color: var(--md-on-primary-container, #21005d) !important;
+}
+.ab-card .ab-dash-shared-chip.is-on .material-icons-round {
+    color: var(--md-primary, #6750a4) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-shared-chip {
+    background: var(--md-dark-surface-container, #211f26) !important;
+    border-color: var(--md-dark-outline-variant, #49454f) !important;
+    color: var(--md-dark-on-surface-variant, #cac4d0) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-shared-chip.is-on {
+    background: var(--md-dark-primary-container, #4f378b) !important;
+    border-color: var(--md-dark-primary, #d0bcff) !important;
+    color: var(--md-dark-on-primary-container, #eaddff) !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-shared-chip.is-on .material-icons-round {
+    color: var(--md-dark-primary, #d0bcff) !important;
+}
+
+/* 概要页公告（按身份）：四段字段各带一个身份小标题 */
+.ab-card .ab-dash-notice-field {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid var(--md-outline-variant, rgba(0, 0, 0, .12));
+}
+.ab-card .ab-card-tip + .ab-dash-notice-field { margin-top: 14px; }
+.ab-card .ab-dash-notice-field-hd {
+    display: flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    color: var(--md-on-surface, #1c1b1f) !important;
+    margin-bottom: 8px !important;
+}
+.ab-card .ab-dash-notice-field-hd::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--md-primary, #6750a4);
+    flex: 0 0 auto;
+}
+/* 身份小标题已说明归属，字段自带 label（「概要页公告 · 管理员」）重复，隐藏 */
+.ab-card .ab-dash-notice-field .typecho-label { display: none !important; }
+/* 说明文字已在卡片顶部提示框里给过，四个字段不必各重复一遍 */
+.ab-card .ab-dash-notice-field .description { display: none !important; }
+.ab-card .ab-dash-notice-field textarea {
+    width: 100% !important;
+    min-height: 124px !important;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace !important;
+    font-size: 12.5px !important;
+    line-height: 1.65 !important;
+}
+[data-theme="dark"] .ab-card .ab-dash-notice-field-hd { color: var(--md-dark-on-surface, #e6e1e5) !important; }
+[data-theme="dark"] .ab-card .ab-dash-notice-field-hd::before { background: var(--md-dark-primary, #d0bcff); }
 
 .ab-card .ab-dash-custom-warn {
     display: flex !important;

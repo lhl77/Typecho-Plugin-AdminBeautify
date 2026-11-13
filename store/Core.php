@@ -127,10 +127,28 @@ class AdminBeautify_Store
         $cache = (isset($state['registry']) && is_array($state['registry'])) ? $state['registry'] : array();
         $at = isset($state['registryAt']) ? (int) $state['registryAt'] : 0;
         $fresh = $cache && (time() - $at) < self::CACHE_TTL;
-        if (!$force && $fresh) {
+        if ($force) {
+            $list = self::fetchRegistry();
+            if ($list !== null) {
+                $state['registry'] = $list;
+                $state['registryAt'] = time();
+                self::saveState($state);
+                return array('plugins' => $list, 'at' => time(), 'stale' => false, 'error' => '');
+            }
+            return array(
+                'plugins' => $cache,
+                'at'     => $at,
+                'stale'  => true,
+                'error'  => '商店服务暂时无法连接，下面只显示本机已安装的插件。',
+            );
+        }
+        if ($fresh) {
             return array('plugins' => $cache, 'at' => $at, 'stale' => false, 'error' => '');
         }
-        $list = self::fetchRegistry();
+        if ($cache) {
+            return array('plugins' => $cache, 'at' => $at, 'stale' => true, 'error' => '');
+        }
+        $list = self::fetchRegistry(4);
         if ($list !== null) {
             $state['registry'] = $list;
             $state['registryAt'] = time();
@@ -138,15 +156,25 @@ class AdminBeautify_Store
             return array('plugins' => $list, 'at' => time(), 'stale' => false, 'error' => '');
         }
         return array(
-            'plugins' => $cache,
+            'plugins' => array(),
             'at'     => $at,
             'stale'  => true,
             'error'  => '商店服务暂时无法连接，下面只显示本机已安装的插件。',
         );
     }
-    public static function fetchRegistry()
+    public static function refreshRegistryIfStale($minGap = 300)
     {
-        $raw = self::httpJson(self::BASE . '/api/plugins', 10);
+        $state = self::state();
+        $at = isset($state['registryAt']) ? (int) $state['registryAt'] : 0;
+        if ($at && (time() - $at) < $minGap) {
+            return false;
+        }
+        $reg = self::registry(true);
+        return empty($reg['stale']);
+    }
+    public static function fetchRegistry($timeout = 10)
+    {
+        $raw = self::httpJson(self::BASE . '/api/plugins', $timeout);
         if (!is_array($raw) || empty($raw['ok']) || empty($raw['plugins']) || !is_array($raw['plugins'])) {
             return null;
         }
@@ -403,7 +431,7 @@ class AdminBeautify_Store
                 CURLOPT_TIMEOUT        => $timeout,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.63'),
+                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.64'),
                 CURLOPT_HTTPHEADER     => array('Accept: application/json'),
             ));
             $raw = curl_exec($ch);
@@ -414,7 +442,7 @@ class AdminBeautify_Store
         $ctx = stream_context_create(array(
             'http' => array(
                 'timeout'       => $timeout,
-                'user_agent'    => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.63'),
+                'user_agent'    => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.64'),
                 'ignore_errors' => true,
             ),
             'ssl'  => array('verify_peer' => true, 'verify_peer_name' => true),
@@ -438,7 +466,7 @@ class AdminBeautify_Store
                 CURLOPT_TIMEOUT        => $timeout,
                 CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2,
-                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.63'),
+                CURLOPT_USERAGENT      => 'AdminBeautify-Store/' . self::opt('pluginVersion', '2.1.64'),
             ));
             $ok = curl_exec($ch);
             $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);

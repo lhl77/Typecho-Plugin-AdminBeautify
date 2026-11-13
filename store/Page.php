@@ -20,7 +20,12 @@ class AdminBeautify_StorePage
     public static function render()
     {
         try {
-            AdminBeautify_StoreInstall::pruneAllBackups(1);
+            $state = AdminBeautify_Store::state();
+            $lastPrune = isset($state['pruneAt']) ? (int) $state['pruneAt'] : 0;
+            if (time() - $lastPrune > 3600) {
+                AdminBeautify_Store::setState('pruneAt', time());
+                AdminBeautify_StoreInstall::pruneAllBackups(1);
+            }
         } catch (Exception $e) {
         } catch (Throwable $e) {
         }
@@ -403,9 +408,14 @@ class AdminBeautify_StorePage
             . ' aria-label="更多操作"><span class="material-icons-round">more_vert</span></button>'
             . '<div class="abp-menu" hidden>' . $inner . '</div></div>';
     }
+    private static $plainMemo = array();
     private static function plain($s)
     {
         $s = (string) $s;
+        if (isset(self::$plainMemo[$s])) {
+            return self::$plainMemo[$s];
+        }
+        $orig = $s;
         for ($i = 0; $i < 3; $i++) {
             $next = strip_tags(html_entity_decode($s, ENT_QUOTES, 'UTF-8'));
             if ($next === $s) {
@@ -413,7 +423,12 @@ class AdminBeautify_StorePage
             }
             $s = $next;
         }
-        return trim(preg_replace('/\s+/u', ' ', $s));
+        $out = trim(preg_replace('/\s+/u', ' ', $s));
+        if (count(self::$plainMemo) > 4096) {
+            self::$plainMemo = array();
+        }
+        self::$plainMemo[$orig] = $out;
+        return $out;
     }
     private static function initial($s)
     {

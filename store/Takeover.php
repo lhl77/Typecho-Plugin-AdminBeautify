@@ -56,9 +56,25 @@ class AdminBeautify_StoreTakeover
         } catch (Exception $e) {
         } catch (Throwable $e) {
         }
+        self::skipCorePluginScan();
         self::$level = ob_get_level();
         ob_start();
         self::$armed = true;
+    }
+    private static function skipCorePluginScan()
+    {
+        try {
+            if (!method_exists('\Typecho\Widget', 'alias')) {
+                return;
+            }
+            if (!class_exists('\Widget\Plugins\Rows')) {
+                return;
+            }
+            require_once __DIR__ . '/FastRows.php';
+            \Typecho\Widget::alias('Widget\Plugins\Rows', 'AdminBeautify_StoreFastRows');
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
     }
     public static function armed()
     {

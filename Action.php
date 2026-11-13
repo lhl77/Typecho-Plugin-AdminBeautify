@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.63
+ * @version 2.1.64
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.63';
+        $pluginVer  = '2.1.64';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -246,6 +246,45 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             'categories' => (int) $categoriesCount,
         ));
     }
+    public function userPrefsGet()
+    {
+        $this->checkAuth();
+        $user    = Typecho_Widget::widget('Widget_User');
+        $role    = AdminBeautify_Plugin::currentRole();
+        $isAdmin = ($role === 'administrator');
+        $canManage = in_array($role, array('administrator', 'editor', 'contributor'), true);
+        $prefs   = AdminBeautify_Plugin::readUserPrefs((int) $user->uid, $canManage);
+        $this->jsonSuccess(array(
+            'cards'   => $prefs['cards'],
+            'editor'  => $prefs['editor'],
+            'editorEditable' => AdminBeautify_Plugin::canPickEditor($role),
+            'allow'   => AdminBeautify_Plugin::defaultUserCards($canManage),
+            'isAdmin' => $isAdmin,
+        ));
+    }
+    public function userPrefsSave()
+    {
+        $this->checkAuth();
+        $this->checkApiToken();
+        if (!$this->request->isPost()) {
+            $this->jsonError('该操作仅接受 POST 请求', 405);
+        }
+        $role = AdminBeautify_Plugin::currentRole();
+        if ($role === 'administrator') {
+            $this->jsonError('管理员请到「插件设置 → 概要页」统一配置', 403);
+        }
+        $user  = Typecho_Widget::widget('Widget_User');
+        $uid   = (int) $user->uid;
+        $cardsRaw = (string) $this->request->get('cards', '');
+        $cards = array_filter(array_map('trim', explode(',', $cardsRaw)));
+        $editorType = (string) $this->request->get('editor', '');
+        $editorMode = (string) $this->request->get('editor_mode', '');
+        $result = AdminBeautify_Plugin::writeUserPrefs($uid, $cards, $editorType, $editorMode);
+        if (isset($result['error'])) {
+            $this->jsonError((string) $result['error'], isset($result['code']) ? (int) $result['code'] : 400);
+        }
+        $this->jsonSuccess($result['prefs'], '已保存');
+    }
     public function stats()
     {
         $this->checkAuth();
@@ -254,51 +293,68 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $now = time();
         $weekAgo      = $now - 7 * 86400;
         $twoWeeksAgo  = $now - 14 * 86400;
-        $postsTotal = (int) $db->fetchObject(
-            $db->select(array('COUNT(cid)' => 'num'))
-               ->from('table.contents')
-               ->where('type = ?', 'post')
-               ->where('status = ?', 'publish')
-        )->num;
-        $commentsTotal = (int) $db->fetchObject(
-            $db->select(array('COUNT(coid)' => 'num'))
-               ->from('table.comments')
-               ->where('status = ?', 'approved')
-        )->num;
+        $user    = Typecho_Widget::widget('Widget_User');
+        $isAdmin = $user->pass('administrator', true);
+        $uid     = (int) $user->uid;
+        $scope   = $isAdmin ? '' : '我的';
+        $postsSelect = $db->select(array('COUNT(cid)' => 'num'))
+            ->from('table.contents')
+            ->where('type = ?', 'post')
+            ->where('status = ?', 'publish');
+        if (!$isAdmin) {
+            $postsSelect->where('authorId = ?', $uid);
+        }
+        $postsTotal = (int) $db->fetchObject($postsSelect)->num;
+        $commentsSelect = $db->select(array('COUNT(coid)' => 'num'))
+            ->from('table.comments')
+            ->where('status = ?', 'approved');
+        if (!$isAdmin) {
+            $commentsSelect->where('ownerId = ?', $uid);
+        }
+        $commentsTotal = (int) $db->fetchObject($commentsSelect)->num;
         $catsTotal = (int) $db->fetchObject(
             $db->select(array('COUNT(mid)' => 'num'))
                ->from('table.metas')
                ->where('type = ?', 'category')
         )->num;
-        $postsThisWeek = (int) $db->fetchObject(
-            $db->select(array('COUNT(cid)' => 'num'))
-               ->from('table.contents')
-               ->where('type = ?', 'post')
-               ->where('status = ?', 'publish')
-               ->where('created >= ?', $weekAgo)
-        )->num;
-        $commentsThisWeek = (int) $db->fetchObject(
-            $db->select(array('COUNT(coid)' => 'num'))
-               ->from('table.comments')
-               ->where('status = ?', 'approved')
-               ->where('created >= ?', $weekAgo)
-        )->num;
-        $postsLastWeek = (int) $db->fetchObject(
-            $db->select(array('COUNT(cid)' => 'num'))
-               ->from('table.contents')
-               ->where('type = ?', 'post')
-               ->where('status = ?', 'publish')
-               ->where('created >= ?', $twoWeeksAgo)
-               ->where('created < ?', $weekAgo)
-        )->num;
-        $commentsLastWeek = (int) $db->fetchObject(
-            $db->select(array('COUNT(coid)' => 'num'))
-               ->from('table.comments')
-               ->where('status = ?', 'approved')
-               ->where('created >= ?', $twoWeeksAgo)
-               ->where('created < ?', $weekAgo)
-        )->num;
+        $postsWeekSelect = $db->select(array('COUNT(cid)' => 'num'))
+            ->from('table.contents')
+            ->where('type = ?', 'post')
+            ->where('status = ?', 'publish')
+            ->where('created >= ?', $weekAgo);
+        if (!$isAdmin) {
+            $postsWeekSelect->where('authorId = ?', $uid);
+        }
+        $postsThisWeek = (int) $db->fetchObject($postsWeekSelect)->num;
+        $commentsWeekSelect = $db->select(array('COUNT(coid)' => 'num'))
+            ->from('table.comments')
+            ->where('status = ?', 'approved')
+            ->where('created >= ?', $weekAgo);
+        if (!$isAdmin) {
+            $commentsWeekSelect->where('ownerId = ?', $uid);
+        }
+        $commentsThisWeek = (int) $db->fetchObject($commentsWeekSelect)->num;
+        $postsLastSelect = $db->select(array('COUNT(cid)' => 'num'))
+            ->from('table.contents')
+            ->where('type = ?', 'post')
+            ->where('status = ?', 'publish')
+            ->where('created >= ?', $twoWeeksAgo)
+            ->where('created < ?', $weekAgo);
+        if (!$isAdmin) {
+            $postsLastSelect->where('authorId = ?', $uid);
+        }
+        $postsLastWeek = (int) $db->fetchObject($postsLastSelect)->num;
+        $commentsLastSelect = $db->select(array('COUNT(coid)' => 'num'))
+            ->from('table.comments')
+            ->where('status = ?', 'approved')
+            ->where('created >= ?', $twoWeeksAgo)
+            ->where('created < ?', $weekAgo);
+        if (!$isAdmin) {
+            $commentsLastSelect->where('ownerId = ?', $uid);
+        }
+        $commentsLastWeek = (int) $db->fetchObject($commentsLastSelect)->num;
         $this->jsonSuccess(array(
+            'scope' => $isAdmin ? 'site' : 'mine',
             'posts' => array(
                 'total'    => $postsTotal,
                 'thisWeek' => $postsThisWeek,
@@ -318,7 +374,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     public function chartData()
     {
-        $this->checkAuth();
+        $this->checkAdmin();
         $this->checkApiToken();
         $db   = $this->db;
         $days = (int) $this->request->get('days', 30);
@@ -1211,7 +1267,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     public function umamiProxy()
     {
-        $this->checkAuth();
+        $this->checkAdmin();
         $opts   = $this->pluginOptions;
         $provider = isset($opts->umamiProvider) ? (string)$opts->umamiProvider : 'self';
         $isCloud = ($provider === 'cloud');
@@ -2091,7 +2147,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.63',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.64',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -2367,6 +2423,12 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 break;
             case 'stats':
                 $this->stats();
+                break;
+            case 'user-prefs-get':
+                $this->userPrefsGet();
+                break;
+            case 'user-prefs-save':
+                $this->userPrefsSave();
                 break;
             case 'chart-data':
                 $this->chartData();

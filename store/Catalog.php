@@ -13,6 +13,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
 class AdminBeautify_StoreCatalog
 {
     const LEGACY_DIR = 'AdminBeautifyStore';
+    const CACHE_VERSION = 2;
     public static function build($force = false)
     {
         $reg = AdminBeautify_Store::allPlugins($force);
@@ -40,16 +41,20 @@ class AdminBeautify_StoreCatalog
             );
             $index[strtolower($p['dir'])] = count($rows) - 1;
         }
+        $titleIndex = array();
+        foreach ($rows as $i => $r) {
+            $k = self::norm($r['title']);
+            if ($k !== '' && !isset($titleIndex[$k])) {
+                $titleIndex[$k] = $i;
+            }
+        }
         foreach ($reg['plugins'] as $s) {
             $key = strtolower(AdminBeautify_Store::safeDir($s['directory']));
             $hit = ($key !== '' && isset($index[$key])) ? $index[$key] : null;
             if ($hit === null && $s['name'] !== '') {
                 $want = self::norm($s['name']);
-                foreach ($rows as $i => $r) {
-                    if (self::norm($r['title']) === $want) {
-                        $hit = $i;
-                        break;
-                    }
+                if ($want !== '' && isset($titleIndex[$want])) {
+                    $hit = $titleIndex[$want];
                 }
             }
             if ($hit !== null) {
@@ -76,18 +81,12 @@ class AdminBeautify_StoreCatalog
                 'private'    => !empty($s['private']),
             );
         }
+        $knownDirs = array();
+        foreach ($rows as $r) {
+            $knownDirs[strtolower($r['dir'])] = true;
+        }
         foreach (self::activatedMap() as $name => $unused) {
-            if (isset($index[strtolower($name)])) {
-                continue;
-            }
-            $found = false;
-            foreach ($rows as $r) {
-                if (strcasecmp($r['dir'], $name) === 0) {
-                    $found = true;
-                    break;
-                }
-            }
-            if ($found) {
+            if (isset($index[strtolower($name)]) || isset($knownDirs[strtolower($name)])) {
                 continue;
             }
             $rows[] = array(
@@ -186,12 +185,19 @@ class AdminBeautify_StoreCatalog
         }
         return $c;
     }
-    public static function localPlugins()
+    public static function pluginInfos()
     {
         $dir = AdminBeautify_Store::pluginsDir();
-        $activated = self::activatedMap();
-        $out = array();
-        foreach ((array) @glob($dir . '/*', GLOB_ONLYDIR) as $path) {
+        $paths = (array) @glob($dir . '/*', GLOB_ONLYDIR);
+        $sig = self::dirSignature($paths);
+        $cache = self::readCache();
+        if ($cache !== null && isset($cache['sig'], $cache['rows'])
+            && $cache['sig'] === $sig && isset($cache['v']) && $cache['v'] === self::CACHE_VERSION
+            && is_array($cache['rows'])) {
+            return $cache['rows'];
+        }
+        $rows = array();
+        foreach ($paths as $path) {
             $name = basename($path);
             if ($name === '' || $name[0] === '.') {
                 continue;
@@ -200,34 +206,102 @@ class AdminBeautify_StoreCatalog
             if (!is_file($file)) {
                 continue;
             }
-            $info = array();
-            try {
-                $info = \Typecho\Plugin::parseInfo($file);
-            } catch (Exception $e) {
-            } catch (Throwable $e) {
-            }
+            $info = self::parsePlugin($file);
+            $rows[$name] = self::packInfo($info);
+        }
+        self::writeCache($sig, $rows);
+        return $rows;
+    }
+    private static function parsePlugin($file)
+    {
+        try {
+            return (array) \Typecho\Plugin::parseInfo($file);
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return array();
+    }
+    private static function packInfo(array $info)
+    {
+        return array(
+            'title'       => isset($info['title']) ? (string) $info['title'] : '',
+            'description' => isset($info['description']) ? trim((string) $info['description']) : '',
+            'author'      => isset($info['author']) ? (string) $info['author'] : '',
+            'homepage'    => isset($info['homepage']) ? (string) $info['homepage'] : '',
+            'version'     => isset($info['version']) ? (string) $info['version'] : '',
+            'since'       => isset($info['since']) ? (string) $info['since'] : '',
+            'activate'    => !empty($info['activate']),
+            'deactivate'  => !empty($info['deactivate']),
+            'config'      => !empty($info['config']),
+            'personalConfig' => !empty($info['personalConfig']),
+        );
+    }
+    public static function localPlugins()
+    {
+        $activated = self::activatedMap();
+        $out = array();
+        foreach (self::pluginInfos() as $name => $info) {
             $needsActivate = !empty($info['activate']) || !empty($info['deactivate'])
                 || !empty($info['config']) || !empty($info['personalConfig']);
-            $dependence = true;
-            try {
-                $dependence = \Typecho\Plugin::checkDependence(isset($info['since']) ? $info['since'] : '');
-            } catch (Exception $e) {
-            } catch (Throwable $e) {
-            }
             $out[] = array(
                 'dir'        => $name,
-                'title'      => isset($info['title']) && $info['title'] !== '' ? $info['title'] : $name,
-                'desc'       => isset($info['description']) ? trim((string) $info['description']) : '',
-                'version'    => isset($info['version']) ? (string) $info['version'] : '',
-                'author'     => isset($info['author']) ? (string) $info['author'] : '',
-                'homepage'   => isset($info['homepage']) ? (string) $info['homepage'] : '',
+                'title'      => $info['title'] !== '' ? $info['title'] : $name,
+                'desc'       => $info['description'],
+                'version'    => $info['version'],
+                'author'     => $info['author'],
+                'homepage'   => $info['homepage'],
                 'config'     => !empty($info['config']),
                 'toggleable' => (bool) $needsActivate,
-                'dependence' => (bool) $dependence,
+                'dependence' => self::dependsOn($info['since']),
                 'activated'  => $needsActivate ? isset($activated[$name]) : true,
             );
         }
         return $out;
+    }
+    private static function cacheFile()
+    {
+        return AdminBeautify_Store::dataDir() . '/plugins-cache.json';
+    }
+    private static function readCache()
+    {
+        $file = self::cacheFile();
+        if (!is_file($file)) {
+            return null;
+        }
+        $data = json_decode((string) @file_get_contents($file), true);
+        return is_array($data) ? $data : null;
+    }
+    private static function writeCache($sig, array $rows)
+    {
+        $json = json_encode(
+            array('v' => self::CACHE_VERSION, 'sig' => $sig, 'at' => time(), 'rows' => $rows),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE
+        );
+        if (is_string($json) && $json !== '') {
+            @file_put_contents(self::cacheFile(), $json);
+        }
+    }
+    private static function dirSignature(array $paths)
+    {
+        $parts = array();
+        foreach ($paths as $path) {
+            $file = $path . '/Plugin.php';
+            $st = @stat($file);
+            $parts[] = basename($path) . '|' . ($st
+                ? ($st['mtime'] . ':' . $st['size'] . ':' . $st['ctime'])
+                : 'x');
+        }
+        sort($parts);
+        return md5(implode(',', $parts));
+    }
+    private static function dependsOn($since)
+    {
+        try {
+            return (bool) \Typecho\Plugin::checkDependence((string) $since);
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return true;
     }
     public static function activatedMap()
     {

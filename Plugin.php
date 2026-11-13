@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.63
+ * @version 2.1.64
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -333,7 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.63';
+        $abVer = '2.1.64';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -609,6 +609,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         abCard('dashboardcards', $abC1, 'dashboard_customize', '概要页卡片设置',
             '查看概要页已有卡片、调整卡片顺序'
         );
+        abCard('dashboardnotice', $abC1, 'campaign', '概要页公告',
+            '为每种用户身份单独写一段 Markdown 公告，显示在概要页问候语下方',
+            abCardTip('campaign', '支持 Markdown（标题 / 列表 / 链接 / 代码 / 引用 / 分隔线），显示在该身份概要页的<b>问候语下方</b>；某一身份留空则对该身份不显示。公告只影响概要页展示，不改变卡片本身。')
+        );
         $dashboardCardOrder = new AdminBeautify_SafeHidden(
             'dashboardCardOrder',
             null,
@@ -649,6 +653,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             self::hydrateCardValueForForm(isset($abOpt->dashboardCustomCards) ? (string) $abOpt->dashboardCustomCards : '')
         );
         $form->addInput($dashboardCustomCards);
+        $dashboardCustomCardsShared = new AdminBeautify_SafeHidden(
+            'dashboardCustomCardsShared',
+            null,
+            isset($abOpt->dashboardCustomCardsShared) ? (string) $abOpt->dashboardCustomCardsShared : ''
+        );
+        $form->addInput($dashboardCustomCardsShared);
         $dashboardMoreCardEnabled = new Typecho_Widget_Helper_Form_Element_Select(
             'dashboardMoreCardEnabled',
             array(
@@ -660,6 +670,16 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('在概要页显示一张「更多」卡片：<b>插件文档</b> / <b>插件仓库</b> / <b>QQ 群</b>，以及<b>捐助作者</b>（鼠标悬停变成微信赞赏码，点击弹出二维码）。<br>卡片默认排在最后，可在上方卡片清单里调整顺序。')
         );
         $form->addInput($dashboardMoreCardEnabled);
+        foreach (self::noticeFieldLabels() as $field => $label) {
+            $notice = new Typecho_Widget_Helper_Form_Element_Textarea(
+                $field,
+                null,
+                $field === 'dashboardNoticeAdmin' ? self::defaultAdminNotice() : '',
+                _t($label),
+                _t('支持 Markdown（标题 / 列表 / 链接 / 代码 / 引用 / 分隔线），显示在概要页问候语下方。留空则该身份不显示公告。')
+            );
+            $form->addInput($notice);
+        }
         abCard('editor', $abC1, 'edit_note', '编辑器设置', '切换 AB 编辑体验与 Vditor 模式，兼容第三方编辑器',
             abCardTip('edit', '可在 AB Typecho 原版优化 / AB Vditor / AB Editor.md / 兼容其他编辑器 之间切换。启用 Vditor 或 Editor.md 后，会替代原版 PageDown 编辑体验，并套用 AB 的 MD3 风格。')
         );
@@ -1184,7 +1204,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $header .= self::storeHeaderInject();
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.63 %c",'
+            .   '"%c AB-Admin %c v2.1.64 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1353,9 +1373,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.63.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.64.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.63.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.64.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1405,6 +1425,221 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         return $injectHead . $header . $injectTail;
     }
+    public static function currentRole()
+    {
+        try {
+            $user = Typecho_Widget::widget('Widget_User');
+            if (!$user->hasLogin()) {
+                return 'visitor';
+            }
+            if ($user->pass('administrator', true)) {
+                return 'administrator';
+            }
+            if ($user->pass('editor', true)) {
+                return 'editor';
+            }
+            if ($user->pass('contributor', true)) {
+                return 'contributor';
+            }
+            return 'subscriber';
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return 'visitor';
+    }
+    public static function noticeFieldLabels()
+    {
+        return array(
+            'dashboardNoticeAdmin'       => '概要页公告 · 管理员',
+            'dashboardNoticeEditor'      => '概要页公告 · 编辑',
+            'dashboardNoticeContributor' => '概要页公告 · 贡献者',
+            'dashboardNoticeSubscriber'  => '概要页公告 · 关注者',
+        );
+    }
+    public static function noticeFieldFor($role)
+    {
+        $map = array(
+            'administrator' => 'dashboardNoticeAdmin',
+            'editor'        => 'dashboardNoticeEditor',
+            'contributor'   => 'dashboardNoticeContributor',
+            'subscriber'    => 'dashboardNoticeSubscriber',
+        );
+        return isset($map[$role]) ? $map[$role] : '';
+    }
+    public static function defaultAdminNotice()
+    {
+        return "### 喜欢 AB Admin？帮它被更多人看到\n\n"
+             . "- GitHub 点个 ⭐：[lhl77/Typecho-Plugin-AdminBeautify](https://github.com/lhl77/Typecho-Plugin-AdminBeautify)\n"
+             . "- 推荐给还在用原生后台的朋友\n"
+             . "- 有想法或问题：[去提 Issue](https://github.com/lhl77/Typecho-Plugin-AdminBeautify/issues)\n\n";
+    }
+    public static function userPrefsDir()
+    {
+        $dir = dirname(dirname(__FILE__)) . '/.ab-store/user-prefs';
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        return $dir;
+    }
+    public static function userPrefsFile($uid)
+    {
+        $uid = (int) $uid;
+        return $uid > 0 ? self::userPrefsDir() . '/' . $uid . '.json' : '';
+    }
+    public static function defaultUserCards($canManage)
+    {
+        $cards = $canManage ? array('stats', 'posts', 'replies') : array('posts', 'replies');
+        foreach (self::sharedCustomCardIds() as $id) {
+            $key = 'custom:' . $id;
+            if (!in_array($key, $cards, true)) {
+                $cards[] = $key;
+            }
+        }
+        return $cards;
+    }
+    public static function sharedCustomCardIds()
+    {
+        $opt = self::pluginOptions();
+        $raw = isset($opt->dashboardCustomCardsShared) ? (string) $opt->dashboardCustomCardsShared : '';
+        if ($raw === '') {
+            return array();
+        }
+        $ids = json_decode($raw, true);
+        if (!is_array($ids)) {
+            $ids = array_filter(array_map('trim', explode(',', $raw)));
+        }
+        $out = array();
+        foreach ($ids as $id) {
+            $id = trim((string) $id);
+            if ($id !== '' && preg_match('/^[A-Za-z0-9_-]+$/', $id) && !in_array($id, $out, true)) {
+                $out[] = $id;
+            }
+        }
+        return $out;
+    }
+    public static function editorTypes()
+    {
+        return array('0', '1', '2', '3');
+    }
+    public static function editorModes()
+    {
+        return array('ir', 'sv', 'wysiwyg');
+    }
+    public static function canPickEditor($role)
+    {
+        return in_array($role, array('editor', 'contributor'), true);
+    }
+    public static function sanitizeUserCards($cards, $canManage)
+    {
+        $allow = self::defaultUserCards($canManage);
+        $out = array();
+        foreach ((array) $cards as $c) {
+            $c = strtolower(trim((string) $c));
+            if ($c !== '' && in_array($c, $allow, true) && !in_array($c, $out, true)) {
+                $out[] = $c;
+            }
+        }
+        return $out ? $out : $allow;
+    }
+    public static function readUserPrefs($uid, $canManage = null)
+    {
+        $role = self::currentRole();
+        if ($canManage === null) {
+            $canManage = ($role !== 'subscriber');
+        }
+        $default = array(
+            'cards'  => self::defaultUserCards($canManage),
+            'editor' => array('type' => '', 'mode' => ''),
+        );
+        $file = self::userPrefsFile($uid);
+        if ($file === '' || !is_file($file)) {
+            return $default;
+        }
+        $data = json_decode((string) @file_get_contents($file), true);
+        if (!is_array($data)) {
+            return $default;
+        }
+        $editor = isset($data['editor']) && is_array($data['editor']) ? $data['editor'] : array();
+        $type = isset($editor['type']) ? (string) $editor['type'] : '';
+        $mode = isset($editor['mode']) ? (string) $editor['mode'] : '';
+        if (!in_array($type, self::editorTypes(), true)) {
+            $type = '';
+        }
+        if (!in_array($mode, self::editorModes(), true)) {
+            $mode = '';
+        }
+        return array(
+            'cards'  => self::sanitizeUserCards(isset($data['cards']) ? $data['cards'] : array(), $canManage),
+            'editor' => array('type' => $type, 'mode' => $mode),
+        );
+    }
+    public static function writeUserPrefs($uid, $cards, $editorType = '', $editorMode = '')
+    {
+        $file = self::userPrefsFile($uid);
+        if ($file === '') {
+            return array('error' => '用户无效', 'code' => 400);
+        }
+        $role = self::currentRole();
+        $canManage = ($role !== 'subscriber');
+        $canPickEditor = self::canPickEditor($role);
+        $type = $canPickEditor ? (string) $editorType : '';
+        $mode = $canPickEditor ? (string) $editorMode : '';
+        if (!in_array($type, self::editorTypes(), true)) {
+            $type = '';
+        }
+        if (!in_array($mode, self::editorModes(), true)) {
+            $mode = '';
+        }
+        $data = array(
+            'cards'  => self::sanitizeUserCards($cards, $canManage),
+            'editor' => array('type' => $type, 'mode' => $mode),
+            'at'     => time(),
+        );
+        $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if (!is_string($json) || $json === '') {
+            return array('error' => '偏好序列化失败', 'code' => 500);
+        }
+        if (@file_put_contents($file, $json, LOCK_EX) === false) {
+            return array('error' => '保存失败：数据目录不可写', 'code' => 500);
+        }
+        return array('ok' => true, 'prefs' => $data);
+    }
+    public static function parseQuickButtons($raw)
+    {
+        $out = array();
+        foreach (array_filter(array_map('trim', explode("\n", (string) $raw))) as $line) {
+            $pos = strpos($line, ':');
+            if ($pos === false) {
+                continue;
+            }
+            $label = trim(substr($line, 0, $pos));
+            $rest  = trim(substr($line, $pos + 1));
+            if ($label === '' || $rest === '') {
+                continue;
+            }
+            $highlight = false;
+            if (preg_match('#^(.*):highlight$#i', $rest, $m)) {
+                $highlight = true;
+                $rest = $m[1];
+            }
+            $icon = 'link';
+            if (preg_match('#^(\S+?):((?!\d+$)[A-Za-z0-9_]+)$#', $rest, $m)) {
+                $rest = $m[1];
+                $icon = $m[2];
+            }
+            $href = trim($rest);
+            if ($href === '') {
+                continue;
+            }
+            $out[] = array(
+                'label'     => $label,
+                'href'      => $href,
+                'icon'      => $icon,
+                'highlight' => $highlight,
+            );
+        }
+        return $out;
+    }
     public static function renderFooter()
     {
         if (self::isLoginPage()) {
@@ -1416,6 +1651,10 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         echo '<div id="ab-page-loader"><div id="ab-loader-spinner"></div></div>';
         $options = Typecho_Widget::widget('Widget_Options');
         $pluginOptions = self::pluginOptions($options);
+        $abRole      = self::currentRole();
+        $abIsAdmin   = ($abRole === 'administrator');
+        $abCanManage = in_array($abRole, array('administrator', 'editor', 'contributor'), true);
+        $abCanEdit   = in_array($abRole, array('administrator', 'editor'), true);
         $darkMode = $pluginOptions->darkMode ?: 'auto';
         $rawAnim = isset($pluginOptions->enableAnimation) ? (string)$pluginOptions->enableAnimation : '';
         $enableAnimation = ($rawAnim !== '') ? $rawAnim : '1';
@@ -1487,6 +1726,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $primaryColorHex     = $colorSchemeData['--md-primary'];
         $primaryColorDarkHex = $colorSchemeData['--md-dark-primary'];
         $user = Typecho_Widget::widget('Widget_User');
+        $abUserPrefs = array(
+            'cards'  => self::defaultUserCards($abCanManage),
+            'editor' => array('type' => '', 'mode' => ''),
+        );
+        if (!$abIsAdmin && $user->hasLogin()) {
+            $abUserPrefs = self::readUserPrefs((int) $user->uid, $abCanManage);
+        }
+        if (!$abIsAdmin && self::canPickEditor($abRole) && $abUserPrefs['editor']['type'] !== '') {
+            $editorVditor = $abUserPrefs['editor']['type'];
+            if ($abUserPrefs['editor']['mode'] !== '') {
+                $editorVditorMode = $abUserPrefs['editor']['mode'];
+            }
+        }
         $avatarUrl  = '';
         $avatarHost = 'https://gravatar.loli.net/avatar';
         if ($user->hasLogin() && $user->mail) {
@@ -1536,19 +1788,8 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         echo '})();</script>';
         echo '<script>';
         $notifyOptOut = isset($pluginOptions->notifyOptOut) ? (string)$pluginOptions->notifyOptOut : '0';
-        $customBtnsRaw = $dashboardCustomButtons;
-        $customBtnsParsed = array();
-        foreach (array_filter(array_map('trim', explode("\n", $customBtnsRaw))) as $line) {
-            $parts = array_map('trim', explode(':', $line, 4));
-            if (count($parts) >= 2 && $parts[0] !== '' && $parts[1] !== '') {
-                $customBtnsParsed[] = array(
-                    'label'     => $parts[0],
-                    'href'      => $parts[1],
-                    'icon'      => isset($parts[2]) && $parts[2] !== '' ? $parts[2] : 'link',
-                    'highlight' => isset($parts[3]) && trim(strtolower($parts[3])) === 'highlight',
-                );
-            }
-        }
+        $customBtnsRaw = $abIsAdmin ? $dashboardCustomButtons : '';
+        $customBtnsParsed = self::parseQuickButtons($customBtnsRaw);
         $enabledCompatPlugins = array();
         $compatEnabledRaw = isset($pluginOptions->compat_disabledScripts) ? (string)$pluginOptions->compat_disabledScripts : '';
         $compatEnabledFiles = ($compatEnabledRaw !== '') ? (array)json_decode($compatEnabledRaw, true) : array();
@@ -1569,7 +1810,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $pendingCompatSuggestions = array();
         $compatDirScan = dirname(__FILE__) . '/assets/compat/';
         $pluginsBaseDir = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
-        if (is_dir($compatDirScan)) {
+        if ($abIsAdmin && is_dir($compatDirScan)) {
             $scanFiles = @scandir($compatDirScan);
             if ($scanFiles) {
                 foreach ($scanFiles as $scanFile) {
@@ -1594,6 +1835,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             }
         }
         $pluginSettingsUrl = $options->adminUrl . 'options-plugin.php?config=AdminBeautify';
+        $dashboardNotice = '';
+        $noticeField = self::noticeFieldFor($abRole);
+        if ($noticeField !== '') {
+            $noticeOpts = array();
+            if (is_object($pluginOptions) && method_exists($pluginOptions, 'toArray')) {
+                $noticeOpts = (array) $pluginOptions->toArray();
+            }
+            if (array_key_exists($noticeField, $noticeOpts)) {
+                $dashboardNotice = trim((string) $noticeOpts[$noticeField]);
+            } elseif ($noticeField === 'dashboardNoticeAdmin') {
+                $dashboardNotice = self::defaultAdminNotice();
+            }
+        }
         $currentPageCompatKey = '';
         $requestUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         if (strpos($requestUri, 'options-plugin.php') !== false && isset($_GET['config'])) {
@@ -1647,6 +1901,54 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         } catch (Exception $e) {
         } catch (Throwable $e) {
         }
+        if (!$abIsAdmin) {
+            $sharedIds = self::sharedCustomCardIds();
+            if (empty($sharedIds)) {
+                $dashboardCustomCards = array();
+            } else {
+                $sharedKeep = array();
+                foreach ($dashboardCustomCards as $sharedCard) {
+                    if (isset($sharedCard['id']) && in_array((string) $sharedCard['id'], $sharedIds, true)) {
+                        $sharedKeep[] = $sharedCard;
+                    }
+                }
+                $dashboardCustomCards = $sharedKeep;
+                if (!empty($dashboardCardGroups)) {
+                    $aliveKeys = array();
+                    foreach ($sharedKeep as $sharedCard) {
+                        $aliveKeys['custom:' . $sharedCard['id']] = true;
+                    }
+                    $keptGroups = array();
+                    foreach ($dashboardCardGroups as $groupItem) {
+                        if (empty($groupItem['cards'])) continue;
+                        $groupCardsOk = true;
+                        foreach ($groupItem['cards'] as $groupCardKey) {
+                            if (strpos($groupCardKey, 'custom:') === 0 && !isset($aliveKeys[$groupCardKey])) {
+                                $groupCardsOk = false;
+                                break;
+                            }
+                        }
+                        if ($groupCardsOk) $keptGroups[] = $groupItem;
+                    }
+                    $dashboardCardGroups = $keptGroups;
+                }
+            }
+            $dashboardCardOrder          = '';
+            $dashboardMoreCardEnabled    = '0';
+            $dashboardHideDonate         = '1';
+            $dashboardThemeButtonShow    = 'hide';
+            $pluginSettingsUrl           = '';
+            $overviewChartEnabled        = '0';
+            $umamiEnabled                = '0';
+            $umamiApiBase                = '';
+            $umamiWebsiteId              = '';
+            $umamiApiToken               = '';
+            $pendingCompatSuggestions    = array();
+            $currentPageCompatKey        = '';
+        }
+        if (!$abCanManage) {
+            $dashboardQuickShow = $customBtnsParsed ? '1' : '0';
+        }
         echo 'window.__AB_CONFIG__=' . json_encode(array(
             'darkMode'               => $darkMode,
             'enableAnimation'        => $enableAnimation,
@@ -1671,8 +1973,25 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.63',
+            'pluginVersion'          => '2.1.64',
             'notifyOptOut'           => $notifyOptOut,
+            'userRole'               => $abRole,
+            'canManage'              => $abCanManage,
+            'canEditOthers'          => $abCanEdit,
+            'userDashboard'          => $abIsAdmin ? null : array(
+                'cards'     => $abUserPrefs['cards'],
+                'allow'     => self::defaultUserCards($abCanManage),
+                'canConfig' => true,
+                'editor'    => self::canPickEditor($abRole) ? array(
+                    'type' => $abUserPrefs['editor']['type'],
+                    'mode' => $abUserPrefs['editor']['mode'],
+                    'site' => array(
+                        'type' => isset($pluginOptions->editor_vditor) ? (string) $pluginOptions->editor_vditor : '1',
+                        'mode' => isset($pluginOptions->editor_vditorMode) ? (string) $pluginOptions->editor_vditorMode : 'ir',
+                    ),
+                ) : null,
+            ),
+            'dashboardNotice'        => $dashboardNotice,
             'dashboardQuickShow'     => $dashboardQuickShow,
             'dashboardQuickStyle'    => $dashboardQuickStyle,
             'dashboardQuickHint'     => $dashboardQuickHint,
@@ -1705,9 +2024,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'pluginSettingsUrl'          => $pluginSettingsUrl,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.63.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.64.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.63.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.64.js?v=' . $abJsVer . '"></script>';
         echo '<script>(function(){"use strict";
   var CQ = 575, OPEN = "ab-search-open";
   function box(f){ return f.querySelector(".search"); }
@@ -1850,7 +2169,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.63"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.64"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
@@ -2028,7 +2347,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.63";';
+        echo 'var __AB_VER__="2.1.64";';
         echo <<<'UPDATEJS'
 // ---- abPatchKey: 把一批补丁 id 变成一个稳定的忽略 key ----
 window.abPatchKey=function(pt){
@@ -2985,14 +3304,14 @@ UPDATEJS;
             . '});'
             . '})();</script>';
         }
-        if (self::storeBoot() && AdminBeautify_Store::enabled()) {
+        if ($abIsAdmin && self::storeBoot() && AdminBeautify_Store::enabled()) {
             $storeOpts = Typecho_Widget::widget('Widget_Options');
             $storeJsUrl = Typecho_Common::url('AdminBeautify/store/assets/store.js', $storeOpts->pluginUrl);
             $storeJsFile = dirname(__FILE__) . '/store/assets/store.js';
             $storeJsVer = is_file($storeJsFile) ? (string) filemtime($storeJsFile) : '0';
             echo '<script src="' . htmlspecialchars($storeJsUrl . '?v=' . $storeJsVer) . '"></script>' . "\n";
         }
-        if (self::storeBoot() && AdminBeautify_Store::enabled()
+        if ($abIsAdmin && self::storeBoot() && AdminBeautify_Store::enabled()
             && !AdminBeautify_Store::notifyOptOut()) {
             $ucOpts = Typecho_Widget::widget('Widget_Options');
             $ucUrl = Typecho_Common::url('AdminBeautify/store/assets/update-check.js', $ucOpts->pluginUrl);
@@ -3000,6 +3319,7 @@ UPDATEJS;
             $ucVer = is_file($ucFile) ? (string) filemtime($ucFile) : '0';
             echo '<script src="' . htmlspecialchars($ucUrl . '?v=' . $ucVer) . '"></script>' . "\n";
         }
+        if ($abIsAdmin):
         echo '<script>(function(){
 setTimeout(function(){
     var LS_KEY="ab-compat-auto-sync-ts";
@@ -3044,6 +3364,7 @@ function abCompatAutoSyncToast(n){
     setTimeout(function(){if(t.parentNode)t.parentNode.removeChild(t);},8000);
 }
 })();</script>';
+        endif;
         echo '<script>';
         echo 'window.__AB_TS_URL__='  . json_encode(Typecho_Common::url('/action/admin-beautify', $options->index)) . ';';
         echo 'window.__AB_TS_TOKEN__=' . json_encode($token) . ';';
