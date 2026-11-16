@@ -135,8 +135,10 @@ class AdminBeautify_AI
         $model = (isset($opt->ai_model) && trim((string) $opt->ai_model) !== '')
             ? trim((string) $opt->ai_model)
             : $def['model'];
+        $enabledRaw = isset($opt->ai_enabled) ? trim((string) $opt->ai_enabled) : '';
+        $enabled = ($enabledRaw === '') ? true : ($enabledRaw === '1');
         return array(
-            'enabled'         => isset($opt->ai_enabled) && (string) $opt->ai_enabled === '1',
+            'enabled'         => $enabled,
             'provider'        => $provider,
             'base_url'        => $baseUrl,
             'api_key'         => isset($opt->ai_api_key) ? (string) $opt->ai_api_key : '',
