@@ -303,7 +303,13 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             fab.classList.add("is-busy");
         });
 
-        document.body.appendChild(fab);
+        /* 放到页面最底部（表单末尾），居中显示，不再悬浮 */
+        var anchor = form.querySelector(".ab-config-footer") || form.lastElementChild;
+        if (anchor && anchor.parentNode === form) {
+            form.appendChild(fab);
+        } else {
+            form.appendChild(fab);
+        }
     }
 
     function buildCards(){
@@ -1859,6 +1865,21 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
             }
             channelBody.style.padding="0px 38px 16px";
         }
+
+        // ---- AB AI 助手卡片（插在升级通道卡片之后） ----
+        var aiFields=["ai_enabled","ai_provider","ai_base_url","ai_api_key","ai_model","ai_temperature","ai_max_tokens","ai_system_prompt","ai_allow_non_admin","ai_rate_per_min"];
+        var aiCard=document.getElementById("ab-card-ai");
+        var aiBody=document.getElementById("ab-card-ai-body");
+        if(aiCard&&aiBody&&channelCard){
+            var formAi=channelCard.parentNode;
+            if(channelCard.nextSibling) formAi.insertBefore(aiCard,channelCard.nextSibling);
+            else formAi.appendChild(aiCard);
+            for(var qa=0;qa<aiFields.length;qa++){
+                var qau=findFieldUl(aiFields[qa]);
+                if(qau) aiBody.appendChild(qau);
+            }
+            aiBody.style.padding="0px 38px 16px";
+        }
         // 注：原「静态资源来源」下拉的联动显隐逻辑已随该字段一起移除（字体字段已下线）
 
         // Umami 字段显示逻辑：仅在开启 Umami 时显示；Cloud 模式隐藏自建 API 地址
@@ -1891,7 +1912,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         // ---- 绑定卡片点击 & 恢复/默认折叠状态 ----
         // ⚠️ 这里是白名单：新加一张 MD3 折叠卡（abCard('xxx', …)）时必须把 id 补进数组，
         //    否则那张卡点标题不会折叠（概要页公告卡片就漏过一次）。
-        ["admin","dashboardcards","dashboardnotice","editor","login","pwa","perf","compat","smtp","security","channel"].forEach(function(id){
+        ["admin","dashboardcards","dashboardnotice","editor","login","pwa","perf","compat","smtp","security","channel","ai"].forEach(function(id){
             var hdr=document.getElementById("ab-card-"+id+"-hdr");
             if(hdr) hdr.addEventListener("click",function(){ abToggleCard(id); });
             restoreCard(id);
@@ -2160,6 +2181,13 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         if(i8) i8.style.background=c[0]+"1a";
         var v8=document.getElementById("ab-card-channel-chev");
         if(v8) v8.setAttribute("stroke",c[0]);
+        // AI 助手卡片
+        var s11=document.getElementById("ab-card-ai-strip");
+        if(s11) s11.style.background=c[0];
+        var i11=document.getElementById("ab-card-ai-icon");
+        if(i11) i11.style.background=c[0]+"1a";
+        var v11=document.getElementById("ab-card-ai-chev");
+        if(v11) v11.setAttribute("stroke",c[0]);
         // 关于插件卡片
         var s6=document.getElementById("ab-card-about-strip");
         if(s6) s6.style.background=c[0];

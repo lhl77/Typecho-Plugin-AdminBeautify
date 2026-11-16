@@ -445,99 +445,42 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     .ab-color-check { width: 20px !important; height: 20px !important; font-size: 14px !important; }
 }
 
-/* 设置页保存 FAB */
+/* 设置页保存按钮（页面最底部、居中、带文字，非悬浮） */
 .ab-config-save-fab {
-    position: fixed;
-    right: 20px;
-    bottom: 20px;
-    width: 58px;
-    height: 58px;
-    padding: 0 18px;
-    overflow: hidden;
-    gap: 0;
-    border: none;
-    border-radius: 50%;
-    z-index: 99;
-    display: inline-flex;
+    position: static;
+    display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    width: auto;
+    min-width: 160px;
+    height: 44px;
+    margin: 28px auto 8px;
+    padding: 0 28px;
+    border: none;
+    border-radius: 22px;
+    z-index: auto;
     cursor: pointer;
-    /* 全部跟随插件主题色：
-       - 文字色用 --md-on-primary（暗色主题下主样式表已把它重映射到 --md-dark-on-primary）
-       - 渐变第二档由主色与 on-primary 混出（原来写死 #8a6bc2 —— Material 默认紫的浅色版，
-         换成绿 / 蓝 / 橙主题后渐变尾部仍是紫的）
-       - 阴影也是写死的紫 rgba(103,80,164,…)，改用主色混透明 */
-    color: var(--md-on-primary, #fff);
-    background: linear-gradient(135deg, var(--md-primary, #6750a4), color-mix(in srgb, var(--md-primary, #6750a4) 78%, var(--md-on-primary, #fff)));
-    box-shadow: 0 10px 28px color-mix(in srgb, var(--md-primary, #6750a4) 35%, transparent);
-    transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, width .24s cubic-bezier(.2,0,.2,1), border-radius .24s cubic-bezier(.2,0,.2,1);
-}
-/* ⚠️ hover 抬起只给「支持悬停 + 指针精确 + 非触摸」的设备（ab-hover-capable 由
-   config.script.php 的 syncHoverCapability() 按 matchMedia + maxTouchPoints 维护）。
-   原来这条写在全局：手机上点一下会让 FAB 抬起 2px 并放大阴影，看起来像误触。 */
-.ab-hover-capable .ab-config-save-fab:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 30px color-mix(in srgb, var(--md-primary, #6750a4) 42%, transparent);
-}
-.ab-config-save-fab .material-icons-round {
-    font-size: 24px;
-    flex: 0 0 auto;
-}
-.ab-config-save-fab-label {
-    max-width: 0;
-    opacity: 0;
-    margin-left: 0;
-    white-space: nowrap;
+    font: inherit;
     font-size: 14px;
     font-weight: 600;
-    letter-spacing: .01em;
-    overflow: hidden;
-    transition: max-width .24s cubic-bezier(.2,0,.2,1), opacity .2s ease, margin-left .24s cubic-bezier(.2,0,.2,1);
+    color: var(--md-on-primary, #fff);
+    background: linear-gradient(135deg, var(--md-primary, #6750a4), color-mix(in srgb, var(--md-primary, #6750a4) 78%, var(--md-on-primary, #fff)));
+    box-shadow: 0 6px 18px color-mix(in srgb, var(--md-primary, #6750a4) 28%, transparent);
+    transition: transform .12s ease, opacity .18s ease, box-shadow .18s ease;
 }
-@media (hover: hover) and (pointer: fine) {
-    .ab-hover-capable .ab-config-save-fab:hover,
-    .ab-hover-capable .ab-config-save-fab:focus-visible {
-        width: 146px;
-        border-radius: 999px;
-    }
-    .ab-hover-capable .ab-config-save-fab:hover .ab-config-save-fab-label,
-    .ab-hover-capable .ab-config-save-fab:focus-visible .ab-config-save-fab-label {
-        max-width: 82px;
-        opacity: 1;
-        margin-left: 8px;
-    }
-}
-.ab-config-save-fab.is-busy {
-    opacity: .72;
-    pointer-events: none;
-}
+.ab-config-save-fab:hover { box-shadow: 0 8px 22px color-mix(in srgb, var(--md-primary, #6750a4) 34%, transparent); }
+.ab-config-save-fab:active { transform: scale(.96); }
+.ab-config-save-fab .material-icons-round { font-size: 20px; }
+.ab-config-save-fab-label { display: inline; }
+.ab-config-save-fab.is-busy { opacity: .72; pointer-events: none; }
 
 @media (max-width: 575px) {
     .ab-config-save-fab {
-        right: 14px;
-        bottom: 14px;
-        width: 54px;
-        height: 54px;
-        padding: 0;
-    }
-    /* 移动端彻底关掉 hover / focus 动效：触摸设备上 hover 会「粘住」（点完手指移开
-       仍保持抬起 + 放大阴影，看起来像误触）。
-       ⚠️ 必须连 .ab-hover-capable 那两条一起写：上面那条全局规则的选择器是
-          `.ab-hover-capable .ab-config-save-fab:hover`（0,3,0），
-          只写 `.ab-config-save-fab:hover`（0,2,0）压不住它。
-          这里两组同优先级、靠「源码顺序在后」取胜（本块在 hover 块之后）。
-       尺寸也要一并复位：hover 块会把 FAB 拉成长胶囊（146px）。 */
-    .ab-config-save-fab:hover,
-    .ab-config-save-fab:focus-visible,
-    .ab-hover-capable .ab-config-save-fab:hover,
-    .ab-hover-capable .ab-config-save-fab:focus-visible {
-        transform: none;
-        width: 54px;
-        border-radius: 50%;
-        box-shadow: 0 10px 28px color-mix(in srgb, var(--md-primary, #6750a4) 35%, transparent);
-    }
-    .ab-config-save-fab-label {
-        display: none;
+        width: calc(100% - 32px);
+        max-width: 320px;
+        height: 46px;
+        margin: 24px auto 8px;
     }
 }
 
@@ -703,7 +646,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.64.css 里的
+   注意：AdminBeautify.v2.1.65.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }

@@ -18,7 +18,7 @@ class AdminBeautify_Patch
     const REPO_RAW = 'https://raw.githubusercontent.com/lhl77/typecho-patches/main/';
     const MIRROR = 'https://gh1.lhl.one/';
     const CDN = 'https://cdn.jsdelivr.net/gh/lhl77/typecho-patches@main/';
-    const CACHE_TTL = 21600;
+    const CACHE_TTL = 3600;
     const MAX_BYTES = 2097152;
     const KEEP_BACKUPS = 5;
     const STATE_KEY = 'core-patch-state';

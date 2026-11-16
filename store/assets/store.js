@@ -39,6 +39,83 @@ if(btn){btn.disabled=false;if(label)label.textContent=oldText;}
 if(typeof onSuccess==='function'){onSuccess(res);}else if(!silent){toast(res.message||'已完成');setTimeout(function(){location.reload();},700);}
 return res;}).catch(function(err){if(btn){btn.disabled=false;if(label)label.textContent=oldText;}
 if(!silent)toast(err.message||'操作失败',true);throw err;});}
+function escHtml(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function fmtSize(n){n=Number(n)||0;if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';return(n/1048576).toFixed(1)+' MB';}
+function openModal(title){closeModal();var scrim=document.createElement('div');scrim.id='abp-modal';scrim.className='abp-modal';scrim.innerHTML='<div class="abp-modal-card" role="dialog" aria-modal="true">'
++'<div class="abp-modal-head"><b>'+escHtml(title)+'</b>'
++'<button type="button" class="abp-iconbtn abp-modal-x" aria-label="关闭">'
++'<span class="material-icons-round">close</span></button></div>'
++'<div class="abp-modal-body"></div></div>';document.body.appendChild(scrim);var close=function(){closeModal();};scrim.addEventListener('click',function(e){if(e.target===scrim)close();});scrim.querySelector('.abp-modal-x').addEventListener('click',close);return{scrim:scrim,body:scrim.querySelector('.abp-modal-body'),close:close};}
+function closeModal(){var m=document.getElementById('abp-modal');if(m&&m.parentNode)m.parentNode.removeChild(m);}
+function zipPrecheck(file,type){return new Promise(function(resolve){var need=(type==='theme')?'index.php':'Plugin.php';if(!file){resolve({ok:false,reason:'没有选择文件'});return;}
+if(!/\.zip$/i.test(file.name)){resolve({ok:false,reason:'只接受 .zip 压缩包'});return;}
+if(file.size<22){resolve({ok:false,reason:'文件太小，不是有效 zip'});return;}
+var tailSize=Math.min(file.size,66000);Promise.all([file.slice(0,4).arrayBuffer(),file.slice(file.size-tailSize,file.size).arrayBuffer()]).then(function(arrs){var head=new Uint8Array(arrs[0]);if(!(head[0]===0x50&&head[1]===0x4b&&(head[2]===3||head[2]===5||head[2]===7))){resolve({ok:false,reason:'不是有效的 ZIP（文件头不对）'});return;}
+var tail=new DataView(arrs[1]);var eocd=-1;for(var i=tail.byteLength-22;i>=0;i--){if(tail.getUint32(i,true)===0x06054b50){eocd=i;break;}}
+if(eocd<0){resolve({ok:false,reason:'不是有效的 ZIP（找不到目录尾）'});return;}
+var count=tail.getUint16(eocd+10,true);var cdSize=tail.getUint32(eocd+12,true);var cdOff=tail.getUint32(eocd+16,true);if(!count){resolve({ok:false,reason:'ZIP 是空的'});return;}
+if(cdSize>4*1024*1024||cdOff+cdSize>file.size){resolve({ok:true});return;}
+file.slice(cdOff,cdOff+cdSize).arrayBuffer().then(function(cdBuf){var cd=new DataView(cdBuf);var p=0,hasNeed=false,bad=false;for(var n=0;n<count;n++){if(p+46>cd.byteLength)break;if(cd.getUint32(p,true)!==0x02014b50)break;var nlen=cd.getUint16(p+28,true);var xlen=cd.getUint16(p+30,true);var clen=cd.getUint16(p+32,true);var fname='';try{fname=new TextDecoder('utf-8').decode(new Uint8Array(cdBuf,p+46,nlen));}catch(e2){fname='';}
+if(fname==='..'||fname.indexOf('../')!==-1||fname.charAt(0)==='/'||/^[A-Za-z]:/.test(fname)){bad=true;}
+if(fname===need||fname.slice(-(need.length+1))==='/'+need){hasNeed=true;}
+p+=46+nlen+xlen+clen;}
+if(bad){resolve({ok:false,reason:'压缩包含非法路径（../ 或绝对路径）'});return;}
+if(!hasNeed){resolve({ok:false,reason:'压缩包里没有找到 '+need+'（'+(type==='theme'?'主题需 index.php':'插件需 Plugin.php')+'）'});return;}
+resolve({ok:true});}).catch(function(){resolve({ok:false,reason:'读取 zip 目录失败'});});}).catch(function(){resolve({ok:false,reason:'读取文件失败'});});});}
+function uploadZip(file,type,onProgress){var c=cfg();return new Promise(function(resolve,reject){if(!c.ajaxUrl){reject(new Error('缺少接口地址'));return;}
+var fd=new FormData();fd.append('do',type==='theme'?'store.local-theme-install':'store.local-install');fd.append('_',c.token);fd.append('zip',file,file.name);var xhr=new XMLHttpRequest();xhr.open('POST',c.ajaxUrl,true);xhr.setRequestHeader('X-Requested-With','XMLHttpRequest');if(onProgress){xhr.upload.onprogress=function(ev){if(ev.lengthComputable)onProgress(ev.loaded,ev.total);};}
+xhr.onload=function(){var res=null;try{res=JSON.parse(xhr.responseText);}catch(e){res=null;}
+if(!res){reject(new Error('服务器返回无法解析（HTTP '+xhr.status+'）'));return;}
+if(res.code!==0){reject(new Error(res.message||'安装失败'));return;}
+resolve(res);};xhr.onerror=function(){reject(new Error('网络错误'));};xhr.send(fd);});}
+function openLocalInstall(){var m=openModal('本地安装插件');m.body.innerHTML=''
++'<div class="abp-up-hint">'
++'<p>上传插件压缩包（<b>.zip</b>）。包内需包含 <code>Plugin.php</code>，建议把文件放在一个顶层目录中：</p>'
++'<pre class="abp-up-tree">MyPlugin/\n  Plugin.php\n  ...</pre>'
++'</div>'
++'<label class="abp-up-pick"><input type="file" accept=".zip,application/zip" hidden id="abp-up-file">'
++'<span class="material-icons-round">upload_file</span><span>选择 zip 文件</span></label>'
++'<div class="abp-up-name" id="abp-up-name"></div>'
++'<div class="abp-up-progress" id="abp-up-progress" hidden>'
++'<div class="abp-up-bar"><i></i></div><div class="abp-up-stat"></div></div>'
++'<div class="abp-up-actions">'
++'<button type="button" class="abp-btn abp-btn-filled" id="abp-up-go" disabled>开始安装</button></div>';var input=m.body.querySelector('#abp-up-file');var nameEl=m.body.querySelector('#abp-up-name');var goBtn=m.body.querySelector('#abp-up-go');var prog=m.body.querySelector('#abp-up-progress');var bar=prog.querySelector('.abp-up-bar > i');var stat=prog.querySelector('.abp-up-stat');var file=null;var checking=false;input.addEventListener('change',function(){file=(input.files&&input.files[0])?input.files[0]:null;goBtn.disabled=true;nameEl.className='abp-up-name';if(!file){nameEl.textContent='';return;}
+checking=true;nameEl.classList.add('is-checking');nameEl.textContent='正在检查 '+file.name+'…';zipPrecheck(file,'plugin').then(function(r){checking=false;if(!r.ok){nameEl.className='abp-up-name is-err';nameEl.textContent='✗ '+r.reason;return;}
+nameEl.className='abp-up-name is-ok';nameEl.textContent='✓ 格式检查通过：'+file.name+'（'+fmtSize(file.size)+'）';goBtn.disabled=false;});});goBtn.addEventListener('click',function(){if(!file||checking)return;goBtn.disabled=true;prog.hidden=false;stat.classList.remove('is-err');var start=Date.now();uploadZip(file,'plugin',function(loaded,total){var pct=total?Math.min(100,Math.round(loaded/total*100)):0;bar.style.width=pct+'%';var secs=(Date.now()-start)/1000;var speed=secs>0?loaded/secs:0;stat.textContent=pct+'% · '+fmtSize(loaded)+' / '+fmtSize(total)+' · '+fmtSize(speed)+'/s';}).then(function(res){bar.style.width='100%';stat.textContent='安装完成，正在刷新…';toast((res&&res.message)||'安装成功');setTimeout(function(){location.reload();},900);}).catch(function(err){goBtn.disabled=false;stat.classList.add('is-err');stat.textContent='✗ '+(err.message||'安装失败');});});}
+function openBackup(){var m=openModal('备份管理');m.body.innerHTML='<div class="abp-bk-empty">正在读取备份…</div>';post('backup-list',{},null,true,function(res){renderBackupPanel(m.body,(res&&res.data&&res.data.items)||[]);}).catch(function(err){m.body.innerHTML='<div class="abp-bk-empty">读取失败：'+escHtml(err.message||'')+'</div>';});}
+function renderBackupPanel(body,items){if(!items.length){body.innerHTML='<div class="abp-bk-empty"><span class="material-icons-round">backup</span><p>还没有任何备份</p></div>';return;}
+body.innerHTML=''
++'<div class="abp-bk-toolbar">'
++'<label class="abp-bk-search"><span class="material-icons-round">search</span>'
++'<input type="search" placeholder="搜索插件 / 主题" aria-label="搜索备份"></label>'
++'<select class="abp-bk-sort" aria-label="排序">'
++'<option value="date-desc">最新优先</option>'
++'<option value="date-asc">最早优先</option>'
++'<option value="name-asc">名称 A→Z</option>'
++'<option value="name-desc">名称 Z→A</option>'
++'</select>'
++'</div>'
++'<div class="abp-bk-actionbar">'
++'<label class="abp-bk-all"><input type="checkbox" class="abp-bk-check-all">全选</label>'
++'<span class="abp-bk-count"></span>'
++'<button type="button" class="abp-btn abp-btn-outline abp-btn-warn" id="abp-bk-clear" disabled>清空选中</button>'
++'<button type="button" class="abp-btn abp-btn-outline abp-btn-warn" id="abp-bk-clear-all">清空全部</button>'
++'</div>'
++'<div class="abp-bk-list"></div>';var q=body.querySelector('.abp-bk-search input');var sel=body.querySelector('.abp-bk-sort');var countEl=body.querySelector('.abp-bk-count');var listEl=body.querySelector('.abp-bk-list');var allBox=body.querySelector('.abp-bk-check-all');var clearBtn=body.querySelector('#abp-bk-clear');var clearAllBtn=body.querySelector('#abp-bk-clear-all');var state={q:'',sort:'date-desc'};function filtered(){var kw=state.q.toLowerCase();var list=items.filter(function(it){if(!kw)return true;return(it.dir+' '+(it.version||'')+' '+it.type).toLowerCase().indexOf(kw)!==-1;});list.sort(function(a,b){if(state.sort==='date-asc')return a.ts-b.ts;if(state.sort==='name-asc')return String(a.dir).localeCompare(String(b.dir));if(state.sort==='name-desc')return String(b.dir).localeCompare(String(a.dir));return b.ts-a.ts;});return list;}
+function checks(){return[].slice.call(listEl.querySelectorAll('.abp-bk-check'));}
+function selectedNames(){return checks().filter(function(c){return c.checked;}).map(function(c){return c.value;});}
+function refreshSel(){var n=selectedNames().length;var total=checks().length;clearBtn.textContent=n?('清空选中 ('+n+')'):'清空选中';clearBtn.disabled=n===0;if(allBox){allBox.checked=total>0&&n===total;allBox.indeterminate=n>0&&n<total;}}
+function paint(){var list=filtered();countEl.textContent='共 '+list.length+' 份';if(!list.length){listEl.innerHTML='<div class="abp-bk-empty">没有匹配的备份</div>';refreshSel();return;}
+listEl.innerHTML=list.map(function(it){return'<div class="abp-bk-row">'
++'<label class="abp-bk-pick"><input type="checkbox" class="abp-bk-check" value="'+escHtml(it.name)+'"></label>'
++'<div class="abp-bk-main"><b class="abp-bk-name">'+escHtml(it.dir)+'</b>'
++'<span class="abp-bk-meta">'+(it.type==='theme'?'主题':'插件')
++(it.version?' · v'+escHtml(it.version):'')+'</span></div>'
++'<div class="abp-bk-side"><span class="abp-bk-date">'+escHtml(it.date)+'</span>'
++'<span class="abp-bk-size">'+fmtSize(it.size)+'</span></div>'
++'<button type="button" class="abp-btn abp-btn-filled abp-bk-restore" data-name="'+escHtml(it.name)+'">回滚</button>'
++'</div>';}).join('');checks().forEach(function(c){c.addEventListener('change',refreshSel);});[].forEach.call(listEl.querySelectorAll('.abp-bk-restore'),function(b){b.addEventListener('click',function(){var name=b.getAttribute('data-name');if(!window.confirm('回滚到「'+name+'」？\n当前版本会先自动备份。'))return;b.disabled=true;post('backup-restore',{name:name},b);});});refreshSel();}
+q.addEventListener('input',function(){state.q=q.value.trim();paint();});sel.addEventListener('change',function(){state.sort=sel.value;paint();});allBox.addEventListener('change',function(){checks().forEach(function(c){c.checked=allBox.checked;});refreshSel();});clearBtn.addEventListener('click',function(){var names=selectedNames();if(!names.length)return;if(!window.confirm('删除选中的 '+names.length+' 份备份？此操作不可撤销。'))return;clearBtn.disabled=true;post('backup-delete',{names:JSON.stringify(names)},clearBtn,true).then(function(res){toast((res&&res.message)||'已删除');post('backup-list',{},null,true,function(r2){renderBackupPanel(body,(r2&&r2.data&&r2.data.items)||[]);});}).catch(function(err){toast((err&&err.message)||'删除失败',true);refreshSel();});});clearAllBtn.addEventListener('click',function(){if(!window.confirm('确定清空全部备份？此操作不可撤销。'))return;clearAllBtn.disabled=true;post('backup-clear',{},clearAllBtn);});paint();}
 function checkBoxes(){return[].slice.call(document.querySelectorAll('.abp-check'));}
 function selected(){return checkBoxes().filter(function(c){return c.checked;});}
 function can(c,key){var v=c.getAttribute(key)||'';return v!==''&&v!=='0';}
@@ -82,6 +159,8 @@ return;}
 var opt=closest(e,'#abp-sort-menu [data-sort]');if(opt){var s=sortInput();if(s){s.value=opt.getAttribute('data-sort');try{localStorage.setItem(LS_SORT,s.value);}catch(err){}
 var sb=document.getElementById('abp-sort-btn');if(sortMenu)closeMenu(sortMenu,sb);syncSortUI();applySort();}
 return;}
+var localBtn=closest(e,'#abp-local-install');if(localBtn){if(localBtn.disabled)return;e.preventDefault();openLocalInstall();return;}
+var backupBtn=closest(e,'#abp-backup');if(backupBtn){e.preventDefault();openBackup();return;}
 var tokenBtn=closest(e,'#abp-token');if(tokenBtn){if(tokenBtn.disabled)return;tokenInstall(tokenBtn);return;}
 var refreshBtn=closest(e,'#abp-refresh');if(refreshBtn){if(refreshBtn.disabled||refreshBtn.classList.contains('is-loading'))return;refreshBtn.classList.add('is-loading');refreshBtn.disabled=true;var done=function(){refreshBtn.classList.remove('is-loading');refreshBtn.disabled=false;};post('refresh',{},refreshBtn,true).then(function(){try{localStorage.removeItem('ab-store-update-check-ts');}catch(err2){}
 setTimeout(function(){location.reload();},750);},function(err){done();toast((err&&err.message)||'刷新失败',true);});return;}

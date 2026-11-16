@@ -46,8 +46,12 @@ class AdminBeautify_StorePage
         $html = '<main class="main"><div class="body container">';
         $html .= '<div class="typecho-page-title abp-title-bar"><h2>插件</h2>'
             . '<span class="abp-by" title="AB Store · 作者 LHL">by <b>LHL</b> · AB Store</span>'
+            . '<span class="abp-title-actions">'
+            . '<a class="abp-submit abp-backup-btn" href="javascript:void(0)" role="button" id="abp-backup"'
+            . ' title="备份管理：查看 / 回滚 / 清空插件备份">备份管理</a>'
             . '<a class="abp-submit" href="' . self::url(AdminBeautify_Store::BASE) . '"'
-            . ' target="_blank" rel="noopener noreferrer" title="向 AB Store 投稿插件">投稿插件</a></div>';
+            . ' target="_blank" rel="noopener noreferrer" title="向 AB Store 投稿插件">投稿插件</a>'
+            . '</span></div>';
         $html .= '<div class="row typecho-page-main" role="main"><div class="col-mb-12 abp-wrap" data-tab="'
             . self::e($tab) . '" data-ajax="' . self::attr($ajaxUrl) . '" data-token="' . self::attr($token) . '">';
         $html .= '<div class="abp-bar"><div class="abp-tabs" role="tablist">';
@@ -66,6 +70,11 @@ class AdminBeautify_StorePage
             . '<span class="material-icons-round">search</span>'
             . '<input type="search" id="abp-q" placeholder="搜索插件 / 作者 / 目录…" autocomplete="off">'
             . '</label>'
+            . '<button type="button" class="abp-iconbtn abp-token-btn" id="abp-local-install"'
+            . ' title="本地安装：上传插件 zip 压缩包" aria-label="本地安装">'
+            . '<span class="material-icons-round">upload</span>'
+            . '<span class="abp-token-label">本地安装</span>'
+            . '</button>'
             . '<button type="button" class="abp-iconbtn abp-token-btn" id="abp-token"'
             . ' title="口令安装：输入插件口令（ID）或完整分享链接" aria-label="口令安装">'
             . '<span class="material-icons-round">key</span>'

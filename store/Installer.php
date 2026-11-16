@@ -343,6 +343,313 @@ class AdminBeautify_StoreInstall
         }
         return $ok;
     }
+    public static function installFromZip($zipFile, $type = 'plugin')
+    {
+        $type = ($type === 'theme') ? 'theme' : 'plugin';
+        if (!is_file($zipFile)) {
+            return array('error' => '没有收到上传文件', 'code' => 400);
+        }
+        $size = (int) @filesize($zipFile);
+        if ($size <= 0) {
+            return array('error' => '上传文件为空', 'code' => 400);
+        }
+        $work = sys_get_temp_dir() . '/abstore-local-' . uniqid('', true);
+        $unzip = self::unzip($zipFile, $work);
+        if (!empty($unzip['error'])) {
+            self::removeDir($work);
+            return array('error' => $unzip['error'], 'code' => 400);
+        }
+        return self::placeExtracted($work, $type);
+    }
+    private static function placeExtracted($work, $type)
+    {
+        $isTheme = ($type === 'theme');
+        $root = $isTheme ? self::findThemeRoot($work) : self::findPluginRoot($work);
+        if ($root === '') {
+            self::removeDir($work);
+            return array(
+                'error' => $isTheme
+                    ? '安装包里没有找到主题（缺少 index.php，或请把主题放进一个顶层目录后压缩）'
+                    : '安装包里没有找到 Plugin.php（或请把插件放进一个顶层目录后压缩）',
+                'code'  => 400,
+            );
+        }
+        $probe = $isTheme ? ($root . '/index.php') : ($root . '/Plugin.php');
+        $dir = '';
+        if (rtrim($root, '/\\') !== rtrim($work, '/\\')) {
+            $dir = AdminBeautify_Store::safeDir(basename($root));
+        }
+        if ($dir === '') {
+            $dir = AdminBeautify_Store::safeDir(self::readPackage($probe));
+        }
+        if ($dir === '') {
+            self::removeDir($work);
+            return array('error' => '无法确定目录名（请把文件放进一个顶层目录后再压缩）', 'code' => 400);
+        }
+        $baseDir = $isTheme ? self::themesDir() : AdminBeautify_Store::pluginsDir();
+        $target = $baseDir . '/' . $dir;
+        $backup = '';
+        if (is_dir($target) || is_link($target)) {
+            $backup = $isTheme ? self::backupTheme($dir) : self::backup($dir);
+            if (!$backup) {
+                self::removeDir($work);
+                return array('error' => '备份现有版本失败（检查写权限）', 'code' => 500);
+            }
+            self::removeDir($target);
+        }
+        $ok = @rename($root, $target);
+        if (!$ok) {
+            $ok = self::copyDir($root, $target);
+        }
+        self::removeDir($work);
+        if (!$ok) {
+            if ($backup) {
+                self::removeDir($target);
+                @rename($backup, $target);
+            }
+            return array('error' => '写入目录失败（检查写权限）', 'code' => 500);
+        }
+        if ($isTheme) {
+            self::pruneThemeBackups($dir, 1);
+        } else {
+            self::pruneBackups($dir, 1);
+        }
+        return array(
+            'data'    => array(
+                'dir'     => $dir,
+                'type'    => $isTheme ? 'theme' : 'plugin',
+                'version' => $isTheme ? '' : self::readVersion($target . '/Plugin.php'),
+            ),
+            'message' => '已安装' . ($isTheme ? '主题 ' : '插件 ') . $dir,
+        );
+    }
+    public static function themesDir()
+    {
+        $dir = rtrim(__TYPECHO_ROOT_DIR__ . __TYPECHO_THEME_DIR__, '/\\');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        return $dir;
+    }
+    public static function findThemeRoot($work)
+    {
+        $work = rtrim($work, '/\\');
+        if (is_file($work . '/index.php')) {
+            return $work;
+        }
+        foreach ((array) @glob($work . '/*', GLOB_ONLYDIR) as $d) {
+            if (is_file($d . '/index.php')) {
+                return $d;
+            }
+        }
+        foreach ((array) @glob($work . '/*', GLOB_ONLYDIR) as $d) {
+            foreach ((array) @glob($d . '/*', GLOB_ONLYDIR) as $dd) {
+                if (is_file($dd . '/index.php')) {
+                    return $dd;
+                }
+            }
+        }
+        return '';
+    }
+    public static function readPackage($file)
+    {
+        if (!is_file($file)) {
+            return '';
+        }
+        $src = (string) @file_get_contents($file, false, null, 0, 4096);
+        if (preg_match('/@package\s+([A-Za-z0-9_\-]+)/', $src, $m)) {
+            return $m[1];
+        }
+        return '';
+    }
+    public static function readVersion($file)
+    {
+        if (!is_file($file)) {
+            return '';
+        }
+        $src = (string) @file_get_contents($file, false, null, 0, 8192);
+        if (preg_match('/@version\s+([0-9][0-9A-Za-z.\-]*)/i', $src, $m)) {
+            return $m[1];
+        }
+        if (preg_match('/\bVersion\s*[:：]\s*([0-9][0-9A-Za-z.\-]*)/i', $src, $m)) {
+            return $m[1];
+        }
+        return '';
+    }
+    public static function backupTheme($dir)
+    {
+        $src = self::themesDir() . '/' . $dir;
+        if (!is_dir($src)) {
+            return '';
+        }
+        $dst = AdminBeautify_Store::backupDir() . '/theme-' . $dir . '-' . date('Ymd-His');
+        $i = 1;
+        while (is_dir($dst)) {
+            $dst = AdminBeautify_Store::backupDir() . '/theme-' . $dir . '-' . date('Ymd-His') . '-' . $i++;
+        }
+        return self::copyDir($src, $dst) ? $dst : '';
+    }
+    public static function pruneThemeBackups($dir, $keep = 1)
+    {
+        $prefix = 'theme-' . $dir . '-';
+        $list = array();
+        foreach ((array) @glob(AdminBeautify_Store::backupDir() . '/' . $prefix . '*', GLOB_ONLYDIR) as $p) {
+            if (strpos(basename($p), $prefix) === 0) {
+                $list[] = $p;
+            }
+        }
+        if (count($list) <= $keep) {
+            return;
+        }
+        sort($list);
+        while (count($list) > $keep) {
+            self::removeDir(array_shift($list));
+        }
+    }
+    public static function backupList()
+    {
+        $base = AdminBeautify_Store::backupDir();
+        $items = array();
+        foreach ((array) @glob($base . '/*', GLOB_ONLYDIR) as $path) {
+            $name = basename($path);
+            if (!preg_match('/^(.+?)-(\d{8}-\d{6})(?:-\d+)?$/', $name, $m)) {
+                continue;
+            }
+            $target = $m[1];
+            $stamp  = $m[2];
+            $isTheme = (strpos($target, 'theme-') === 0);
+            $dirName = $isTheme ? substr($target, 6) : $target;
+            $version = '';
+            if (!$isTheme) {
+                $version = self::readVersion($path . '/Plugin.php');
+            } else {
+                $version = self::readPackage($path . '/index.php');
+            }
+            $items[] = array(
+                'name'    => $name,
+                'type'    => $isTheme ? 'theme' : 'plugin',
+                'dir'     => $dirName,
+                'version' => $version,
+                'date'    => substr($stamp, 0, 4) . '-' . substr($stamp, 4, 2) . '-' . substr($stamp, 6, 2)
+                    . ' ' . substr($stamp, 9, 2) . ':' . substr($stamp, 11, 2) . ':' . substr($stamp, 13, 2),
+                'ts'      => self::dateToTs($stamp),
+                'size'    => self::dirSize($path),
+            );
+        }
+        usort($items, function ($a, $b) {
+            return $b['ts'] - $a['ts'];
+        });
+        return array('items' => $items, 'count' => count($items));
+    }
+    public static function backupRestore($name)
+    {
+        $name = basename(trim((string) $name));
+        $base = AdminBeautify_Store::backupDir();
+        $src  = $base . '/' . $name;
+        if ($name === '' || !is_dir($src)) {
+            return array('error' => '备份不存在', 'code' => 404);
+        }
+        if (!preg_match('/^(.+?)-(\d{8}-\d{6})(?:-\d+)?$/', $name, $m)) {
+            return array('error' => '备份名格式不合法', 'code' => 400);
+        }
+        $target  = $m[1];
+        $isTheme = (strpos($target, 'theme-') === 0);
+        $dirName = AdminBeautify_Store::safeDir($isTheme ? substr($target, 6) : $target);
+        if ($dirName === '') {
+            return array('error' => '目录名不合法', 'code' => 400);
+        }
+        $baseDir = $isTheme ? self::themesDir() : AdminBeautify_Store::pluginsDir();
+        $dest = $baseDir . '/' . $dirName;
+        $curBackup = '';
+        if (is_dir($dest)) {
+            $curBackup = $isTheme ? self::backupTheme($dirName) : self::backup($dirName);
+            if (!$curBackup) {
+                return array('error' => '备份当前版本失败，已中止回滚', 'code' => 500);
+            }
+            self::removeDir($dest);
+        }
+        $ok = self::copyDir($src, $dest);
+        if (!$ok) {
+            if ($curBackup) {
+                self::removeDir($dest);
+                @rename($curBackup, $dest);
+            }
+            return array('error' => '回滚写入失败（检查写权限）', 'code' => 500);
+        }
+        return array(
+            'data'    => array('dir' => $dirName, 'type' => $isTheme ? 'theme' : 'plugin'),
+            'message' => '已回滚 ' . $dirName,
+        );
+    }
+    public static function backupClear()
+    {
+        $base = AdminBeautify_Store::backupDir();
+        $removed = 0;
+        foreach ((array) @glob($base . '/*') as $path) {
+            if (is_dir($path)) {
+                if (self::removeDir($path)) {
+                    $removed++;
+                }
+            } elseif (is_file($path)) {
+                @unlink($path);
+                $removed++;
+            }
+        }
+        return array('data' => array('removed' => $removed), 'message' => '已清空备份');
+    }
+    public static function backupDelete($names)
+    {
+        $base = AdminBeautify_Store::backupDir();
+        $baseReal = @realpath($base);
+        $removed = 0;
+        $errors = array();
+        foreach ((array) $names as $name) {
+            $name = basename(trim((string) $name));
+            if ($name === '' || $name === '.' || $name === '..') {
+                continue;
+            }
+            $path = $base . '/' . $name;
+            $real = @realpath($path);
+            if ($real === false || $baseReal === false
+                || strpos($real, $baseReal . DIRECTORY_SEPARATOR) !== 0
+                || dirname($real) !== $baseReal) {
+                $errors[] = $name;
+                continue;
+            }
+            if (is_dir($real) && self::removeDir($real)) {
+                $removed++;
+            } else {
+                $errors[] = $name;
+            }
+        }
+        return array(
+            'data'    => array('removed' => $removed, 'errors' => $errors),
+            'message' => '已删除 ' . $removed . ' 份备份',
+        );
+    }
+    public static function dirSize($dir)
+    {
+        $size = 0;
+        try {
+            $it = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY
+            );
+            foreach ($it as $f) {
+                if ($f->isFile()) {
+                    $size += (int) $f->getSize();
+                }
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return $size;
+    }
+    private static function dateToTs($stamp)
+    {
+        $dt = \DateTime::createFromFormat('Ymd-His', $stamp);
+        return $dt ? (int) $dt->getTimestamp() : 0;
+    }
     public static function removeDir($dir)
     {
         $dir = rtrim((string) $dir, '/\\');

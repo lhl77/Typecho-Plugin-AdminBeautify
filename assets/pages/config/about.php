@@ -303,8 +303,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         //   若直接锚定 perf 会把「关于插件」插到通道卡片前面，故优先锚定通道卡片）
         var perfCard=document.getElementById("ab-card-perf");
         var channelCard=document.getElementById("ab-card-channel");
+        var aiCard=document.getElementById("ab-card-ai");
         var aboutCard=document.getElementById("ab-card-about");
-        var anchorCard=(channelCard&&channelCard.parentNode)?channelCard:perfCard;
+        /* 顺序：升级通道 → AI 助手 → 关于插件（AI 卡片由 config.script.php 先插到通道之后） */
+        var anchorCard=(aiCard&&aiCard.parentNode)?aiCard:((channelCard&&channelCard.parentNode)?channelCard:perfCard);
         if(anchorCard&&aboutCard){
             if(anchorCard.nextSibling) anchorCard.parentNode.insertBefore(aboutCard,anchorCard.nextSibling);
             else anchorCard.parentNode.appendChild(aboutCard);

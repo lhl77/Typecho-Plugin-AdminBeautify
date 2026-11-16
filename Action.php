@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.64
+ * @version 2.1.65
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.64';
+        $pluginVer  = '2.1.65';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -1599,6 +1599,21 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError('该操作仅接受 POST 请求', 405);
         }
     }
+    private function checkCardAccess($scope, $requirePost)
+    {
+        $user = Typecho_Widget::widget('Widget_User');
+        if (!$user->hasLogin()) {
+            $this->jsonError('未登录', 401);
+        }
+        if ($scope === 'site' && !$user->pass('administrator', true)) {
+            $this->jsonError('权限不足：全站共享数据仅管理员可操作', 403);
+        }
+        $this->releaseSessionLock();
+        $this->checkApiToken();
+        if ($requirePost && !$this->request->isPost()) {
+            $this->jsonError('该操作仅接受 POST 请求', 405);
+        }
+    }
     private function sendCardResult($result, $successMessage)
     {
         if (is_array($result) && isset($result['error'])) {
@@ -1892,31 +1907,33 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     public function saveCardData()
     {
-        $this->checkWriteRequest();
+        $scope = $this->cardScopeParam();
+        $this->checkCardAccess($scope, true);
         $key = (string) $this->request->get('key');
         $content = (string) $this->request->get('content');
-        $result = AdminBeautify_Plugin::cardDataSave($key, $content, $this->cardScopeParam());
+        $result = AdminBeautify_Plugin::cardDataSave($key, $content, $scope);
         $created = (is_array($result) && !empty($result['created']));
         $this->sendCardResult($result, $created ? '数据已新增' : '数据已更新');
     }
     public function getCardData()
     {
-        $this->checkAdmin();
-        $this->checkApiToken();
+        $scope = $this->cardScopeParam();
+        $this->checkCardAccess($scope, false);
         $key = (string) $this->request->get('key');
-        $this->sendCardResult(AdminBeautify_Plugin::cardDataGet($key, $this->cardScopeParam()), 'ok');
+        $this->sendCardResult(AdminBeautify_Plugin::cardDataGet($key, $scope), 'ok');
     }
     public function listCardData()
     {
-        $this->checkAdmin();
-        $this->checkApiToken();
-        $this->sendCardResult(AdminBeautify_Plugin::cardDataList($this->cardScopeParam()), 'ok');
+        $scope = $this->cardScopeParam();
+        $this->checkCardAccess($scope, false);
+        $this->sendCardResult(AdminBeautify_Plugin::cardDataList($scope), 'ok');
     }
     public function deleteCardData()
     {
-        $this->checkWriteRequest();
+        $scope = $this->cardScopeParam();
+        $this->checkCardAccess($scope, true);
         $key = (string) $this->request->get('key');
-        $this->sendCardResult(AdminBeautify_Plugin::cardDataDelete($key, $this->cardScopeParam()), '数据已删除');
+        $this->sendCardResult(AdminBeautify_Plugin::cardDataDelete($key, $scope), '数据已删除');
     }
     public function noticeList()
     {
@@ -2147,7 +2164,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.64',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.65',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -2379,6 +2396,183 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $this->sendCardResult(AdminBeautify_Plugin::dbReadTable($table, $query), 'ok');
     }
+    public function aiConfig()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $this->jsonSuccess(AdminBeautify_AI::publicConfig($user), 'ok');
+    }
+    public function aiTest()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $res = AdminBeautify_AI::testConnection();
+        if (isset($res['error'])) {
+            $this->jsonError($res['error'], isset($res['code']) ? (int) $res['code'] : 500);
+            return;
+        }
+        $this->jsonSuccess(isset($res['data']) ? $res['data'] : null, isset($res['message']) ? $res['message'] : '连接成功');
+    }
+    public function aiChat()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $cfg = AdminBeautify_AI::publicConfig($user);
+        if (!$cfg['available']) {
+            $this->jsonError('AI 助手不可用（未启用或当前角色无权使用）', 403);
+            return;
+        }
+        $rl = AdminBeautify_AI::rateLimit((int) $user->uid);
+        if (isset($rl['error'])) {
+            $this->jsonError($rl['error'], isset($rl['code']) ? (int) $rl['code'] : 429);
+            return;
+        }
+        $messagesRaw = (string) $this->request->get('messages', '');
+        $messages = json_decode($messagesRaw, true);
+        if (!is_array($messages) || empty($messages)) {
+            $this->jsonError('消息格式错误', 400);
+            return;
+        }
+        $sid = (string) $this->request->get('sid', '');
+        $clientMessages = $messages;
+        $role = AdminBeautify_Plugin::currentRole();
+        $page = (string) $this->request->get('page', '');
+        $ctxRaw = (string) $this->request->get('ctx', '');
+        if ($ctxRaw !== '') {
+            $ctx = json_decode($ctxRaw, true);
+            if (is_array($ctx)) {
+                AdminBeautify_AI::setPageContext($ctx);
+            }
+        }
+        array_unshift($messages, array(
+            'role'    => 'system',
+            'content' => AdminBeautify_AI::systemPrompt($page, $role, (int) $user->uid),
+        ));
+        @ini_set('zlib.output_compression', 'Off');
+        while (ob_get_level() > 0) { @ob_end_clean(); }
+        @set_time_limit(300);
+        @ob_implicit_flush(1);
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            @session_write_close();
+        }
+        @header('Content-Type: text/event-stream; charset=utf-8');
+        @header('Cache-Control: no-cache, no-store');
+        @header('X-Accel-Buffering: no');
+        @header('X-Content-Type-Options: nosniff');
+        @header('Connection: keep-alive');
+        $isAdmin = $user->pass('administrator', true);
+        $res = AdminBeautify_AI::chatAgent($messages, function ($chunk) {
+            echo $chunk;
+            if (ob_get_level() > 0) {
+                @ob_flush();
+            }
+            @flush();
+        }, $isAdmin);
+        if (isset($res['error'])) {
+            echo "event: error\n";
+            echo 'data: ' . json_encode(array('message' => $res['error']), JSON_UNESCAPED_UNICODE) . "\n\n";
+        } elseif ($sid !== '') {
+            $assistant = isset($res['content']) ? (string) $res['content'] : '';
+            $clientMessages[] = array('role' => 'assistant', 'content' => $assistant);
+            AdminBeautify_AI::saveChatSession($sid, AdminBeautify_AI::stripImagesForStore($clientMessages));
+        }
+        echo "event: done\ndata: {}\n\n";
+        exit;
+    }
+    public function aiSessionsList()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $this->jsonSuccess(AdminBeautify_AI::listSessions((int) $user->uid), 'ok');
+    }
+    public function aiSessionDelete()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $sid = (string) $this->request->get('sid', '');
+        $ok = AdminBeautify_AI::deleteSession((int) $user->uid, $sid);
+        if (!$ok) {
+            $this->jsonError('会话不存在或无权删除', 404);
+            return;
+        }
+        $this->jsonSuccess(null, '已删除');
+    }
+    public function aiSessionGet()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $sid = (string) $this->request->get('sid', '');
+        $data = AdminBeautify_AI::getSession((int) $user->uid, $sid);
+        if (null === $data) {
+            $this->jsonError('会话不存在', 404);
+            return;
+        }
+        $this->jsonSuccess($data, 'ok');
+    }
+    public function aiTitle()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $sid = (string) $this->request->get('sid', '');
+        $title = AdminBeautify_AI::ensureSessionTitle((int) $user->uid, $sid, $user);
+        if (null === $title) {
+            $this->jsonError('会话不存在', 404);
+            return;
+        }
+        $this->jsonSuccess(array('title' => $title), 'ok');
+    }
+    public function aiToolConfirm()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAdmin();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $token = (string) $this->request->get('token', '');
+        $res = AdminBeautify_AI::executeConfirmed((int) $user->uid, $token);
+        if (isset($res['error'])) {
+            $this->jsonError($res['error'], isset($res['code']) ? (int) $res['code'] : 500);
+            return;
+        }
+        $this->jsonSuccess(isset($res['data']) ? $res['data'] : null, isset($res['message']) ? $res['message'] : '已完成');
+    }
+    public function aiPrefsGet()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $prefs = AdminBeautify_AI::userPrefs((int) $user->uid);
+        $prefs['version'] = AdminBeautify_AI::VERSION;
+        $this->jsonSuccess($prefs, 'ok');
+    }
+    public function aiPrefsSave()
+    {
+        require_once dirname(__FILE__) . '/Ai.php';
+        $this->checkAuth();
+        $this->checkApiToken();
+        $user = Typecho_Widget::widget('Widget_User');
+        $prompt = (string) $this->request->get('prompt', '');
+        $knowledge = (string) $this->request->get('knowledge', '');
+        $res = AdminBeautify_AI::saveUserPrefs((int) $user->uid, $prompt, $knowledge);
+        if (isset($res['error'])) {
+            $this->jsonError($res['error'], isset($res['code']) ? (int) $res['code'] : 500);
+            return;
+        }
+        $this->jsonSuccess(isset($res['data']) ? $res['data'] : null, '已保存');
+    }
     public function action()
     {
         $do = $this->request->get('do', '');
@@ -2398,6 +2592,10 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->patchApplyStream();
             return;
         }
+        if ($do === 'ai-chat') {
+            $this->aiChat();
+            return;
+        }
         require_once dirname(__FILE__) . '/store/bootstrap.php';
         if (AdminBeautify_StoreAjax::owns($do)) {
             $this->response->setContentType('application/json');
@@ -2415,6 +2613,33 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $this->response->setContentType('application/json');
         switch ($do) {
+            case 'ai-config':
+                $this->aiConfig();
+                break;
+            case 'ai-test':
+                $this->aiTest();
+                break;
+            case 'ai-sessions-list':
+                $this->aiSessionsList();
+                break;
+            case 'ai-session-delete':
+                $this->aiSessionDelete();
+                break;
+            case 'ai-title':
+                $this->aiTitle();
+                break;
+            case 'ai-session-get':
+                $this->aiSessionGet();
+                break;
+            case 'ai-tool-confirm':
+                $this->aiToolConfirm();
+                break;
+            case 'ai-prefs-get':
+                $this->aiPrefsGet();
+                break;
+            case 'ai-prefs-save':
+                $this->aiPrefsSave();
+                break;
             case 'ping':
                 $this->ping();
                 break;

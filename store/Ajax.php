@@ -97,6 +97,22 @@ class AdminBeautify_StoreAjax
                     ),
                     'message' => !empty($row['private']) ? '已添加口令插件' : '已找到插件',
                 );
+            case 'store.local-install':
+            case 'store.local-theme-install':
+                return self::localInstall($do === 'store.local-theme-install' ? 'theme' : 'plugin');
+            case 'store.backup-list':
+                return array('data' => AdminBeautify_StoreInstall::backupList(), 'message' => '备份列表');
+            case 'store.backup-restore':
+                return AdminBeautify_StoreInstall::backupRestore(trim((string) $req->get('name', '')));
+            case 'store.backup-clear':
+                return AdminBeautify_StoreInstall::backupClear();
+            case 'store.backup-delete':
+                $namesRaw = (string) $req->get('names', '');
+                $names = json_decode($namesRaw, true);
+                if (!is_array($names)) {
+                    $names = array_filter(array_map('trim', explode(',', $namesRaw)));
+                }
+                return AdminBeautify_StoreInstall::backupDelete($names);
             case 'store.uninstall':
                 return AdminBeautify_StoreInstall::uninstall($dir);
             case 'store.block':
@@ -137,6 +153,29 @@ class AdminBeautify_StoreAjax
                 return self::pushUpdateNotice();
         }
         return array('error' => '未知的商店操作：' . $do, 'code' => 404);
+    }
+    private static function localInstall($type)
+    {
+        $file = isset($_FILES['zip']) && is_array($_FILES['zip']) ? $_FILES['zip'] : null;
+        if (!$file || !isset($file['tmp_name']) || !isset($file['error'])) {
+            return array('error' => '没有收到 zip 文件', 'code' => 400);
+        }
+        if ((int) $file['error'] !== UPLOAD_ERR_OK) {
+            $code = (int) $file['error'];
+            $msg = ($code === UPLOAD_ERR_INI_SIZE || $code === UPLOAD_ERR_FORM_SIZE)
+                ? '文件超过 PHP 上传大小限制（upload_max_filesize / post_max_size）'
+                : '上传失败（错误码 ' . $code . '）';
+            return array('error' => $msg, 'code' => 400);
+        }
+        $name = isset($file['name']) ? (string) $file['name'] : '';
+        if (strtolower(pathinfo($name, PATHINFO_EXTENSION)) !== 'zip') {
+            return array('error' => '只接受 .zip 压缩包', 'code' => 400);
+        }
+        $tmp = isset($file['tmp_name']) ? (string) $file['tmp_name'] : '';
+        if ($tmp === '' || (!is_uploaded_file($tmp) && !is_file($tmp))) {
+            return array('error' => '临时文件不可读', 'code' => 400);
+        }
+        return AdminBeautify_StoreInstall::installFromZip($tmp, $type);
     }
     private static function pushUpdateNotice($rearm = false)
     {

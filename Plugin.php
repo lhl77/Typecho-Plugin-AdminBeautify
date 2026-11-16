@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.64
+ * @version 2.1.65
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -35,6 +35,7 @@ class AdminBeautify_SafeHidden extends Typecho_Widget_Helper_Form_Element_Hidden
 }
 class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 {
+    const VERSION = '2.1.65';
     private static function isLoginPage()
     {
         try {
@@ -333,7 +334,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.64';
+        $abVer = '2.1.65';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -1127,6 +1128,101 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('开启后，忘记密码提交邮箱前需先完成 Turnstile 人机验证。')
         );
         $form->addInput($turnstileForgot);
+        abCard('ai', $abC1, 'auto_awesome', 'AB AI 助手', '后台 AI 助手：问答、写作辅助（OpenAI 兼容协议）',
+            abCardTip('info',
+                '接入任意 <b>OpenAI 兼容</b>模型服务（DeepSeek / 智谱 / 通义 / Ollama 等），只需填 Base URL + API Key + 模型名。'
+                . '<br><b>API Key 只保存在服务端</b>，前端永远拿不到。'
+                . '<br>对话内容会发送到你配置的模型服务，请自行评估隐私。'
+            )
+        );
+        $aiEnabled = new Typecho_Widget_Helper_Form_Element_Radio(
+            'ai_enabled',
+            array('1' => _t('开启（默认）'), '0' => _t('关闭')),
+            '1',
+            _t('启用 AI 助手'),
+            _t('默认开启。开启后后台右下角出现 AI 助手入口；若 API Key / 地址未填写，入口仍显示，打开时会提示去补全配置。')
+        );
+        $form->addInput($aiEnabled);
+        $aiProvider = new Typecho_Widget_Helper_Form_Element_Select(
+            'ai_provider',
+            array(
+                'deepseek' => 'DeepSeek',
+                'zhipu'    => '智谱 GLM',
+                'qwen'     => '通义千问',
+                'openai'   => 'OpenAI',
+                'ollama'   => 'Ollama（本地）',
+                'custom'   => '自定义（OpenAI 兼容）',
+            ),
+            'deepseek',
+            _t('模型服务'),
+            _t('选择预设服务；选「自定义」后可填任意 OpenAI 兼容地址。')
+        );
+        $form->addInput($aiProvider);
+        $aiBaseUrl = new Typecho_Widget_Helper_Form_Element_Text(
+            'ai_base_url',
+            null,
+            '',
+            _t('API 地址（Base URL）'),
+            _t('留空则使用所选服务的默认地址，例如 <code>https://api.deepseek.com/v1</code>。仅允许公网地址。')
+        );
+        $form->addInput($aiBaseUrl);
+        $aiApiKey = new Typecho_Widget_Helper_Form_Element_Password(
+            'ai_api_key',
+            null,
+            '',
+            _t('API Key'),
+            _t('只保存在服务端，前端仅显示脱敏片段。')
+        );
+        $aiApiKey->setInputsAttribute('autocomplete', 'new-password');
+        $form->addInput($aiApiKey);
+        $aiModel = new Typecho_Widget_Helper_Form_Element_Text(
+            'ai_model',
+            null,
+            '',
+            _t('模型名'),
+            _t('留空则使用所选服务的默认模型，例如 <code>deepseek-chat</code>。')
+        );
+        $form->addInput($aiModel);
+        $aiTemperature = new Typecho_Widget_Helper_Form_Element_Text(
+            'ai_temperature',
+            null,
+            '0.7',
+            _t('温度（temperature）'),
+            _t('0~2，越大越发散，默认 0.7。')
+        );
+        $form->addInput($aiTemperature);
+        $aiMaxTokens = new Typecho_Widget_Helper_Form_Element_Text(
+            'ai_max_tokens',
+            null,
+            '2048',
+            _t('最大输出长度（max_tokens）'),
+            _t('单次回复的最大 token 数，默认 2048。')
+        );
+        $form->addInput($aiMaxTokens);
+        $aiSystemPrompt = new Typecho_Widget_Helper_Form_Element_Textarea(
+            'ai_system_prompt',
+            null,
+            '',
+            _t('系统提示词（可选）'),
+            _t('追加到内置提示词之后，可约束助手身份、语气与回答范围。')
+        );
+        $form->addInput($aiSystemPrompt);
+        $aiAllowNonAdmin = new Typecho_Widget_Helper_Form_Element_Radio(
+            'ai_allow_non_admin',
+            array('1' => _t('允许'), '0' => _t('仅管理员（默认）')),
+            '0',
+            _t('非管理员可用'),
+            _t('是否允许编辑 / 贡献者 / 关注者使用 AI 助手。')
+        );
+        $form->addInput($aiAllowNonAdmin);
+        $aiRatePerMin = new Typecho_Widget_Helper_Form_Element_Text(
+            'ai_rate_per_min',
+            null,
+            '10',
+            _t('频率限制（次/分钟）'),
+            _t('每个用户每分钟最多请求次数，默认 10。')
+        );
+        $form->addInput($aiRatePerMin);
         if ($abOpt) {
             $existingInputs = $form->getInputs();
             foreach ($abOpt as $key => $val) {
@@ -1192,7 +1288,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
                 $css = Typecho_Common::url('AdminBeautify/store/assets/store.css', $options->pluginUrl);
                 $file = dirname(__FILE__) . '/store/assets/store.css';
                 $ver = is_file($file) ? (string) filemtime($file) : '0';
-                $out .= '<link rel="stylesheet" href="' . htmlspecialchars($css . '?v=' . $ver) . '">';
+                $out .= '<link rel="stylesheet" href="' . htmlspecialchars($css . '?v=' . self::VERSION . '-' . $ver) . '">';
             }
         } catch (Exception $e) {
         } catch (Throwable $e) {
@@ -1204,7 +1300,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $header .= self::storeHeaderInject();
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.64 %c",'
+            .   '"%c AB-Admin %c v2.1.65 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1373,9 +1469,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.64.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.65.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.64.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.65.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1551,12 +1647,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'cards'  => self::defaultUserCards($canManage),
             'editor' => array('type' => '', 'mode' => ''),
         );
-        $file = self::userPrefsFile($uid);
-        if ($file === '' || !is_file($file)) {
-            return $default;
+        $data = null;
+        $res = self::cardDataGet(self::USER_PREFS_KEY, 'user');
+        if (is_array($res) && !empty($res['exists']) && isset($res['json']) && is_array($res['json'])) {
+            $data = $res['json'];
         }
-        $data = json_decode((string) @file_get_contents($file), true);
-        if (!is_array($data)) {
+        if ($data === null) {
+            $file = self::userPrefsFile($uid);
+            if ($file !== '' && is_file($file)) {
+                $legacy = json_decode((string) @file_get_contents($file), true);
+                if (is_array($legacy)) {
+                    $data = $legacy;
+                    self::persistUserPrefs($legacy);
+                    @unlink($file);
+                }
+            }
+        }
+        if ($data === null) {
             return $default;
         }
         $editor = isset($data['editor']) && is_array($data['editor']) ? $data['editor'] : array();
@@ -1575,8 +1682,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     }
     public static function writeUserPrefs($uid, $cards, $editorType = '', $editorMode = '')
     {
-        $file = self::userPrefsFile($uid);
-        if ($file === '') {
+        if ((int) $uid <= 0) {
             return array('error' => '用户无效', 'code' => 400);
         }
         $role = self::currentRole();
@@ -1595,14 +1701,23 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editor' => array('type' => $type, 'mode' => $mode),
             'at'     => time(),
         );
+        $res = self::persistUserPrefs($data);
+        if (isset($res['error'])) {
+            return $res;
+        }
+        return array('ok' => true, 'prefs' => $data);
+    }
+    private static function persistUserPrefs($data)
+    {
         $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if (!is_string($json) || $json === '') {
             return array('error' => '偏好序列化失败', 'code' => 500);
         }
-        if (@file_put_contents($file, $json, LOCK_EX) === false) {
-            return array('error' => '保存失败：数据目录不可写', 'code' => 500);
+        $res = self::cardDataSave(self::USER_PREFS_KEY, $json, 'user');
+        if (is_array($res) && isset($res['error'])) {
+            return array('error' => (string) $res['error'], 'code' => isset($res['code']) ? (int) $res['code'] : 500);
         }
-        return array('ok' => true, 'prefs' => $data);
+        return array('ok' => true);
     }
     public static function parseQuickButtons($raw)
     {
@@ -1949,6 +2064,19 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!$abCanManage) {
             $dashboardQuickShow = $customBtnsParsed ? '1' : '0';
         }
+        $aiPublic = array(
+            'enabled' => false, 'available' => false, 'isAdmin' => $abIsAdmin,
+            'model' => '', 'hasKey' => false, 'hasUrl' => false,
+            'missing' => array(), 'version' => '1.0.0', 'beta' => true,
+        );
+        if (is_file(dirname(__FILE__) . '/Ai.php')) {
+            require_once dirname(__FILE__) . '/Ai.php';
+            try {
+                $aiPublic = AdminBeautify_AI::publicConfig($user);
+            } catch (Exception $e) {
+            } catch (Throwable $e) {
+            }
+        }
         echo 'window.__AB_CONFIG__=' . json_encode(array(
             'darkMode'               => $darkMode,
             'enableAnimation'        => $enableAnimation,
@@ -1960,6 +2088,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'siteName'               => $options->title,
             'user'                   => $currentUserInfo,
             'pluginUrl'              => (string)$options->pluginUrl,
+            'adminUrl'               => (string)$options->adminUrl,
             'ajaxUrl'                => $ajaxUrl,
             'ajaxToken'              => $token,
             'editorVditor'           => $editorVditor,
@@ -1973,7 +2102,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.64',
+            'pluginVersion'          => '2.1.65',
             'notifyOptOut'           => $notifyOptOut,
             'userRole'               => $abRole,
             'canManage'              => $abCanManage,
@@ -2022,11 +2151,12 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'currentPageCompatKey'       => $currentPageCompatKey,
             'pendingCompatSuggestions'   => $pendingCompatSuggestions,
             'pluginSettingsUrl'          => $pluginSettingsUrl,
+            'ai'                        => $aiPublic,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.64.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.65.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.64.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.65.js?v=' . $abJsVer . '"></script>';
         echo '<script>(function(){"use strict";
   var CQ = 575, OPEN = "ab-search-open";
   function box(f){ return f.querySelector(".search"); }
@@ -2169,7 +2299,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
         if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.64"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
+            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.65"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
@@ -2347,7 +2477,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.64";';
+        echo 'var __AB_VER__="2.1.65";';
         echo <<<'UPDATEJS'
 // ---- abPatchKey: 把一批补丁 id 变成一个稳定的忽略 key ----
 window.abPatchKey=function(pt){
@@ -3309,7 +3439,7 @@ UPDATEJS;
             $storeJsUrl = Typecho_Common::url('AdminBeautify/store/assets/store.js', $storeOpts->pluginUrl);
             $storeJsFile = dirname(__FILE__) . '/store/assets/store.js';
             $storeJsVer = is_file($storeJsFile) ? (string) filemtime($storeJsFile) : '0';
-            echo '<script src="' . htmlspecialchars($storeJsUrl . '?v=' . $storeJsVer) . '"></script>' . "\n";
+            echo '<script src="' . htmlspecialchars($storeJsUrl . '?v=' . self::VERSION . '-' . $storeJsVer) . '"></script>' . "\n";
         }
         if ($abIsAdmin && self::storeBoot() && AdminBeautify_Store::enabled()
             && !AdminBeautify_Store::notifyOptOut()) {
@@ -3317,7 +3447,7 @@ UPDATEJS;
             $ucUrl = Typecho_Common::url('AdminBeautify/store/assets/update-check.js', $ucOpts->pluginUrl);
             $ucFile = dirname(__FILE__) . '/store/assets/update-check.js';
             $ucVer = is_file($ucFile) ? (string) filemtime($ucFile) : '0';
-            echo '<script src="' . htmlspecialchars($ucUrl . '?v=' . $ucVer) . '"></script>' . "\n";
+            echo '<script src="' . htmlspecialchars($ucUrl . '?v=' . self::VERSION . '-' . $ucVer) . '"></script>' . "\n";
         }
         if ($abIsAdmin):
         echo '<script>(function(){
@@ -3748,6 +3878,7 @@ window.abSyncCompat = function(){
     const CARD_KEY_MAX_LEN = 64;
     const CARD_CONTENT_MAX_BYTES = 65535;
     const CARD_CODE_KEY_PREFIX = 'cc';
+    const USER_PREFS_KEY = 'user-prefs';
     const CARD_CODE_MAX_BYTES = 65535;
     const OPTION_BLOB_MAX_BYTES = 61440;
     const DB_READ_DEFAULT_LIMIT = 50;
@@ -4347,6 +4478,7 @@ window.abSyncCompat = function(){
                     ->where('uid = ?', $storeUid)
                     ->where('card_key LIKE ?', self::CARD_KEY_PREFIX . '%')
                     ->where('card_key NOT LIKE ?', self::CARD_KEY_PREFIX . self::CARD_CODE_KEY_PREFIX . '-%')
+                    ->where('card_key <> ?', self::CARD_KEY_PREFIX . self::USER_PREFS_KEY)
                     ->order('updated_at', Typecho_Db::SORT_DESC)
                     ->order('id', Typecho_Db::SORT_DESC)
                     ->limit(self::DB_READ_MAX_LIMIT)
