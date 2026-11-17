@@ -4,7 +4,7 @@
  *
  * @package AB-Admin
  * @author LHL
- * @version 2.1.65
+ * @version 2.1.66
  * @link https://github.com/lhl77/Typecho-Plugin-AdminBeautify
  */
 if (!defined('__TYPECHO_ROOT_DIR__')) {
@@ -35,7 +35,7 @@ class AdminBeautify_SafeHidden extends Typecho_Widget_Helper_Form_Element_Hidden
 }
 class AdminBeautify_Plugin implements Typecho_Plugin_Interface
 {
-    const VERSION = '2.1.65';
+    const VERSION = '2.1.66';
     private static function isLoginPage()
     {
         try {
@@ -96,7 +96,25 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         Typecho_Plugin::factory('admin/footer.php')->end = array(__CLASS__, 'renderLoginFooter');
         Utils\Helper::addAction('admin-beautify', 'AdminBeautify_Action');
         self::ensureTurnstileActions();
+        self::repairAttachments();
         return _t('AB-Admin 已启用');
+    }
+    public static function repairAttachments()
+    {
+        try {
+            if (!class_exists('AdminBeautify_Action')) {
+                $file = __DIR__ . '/Action.php';
+                if (is_file($file)) {
+                    require_once $file;
+                }
+            }
+            if (class_exists('AdminBeautify_Action')) {
+                return AdminBeautify_Action::repairAttachmentText();
+            }
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        return 0;
     }
     public static function deactivate()
     {
@@ -315,6 +333,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
     public static function config(Typecho_Widget_Helper_Form $form)
     {
         self::ensureTurnstileActions();
+        self::repairAttachments();
         $abConfigColors = array(
             'purple' => array('#7D5260', '#9E7B8A'),
             'blue'   => array('#556270', '#7A8A9E'),
@@ -334,7 +353,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         if (!isset($abConfigColors[$abScheme])) $abScheme = 'purple';
         $abC1 = $abConfigColors[$abScheme][0];
         $abC2 = $abConfigColors[$abScheme][1];
-        $abVer = '2.1.65';
+        $abVer = '2.1.66';
         include dirname(__FILE__) . '/assets/pages/config/header.php';
         include dirname(__FILE__) . '/assets/pages/config/config.style.php';
         include_once dirname(__FILE__) . '/assets/pages/config/card-create.php';
@@ -934,17 +953,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             _t('每行一个 JS 文件 URL，将在后台所有页面加载。示例：https://cdn.example.com/compat/my-plugin-fix.js')
         );
         $form->addInput($compatExternalJs);
-        $telemetryOptOut = new Typecho_Widget_Helper_Form_Element_Radio(
-            'telemetryOptOut',
-            array(
-                '0' => _t('允许'),
-                '1' => _t('关闭统计'),
-            ),
-            '0',
-            _t('匿名使用统计'),
-            _t('启用后，插件会通过浏览器向开发者统计服务发送，仅包含：插件版本号、站点表示。选择"关闭统计"后立即停止上报。')
-        );
-        $form->addInput($telemetryOptOut);
         $notifyOptOut = new Typecho_Widget_Helper_Form_Element_Radio(
             'notifyOptOut',
             array(
@@ -1194,9 +1202,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $aiMaxTokens = new Typecho_Widget_Helper_Form_Element_Text(
             'ai_max_tokens',
             null,
-            '2048',
+            '4096',
             _t('最大输出长度（max_tokens）'),
-            _t('单次回复的最大 token 数，默认 2048。')
+            _t('单次回复的最大 token 数，默认 4096。写长代码（如自定义卡片的 HTML/JS）时容易被截断，可调到 8192。')
         );
         $form->addInput($aiMaxTokens);
         $aiSystemPrompt = new Typecho_Widget_Helper_Form_Element_Textarea(
@@ -1300,7 +1308,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $header .= self::storeHeaderInject();
         $header .= '<script>(function(){try{'
             . 'console.log('
-            .   '"%c AB-Admin %c v2.1.65 %c",'
+            .   '"%c AB-Admin %c v2.1.66 %c",'
             .   '"background:#6750a4;color:#fff;padding:3px 10px;border-radius:3px 0 0 3px;font-family:sans-serif;font-size:12px;font-weight:600",'
             .   '"background:#625b71;color:#fff;padding:3px 10px;font-family:sans-serif;font-size:12px",'
             .   '"background:#e8def8;color:#21005d;padding:3px 10px;border-radius:0 3px 3px 0;font-family:sans-serif;font-size:12px"'
@@ -1469,9 +1477,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         $injectHead .= '@keyframes ab-spin{to{transform:rotate(360deg)}}';
         $injectHead .= '</style>';
-        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.65.css';
+        $abCssFile = dirname(__FILE__) . '/assets/AdminBeautify.v2.1.66.css';
         $abCssVer = is_file($abCssFile) ? (string) filemtime($abCssFile) : '0';
-        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.65.css?v=' . $abCssVer . '">';
+        $injectTail = "\n" . '<link rel="stylesheet" href="' . $cssUrl . '.v2.1.66.css?v=' . $abCssVer . '">';
         $editorVditor = isset($pluginOptions->editor_vditor) ? (string)$pluginOptions->editor_vditor : '1';
         $reqUri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePage = (strpos($reqUri, 'write-post.php') !== false || strpos($reqUri, 'write-page.php') !== false);
@@ -1514,10 +1522,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         $injectTail .= "\n" . '<meta name="mobile-web-app-capable" content="yes">';
         if ($pwaAppIcon !== '') {
             $injectTail .= "\n" . '<link rel="apple-touch-icon" sizes="180x180" href="' . htmlspecialchars($pwaAppIcon) . '">';
-        }
-        $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
-        if ($telemetryOptOut !== '1') {
-            $injectTail .= "\n" . '<script defer src="https://stats.lhl.one/script.js" data-website-id="dfabc99f-991e-4f7c-9358-03177fbee0ec"></script>';
         }
         return $injectHead . $header . $injectTail;
     }
@@ -2102,7 +2106,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'editorMdUploadUrl'      => $editorMdUploadUrl,
             'uploadAccept'           => $uploadAccept,
             'uploadMaxBytes'         => $uploadMaxBytes,
-            'pluginVersion'          => '2.1.65',
+            'pluginVersion'          => '2.1.66',
             'notifyOptOut'           => $notifyOptOut,
             'userRole'               => $abRole,
             'canManage'              => $abCanManage,
@@ -2154,9 +2158,9 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             'ai'                        => $aiPublic,
         )) . ';</script>';
         $jsUrlPrefix = Typecho_Common::url('AdminBeautify/assets/AdminBeautify.min', $options->pluginUrl);
-        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.65.js';
+        $abJsFile = dirname(__FILE__) . '/assets/AdminBeautify.min.v2.1.66.js';
         $abJsVer = is_file($abJsFile) ? (string) filemtime($abJsFile) : '0';
-        echo '<script src="' . $jsUrlPrefix . '.v2.1.65.js?v=' . $abJsVer . '"></script>';
+        echo '<script src="' . $jsUrlPrefix . '.v2.1.66.js?v=' . $abJsVer . '"></script>';
         echo '<script>(function(){"use strict";
   var CQ = 575, OPEN = "ab-search-open";
   function box(f){ return f.querySelector(".search"); }
@@ -2296,10 +2300,6 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
         }
         if ($darkMode === 'auto') {
             echo '<script>AdminBeautify.watchSystemTheme();</script>';
-        }
-        $telemetryOptOut = isset($pluginOptions->telemetryOptOut) ? (string)$pluginOptions->telemetryOptOut : '0';
-        if ($telemetryOptOut !== '1') {
-            echo '<script>(function(){function abTrack(){if(window.umami&&typeof window.umami.track==="function"){window.umami.track("settings_visit",{domain:window.location.hostname,version:"2.1.65"});}else{setTimeout(abTrack,300);}}if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",function(){setTimeout(abTrack,200);});}else{setTimeout(abTrack,200);}})();</script>';
         }
         $reqUriFooter = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
         $isWritePageFooter = (strpos($reqUriFooter, 'write-post.php') !== false || strpos($reqUriFooter, 'write-page.php') !== false);
@@ -2477,7 +2477,7 @@ class AdminBeautify_Plugin implements Typecho_Plugin_Interface
             . 'setInterval(function(){fetch(' . json_encode($pingUrl) . ',{credentials:"include"}).catch(function(){});},15*60*1000);'
             . '}());</script>';
         echo '<script>(function(){';
-        echo 'var __AB_VER__="2.1.65";';
+        echo 'var __AB_VER__="2.1.66";';
         echo <<<'UPDATEJS'
 // ---- abPatchKey: 把一批补丁 id 变成一个稳定的忽略 key ----
 window.abPatchKey=function(pt){
@@ -4015,12 +4015,24 @@ window.abSyncCompat = function(){
         if (!is_array($cards)) return $out;
         foreach ($cards as $item) {
             if (!is_array($item)) continue;
+            $html = isset($item['html']) ? (string) $item['html'] : '';
+            $js   = isset($item['js']) ? (string) $item['js'] : '';
+            if ($html === '' && isset($item['content']) && is_string($item['content']) && $item['content'] !== '') {
+                $legacy = $item['content'];
+                if ($js === '') {
+                    if (preg_match_all('#<script[^>]*>(.*?)</script>#is', $legacy, $mm)) {
+                        $js = implode("\n", $mm[1]);
+                    }
+                }
+                $legacy = preg_replace('#<script[^>]*>.*?</script>#is', '', $legacy);
+                $html = (string) $legacy;
+            }
             $out[] = array(
                 'id'    => self::normalizeCardField(isset($item['id']) ? $item['id'] : '', 'c' . (count($out) + 1)),
                 'icon'  => self::normalizeCardField(isset($item['icon']) ? $item['icon'] : '', 'widgets'),
                 'title' => isset($item['title']) ? (string) $item['title'] : '',
-                'html'  => isset($item['html']) ? (string) $item['html'] : '',
-                'js'    => isset($item['js']) ? (string) $item['js'] : '',
+                'html'  => $html,
+                'js'    => $js,
                 'code'  => isset($item['code']) ? (string) preg_replace('/[^A-Za-z0-9_-]/', '', (string) $item['code']) : '',
             );
         }

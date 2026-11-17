@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.65
+ * @version 2.1.66
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.65';
+        $pluginVer  = '2.1.66';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -552,9 +552,120 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $this->jsonError('上传处理出错：' . $e->getMessage(), 500);
         }
     }
+    public static function attachmentUsesJson()
+    {
+        try {
+            if (class_exists('\Typecho\Common') && defined('\Typecho\Common::VERSION')) {
+                return version_compare(\Typecho\Common::VERSION, '1.3.0', '>=');
+            }
+        } catch (\Throwable $e) {
+        }
+        return false;
+    }
+    public static function encodeAttachment($data)
+    {
+        $raw  = is_array($data) ? $data : array();
+        $data = array_merge($raw, self::normalizeAttachment($raw));
+        if (self::attachmentUsesJson()) {
+            return (string) json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+        return serialize($data);
+    }
+    private static function mimeByExt($ext)
+    {
+        $map = array(
+            'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png',
+            'gif' => 'image/gif', 'webp' => 'image/webp', 'svg' => 'image/svg+xml',
+            'bmp' => 'image/bmp', 'avif' => 'image/avif', 'tiff' => 'image/tiff',
+            'ico' => 'image/x-icon', 'pdf' => 'application/pdf',
+            'zip' => 'application/zip', 'mp4' => 'video/mp4', 'mp3' => 'audio/mpeg',
+        );
+        $ext = strtolower((string) $ext);
+        return isset($map[$ext]) ? $map[$ext] : 'application/octet-stream';
+    }
+    public static function normalizeAttachment($raw)
+    {
+        $raw  = is_array($raw) ? $raw : array();
+        $path = isset($raw['path']) ? (string) $raw['path'] : '';
+        $name = isset($raw['name']) && (string) $raw['name'] !== ''
+            ? (string) $raw['name']
+            : basename($path);
+        $ext  = strtolower((string) pathinfo($name !== '' ? $name : $path, PATHINFO_EXTENSION));
+        $type = isset($raw['type']) && (string) $raw['type'] !== ''
+            ? strtolower((string) $raw['type'])
+            : $ext;
+        $mime = isset($raw['mime']) ? (string) $raw['mime'] : '';
+        if ($mime === '') {
+            $mime = self::mimeByExt($type !== '' ? $type : $ext);
+        }
+        return array(
+            'name' => $name,
+            'path' => $path,
+            'size' => isset($raw['size']) ? (int) $raw['size'] : 0,
+            'type' => $type,
+            'mime' => $mime,
+        );
+    }
+    public static function parseAttachmentText($text)
+    {
+        if (!is_string($text) || $text === '') {
+            return array();
+        }
+        $trim = ltrim($text);
+        if ($trim !== '' && $trim[0] === '{') {
+            $data = json_decode($text, true);
+            if (is_array($data)) {
+                return $data;
+            }
+        }
+        $data = @unserialize($text, array('allowed_classes' => false));
+        if (is_array($data)) {
+            return $data;
+        }
+        $data = json_decode($text, true);
+        return is_array($data) ? $data : array();
+    }
+    public static function repairAttachmentText()
+    {
+        $fixed = 0;
+        try {
+            $db   = \Typecho\Db::get();
+            $rows = $db->fetchAll(
+                $db->select('cid', 'text')
+                    ->from('table.contents')
+                    ->where('type = ?', 'attachment')
+                    ->order('cid', \Typecho\Db::SORT_DESC)
+                    ->limit(500)
+            );
+            foreach ($rows as $row) {
+                $text = isset($row['text']) ? (string) $row['text'] : '';
+                $data = self::parseAttachmentText($text);
+                if (empty($data)) {
+                    continue;
+                }
+                $want = self::encodeAttachment($data);
+                if ($want === $text) {
+                    continue;
+                }
+                $db->query(
+                    $db->update('table.contents')
+                        ->rows(array('text' => $want))
+                        ->where('cid = ?', (int) $row['cid'])
+                );
+                $fixed++;
+            }
+            if ($fixed > 0) {
+                error_log('[AdminBeautify] repaired attachment rows: ' . $fixed);
+            }
+        } catch (\Throwable $e) {
+            error_log('[AdminBeautify] repairAttachmentText error: ' . $e->getMessage());
+        }
+        return $fixed;
+    }
     private function _doUploadMedia()
     {
         $this->checkAuth();
+        self::repairAttachmentText();
         if (empty($_FILES['files'])) {
             $this->jsonError('没有收到文件', 400);
             return;
@@ -615,12 +726,13 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     $slugBase = 'attachment';
                 }
                 $slug = $slugBase . '-' . $now . '-' . substr(md5(uniqid('', true)), 0, 8);
+                $attach = self::normalizeAttachment($uploadResult);
                 $insertData = array(
                     'title'        => $title,
                     'slug'         => $slug,
                     'created'      => $now,
                     'modified'     => $now,
-                    'text'         => json_encode($uploadResult),
+                    'text'         => self::encodeAttachment($attach),
                     'authorId'     => (int)$user->uid,
                     'type'         => 'attachment',
                     'status'       => 'publish',
@@ -651,8 +763,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                     'cid'  => $cid,
                     'name' => $title,
                     'url'  => $url,
-                    'mime' => isset($uploadResult['mime']) ? $uploadResult['mime'] : '',
-                    'size' => isset($uploadResult['size']) ? (int)$uploadResult['size'] : 0,
+                    'mime' => $attach['mime'],
+                    'size' => $attach['size'],
                 );
             } catch (\Throwable $e) {
                 error_log('[AdminBeautify] uploadMedia DB error: ' . get_class($e) . ': ' . $e->getMessage());
@@ -719,8 +831,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             $rows = $db->fetchAll($dataQ);
             $items = array();
             foreach ($rows as $row) {
-                $content = json_decode($row['text'], true);
-                if (!is_array($content)) { $content = array(); }
+                $content = self::parseAttachmentText($row['text']);
                 $url = '';
                 try {
                     $attachCfg = new \Typecho\Config($content);
@@ -777,8 +888,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 $this->jsonError('附件不存在', 404);
                 return;
             }
-            $content = json_decode($row['text'], true);
-            if (is_array($content)) {
+            $content = self::parseAttachmentText($row['text']);
+            if (!empty($content)) {
                 try {
                     \Widget\Upload::deleteHandle(new \Typecho\Config($content));
                 } catch (\Throwable $e) {
@@ -817,8 +928,8 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
             );
             foreach ($rows as $row) {
                 $cid     = (int)$row['cid'];
-                $content = json_decode($row['text'], true);
-                if (!is_array($content) || empty($content['path'])) {
+                $content = self::parseAttachmentText($row['text']);
+                if (empty($content['path'])) {
                     continue;
                 }
                 $url = '';
@@ -2164,7 +2275,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.65',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.66',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);

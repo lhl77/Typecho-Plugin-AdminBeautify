@@ -50,6 +50,10 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 </div>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <a href="https://ab.lhl.one" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
+                    <span class="material-icons-round" style="font-size:14px">public</span>
+                    官网
+                </a>
                 <a href="https://github.com/lhl77" target="_blank" rel="noopener" class="ab-about-link-btn" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#fff;border:1px solid rgba(0,0,0,.1);border-radius:20px;font-size:12px;font-weight:500;color:#333;text-decoration:none;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background='#fff'">
                     <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
                     GitHub
@@ -318,7 +322,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
         }
         // 延迟加载异步内容
         setTimeout(function(){ loadChangelog(); loadGithubRepos(); }, 800);
-        // 将「匿名使用统计」和「插件通知」表单字段注入「数据与隐私」区块
+        // 将「插件通知」表单字段注入「数据与隐私」区块（匿名使用统计已下线）
         var telContainer=document.getElementById("ab-telemetry-field-container");
         if(telContainer){
             function findFieldUlAbout(name){
@@ -332,8 +336,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                 while(c&&c!==form){ if(c.tagName==="UL") return c; c=c.parentNode; }
                 return null;
             }
-            var telUl=findFieldUlAbout("telemetryOptOut");
-            if(telUl) telContainer.appendChild(telUl);
             var notifyUl=findFieldUlAbout("notifyOptOut");
             if(notifyUl) telContainer.appendChild(notifyUl);
         }

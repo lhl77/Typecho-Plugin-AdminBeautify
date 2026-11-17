@@ -176,11 +176,14 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     padding: 10px 12px;
     margin: 0 0 22px;
     border-radius: 14px;
-    background: rgba(255,255,255,.86);
-    border: 1px solid rgba(103,80,164,.22);
+    /* 颜色一律走主题令牌（之前写死的 rgba(103,80,164,…) 是 Material 默认紫，
+       换主题色后搜索框不会跟着变） */
+    background: color-mix(in srgb, var(--md-surface, #fff) 86%, transparent);
+    border: 1px solid color-mix(in srgb, var(--md-primary, #6750a4) 22%, transparent);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 10px 28px rgba(103,80,164,.16), 0 0 0 2px rgba(255,255,255,.42);
+    box-shadow: 0 10px 28px color-mix(in srgb, var(--md-primary, #6750a4) 16%, transparent),
+        0 0 0 2px color-mix(in srgb, var(--md-surface, #fff) 42%, transparent);
 }
 .ab-global-search-main {
     display: flex;
@@ -237,7 +240,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     border-top: 1px solid var(--md-outline-variant, #e4dfe8);
 }
 .ab-global-search-item:hover {
-    background: rgba(103,80,164,.08);
+    background: color-mix(in srgb, var(--md-primary, #6750a4) 8%, transparent);
 }
 .ab-global-search-item.is-hidden {
     background: rgba(179,38,30,.04);
@@ -552,32 +555,35 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
     border-color: rgba(208,188,255,.2) !important;
 }
 [data-theme="dark"] .ab-global-search {
-    background: rgba(33,31,38,.88) !important;
-    border-color: rgba(208,188,255,.28) !important;
-    box-shadow: 0 12px 30px rgba(0,0,0,.38), 0 0 0 1px rgba(208,188,255,.12) !important;
+    /* 暗色下也要跟随主题色：--md-* 在 dark 已被重映射，直接用即可，
+       不能再写死 Material 默认暗紫色的 rgba(208,188,255,…) */
+    background: color-mix(in srgb, var(--md-surface, #1a1c18) 88%, transparent) !important;
+    border-color: color-mix(in srgb, var(--md-primary, #9cd67d) 28%, transparent) !important;
+    box-shadow: 0 12px 30px rgba(0,0,0,.38),
+        0 0 0 1px color-mix(in srgb, var(--md-primary, #9cd67d) 12%, transparent) !important;
 }
 [data-theme="dark"] .ab-global-search-input {
-    color: var(--md-dark-on-surface, #e6e1e5) !important;
+    color: var(--md-on-surface, #e6e1e5) !important;
 }
 [data-theme="dark"] .ab-global-search-results {
-    background: var(--md-dark-surface-container, #211f26) !important;
-    border-color: rgba(255,255,255,.14) !important;
+    background: var(--md-surface-container, #211f26) !important;
+    border-color: color-mix(in srgb, var(--md-outline-variant, #49454f) 70%, transparent) !important;
 }
 [data-theme="dark"] .ab-global-search-item + .ab-global-search-item {
-    border-top-color: rgba(255,255,255,.08) !important;
+    border-top-color: color-mix(in srgb, var(--md-outline-variant, #49454f) 70%, transparent) !important;
 }
 [data-theme="dark"] .ab-global-search-item:hover {
-    background: rgba(208,188,255,.12) !important;
+    background: color-mix(in srgb, var(--md-primary, #9cd67d) 12%, transparent) !important;
 }
 [data-theme="dark"] .ab-global-search-item-title {
-    color: var(--md-dark-on-surface, #e6e1e5) !important;
+    color: var(--md-on-surface, #e6e1e5) !important;
 }
 [data-theme="dark"] .ab-global-search-item-path,
 [data-theme="dark"] .ab-global-search-empty {
-    color: var(--md-dark-on-surface-variant, #cac4d0) !important;
+    color: var(--md-on-surface-variant, #cac4d0) !important;
 }
 [data-theme="dark"] .ab-global-search-status {
-    color: var(--md-dark-on-surface-variant, #cac4d0) !important;
+    color: var(--md-on-surface-variant, #cac4d0) !important;
 }
 [data-theme="dark"] .ab-global-search-status.is-warn {
     color: #f2b8b5 !important;
@@ -646,7 +652,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 /* ============================================================
    概要页卡片设置（卡片清单 / 拖拽排序）
-   注意：AdminBeautify.v2.1.65.css 里的
+   注意：AdminBeautify.v2.1.66.css 里的
      .ab-card ul            { padding:4px 12px 12px !important }
      .ab-card ul li         { display:flex!important; align-items:baseline!important; ... }
      .ab-card ul li span:first-child { 日期徽章样式 }

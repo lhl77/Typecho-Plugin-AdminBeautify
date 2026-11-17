@@ -28,7 +28,7 @@ keywords: AB Admin, AdminBeautify, 后台美化, 动画, 暗色, 圆角, 加载�
 | `dashboardHideDonate` | string | `0` | 是否隐藏捐助入口 |
 | `dashboardCustomButtons` | JSON | `[]` | 自定义快捷按钮 |
 | `dashboardCustomCardsEnabled` | string | `0` | 是否启用自定义卡片 |
-| `dashboardCustomCards` | JSON | `[]` | 自定义卡片配置 |
+| `dashboardCustomCards` | JSON | `[]` | 自定义卡片配置（结构 / 写法 / 示例见 `custom-cards` 技能） |
 | `dashboardRecentStyle` | string | `list` | 最近文章展示样式 |
 
 ## 三、列表页

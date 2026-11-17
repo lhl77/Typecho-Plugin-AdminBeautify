@@ -547,12 +547,20 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
                     if(Object.prototype.toString.call(arr)==="[object Array]"){
                         for(var i=0;i<arr.length;i++){
                             if(arr[i]&&typeof arr[i]==="object"){
+                                /* 兼容老格式 / 卡片广场导出：代码塞在 content 里（含 <style> / <script>） */
+                                var _h=String(arr[i].html||""),_j=String(arr[i].js||"");
+                                if(!_h&&!arr[i].html&&typeof arr[i].content==="string"&&arr[i].content){
+                                    var _c=arr[i].content;
+                                    var _s=_c.match(/<script[^>]*>([\s\S]*?)<\/script>/ig)||[];
+                                    if(!_j)_j=_s.map(function(x){return x.replace(/^<script[^>]*>/i,"").replace(/<\/script>$/i,"");}).join("\n");
+                                    _h=_c.replace(/<script[^>]*>[\s\S]*?<\/script>/ig,"");
+                                }
                                 customCards.push({
                                     id:String(arr[i].id||("c"+(i+1))),
                                     icon:String(arr[i].icon||"widgets"),
                                     title:String(arr[i].title||""),
-                                    html:String(arr[i].html||""),
-                                    js:String(arr[i].js||"")
+                                    html:_h,
+                                    js:_j
                                 });
                             }
                         }

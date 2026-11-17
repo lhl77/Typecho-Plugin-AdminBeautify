@@ -12,7 +12,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
 }
 class AdminBeautify_AI
 {
-    const VERSION = '0.1.0';
+    const VERSION = '0.2.0';
     const AD_REPO_RAW = 'https://raw.githubusercontent.com/lhl77/Typecho-Raw-Nontification/main/AdminBeautify/ai_ad.md';
     const AD_MIRROR = 'https://gh1.lhl.one/';
     const AD_CONTACT = 'admin@lhl.one';
@@ -144,7 +144,7 @@ class AdminBeautify_AI
             'api_key'         => isset($opt->ai_api_key) ? (string) $opt->ai_api_key : '',
             'model'           => $model,
             'temperature'     => (float) (isset($opt->ai_temperature) ? $opt->ai_temperature : 0.7),
-            'max_tokens'      => (int) (isset($opt->ai_max_tokens) ? $opt->ai_max_tokens : 2048),
+            'max_tokens'      => (int) (isset($opt->ai_max_tokens) ? $opt->ai_max_tokens : 4096),
             'system_prompt'   => isset($opt->ai_system_prompt) ? (string) $opt->ai_system_prompt : '',
             'allow_non_admin' => isset($opt->ai_allow_non_admin) && (string) $opt->ai_allow_non_admin === '1',
             'rate_per_min'    => (int) (isset($opt->ai_rate_per_min) ? $opt->ai_rate_per_min : 10),
@@ -738,6 +738,7 @@ class AdminBeautify_AI
         }
         $content = '';
         $toolBuf = array();
+        $finishReason = '';
         $lineBuf = '';
         $errMsg  = '';
         $ch = curl_init($url);
@@ -748,7 +749,7 @@ class AdminBeautify_AI
             CURLOPT_RETURNTRANSFER => false,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_TIMEOUT        => 0,
-            CURLOPT_WRITEFUNCTION  => function ($ch, $data) use (&$content, &$toolBuf, &$lineBuf, &$errMsg, $emit) {
+            CURLOPT_WRITEFUNCTION  => function ($ch, $data) use (&$content, &$toolBuf, &$lineBuf, &$errMsg, &$finishReason, $emit) {
                 $lineBuf .= $data;
                 while (false !== ($pos = strpos($lineBuf, "\n"))) {
                     $line = rtrim(substr($lineBuf, 0, $pos), "\r");
@@ -770,6 +771,9 @@ class AdminBeautify_AI
                         continue;
                     }
                     $delta = isset($obj['choices'][0]['delta']) ? $obj['choices'][0]['delta'] : null;
+                    if (isset($obj['choices'][0]['finish_reason']) && (string) $obj['choices'][0]['finish_reason'] !== '') {
+                        $finishReason = (string) $obj['choices'][0]['finish_reason'];
+                    }
                     if (!is_array($delta)) {
                         continue;
                     }
@@ -822,7 +826,7 @@ class AdminBeautify_AI
                 'function' => array('name' => $t['name'], 'arguments' => $t['arguments']),
             );
         }
-        return array('ok' => true, 'content' => $content, 'tool_calls' => $toolCalls);
+        return array('ok' => true, 'content' => $content, 'tool_calls' => $toolCalls, 'finish_reason' => $finishReason);
     }
     public static function chatAgent($messages, $emit, $withTools = true)
     {
@@ -841,10 +845,14 @@ class AdminBeautify_AI
                 . "\n当用户要求「保存 / 上传到媒体库 / 传到图床 / 插进文章正文」时，直接调用 save_chat_image，index 传上面的编号；上传成功后会返回可访问 URL 与 Markdown 片段。";
         }
         $finalContent = '';
+        $truncated = false;
         for ($round = 0; $round < 8; $round++) {
             $res = self::streamOnce($messages, $tools, $emit);
             if (isset($res['error'])) {
                 return $res;
+            }
+            if (isset($res['finish_reason']) && $res['finish_reason'] === 'length') {
+                $truncated = true;
             }
             $toolCalls = isset($res['tool_calls']) ? $res['tool_calls'] : array();
             $piece = isset($res['content']) ? (string) $res['content'] : '';
@@ -860,8 +868,24 @@ class AdminBeautify_AI
                 foreach ($toolCalls as $tc) {
                     $fn = isset($tc['function']) ? $tc['function'] : array();
                     $name = isset($fn['name']) ? (string) $fn['name'] : '';
-                    $args = isset($fn['arguments']) ? @json_decode((string) $fn['arguments'], true) : array();
-                    $result = self::runTool($name, is_array($args) ? $args : array());
+                    $rawArgs = isset($fn['arguments']) ? (string) $fn['arguments'] : '';
+                    $args = $rawArgs === '' ? array() : @json_decode($rawArgs, true);
+                    if (!is_array($args)) {
+                        $truncated = true;
+                        $result = json_encode(array(
+                            'ok'    => false,
+                            'error' => '这次工具调用的参数不完整（JSON 被截断，通常是单条回复超过了 max_tokens 上限）。'
+                                . '请把内容拆小后再试：例如自定义卡片先只写 html，下一轮再写 js；或把 js 压缩到必要的最小实现。'
+                                . '不要原样重试同样长度的内容。',
+                        ), JSON_UNESCAPED_UNICODE);
+                        $messages[] = array(
+                            'role'         => 'tool',
+                            'tool_call_id' => isset($tc['id']) ? (string) $tc['id'] : ('call_' . $round),
+                            'content'      => $result,
+                        );
+                        continue;
+                    }
+                    $result = self::runTool($name, $args);
                     $decoded = @json_decode($result, true);
                     if (is_array($decoded) && !empty($decoded['pending']) && !empty($decoded['confirm'])) {
                         $emit('event: confirm' . "\n"
@@ -883,12 +907,23 @@ class AdminBeautify_AI
                 continue;
             }
             $finalContent .= $piece;
+            $hitLimit = (isset($res['finish_reason']) && $res['finish_reason'] === 'length');
             if (trim($finalContent) === '') {
-                $finalContent = '（无回复）';
+                $finalContent = ($truncated || $hitLimit)
+                    ? '（模型这次输出被 max_tokens 上限截断了，没能给出完整回答。'
+                        . '请在「插件 → AB Admin → AI 助手」里把「最大输出长度」调大（如 4096～8192），'
+                        . '或把需求拆小一点（例如先让我写卡片的结构、再单独写脚本）再试一次。）'
+                    : '（这次没有拿到内容，可能是模型返回了空消息。可以点「重新生成」再试一次。）';
+                self::emitDelta($emit, $finalContent);
+            } elseif ($hitLimit) {
+                $note = "\n\n---\n（这条回答被 max_tokens 上限截断了，后面可能还没说完。"
+                    . '可以把「插件 → AB Admin → AI 助手 → 最大输出长度」调到 8192，或让我「继续」。）';
+                self::emitDelta($emit, $note);
+                $finalContent .= $note;
             }
             return array('ok' => true, 'content' => $finalContent);
         }
-        return array('error' => '操作步骤过多，已中止', 'code' => 400);
+        return array('error' => '操作步骤过多，已中止（多半是同一个工具反复失败）。可以换个说法或把需求拆小再试。', 'code' => 400);
     }
     private static function emitDelta($emit, $text)
     {
@@ -1063,7 +1098,8 @@ class AdminBeautify_AI
                 return self::pendingOrRun(
                     'update_site_option',
                     '修改站点设置',
-                    '把 ' . (isset($args['key']) ? (string) $args['key'] : '') . ' 改为 ' . (isset($args['value']) ? (string) $args['value'] : ''),
+                    '把 ' . (isset($args['key']) ? (string) $args['key'] : '') . ' 改为 '
+                        . self::previewValue(isset($args['value']) ? $args['value'] : ''),
                     $args
                 );
             case 'update_plugin_config':
@@ -1072,7 +1108,7 @@ class AdminBeautify_AI
                     '修改插件设置',
                     '把插件 ' . (isset($args['directory']) ? (string) $args['directory'] : '')
                         . ' 的 ' . (isset($args['key']) ? (string) $args['key'] : '')
-                        . ' 改为 ' . (isset($args['value']) ? (string) $args['value'] : ''),
+                        . ' 改为 ' . self::previewValue(isset($args['value']) ? $args['value'] : ''),
                     $args
                 );
             default:
@@ -1089,6 +1125,24 @@ class AdminBeautify_AI
         } catch (Throwable $e) {
             return 0;
         }
+    }
+    private static function previewValue($v)
+    {
+        if (is_array($v) || is_object($v)) {
+            $v = json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        }
+        $v = (string) $v;
+        if (trim($v) === '') {
+            return '（清空，设为空值）';
+        }
+        $v = preg_replace('/\s+/u', ' ', $v);
+        if (function_exists('mb_strlen') && function_exists('mb_substr')) {
+            $len = mb_strlen($v, 'UTF-8');
+            if ($len > 160) {
+                return '「' . mb_substr($v, 0, 160, 'UTF-8') . '…」（共 ' . $len . ' 字）';
+            }
+        }
+        return '「' . $v . '」';
     }
     private static function pendingOrRun($action, $title, $summary, array $params)
     {
@@ -1193,6 +1247,29 @@ class AdminBeautify_AI
         }
         return array('ok' => true, 'data' => $data, 'message' => self::successMessage($row['action'], $data));
     }
+    private static function briefValue($v)
+    {
+        $s = (is_array($v) || is_object($v))
+            ? (string) json_encode($v, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+            : (string) $v;
+        if (trim($s) === '') {
+            return '（空）';
+        }
+        $len = function_exists('mb_strlen') ? mb_strlen($s, 'UTF-8') : strlen($s);
+        $trim = ltrim($s);
+        if ($trim !== '' && ($trim[0] === '{' || $trim[0] === '[')) {
+            $decoded = json_decode($s, true);
+            if (is_array($decoded)) {
+                $n = count($decoded);
+                return '（JSON，' . $n . ' 项，' . $len . ' 字）';
+            }
+        }
+        if ($len > 60) {
+            $head = function_exists('mb_substr') ? mb_substr($s, 0, 60, 'UTF-8') : substr($s, 0, 60);
+            return '「' . $head . '…」（共 ' . $len . ' 字）';
+        }
+        return '「' . $s . '」';
+    }
     private static function successMessage($action, array $data)
     {
         switch ($action) {
@@ -1203,7 +1280,7 @@ class AdminBeautify_AI
             case 'delete_post':
                 return '已删除文章 #' . (isset($data['cid']) ? $data['cid'] : '');
             case 'update_plugin_setting':
-                return '已把 ' . (isset($data['key']) ? $data['key'] : '') . ' 设为 ' . (isset($data['value']) ? $data['value'] : '');
+                return '已把 ' . (isset($data['key']) ? $data['key'] : '') . ' 设为 ' . self::briefValue(isset($data['value']) ? $data['value'] : '');
             case 'install_plugin':
                 return '已安装插件 ' . (isset($data['directory']) ? $data['directory'] : '');
             case 'toggle_plugin':
@@ -1221,11 +1298,11 @@ class AdminBeautify_AI
                 return '已新建' . (isset($data['type']) && $data['type'] === 'tag' ? '标签' : '分类')
                     . '「' . (isset($data['name']) ? $data['name'] : '') . '」';
             case 'update_site_option':
-                return '已把站点设置 ' . (isset($data['key']) ? $data['key'] : '') . ' 设为 ' . (isset($data['value']) ? $data['value'] : '');
+                return '已把站点设置 ' . (isset($data['key']) ? $data['key'] : '') . ' 设为 ' . self::briefValue(isset($data['value']) ? $data['value'] : '');
             case 'update_plugin_config':
-                return '已把插件 ' . (isset($data['directory']) ? $data['directory'] : '')
-                    . ' 的 ' . (isset($data['key']) ? $data['key'] : '')
-                    . ' 设为 ' . (isset($data['value']) ? $data['value'] : '');
+                return '已更新插件 ' . (isset($data['directory']) ? $data['directory'] : '')
+                    . ' 的 ' . (isset($data['key']) ? $data['key'] : '') . ' '
+                    . self::briefValue(isset($data['value']) ? $data['value'] : '');
             default:
                 return '操作已完成';
         }
@@ -2024,6 +2101,15 @@ class AdminBeautify_AI
             }
             $cfg[$key] = $value;
             $json = json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if (strlen($json) > 60000 && strlen($json) > strlen((string) ($row ? $row['value'] : ''))) {
+                return json_encode(array(
+                    'ok'    => false,
+                    'error' => '这次写入会让插件设置超过 64KB 上限（当前 '
+                        . strlen($json) . ' 字节），可能损坏全部插件设置。'
+                        . '请缩短内容（自定义卡片的 HTML+JS 建议 ≤12KB），'
+                        . '或改成到「插件设置 → 概要页卡片设置 → 自定义卡片」里手动粘贴保存。',
+                ), JSON_UNESCAPED_UNICODE);
+            }
             if ($row) {
                 $db->query($db->update('table.options')->rows(array('value' => $json))
                     ->where('name = ?', 'plugin:' . $dir)->where('user = ?', 0));
@@ -2365,17 +2451,25 @@ class AdminBeautify_AI
             $user = Typecho_Widget::widget('Widget_User');
             $db = \Typecho\Db::get();
             $now = time();
+            $type = trim((string) $type);
+            if ($type === '') {
+                $type = strtolower((string) pathinfo((string) $name, PATHINFO_EXTENSION));
+            }
+            $mime = is_string($mime) ? trim($mime) : '';
+            if ($mime === '') {
+                $mime = self::mimeByExt($type);
+            }
             $info = array(
-                'name' => $name,
-                'path' => $relPath,
-                'size' => $size,
+                'name' => (string) $name,
+                'path' => (string) $relPath,
+                'size' => (int) $size,
                 'type' => $type,
                 'mime' => $mime,
             );
             return (int) $db->query($db->insert('table.contents')->rows(array(
                 'title'        => $name,
                 'slug'         => 'attachment-' . $now . '-' . mt_rand(1000, 9999),
-                'text'         => serialize($info),
+                'text'         => self::encodeAttachmentText($info),
                 'type'         => 'attachment',
                 'status'       => 'publish',
                 'authorId'     => (int) $user->uid,
@@ -2389,6 +2483,19 @@ class AdminBeautify_AI
         } catch (Throwable $e) {
         }
         return 0;
+    }
+    private static function encodeAttachmentText($info)
+    {
+        if (!class_exists('AdminBeautify_Action')) {
+            $file = __DIR__ . '/Action.php';
+            if (is_file($file)) {
+                require_once $file;
+            }
+        }
+        if (class_exists('AdminBeautify_Action')) {
+            return AdminBeautify_Action::encodeAttachment($info);
+        }
+        return serialize($info);
     }
     private static function collectChatImages(array $messages, $limit = 8, $maxBytes = 8388608)
     {

@@ -24,6 +24,7 @@ keywords: 关键词1, 关键词2
 | `image-upload` | AI 上传图片（本地上传 / 剪贴板粘贴）的完整流程与错误处理 |
 | `links-plus` | Links+ 友链插件的设置与短代码 |
 | `ab-admin` | AB Admin 自身设置项说明 |
+| `custom-cards` | **在概要页添加自定义卡片**（数据结构、写入步骤、`ab.ui` 组件库、示例与排错） |
 | `typecho-basics` | Typecho 后台常用操作（文章、分类、评论、设置） |
 
 ## 新增技能
