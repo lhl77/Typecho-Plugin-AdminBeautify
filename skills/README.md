@@ -30,3 +30,29 @@ keywords: 关键词1, 关键词2
 ## 新增技能
 
 在 `skills/` 下新建 `<name>.md`，按上面的 frontmatter 格式写即可，无需改代码。
+
+## 单独更新（不跟插件发版）
+
+技能库支持单独更新，入口在 **AI 助手面板顶部**（发现新版本时自动出现一条提示）。
+
+机制：
+
+1. 本目录的 **`manifest.json`** 是唯一的版本清单 —— 检查更新**只拉这一个文件**
+   （一次请求），比对 `version` 就能判断要不要更新；
+2. 版本不同 → 逐个拉取 `files` 里列出的 md，覆盖本地 `skills/`；
+3. 检查间隔 **30 分钟**（服务端 `AdminBeautify_Skills::TTL` + 前端 localStorage 双重节流）；
+4. 大陆网络：直连 `raw.githubusercontent.com` 失败时自动走 `https://gh1.lhl.one/` 镜像。
+
+**改动任何技能文件后，请务必同步修改 `manifest.json`**：
+
+```json
+{
+  "version": "YYYYMMDD-N",      // 递增即可，不用语义化
+  "updated": "2026-11-19 12:00:00",
+  "files": ["picup.md", "..."]
+}
+```
+
+新增技能时把文件名补进 `files`，否则单独更新拉不到它。
+覆盖前的旧文件会备份到 `usr/plugins/.ab-store/skills-backup/<时间>/`，
+当前版本记录在 `usr/plugins/.ab-store/skills.json`。

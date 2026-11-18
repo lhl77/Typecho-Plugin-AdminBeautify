@@ -4,7 +4,7 @@
  *
  * @package AdminBeautify
  * @author LHL
- * @version 2.1.66
+ * @version 2.1.67
  * @link https://blog.lhl.one
  */
 class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
@@ -196,7 +196,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->requireLoginForPwa();
         $options    = $this->options;
         $pluginUrl  = rtrim((string) $options->pluginUrl, '/');
-        $pluginVer  = '2.1.66';
+        $pluginVer  = '2.1.67';
         $cssUrl     = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.v' . $pluginVer . '.css';
         $jsUrl      = $pluginUrl . '/AdminBeautify/assets/AdminBeautify.min.v' . $pluginVer . '.js';
         $swFile = dirname(__FILE__) . '/assets/sw.js';
@@ -2275,7 +2275,7 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         $headers = array(
             'Content-Type: application/json; charset=utf-8',
             'Accept: application/json',
-            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.66',
+            'User-Agent: AdminBeautify-Typecho-Plugin/2.1.67',
         );
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
@@ -2684,6 +2684,28 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
         }
         $this->jsonSuccess(isset($res['data']) ? $res['data'] : null, '已保存');
     }
+    public function aiSkillsCheck()
+    {
+        $this->checkAdmin();
+        require_once dirname(__FILE__) . '/Skills.php';
+        $force = (string) $this->request->get('force', '') === '1';
+        $res = AdminBeautify_Skills::check($force);
+        $msg = !empty($res['hasUpdate'])
+            ? '发现技能更新'
+            : (empty($res['ok']) ? ('检查失败：' . (isset($res['error']) ? $res['error'] : '未知错误')) : '已是最新');
+        $this->jsonSuccess($res, $msg);
+    }
+    public function aiSkillsApply()
+    {
+        $this->checkWriteRequest();
+        require_once dirname(__FILE__) . '/Skills.php';
+        $res = AdminBeautify_Skills::apply();
+        if (isset($res['error'])) {
+            $this->jsonError($res['error'], 500);
+            return;
+        }
+        $this->jsonSuccess($res, '技能库已更新到 ' . (isset($res['version']) ? $res['version'] : ''));
+    }
     public function action()
     {
         $do = $this->request->get('do', '');
@@ -2750,6 +2772,12 @@ class AdminBeautify_Action extends Typecho_Widget implements Widget_Interface_Do
                 break;
             case 'ai-prefs-save':
                 $this->aiPrefsSave();
+                break;
+            case 'ai-skills-check':
+                $this->aiSkillsCheck();
+                break;
+            case 'ai-skills-apply':
+                $this->aiSkillsApply();
                 break;
             case 'ping':
                 $this->ping();

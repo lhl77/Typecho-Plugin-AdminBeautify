@@ -1,0 +1,13 @@
+{
+  "version": "20261119-1",
+  "updated": "2026-11-19 12:00:00",
+  "note": "AB AI Skills 版本清单 —— 检查更新只看这一个文件。改动任何 skills/*.md 后请把 version 递增（YYYYMMDD-N）并把文件名补进 files。",
+  "files": [
+    "ab-admin.md",
+    "custom-cards.md",
+    "image-upload.md",
+    "links-plus.md",
+    "picup.md",
+    "typecho-basics.md"
+  ]
+}

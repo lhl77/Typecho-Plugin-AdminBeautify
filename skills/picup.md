@@ -1,7 +1,7 @@
 ---
 name: picup
 title: PicUp 图片上传插件（完整字段参考）
-description: PicUp 全部设置项、18 种存储驱动的完整字段名与默认值、4 个扩展、configJson 结构、排错
+description: PicUp 全部设置项、18 种存储驱动的完整字段名与默认值、5 个扩展、configJson 结构、排错
 keywords: PicUp, 图片上传, 上传图片, 图床, 附件, 媒体库, configJson, 存储驱动
 ---
 
@@ -17,10 +17,54 @@ keywords: PicUp, 图片上传, 上传图片, 图床, 附件, 媒体库, configJs
 | `storagePathTemplate` | text | `{year}/{month}/` | 文件路径模板（**全局**，不在方案里） |
 | `mimeScope` | radio | `image` | `image` 只接管图片 / `all` 接管所有附件 |
 | `suffixProfiles` | textarea(JSON) | `{}` | 按扩展名分流到不同方案，如 `{"gif,webp":"upyun"}` |
+| `backupProfiles` | textarea(JSON) | `[]` | **自动备份**：主方案上传后再传到这些方案，如 `["bak","upyun"]`（勾选即生效，主方案会自动跳过） |
 | `configJson` | textarea(JSON) | 见下 | **核心**：所有存储方案 + 各方案的扩展 |
 | `abPromoHidden` | hidden text | `0` | AB Admin 分享开关（隐藏字段，`0` / `1`） |
 
 > ⚠️ 这几个是**独立设置项**，扩展配置**不在**它们里面，而在 `configJson` 每个方案的 `_extensions` 里。
+
+## 一·五、自动备份 🅱 Beta（旧名「多方案备份」，`backupProfiles` + `PicUpLinks` 表）
+
+> 折叠头带 `.picup-beta` 徽标；与「迁移与替换」一并在设置页标为**测试版**。
+
+- `backupProfiles` = 备份方案名数组（JSON 字符串）。会在 `uploadHandle()` 里、主上传成功后
+  用**同一份已处理文件**再向每个备份方案传一次；主方案同名会被跳过。
+- 依赖数据表 **`{prefix}PicUpLinks`**（`id, filename, primary_profile, primary_url, links, created_at, cid`）。
+  从旧版升级上来的站点不会自动建表——用户在设置页点「开启自动备份」才建；表不存在时
+  备份静默跳过并写 error_log，**不影响主上传**。
+  三种数据库均已适配：MySQL 用 `information_schema` 判存在（不用 `SHOW TABLES LIKE`，`_` 是通配符会误判）、
+  PgSQL 建表**不加引号**（Query Builder 生成的是未加引号的 `typecho_PicUpLinks`，PG 会折叠成小写）。
+- **附件 ↔ 记录只按 URL 匹配**（`findRowForAttachment()`）：附件当前 `path` 必须命中
+  `links` 里某条链接或 `primary_url`。**不再按文件名回退** —— `image.png` 这类同名文件会把
+  别人的记录挂过来，出现「没开自动备份却已有备份链接」。命中后回填 `cid`；未命中但库里有
+  `cid` 相同的历史记录时，说明是旧版按文件名错绑的，顺手解绑（`cid=0`）。
+- `links` 字段是 `{"方案名":"链接"}` 的 JSON（含主方案）。查询接口：
+  `/action/picup-backup`，`do=` `links-status` / `links-create` / `links-profiles`（保存勾选）/ `links-list`（`q` 搜索文件名、方案名、链接）。
+
+## 一·六、迁移与替换 🅱 Beta（`migrate-*` / `file-*`）
+
+- **批量替换**（设置页「迁移与替换」）：源方案 → 目标方案，同时改写
+  ① `PicUpLinks.primary_profile/primary_url` ② `contents.text` 里附件的 `path` ③ 文章正文中的旧 URL
+  （**两种形式都要换**：明文 `http://…` 与 JSON 转义 `http:\/\/…`）。目标方案没对应链接的记录跳过。
+- **单文件迁移**（媒体详情页 `admin/media.php?cid=X`）：**先备份、再替换** ——
+  目标方案已有链接就直接用，没有就 `downloadToTemp()`（本站 URL 直接读磁盘，否则 curl）→
+  `Plugin::uploadFileToProfile()` 上传 → 再把附件 `path` 与正文引用改成新链接。
+  **迁移前会先把当前链接记到它所属方案名下**（`guessProfileForUrl()`），所以 `default → bak`
+  之后 `links` 里两条都在，可在详情页一键「设为当前」切回。
+- ⚠️ `replaceUrlEverywhere()` 的 `text LIKE` 只能用**文件名**做锚点：库里可能是明文
+  `http://…`，也可能是 JSON 转义 `http:\/\/…`；而 `\/` 在 MySQL 的 LIKE 里是转义符、在
+  SQLite/PG 里是字面量 —— 拿整条 URL 去 LIKE 必然有一边匹配不到（曾因此附件地址没跟着改）。
+- 接口：`media-counts`（列表角标）、`file-links`（cid→各方案链接）、`file-migrate`（`cid,target,replaceInPosts`）、
+  `migrate-preview`（`from,to` 只统计）、`migrate-run`（执行）。
+- 表新增可空 `cid` 列（`Plugin::ensureLinksCidColumn()`，ALTER 失败静默忽略）。
+  ⚠️ `linksRowsAll()` 的 `select()` 必须带 `cid`，否则 `$row['cid']` 恒为 `null`，
+  回填与自愈全都失效（老表没这列时会回退到不带 `cid` 的查询）。
+- 媒体详情页会**移除 Typecho 自带的 `#upload-panel`**：不同方案重传返回的链接不一致，会与备份/迁移记录脱节。
+- 没有备份记录时 `file-links` 只用 `Plugin::guessProfileForUrl()` 反推方案名：比对每个方案配置里的
+  `urlPrefix/customDomain/cdnDomain/domain/url/host/siteUrl` 与本地驱动的 `站点地址+uploadDir`，
+  **取最长命中**（`usr/uploads` 是 `usr/uploads-bak` 的前缀，必须比长度）；取不到才回落 `(当前)`。
+  附件本身**不记录**方案名（`contents.text` 只有 path），所以只能靠 URL 猜。
+- UI 用 AB 的 `--md-*` 令牌 + `[data-theme="dark"]` 覆盖，亮/暗主题都能跟随主题色。
 
 
 ### storagePathTemplate 可用变量
@@ -302,7 +346,7 @@ TgImagebedDriver.php → tgimagebed  ZpicDriver.php → zpic
 | `uid` | text | `''` | 否 | UID（仅 V2） |
 | `album_id` | number | `0` | 否 | 相册 ID |
 
-## 四、4 个扩展（写在方案的 `_extensions` 里）
+## 四、5 个扩展（写在方案的 `_extensions` 里）
 
 > 键名是 **`_extensions`（带下划线）**，位置在**方案对象内部**，不是 configJson 顶层。
 > 未启用的扩展不必写；`enabled` 写 `true`（布尔）或 `"true"` 都行，
@@ -364,6 +408,18 @@ TgImagebedDriver.php → tgimagebed  ZpicDriver.php → zpic
 | `driver` | select | 首个可用 | `gd` / `imagick`（需对应扩展支持 AVIF） |
 | `quality` | number | `"60"` | 转换质量 1–100 |
 
+### `exif` EXIF 信息抹除
+
+直接改写 JPEG 段 / PNG 块 / WebP RIFF 块，**不重新编码、不掉画质**；不支持的文件格式原样跳过。
+执行顺序 `getOrder() = 12`（压缩 10 之后、水印 20 之前）；压缩若已重编码，元数据本就不存在，此时自动 no-op。
+
+| 字段 | 类型 | 默认 | 说明 |
+|---|---|---|---|
+| `enabled` | bool | `false` | 是否启用 |
+| `keepOrientation` | select | `"1"` | `"1"` 保留方向（只写回 Orientation 一个标签）/ `"0"` 一并抹除 |
+| `keepIcc` | select | `"1"` | `"1"` 保留 ICC 色彩配置（Adobe RGB / P3 图片重要）/ `"0"` 移除 |
+| `stripIptc` | select | `"1"` | `"1"` 同时移除 IPTC / XMP（含作者、版权、地理位置）/ `"0"` 保留 |
+
 ## 五、上传接口
 
 ```
@@ -395,6 +451,33 @@ Content-Type: multipart/form-data
 
 ## 七、AI 能做什么
 
+### 7.1 专用工具（PicUp 1.3.0+ 提供 `Api.php` 接口层，AI 直接调用）
+
+带 🔒 的是**写操作**：调用后只会生成一张确认卡片，用户点「确认执行」才真正落库，
+所以**不要重复调用同一个写工具**。
+
+| 工具 | 说明 | 典型用法 |
+|---|---|---|
+| `picup_status` | 方案列表、默认方案、自动备份是否开启、已勾选备份方案、记录条数 | 任何 PicUp 问题先调它 |
+| `picup_list_backup_records` | 列出自动备份链接记录（`q` 搜索文件名/方案名/链接，`page`/`limit` 分页） | 「看看都备份了哪些图」 |
+| `picup_get_file_links` | 某附件在各方案下的链接，标出哪条是当前；只给 `keyword` 时返回候选 cid 列表 | 「这张图备份到哪几个地方了」 |
+| `picup_migrate_preview` | **只统计**批量替换的影响面（记录/附件/文章数） | 批量替换前必调 |
+| 🔒 `picup_migrate_batch` | 批量：记录 `primary_*` + 附件 `path` + 文章正文一起换（明文与 `http:\/\/` 两种写法都换） | 「把所有图从 default 换到 bak」 |
+| 🔒 `picup_migrate_file` | 单文件迁移：目标方案没有就先下载+上传，再切链接；**原方案链接保留** | 「把这张图迁到 bak」 |
+| 🔒 `picup_enable_backup` | 开启自动备份（先建 `{prefix}PicUpLinks` 表，再存方案勾选）；`profiles` 传空＝关闭 | 「开启自动备份，备份到 bak」 |
+
+标准流程：
+
+1. **开启自动备份** → `picup_status` 看有哪些方案 → `picup_enable_backup(profiles="bak")`
+2. **批量替换** → `picup_migrate_preview(from,to)` 报数字给用户 → 确认后 `picup_migrate_batch`
+3. **单文件迁移** → `picup_get_file_links(keyword=…)` 拿 cid → `picup_migrate_file(cid,target)`
+4. **看备份情况** → `picup_list_backup_records(q="")`
+
+> 没有 `Api.php` 的老版本 PicUp 会提示「版本过旧」，此时只能退化成
+> `get_plugin_config` / `update_plugin_config` 改 `backupProfiles` 明文。
+
+### 7.2 通用工具
+
 - `get_plugin_config(directory="PicUp")` 读取当前配置
 - `update_plugin_config(directory="PicUp", key="configJson", value="...")` 修改配置
   - `value` 必须是**完整的两层 JSON 字符串**（方案名 → 方案对象），不是片段；
@@ -407,5 +490,34 @@ Content-Type: multipart/form-data
     但改完后其中的密钥仍需用户自己确认是否正确
   - 改完 `defaultProfile` 时，一定确认它指向的 key 真实存在
 - `upload_image` 上传图片拿 URL，再用 `edit_editor_content` 插入正文
+- `save_chat_image` 把对话里的图片存进媒体库（走 PicUp 的方案与扩展）
 - **不能**把驱动密钥（`token` / `secretKey` / `accessKey` / `password` / `api_key`）
   当成独立设置项去改 —— PicUp 没有这些顶层项，它们只存在于 `configJson` 里
+
+### 7.3 新老版本兼容（重要）
+
+`picup_*` 这套专用工具**依赖 PicUp 1.3.0 起提供的 `Api.php` 接口层**。
+老版本 PicUp（`< 1.3.0`，或手动删过文件的残缺安装）没有它，此时必须走**原来的通用调用方式**，
+下面这套写法**一直有效，请保留使用**。
+
+**怎么判断**：先调一次 `picup_status`。
+
+- 返回 `{"ok": true, ...}` → 用 7.1 的专用工具
+- 返回 `{"ok": false, "error": "...版本过旧..."}` 或 `...未启用...` → 走下面的降级方式
+
+| 需求 | 新方式（1.3.0+） | 老方式（任何版本都能用） |
+|---|---|---|
+| 看有哪些方案 | `picup_status` | `get_plugin_config(directory="PicUp")` 看 `configJson` 的键 |
+| 看自动备份是否开启 | `picup_status` | `get_plugin_config` 看 `backupProfiles` 是否为 `[]` |
+| 开启 / 关闭自动备份 | `picup_enable_backup(profiles="bak")` | `update_plugin_config(directory="PicUp", key="backupProfiles", value="[\"bak\"]")`；关闭传 `"[]"` |
+| 看某文件的备份链接 | `picup_get_file_links` | 无接口，只能看 `get_plugin_config` 或让用户去 **管理 → 文件 → 详情页** |
+| 批量 / 单文件迁移 | `picup_migrate_batch` / `picup_migrate_file` | 无接口，**让用户自己去设置页「迁移与替换」或详情页操作**，不要尝试直接改数据库 |
+| 看链接记录 | `picup_list_backup_records` | 无接口（`get_plugin_config` 读不到 `{prefix}PicUpLinks` 表） |
+
+老方式的两个硬性注意点：
+
+1. `backupProfiles` 的值是**JSON 数组字符串**，如 `["bak","upyun"]`，不是逗号分隔；
+   关掉自动备份传 `"[]"`（不是空字符串）。
+2. 老版本**建表只能由用户在设置页点「开启自动备份」按钮触发**。
+   如果 `backupProfiles` 有值但链接表不存在，备份会在上传时静默跳过
+   （只写 error_log）—— 这时要明确提示用户去后台点那个按钮，不要说「已经开好了」。

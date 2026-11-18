@@ -651,6 +651,32 @@ class AdminBeautify_AI
                 'index'    => array('type' => 'integer', 'description' => '图片编号，从 1 开始（见系统提示里列出的图片清单）'),
                 'filename' => array('type' => 'string', 'description' => '文件名（可选，含扩展名）'),
             ), array('index')),
+            self::toolDef('picup_status', '查看 PicUp 插件的当前状态：全部存储方案、当前默认方案、自动备份是否开启、已勾选的备份方案、链接记录条数。涉及 PicUp 的问题先调它；若返回「版本过旧 / 未启用」，改用 get_plugin_config / update_plugin_config 操作 backupProfiles 降级处理。', array(), array()),
+            self::toolDef('picup_list_backup_records', '列出 PicUp 的自动备份链接记录（每个文件一行，含各方案的链接）。可按文件名/方案名/链接搜索。', array(
+                'q'     => array('type' => 'string', 'description' => '搜索关键词（可选）'),
+                'page'  => array('type' => 'integer', 'description' => '页码，默认 1'),
+                'limit' => array('type' => 'integer', 'description' => '每页数量，默认 20，最多 100'),
+            ), array()),
+            self::toolDef('picup_get_file_links', '查看某个附件在各个存储方案下的链接（哪条是当前使用的）。先用 cid；不知道 cid 时可以传 keyword 按文件名/地址搜索。', array(
+                'cid'     => array('type' => 'integer', 'description' => '附件 ID（media.php?cid=X）；不知道可省略'),
+                'keyword' => array('type' => 'string', 'description' => '文件名或链接关键词（cid 为空时必填）'),
+            ), array()),
+            self::toolDef('picup_migrate_preview', '预览「批量把链接从方案 A 切到方案 B」会影响多少：链接记录数、附件数、文章数。只统计不写入。', array(
+                'from' => array('type' => 'string', 'description' => '源方案名'),
+                'to'   => array('type' => 'string', 'description' => '目标方案名'),
+            ), array('from', 'to')),
+            self::toolDef('picup_migrate_batch', '执行批量替换：把链接记录、媒体库附件地址、文章正文里的链接从「源方案」整体换成「目标方案」。会改写三处数据，需要用户确认后执行。建议先调 picup_migrate_preview。', array(
+                'from' => array('type' => 'string', 'description' => '源方案名'),
+                'to'   => array('type' => 'string', 'description' => '目标方案名'),
+            ), array('from', 'to')),
+            self::toolDef('picup_migrate_file', '单个文件的方案迁移：目标方案里没有这份文件会先上传一份，再把附件地址与正文引用换过去；**原方案的链接会保留**，可随时切回。需要用户确认后执行。', array(
+                'cid'            => array('type' => 'integer', 'description' => '附件 ID（media.php?cid=X）'),
+                'target'         => array('type' => 'string', 'description' => '目标方案名'),
+                'replaceInPosts' => array('type' => 'boolean', 'description' => '是否同时替换文章正文里的旧链接，默认 true'),
+            ), array('cid', 'target')),
+            self::toolDef('picup_enable_backup', '开启/关闭 PicUp 的「自动备份」：开启会先建链接记录表，再保存勾选的备份方案；传入空的 profiles 即关闭自动备份（停止备份，但已有记录不删）。需要用户确认后执行。', array(
+                'profiles' => array('type' => 'string', 'description' => '备份方案名列表，逗号分隔，如 "bak,upyun"；传空字符串＝关闭自动备份'),
+            ), array('profiles')),
         );
     }
     private static function toolDef($name, $desc, array $props, array $required)
@@ -1031,6 +1057,14 @@ class AdminBeautify_AI
                 return self::toolUploadImage($args);
             case 'save_chat_image':
                 return self::toolSaveChatImage($args);
+            case 'picup_status':
+                return self::toolPicupStatus();
+            case 'picup_list_backup_records':
+                return self::toolPicupListRecords($args);
+            case 'picup_get_file_links':
+                return self::toolPicupFileLinks($args);
+            case 'picup_migrate_preview':
+                return self::toolPicupMigratePreview($args);
             case 'create_post':
                 return self::pendingOrRun('create_post', '创建文章', self::describeCreate($args), $args);
             case 'update_post':
@@ -1109,6 +1143,34 @@ class AdminBeautify_AI
                     '把插件 ' . (isset($args['directory']) ? (string) $args['directory'] : '')
                         . ' 的 ' . (isset($args['key']) ? (string) $args['key'] : '')
                         . ' 改为 ' . self::previewValue(isset($args['value']) ? $args['value'] : ''),
+                    $args
+                );
+            case 'picup_migrate_batch':
+                $from = isset($args['from']) ? (string) $args['from'] : '';
+                $to = isset($args['to']) ? (string) $args['to'] : '';
+                return self::pendingOrRun(
+                    'picup_migrate_batch',
+                    'PicUp 批量替换链接',
+                    '把所有记录 / 附件地址 / 正文里的「' . $from . '」链接换成「' . $to . '」',
+                    $args
+                );
+            case 'picup_migrate_file':
+                $cid = isset($args['cid']) ? (int) $args['cid'] : 0;
+                $target = isset($args['target']) ? (string) $args['target'] : '';
+                return self::pendingOrRun(
+                    'picup_migrate_file',
+                    'PicUp 单文件迁移',
+                    '把附件 #' . $cid . ' 迁移到方案「' . $target . '」（原方案的链接会保留）',
+                    $args
+                );
+            case 'picup_enable_backup':
+                $profiles = isset($args['profiles']) ? trim((string) $args['profiles']) : '';
+                return self::pendingOrRun(
+                    'picup_enable_backup',
+                    $profiles === '' ? '关闭 PicUp 自动备份' : '开启 PicUp 自动备份',
+                    $profiles === ''
+                        ? '清空备份方案（已有链接记录不删）'
+                        : '把 ' . $profiles . ' 设为 PicUp 的备份方案并确保链接表存在',
                     $args
                 );
             default:
@@ -1235,6 +1297,15 @@ class AdminBeautify_AI
             case 'update_plugin_config':
                 $raw = self::toolUpdatePluginConfig($params);
                 break;
+            case 'picup_migrate_batch':
+                $raw = self::toolPicupMigrateBatch($params);
+                break;
+            case 'picup_migrate_file':
+                $raw = self::toolPicupMigrateFile($params);
+                break;
+            case 'picup_enable_backup':
+                $raw = self::toolPicupEnableBackup($params);
+                break;
             default:
                 return array('error' => '不支持的操作：' . $row['action'], 'code' => 400);
         }
@@ -1303,6 +1374,17 @@ class AdminBeautify_AI
                 return '已更新插件 ' . (isset($data['directory']) ? $data['directory'] : '')
                     . ' 的 ' . (isset($data['key']) ? $data['key'] : '') . ' '
                     . self::briefValue(isset($data['value']) ? $data['value'] : '');
+            case 'picup_migrate_batch':
+                return 'PicUp 批量替换完成：改写 ' . (isset($data['records']) ? (int) $data['records'] : 0)
+                    . ' 条记录、' . (isset($data['attachments']) ? (int) $data['attachments'] : 0)
+                    . ' 个附件、' . (isset($data['posts']) ? (int) $data['posts'] : 0) . ' 篇文章';
+            case 'picup_migrate_file':
+                return 'PicUp 单文件迁移完成 → ' . (isset($data['url']) ? $data['url'] : '');
+            case 'picup_enable_backup':
+                $names = isset($data['profiles']) && is_array($data['profiles']) ? $data['profiles'] : array();
+                return empty($names)
+                    ? '已关闭 PicUp 自动备份（已有链接记录保留）'
+                    : '已开启 PicUp 自动备份，备份方案：' . implode('、', $names);
             default:
                 return '操作已完成';
         }
@@ -2615,6 +2697,156 @@ class AdminBeautify_AI
             return null;
         }
         return $body;
+    }
+    private static function picupUnavailable()
+    {
+        $activated = array();
+        try {
+            $exported  = \Typecho\Plugin::export();
+            $activated = isset($exported['activated']) && is_array($exported['activated'])
+                ? $exported['activated'] : array();
+        } catch (Exception $e) {
+        } catch (Throwable $e) {
+        }
+        if (!isset($activated['PicUp'])) {
+            return 'PicUp 插件未启用，请先到「控制台 → 插件」启用它；已停用时只能用 get_plugin_config 查看配置，无法执行备份/迁移';
+        }
+        if (!class_exists('\\TypechoPlugin\\PicUp\\Api')) {
+            return 'PicUp 版本过旧（缺少 Api.php 接口层），请升级到 1.3.0 及以上；'
+                . '暂时可以改用 get_plugin_config / update_plugin_config 操作 backupProfiles 降级实现';
+        }
+        return '';
+    }
+    private static function picupEncode($data)
+    {
+        return json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    private static function picupCall($method, array $args)
+    {
+        $err = self::picupUnavailable();
+        if ($err !== '') {
+            return self::picupEncode(array('ok' => false, 'error' => $err));
+        }
+        try {
+            $res = call_user_func_array(array('\\TypechoPlugin\\PicUp\\Api', $method), $args);
+            if (!is_array($res)) {
+                return self::picupEncode(array('ok' => false, 'error' => 'PicUp 返回了异常结果'));
+            }
+            return self::picupEncode($res);
+        } catch (Exception $e) {
+            return self::picupEncode(array('ok' => false, 'error' => 'PicUp 调用失败：' . $e->getMessage()));
+        } catch (Throwable $e) {
+            return self::picupEncode(array('ok' => false, 'error' => 'PicUp 调用失败：' . $e->getMessage()));
+        }
+    }
+    private static function toolPicupStatus()
+    {
+        return self::picupCall('status', array());
+    }
+    private static function toolPicupListRecords(array $args)
+    {
+        $q     = isset($args['q']) ? trim((string) $args['q']) : '';
+        $page  = isset($args['page']) ? (int) $args['page'] : 1;
+        $limit = isset($args['limit']) ? (int) $args['limit'] : 20;
+        return self::picupCall('listLinks', array($q, $page, $limit));
+    }
+    private static function toolPicupFileLinks(array $args)
+    {
+        $err = self::picupUnavailable();
+        if ($err !== '') {
+            return self::picupEncode(array('ok' => false, 'error' => $err));
+        }
+        $cid = isset($args['cid']) ? (int) $args['cid'] : 0;
+        $kw  = isset($args['keyword']) ? trim((string) $args['keyword']) : '';
+        if ($cid <= 0) {
+            if ($kw === '') {
+                return self::picupEncode(array('ok' => false, 'error' => '请提供 cid 或 keyword'));
+            }
+            try {
+                $atts    = \TypechoPlugin\PicUp\Api::attachmentMap();
+                $matches = array();
+                foreach ($atts as $c => $a) {
+                    $hit = ($kw !== '' && mb_stripos($a['name'], $kw) !== false)
+                        || ($kw !== '' && stripos($a['path'], $kw) !== false);
+                    if ($hit) {
+                        $matches[] = array('cid' => (int) $c, 'name' => $a['name'], 'path' => $a['path']);
+                        if (count($matches) >= 10) {
+                            break;
+                        }
+                    }
+                }
+                if (empty($matches)) {
+                    return self::picupEncode(array('ok' => false, 'error' => '没有找到匹配「' . $kw . '」的附件'));
+                }
+                return self::picupEncode(array(
+                    'ok'      => true,
+                    'matches' => $matches,
+                    'hint'    => '拿到 cid 后再调一次 picup_get_file_links 查看各方案链接',
+                ));
+            } catch (Exception $e) {
+                return self::picupEncode(array('ok' => false, 'error' => $e->getMessage()));
+            } catch (Throwable $e) {
+                return self::picupEncode(array('ok' => false, 'error' => $e->getMessage()));
+            }
+        }
+        return self::picupCall('fileLinks', array($cid));
+    }
+    private static function toolPicupMigratePreview(array $args)
+    {
+        $from = isset($args['from']) ? trim((string) $args['from']) : '';
+        $to   = isset($args['to']) ? trim((string) $args['to']) : '';
+        return self::picupCall('migratePreview', array($from, $to));
+    }
+    private static function toolPicupMigrateBatch(array $args)
+    {
+        $from = isset($args['from']) ? trim((string) $args['from']) : '';
+        $to   = isset($args['to']) ? trim((string) $args['to']) : '';
+        return self::picupCall('migrateRun', array($from, $to));
+    }
+    private static function toolPicupMigrateFile(array $args)
+    {
+        $cid     = isset($args['cid']) ? (int) $args['cid'] : 0;
+        $target  = isset($args['target']) ? trim((string) $args['target']) : '';
+        $replace = !isset($args['replaceInPosts']) || $args['replaceInPosts'] !== false;
+        return self::picupCall('fileMigrate', array($cid, $target, $replace));
+    }
+    private static function toolPicupEnableBackup(array $args)
+    {
+        $err = self::picupUnavailable();
+        if ($err !== '') {
+            return self::picupEncode(array('ok' => false, 'error' => $err));
+        }
+        $profiles = isset($args['profiles']) ? trim((string) $args['profiles']) : '';
+        $created = false;
+        if ($profiles !== '') {
+            try {
+                $t = \TypechoPlugin\PicUp\Api::enableBackupTable();
+                if (empty($t['ok'])) {
+                    return self::picupEncode(array('ok' => false, 'error' => isset($t['error']) ? $t['error'] : '建表失败'));
+                }
+                $created = !empty($t['created']);
+            } catch (Exception $e) {
+                return self::picupEncode(array('ok' => false, 'error' => $e->getMessage()));
+            } catch (Throwable $e) {
+                return self::picupEncode(array('ok' => false, 'error' => $e->getMessage()));
+            }
+        }
+        try {
+            $s = \TypechoPlugin\PicUp\Api::setBackupProfiles($profiles);
+        } catch (Exception $e) {
+            return self::picupEncode(array('ok' => false, 'error' => $e->getMessage()));
+        } catch (Throwable $e) {
+            return self::picupEncode(array('ok' => false, 'error' => $e->getMessage()));
+        }
+        if (empty($s['ok'])) {
+            return self::picupEncode(array('ok' => false, 'error' => isset($s['error']) ? $s['error'] : '保存备份方案失败'));
+        }
+        return self::picupEncode(array(
+            'ok'           => true,
+            'profiles'     => isset($s['profiles']) ? $s['profiles'] : array(),
+            'tableCreated' => $created,
+            'enabled'      => !empty($s['profiles']),
+        ));
     }
     private static function toolRemovePlugin(array $args)
     {
