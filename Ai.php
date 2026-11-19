@@ -633,11 +633,17 @@ class AdminBeautify_AI
             self::toolDef('get_plugin_config', '读取任意插件（不只是 AB Admin）的当前设置项。先用 list_plugins 拿到目录名。', array(
                 'directory' => array('type' => 'string', 'description' => '插件目录名，如 Links'),
             ), array('directory')),
-            self::toolDef('update_plugin_config', '修改任意插件的设置项（不只是 AB Admin）。先用 get_plugin_config 看清现有键名与值，再改。需要用户确认后执行。', array(
+            self::toolDef('update_plugin_config', '修改任意插件的设置项（不只是 AB Admin）。先用 get_plugin_config 看清现有键名与值，再改。⚠️ 遇到**嵌套 JSON**（如 PicUp 的 configJson：方案名→方案对象）请改用 patch_plugin_json，整段覆盖极易把其它内容写没。需要用户确认后执行。', array(
                 'directory' => array('type' => 'string', 'description' => '插件目录名'),
                 'key'       => array('type' => 'string', 'description' => '设置项键名'),
                 'value'     => array('type' => 'string', 'description' => '新值'),
             ), array('directory', 'key', 'value')),
+            self::toolDef('patch_plugin_json', '对插件的某个 JSON 设置项做「局部合并」：只改你给出的键，其余已有内容原地保留（不会因为漏抄而删掉其它项）。新增/修改 PicUp 存储方案、改单个方案的字段、改 backupProfiles 等一律用它。需要用户确认后执行。', array(
+                'directory' => array('type' => 'string', 'description' => '插件目录名，如 PicUp'),
+                'key'       => array('type' => 'string', 'description' => 'JSON 设置项键名，如 configJson'),
+                'patch'     => array('type' => 'string', 'description' => '要合并进去的 JSON 对象，如 {"my-oss":{"driver":"s3",...}}；同名对象会递归合并字段'),
+                'remove'    => array('type' => 'string', 'description' => '可选：要删除的顶层键，逗号分隔'),
+            ), array('directory', 'key', 'patch')),
             self::toolDef('list_skills', '列出所有可用技能（Skills）的名称与简介。', array(), array()),
             self::toolDef('read_skill', '读取某个技能的完整说明。当用户问题涉及插件用法、短代码、图片上传等主题时，先读对应技能再回答。', array(
                 'name' => array('type' => 'string', 'description' => '技能名，如 picup、image-upload、links-plus、ab-admin、typecho-basics'),
@@ -674,7 +680,7 @@ class AdminBeautify_AI
                 'target'         => array('type' => 'string', 'description' => '目标方案名'),
                 'replaceInPosts' => array('type' => 'boolean', 'description' => '是否同时替换文章正文里的旧链接，默认 true'),
             ), array('cid', 'target')),
-            self::toolDef('picup_enable_backup', '开启/关闭 PicUp 的「自动备份」：开启会先建链接记录表，再保存勾选的备份方案；传入空的 profiles 即关闭自动备份（停止备份，但已有记录不删）。需要用户确认后执行。', array(
+            self::toolDef('picup_enable_backup', '开启/关闭 PicUp 的「自动备份」：开启会先建链接记录表，再保存勾选的备份方案；传入空的 profiles 即关闭自动备份（停止备份，但已有记录不删）。注意备份是**异步**的（响应返回后才传），刚上传完查记录可能还看不到。需要用户确认后执行。', array(
                 'profiles' => array('type' => 'string', 'description' => '备份方案名列表，逗号分隔，如 "bak,upyun"；传空字符串＝关闭自动备份'),
             ), array('profiles')),
         );
@@ -1145,6 +1151,15 @@ class AdminBeautify_AI
                         . ' 改为 ' . self::previewValue(isset($args['value']) ? $args['value'] : ''),
                     $args
                 );
+            case 'patch_plugin_json':
+                return self::pendingOrRun(
+                    'patch_plugin_json',
+                    '合并插件 JSON 设置',
+                    '把 ' . self::previewPatchKeys(isset($args['patch']) ? (string) $args['patch'] : '')
+                        . ' 合入插件 ' . (isset($args['directory']) ? (string) $args['directory'] : '')
+                        . ' 的 ' . (isset($args['key']) ? (string) $args['key'] : '') . '（其余保持不动）',
+                    $args
+                );
             case 'picup_migrate_batch':
                 $from = isset($args['from']) ? (string) $args['from'] : '';
                 $to = isset($args['to']) ? (string) $args['to'] : '';
@@ -1297,6 +1312,9 @@ class AdminBeautify_AI
             case 'update_plugin_config':
                 $raw = self::toolUpdatePluginConfig($params);
                 break;
+            case 'patch_plugin_json':
+                $raw = self::toolPatchPluginJson($params);
+                break;
             case 'picup_migrate_batch':
                 $raw = self::toolPicupMigrateBatch($params);
                 break;
@@ -1385,6 +1403,20 @@ class AdminBeautify_AI
                 return empty($names)
                     ? '已关闭 PicUp 自动备份（已有链接记录保留）'
                     : '已开启 PicUp 自动备份，备份方案：' . implode('、', $names);
+            case 'patch_plugin_json':
+                $parts = array();
+                if (!empty($data['added'])) {
+                    $parts[] = '新增 ' . implode('、', $data['added']);
+                }
+                if (!empty($data['updated'])) {
+                    $parts[] = '更新 ' . implode('、', $data['updated']);
+                }
+                if (!empty($data['removed'])) {
+                    $parts[] = '删除 ' . implode('、', $data['removed']);
+                }
+                return '已合并插件 ' . (isset($data['directory']) ? $data['directory'] : '')
+                    . ' 的 ' . (isset($data['key']) ? $data['key'] : '') . '：'
+                    . (empty($parts) ? '内容无变化' : implode('；', $parts));
             default:
                 return '操作已完成';
         }
@@ -2171,14 +2203,33 @@ class AdminBeautify_AI
             $db = \Typecho\Db::get();
             $row = $db->fetchRow($db->select('value')->from('table.options')
                 ->where('name = ?', 'plugin:' . $dir)->where('user = ?', 0)->limit(1));
+            $rawOld = $row ? (string) $row['value'] : '';
             $cfg = array();
             if ($row) {
-                $cfg = @json_decode((string) $row['value'], true);
+                $cfg = @json_decode($rawOld, true);
                 if (!is_array($cfg)) {
-                    $cfg = @unserialize((string) $row['value']);
+                    $cfg = @unserialize($rawOld);
                 }
                 if (!is_array($cfg)) {
                     $cfg = array();
+                }
+            }
+            if (isset($cfg[$key])) {
+                $oldDecoded = is_string($cfg[$key]) && $cfg[$key] !== ''
+                    ? json_decode((string) $cfg[$key], true) : null;
+                $newDecoded = $value !== '' ? json_decode($value, true) : null;
+                if (is_array($oldDecoded) && is_array($newDecoded)
+                    && !self::isListArray($oldDecoded) && !self::isListArray($newDecoded)) {
+                    $lost = array_values(array_diff(array_keys($oldDecoded), array_keys($newDecoded)));
+                    if (!empty($lost)) {
+                        return json_encode(array(
+                            'ok'    => false,
+                            'error' => '这次写入会丢掉已有的 ' . count($lost) . ' 个设置项：'
+                                . implode('、', array_slice($lost, 0, 10))
+                                . '。整段覆盖嵌套 JSON 很容易写漏 —— '
+                                . '要新增/修改其中某一项，请改用 patch_plugin_json（只合并你给出的键，其余保持不动）。',
+                        ), JSON_UNESCAPED_UNICODE);
+                    }
                 }
             }
             $cfg[$key] = $value;
@@ -2200,13 +2251,152 @@ class AdminBeautify_AI
                     'name' => 'plugin:' . $dir, 'user' => 0, 'value' => $json,
                 )));
             }
+            $backup = self::backupPluginOptions($dir, $rawOld);
             return json_encode(array(
                 'ok'        => true,
                 'directory' => $dir,
                 'key'       => $key,
                 'value'     => $value,
+                'backup'    => $backup,
             ), JSON_UNESCAPED_UNICODE);
         } catch (Exception $e) {
+            return json_encode(array('ok' => false, 'error' => $e->getMessage()), JSON_UNESCAPED_UNICODE);
+        }
+    }
+    private static function isListArray(array $arr)
+    {
+        if (function_exists('array_is_list')) {
+            return array_is_list($arr);
+        }
+        return array_keys($arr) === range(0, count($arr) - 1);
+    }
+    private static function previewPatchKeys($patchJson)
+    {
+        $arr = json_decode((string) $patchJson, true);
+        if (!is_array($arr) || empty($arr)) {
+            return '（空 patch）';
+        }
+        $keys = array_keys($arr);
+        $show = array_slice($keys, 0, 6);
+        return '「' . implode('、', $show) . (count($keys) > 6 ? ' 等 ' . count($keys) . ' 项' : '') . '」';
+    }
+    private static function deepMergeAssoc(array $base, array $patch)
+    {
+        foreach ($patch as $k => $v) {
+            if (is_array($v) && isset($base[$k]) && is_array($base[$k]) && !self::isListArray($v)) {
+                $base[$k] = self::deepMergeAssoc($base[$k], $v);
+            } else {
+                $base[$k] = $v;
+            }
+        }
+        return $base;
+    }
+    private static function backupPluginOptions($dir, $raw)
+    {
+        if ($raw === '') {
+            return '';
+        }
+        $base = rtrim(__TYPECHO_ROOT_DIR__ . __TYPECHO_PLUGIN_DIR__, '/\\') . '/.ab-store/config-backup';
+        if (!is_dir($base)) {
+            @mkdir($base, 0755, true);
+        }
+        if (!is_dir($base) || !is_writable($base)) {
+            return '';
+        }
+        $file = $base . '/' . $dir . '-' . date('Ymd-His') . '.json';
+        if (@file_put_contents($file, $raw) === false) {
+            return '';
+        }
+        $all = glob($base . '/' . $dir . '-*.json');
+        if (is_array($all) && count($all) > 30) {
+            sort($all);
+            foreach (array_slice($all, 0, count($all) - 30) as $old) {
+                @unlink($old);
+            }
+        }
+        return $file;
+    }
+    private static function toolPatchPluginJson(array $args)
+    {
+        try {
+            $dir   = isset($args['directory']) ? trim((string) $args['directory']) : '';
+            $key   = isset($args['key']) ? (string) $args['key'] : '';
+            $patch = isset($args['patch']) ? (string) $args['patch'] : '';
+            $rmRaw = isset($args['remove']) ? (string) $args['remove'] : '';
+            if ($dir === '' || !preg_match('/^[A-Za-z0-9_\-]+$/', $dir)) {
+                return json_encode(array('ok' => false, 'error' => '插件目录名不合法'), JSON_UNESCAPED_UNICODE);
+            }
+            if ($key === '') {
+                return json_encode(array('ok' => false, 'error' => '缺少设置项键名'), JSON_UNESCAPED_UNICODE);
+            }
+            if (preg_match('/key|secret|token|password|passwd/i', $key)) {
+                return json_encode(array(
+                    'ok'    => false,
+                    'error' => '出于安全考虑，不能通过 AI 修改密钥类设置项（' . $key . '）。',
+                ), JSON_UNESCAPED_UNICODE);
+            }
+            $patchArr = json_decode($patch, true);
+            if (!is_array($patchArr)) {
+                return json_encode(array('ok' => false, 'error' => 'patch 必须是一个 JSON 对象'), JSON_UNESCAPED_UNICODE);
+            }
+            $db  = \Typecho\Db::get();
+            $row = $db->fetchRow($db->select('value')->from('table.options')
+                ->where('name = ?', 'plugin:' . $dir)->where('user = ?', 0)->limit(1));
+            $rawOld = $row ? (string) $row['value'] : '';
+            $cfg = array();
+            if ($row) {
+                $cfg = @json_decode($rawOld, true);
+                if (!is_array($cfg)) {
+                    $cfg = @unserialize($rawOld);
+                }
+                if (!is_array($cfg)) {
+                    $cfg = array();
+                }
+            }
+            $oldVal = isset($cfg[$key]) ? (string) $cfg[$key] : '';
+            $base   = $oldVal !== '' ? json_decode($oldVal, true) : null;
+            if (!is_array($base)) {
+                $base = @unserialize($oldVal, array('allowed_classes' => false));
+            }
+            if (!is_array($base)) {
+                $base = array();
+            }
+            $merged = self::deepMergeAssoc($base, $patchArr);
+            foreach (explode(',', $rmRaw) as $k) {
+                $k = trim($k);
+                if ($k !== '') {
+                    unset($merged[$k]);
+                }
+            }
+            $cfg[$key] = json_encode($merged, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            $json = json_encode($cfg, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            if (strlen($json) > 60000 && strlen($json) > strlen($rawOld)) {
+                return json_encode(array(
+                    'ok'    => false,
+                    'error' => '这次写入会让插件设置超过 64KB 上限（' . strlen($json) . ' 字节），已拒绝。',
+                ), JSON_UNESCAPED_UNICODE);
+            }
+            $backup = self::backupPluginOptions($dir, $rawOld);
+            if ($row) {
+                $db->query($db->update('table.options')->rows(array('value' => $json))
+                    ->where('name = ?', 'plugin:' . $dir)->where('user = ?', 0));
+            } else {
+                $db->query($db->insert('table.options')->rows(array(
+                    'name' => 'plugin:' . $dir, 'user' => 0, 'value' => $json,
+                )));
+            }
+            return json_encode(array(
+                'ok'        => true,
+                'directory' => $dir,
+                'key'       => $key,
+                'added'     => array_values(array_diff(array_keys($patchArr), array_keys($base))),
+                'updated'   => array_values(array_intersect(array_keys($patchArr), array_keys($base))),
+                'removed'   => $rmRaw !== '' ? array_map('trim', explode(',', $rmRaw)) : array(),
+                'backup'    => $backup,
+            ), JSON_UNESCAPED_UNICODE);
+        } catch (Exception $e) {
+            return json_encode(array('ok' => false, 'error' => $e->getMessage()), JSON_UNESCAPED_UNICODE);
+        } catch (Throwable $e) {
             return json_encode(array('ok' => false, 'error' => $e->getMessage()), JSON_UNESCAPED_UNICODE);
         }
     }
@@ -2712,7 +2902,7 @@ class AdminBeautify_AI
             return 'PicUp 插件未启用，请先到「控制台 → 插件」启用它；已停用时只能用 get_plugin_config 查看配置，无法执行备份/迁移';
         }
         if (!class_exists('\\TypechoPlugin\\PicUp\\Api')) {
-            return 'PicUp 版本过旧（缺少 Api.php 接口层），请升级到 1.3.0 及以上；'
+            return 'PicUp 版本过旧（缺少 Api.php 接口层），请升级到 1.3.1 及以上；'
                 . '暂时可以改用 get_plugin_config / update_plugin_config 操作 backupProfiles 降级实现';
         }
         return '';

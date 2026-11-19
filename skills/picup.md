@@ -7,7 +7,8 @@ keywords: PicUp, 图片上传, 上传图片, 图床, 附件, 媒体库, configJs
 
 # PicUp 图片上传插件
 
-> 本文档字段名全部从 PicUp 源码 `vendor/*Driver.php` 的 `getConfigFields()` 提取，可直接用于 `update_plugin_config`。
+> 本文档字段名全部从 PicUp 源码 `vendor/*Driver.php` 的 `getConfigFields()` 提取，
+> 加/改方案请用 `patch_plugin_json`（局部合并），不要用 `update_plugin_config` 整段覆盖 `configJson`。
 
 ## 一、顶层设置项（`plugin:PicUp` 的键）
 
@@ -27,8 +28,13 @@ keywords: PicUp, 图片上传, 上传图片, 图床, 附件, 媒体库, configJs
 
 > 折叠头带 `.picup-beta` 徽标；与「迁移与替换」一并在设置页标为**测试版**。
 
-- `backupProfiles` = 备份方案名数组（JSON 字符串）。会在 `uploadHandle()` 里、主上传成功后
-  用**同一份已处理文件**再向每个备份方案传一次；主方案同名会被跳过。
+- `backupProfiles` = 备份方案名数组（JSON 字符串）。主上传成功后，用**同一份已处理文件**
+  再向每个备份方案传一次；主方案同名会被跳过。
+- ⚠️ **备份是异步的**：`uploadHandle()` 只把任务排进 `Plugin::$backupQueue`，
+  由 `register_shutdown_function('flushBackupQueue')` 在**响应发出之后**执行
+  （php-fpm 走 `fastcgi_finish_request()`，其它 SAPI 退化为 flush + `ignore_user_abort`）。
+  所以：上传接口返回 ≠ 备份已完成；刚传完就查 `picup_list_backup_records` 可能还看不到那条记录，
+  稍等几秒再查（或直接告诉用户「备份在后台进行」）。
 - 依赖数据表 **`{prefix}PicUpLinks`**（`id, filename, primary_profile, primary_url, links, created_at, cid`）。
   从旧版升级上来的站点不会自动建表——用户在设置页点「开启自动备份」才建；表不存在时
   备份静默跳过并写 error_log，**不影响主上传**。
@@ -51,6 +57,15 @@ keywords: PicUp, 图片上传, 上传图片, 图床, 附件, 媒体库, configJs
   `Plugin::uploadFileToProfile()` 上传 → 再把附件 `path` 与正文引用改成新链接。
   **迁移前会先把当前链接记到它所属方案名下**（`guessProfileForUrl()`），所以 `default → bak`
   之后 `links` 里两条都在，可在详情页一键「设为当前」切回。
+- **目标可以是「历史链接」**：`file-migrate` 的 `target` 除了真方案，也接受记录里已有的
+  键（`(原方案)` / `(当前)` 这类反推不出方案名的）。后者**不重新上传**，只把 `path`
+  指回去 —— 否则用户就回不到迁移前的图了；`file-links` 会给这些条目返回
+  `label:"原链接"` + `virtual:true`，界面据此换个中性胶囊显示。
+- ⚠️ **复合存储路径**：NodeImage 把 `path` 存成 `nodeimage://<id>|<真实URL>`。
+  一律用 `Plugin::publicUrl()` 归一化后再用：`downloadToTemp()`（否则 curl 必失败）、
+  `guessProfileForUrl()`（否则反推不出方案）、以及 `replaceUrlEverywhere()` ——
+  后者要按行类型分开替换：**附件行**用存储值（复合串），**文章行**用公网地址
+  （把 `nodeimage://…|` 写进正文就是坏链接）。
 - ⚠️ `replaceUrlEverywhere()` 的 `text LIKE` 只能用**文件名**做锚点：库里可能是明文
   `http://…`，也可能是 JSON 转义 `http:\/\/…`；而 `\/` 在 MySQL 的 LIKE 里是转义符、在
   SQLite/PG 里是字面量 —— 拿整条 URL 去 LIKE 必然有一边匹配不到（曾因此附件地址没跟着改）。
@@ -451,7 +466,7 @@ Content-Type: multipart/form-data
 
 ## 七、AI 能做什么
 
-### 7.1 专用工具（PicUp 1.3.0+ 提供 `Api.php` 接口层，AI 直接调用）
+### 7.1 专用工具（PicUp 1.3.1+ 提供 `Api.php` 接口层，AI 直接调用）
 
 带 🔒 的是**写操作**：调用后只会生成一张确认卡片，用户点「确认执行」才真正落库，
 所以**不要重复调用同一个写工具**。
@@ -476,15 +491,48 @@ Content-Type: multipart/form-data
 > 没有 `Api.php` 的老版本 PicUp 会提示「版本过旧」，此时只能退化成
 > `get_plugin_config` / `update_plugin_config` 改 `backupProfiles` 明文。
 
+### 7.1.5 新增 / 修改存储方案（**必须用 `patch_plugin_json`**）
+
+> 🚨 **血泪教训**：曾用 `update_plugin_config(key="configJson", value="…")` 整段覆盖去
+> 加一个方案，模型把值写短了 → **用户所有存储方案被清空**。
+> `configJson` 是「方案名 → 方案对象」的嵌套 JSON，**永远不要整段覆盖**。
+
+正确姿势 —— `patch_plugin_json` 只合并你给出的键，其余原地保留：
+
+```
+patch_plugin_json(
+  directory = "PicUp",
+  key       = "configJson",
+  patch     = {"lhl-oss":{"driver":"s3","bucket":"mybucket","endpoint":"oss-cn-hangzhou.aliyuncs.com",
+                          "accessKeyId":"…","accessKeySecret":"…","urlPrefix":"https://cdn.example.com",
+                          "_extensions":{"compress":{"enabled":true,"quality":"82"}}}}
+)
+```
+
+- 同名方案会**递归合并字段**（只传要改的字段即可，不会把别的字段冲掉）；
+- 删除某方案：`remove="lhl-oss"`（顶层键，逗号分隔）；
+- 想确认现有方案名：先 `get_plugin_config(directory="PicUp")` 看 `configJson` 的顶层键，
+  或直接 `picup_status` 看 `profiles`；
+- 新方案建好后，需要让它生效再改 `defaultProfile`；
+- `update_plugin_config` 现在会**主动拦截**「会让 configJson 顶层键变少」的写入并报错，
+  看到那个报错就是提示你改用 `patch_plugin_json`。
+
+**写坏了怎么救**（回答用户时可直接给这两条）：
+
+1. 每次 AI 写插件设置前，旧值会自动备份到 `usr/plugins/.ab-store/config-backup/<插件>-<时间>.json`；
+2. PicUp 设置页 →「配置备份」里，若用户之前点过「备份当前配置」，可直接「恢复选中备份」。
+
 ### 7.2 通用工具
 
 - `get_plugin_config(directory="PicUp")` 读取当前配置
 - `update_plugin_config(directory="PicUp", key="configJson", value="...")` 修改配置
+  - ⚠️ **只适合改「扁平」的单值设置项**（`defaultProfile` / `backupProfiles` 这类）。
+    嵌套 JSON（`configJson` / `suffixProfiles`）**请用 `patch_plugin_json`**，别整段覆盖
   - `value` 必须是**完整的两层 JSON 字符串**（方案名 → 方案对象），不是片段；
     扩展一定要写在**方案对象**的 `_extensions` 里
   - ⚠️ **`configJson` 里的密钥不会被脱敏**（脱敏只作用于顶层键名），
     所以读到的 `"accessKeySecret"` / `"token"` 等都是明文 ——
-    **不要复述、不要写进回复**；回写时要原样带上这些字段，不能丢
+    **不要复述、不要写进回复**；只在用户明确给了新值时才写，**不要自行改写已有密钥字段**
   - `update_plugin_config` 会**拒绝** key 名里含 `key|secret|token|password|passwd`
     的设置项，因此 `configJson`（名字不含这些词）**可以改**，
     但改完后其中的密钥仍需用户自己确认是否正确
@@ -496,8 +544,8 @@ Content-Type: multipart/form-data
 
 ### 7.3 新老版本兼容（重要）
 
-`picup_*` 这套专用工具**依赖 PicUp 1.3.0 起提供的 `Api.php` 接口层**。
-老版本 PicUp（`< 1.3.0`，或手动删过文件的残缺安装）没有它，此时必须走**原来的通用调用方式**，
+`picup_*` 这套专用工具**依赖 PicUp 1.3.1 起提供的 `Api.php` 接口层**。
+老版本 PicUp（`< 1.3.1`，或手动删过文件的残缺安装）没有它，此时必须走**原来的通用调用方式**，
 下面这套写法**一直有效，请保留使用**。
 
 **怎么判断**：先调一次 `picup_status`。
@@ -505,7 +553,7 @@ Content-Type: multipart/form-data
 - 返回 `{"ok": true, ...}` → 用 7.1 的专用工具
 - 返回 `{"ok": false, "error": "...版本过旧..."}` 或 `...未启用...` → 走下面的降级方式
 
-| 需求 | 新方式（1.3.0+） | 老方式（任何版本都能用） |
+| 需求 | 新方式（1.3.1+） | 老方式（任何版本都能用） |
 |---|---|---|
 | 看有哪些方案 | `picup_status` | `get_plugin_config(directory="PicUp")` 看 `configJson` 的键 |
 | 看自动备份是否开启 | `picup_status` | `get_plugin_config` 看 `backupProfiles` 是否为 `[]` |

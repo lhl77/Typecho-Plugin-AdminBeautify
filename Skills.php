@@ -9,6 +9,7 @@ class AdminBeautify_Skills
     const RAW = 'https://raw.githubusercontent.com/lhl77/Typecho-Plugin-AdminBeautify/main/skills/';
     const PAGE = 'https://github.com/lhl77/Typecho-Plugin-AdminBeautify/tree/main/skills';
     const TTL = 1800;
+    const FAIL_TTL = 300;
     private static $mirrors = array(
         'https://gh1.lhl.one/',
     );
@@ -78,13 +79,53 @@ class AdminBeautify_Skills
         $state = self::readState();
         return isset($state['lastCheck']) ? (int)$state['lastCheck'] : 0;
     }
-    public static function check($force = false)
+    public static function compareVersion($a, $b)
+    {
+        $a = trim((string)$a);
+        $b = trim((string)$b);
+        if ($a === $b) {
+            return 0;
+        }
+        if ($a === '') {
+            return -1;
+        }
+        if ($b === '') {
+            return 1;
+        }
+        $pa = preg_split('/[._-]/', $a);
+        $pb = preg_split('/[._-]/', $b);
+        $n  = max(count($pa), count($pb));
+        for ($i = 0; $i < $n; $i++) {
+            $x = isset($pa[$i]) ? $pa[$i] : '0';
+            $y = isset($pb[$i]) ? $pb[$i] : '0';
+            if (is_numeric($x) && is_numeric($y)) {
+                $ix = (int)$x;
+                $iy = (int)$y;
+                if ($ix !== $iy) {
+                    return $ix > $iy ? 1 : -1;
+                }
+            } else {
+                $c = strcmp($x, $y);
+                if ($c !== 0) {
+                    return $c > 0 ? 1 : -1;
+                }
+            }
+        }
+        return 0;
+    }
+    public static function check($force = false, $autoApply = true)
     {
         $state = self::readState();
         $now   = time();
+        $ttl = self::TTL;
+        if (isset($state['lastResult']) && is_array($state['lastResult'])
+            && isset($state['lastResult']['ok']) && !$state['lastResult']['ok']
+        ) {
+            $ttl = self::FAIL_TTL;
+        }
         if (!$force
             && isset($state['lastCheck'], $state['lastResult'])
-            && $now - (int)$state['lastCheck'] < self::TTL
+            && $now - (int)$state['lastCheck'] < $ttl
             && is_array($state['lastResult'])
         ) {
             $cached = $state['lastResult'];
@@ -93,16 +134,20 @@ class AdminBeautify_Skills
         }
         $local  = self::localVersion();
         $result = array(
-            'ok'         => true,
-            'hasUpdate'  => false,
-            'local'      => $local,
-            'remote'     => '',
-            'remoteTime' => '',
-            'files'      => array(),
-            'error'      => '',
-            'cached'     => false,
-            'checkedAt'  => $now,
-            'page'       => self::PAGE,
+            'ok'             => true,
+            'hasUpdate'      => false,
+            'behind'         => false,
+            'local'          => $local,
+            'remote'         => '',
+            'remoteTime'     => '',
+            'files'          => array(),
+            'error'          => '',
+            'cached'         => false,
+            'checkedAt'      => $now,
+            'page'           => self::PAGE,
+            'applied'        => false,
+            'appliedVersion' => '',
+            'appliedFiles'   => array(),
         );
         $raw = self::fetch('manifest.json', 8, true);
         if ($raw === null) {
@@ -114,15 +159,38 @@ class AdminBeautify_Skills
                 $result['ok']    = false;
                 $result['error'] = '技能清单格式不正确';
             } else {
-                $result['remote']     = (string)$manifest['version'];
+                $remote               = (string)$manifest['version'];
+                $cmp                  = self::compareVersion($remote, $local);
+                $result['remote']     = $remote;
                 $result['remoteTime'] = isset($manifest['updated']) ? (string)$manifest['updated'] : '';
                 $result['files']      = self::normalizeFiles(isset($manifest['files']) ? $manifest['files'] : array());
-                $result['hasUpdate']  = ($result['remote'] !== $local);
+                $result['hasUpdate']  = ($cmp > 0);
+                $result['behind']     = ($cmp < 0);
             }
         }
         $state['lastCheck']  = $now;
         $state['lastResult'] = $result;
         self::writeState($state);
+        if ($autoApply && !empty($result['hasUpdate'])) {
+            $applied = self::apply();
+            if (isset($applied['error'])) {
+                $result['autoError'] = (string)$applied['error'];
+            } else {
+                $result['applied']        = true;
+                $result['appliedVersion'] = (string)$applied['version'];
+                $result['appliedFiles']   = $applied['files'];
+                $result['local']          = (string)$applied['version'];
+                $result['hasUpdate']      = false;
+                $result['behind']         = false;
+                $st = self::readState();
+                if (isset($st['lastResult']) && is_array($st['lastResult'])) {
+                    $st['lastResult']['applied']        = true;
+                    $st['lastResult']['appliedVersion'] = (string)$applied['version'];
+                    $st['lastResult']['appliedFiles']   = $applied['files'];
+                    self::writeState($st);
+                }
+            }
+        }
         return $result;
     }
     public static function apply()
@@ -181,16 +249,20 @@ class AdminBeautify_Skills
         $state['appliedAt'] = $now;
         $state['lastCheck'] = $now;
         $state['lastResult'] = array(
-            'ok'         => true,
-            'hasUpdate'  => false,
-            'local'      => (string)$manifest['version'],
-            'remote'     => (string)$manifest['version'],
-            'remoteTime' => isset($manifest['updated']) ? (string)$manifest['updated'] : '',
-            'files'      => $files,
-            'error'      => '',
-            'cached'     => false,
-            'checkedAt'  => $now,
-            'page'       => self::PAGE,
+            'ok'             => true,
+            'hasUpdate'      => false,
+            'behind'         => false,
+            'local'          => (string)$manifest['version'],
+            'remote'         => (string)$manifest['version'],
+            'remoteTime'     => isset($manifest['updated']) ? (string)$manifest['updated'] : '',
+            'files'          => $files,
+            'error'          => '',
+            'cached'         => false,
+            'checkedAt'      => $now,
+            'page'           => self::PAGE,
+            'applied'        => false,
+            'appliedVersion' => '',
+            'appliedFiles'   => array(),
         );
         self::writeState($state);
         return array(
@@ -238,7 +310,7 @@ class AdminBeautify_Skills
     }
     private static function httpGet($url, $timeout)
     {
-        $ua = 'AdminBeautify-Skills/2.1.67';
+        $ua = 'AdminBeautify-Skills/2.1.68';
         if (function_exists('curl_init')) {
             $ch = curl_init($url);
             curl_setopt_array($ch, array(
