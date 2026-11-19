@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="http://ab.lhl.one/og.png" width="40%">
+  <img src="http://ab.lhl.one/og.png" width="60%">
 </p>
 
 <h1 align="center">AB Admin</h1>
