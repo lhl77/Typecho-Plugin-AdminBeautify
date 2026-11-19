@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://i.see.you/2026/07/26/2cGr/8894a6d697ad01f8f24f0124099e915b.jpg" width="40%">
+  <img src="http://ab.lhl.one/og.png" width="40%">
 </p>
 
 <h1 align="center">AB Admin</h1>
